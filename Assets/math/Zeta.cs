@@ -1,0 +1,303 @@
+using System;
+using System.Linq;
+using Complex = System.Numerics.Complex;
+
+
+// public static class ComplexExt
+// {
+//     public static double Mod(this Complex a)
+//     {
+//         return Math.Sqrt((a.Real * a.Real) + (a.Imaginary * a.Imaginary));
+//     }
+
+//     public static Complex Neg(this Complex a)
+//     {
+//         return new Complex(-1 * a.Real, -1 * a.Imaginary);
+//     }
+
+//     public static double Arg(this Complex a)
+//     {
+//         if (a.Imaginary != 0.0) return 2.0 * Math.Atan((a.Mod() - a.Real) / a.Imaginary);
+//         if (a.Real > 0.0) return 0.0;
+//         if (a.Real < 0.0) return Math.PI;
+//         return 1.0 / 0.0; //argument is undefined at the origin
+//     }
+
+//     public static Complex Pow(this int a, Complex exp)
+//     {
+//         return ((double)a).Pow(exp);
+//     }
+
+//     // real number raised to complex power
+//     public static Complex Pow(this double a, Complex exp)
+//     {
+//         return new Complex(Math.Pow(a, exp.Real) * Math.Cos((exp.Imaginary) * Math.Log(a)),
+//             Math.Pow(a, exp.Real) * Math.Sin((exp.Imaginary) * Math.Log(a)));
+//     }
+// }
+
+public class Zeta
+{
+
+    const int MIN_N = 100;
+    const int MAX_N = 1000000;
+    const double TWO_PI = (Math.PI * 2);
+    static readonly double SQRT_TWO_PI = Math.Sqrt(TWO_PI);
+    const double CABS_Z_MAX = 10000.0;
+    const int MAX_ITS = 5000;
+    const double MAX_GAMMA = 450;
+
+    static double[] b_coeff = {
+        1.0000000000000000000000000000000,
+        0.0833333333333333333333333333333,
+        -0.0013888888888888888888888888888,
+        3.3068783068783068783068783068783E-5,
+        -8.2671957671957671957671957671958E-7,
+        2.0876756987868098979210090321201E-8,
+        -5.2841901386874931848476822021796E-10,
+        1.3382536530684678832826980975129E-11,
+        -3.3896802963225828668301953912494E-13,
+        8.5860620562778445641359054504256E-15,
+        -2.1748686985580618730415164238659E-16,
+        5.5090028283602295152026526089023E-18,
+        -1.3954464685812523340707686264064E-19,
+        3.5347070396294674716932299778038E-21,
+        -8.9535174266605480875210207537274E-23,
+        2.2679524523376830603109507388682E-24,
+        -5.7447906688722024452638819876070E-26,
+        1.4551724756148649018662648672713E-27,
+        -3.6859949406653101781817824799086E-29,
+        9.3367342570950446720325551527856E-31
+    };
+
+    static double[] g_coeff = {
+        0.99999999999999709182,
+        57.15623566586292351700,
+        -59.59796035547549124800,
+        14.13609797474174717400,
+        -0.491913816097620199780,
+        0.33994649984811888699E-4,
+        0.46523628927048575665E-4,
+        -0.98374475304879564677E-4,
+        0.15808870322491248884E-3,
+        -0.21026444172410488319E-3,
+        0.21743961811521264320E-3,
+        -0.16431810653676389022E-3,
+        0.84418223983852743293E-4,
+        -0.26190838401581408670E-4,
+        0.36899182659531622704E-5
+    };
+
+    public static Complex Compute(Complex s)
+    {
+        Complex z, g;
+        if (s.Real < 0.0)
+        {
+            if (Math.Abs(s.Imaginary) < MAX_GAMMA)
+            {
+                s = 1.0 - s;
+                g = complex_gamma(s);
+                z = ems(s);
+                z *= g * 2.0 * Complex.Pow(TWO_PI, -s) * Complex.Cos(Math.PI / 2 * s);
+            }
+            else
+            {
+                z = ems(s);
+            }
+        }
+        else
+        {
+            z = ems(s);
+        }
+        return z;
+    }
+
+    // euler maclaurin summation
+    static Complex ems(Complex s)
+    {
+        int N = (int)Complex.Abs(s), k;
+        Complex z = 0.0, t = 0.0, temp = 0.0;
+        if (N > MAX_N) N = MAX_N;
+        if (N < MIN_N) N = MIN_N;
+        for (k = 1; k < N; k++)
+        {
+            z += Complex.Pow(k, -s);
+        }
+        z += Complex.Pow(N, 1 - s) / (s - 1) + 0.5 * Complex.Pow(N, -s);
+        for (k = 1; k < 20; k++)
+        {
+            t += b_coeff[k] * pochhammer(s, (2 * k) - 1) * Complex.Pow(N, 1 - s - (2 * k));
+            if (t - temp == 0.0) break;
+            temp = t;
+        }
+        return z + t;
+    }
+
+    static Complex pochhammer(Complex s, int n)
+    {
+        int i;
+        Complex poch_val = 1.0;
+        for (i = 0; i < n; i++)
+        {
+            poch_val *= (s + i);
+        }
+        return poch_val;
+    }
+
+    static Complex complex_gamma(Complex s)
+    {
+        int i;
+        Complex g = g_coeff[0];
+        if (s.Real < 0.5)
+        {
+            if (s.Real == Math.Floor(s.Real) && s.Imaginary == 0.0)
+            {
+                return double.PositiveInfinity;
+            }
+            else
+            {
+                return Math.PI / (Complex.Sin(s * Math.PI) * complex_gamma(1.0 - s));
+            }
+        }
+        else
+        {
+            s -= 1.0;
+            for (i = 1; i < 15; i++)
+            {
+                g += g_coeff[i] / (s + i);
+            }
+            g *= SQRT_TWO_PI * Complex.Pow(s + 5.2421875, s + 0.5) * Complex.Exp(-5.2421875 - s);
+            return g;
+        }
+    }
+
+    public static int Iterate(Complex s, double epsilon = 1e-15)
+    {
+        int i = 0;
+        double cabs_z = 0.0, diff = 100;
+        Complex z = 0.0;
+        // if (verb == 1) printf("0: %.16lG + %.16lG\n", s.Real, s.Imaginary);
+        while (diff > epsilon && cabs_z < CABS_Z_MAX && i < MAX_ITS)
+        {
+            z = Compute(s);
+            diff = Complex.Abs(z.Real - s.Real);
+            cabs_z = Complex.Abs(z);
+            i++;
+            s = z;
+        }
+        if (cabs_z >= CABS_Z_MAX)
+        {
+            if (z.Real < 0.0)
+            {
+                i += 1;
+            }
+            else
+            {
+                i += 2;
+            }
+        }
+
+        return i;
+    }
+
+    public static double index_to_imag(double n)  // n is the index of the link in question.  
+    {
+        /*  Euler
+        double numerator, denominator, result;
+        double C = 0.01900311489814044762029209432973427009446270150034137604224;  //A097671  
+        double C2 = sq(C);
+        double N2 = sq(n);
+        double N3 =N2*n;
+        
+        // imag = (16 π c^2 n^2 - 16 π c^2 n + 4 π c^2 + 16 π c n^3 - 4 π c n + 4 π n^4 + 4 π n^3 + π n^2)/(2 (2 c + n)^2) 
+        //    y = (16 π c^2 n^2 - 16 π c^2 n + 4 π c^2 + 16 π c n^3 - 4 π c n + 4 π n^4 + 4 π n^3 + π n^2)/(2 (2 c + n)^2)     
+        numerator = PI*( 16*C2*N2 - 16*C2*n + 4*C2     + 16*C*N3    - 4*C*n   + 4*N2*N2 + 4*N3    + N2);
+        denominator = 2*sq(2*C+n);
+        result = numerator/denominator;
+       */
+
+        // Newton
+        //double imag = .5f * Math.PI * (4 * n * n + 4 * n + 1);  // not its not .5*PI*(4*n*n - 4*n + 1)  bcuz, y=(1/sqrt(2*pi))*sqrt(x)-.5, in this case, not y=(1/sqrt(2*pi))*sqrt(x)+.5 
+        // OR....imag = Pi(2n^2 + 2n + 1/3)   which is close to Pi(2n^2 + 2n + 1/2)
+        //println("result= " + result + " result2=" + result2);
+
+        // "Einstein" becasue it is exact
+        // return ((float_index*2 +1)*Pi/denominator)
+        // TODO: denominator lookup
+        // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
+        double imag = (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
+
+        
+
+
+        return imag;
+    }
+    
+    public static double imag_to_index(double imaginary_part)  //given imag, what is the index of the segment?
+    {
+        // Newton
+        //double one_o_sqrt_2_pi = 1 / Math.Sqrt(2 * Math.PI);
+        //double return_this = one_o_sqrt_2_pi * Math.Sqrt(imaginary_part) + .5f;
+
+        // funky, Euler, or whatever we are calling it
+        /*
+        double C = 0.01900311489814044762029209432973427009446270150034137604224;  //A097671  
+        double two_sqrt_2_pi = 2 * Math.Sqrt(2 * Math.PI);
+        double sqrt_imag = Math.Sqrt(imaginary_part);
+        double big_sqrt = Math.Sqrt(16 * Math.PI * Math.Pow(C, 2) + 4 * two_sqrt_2_pi * C * sqrt_imag + 24 * Math.PI * C + 2 * imaginary_part - two_sqrt_2_pi * sqrt_imag + Math.PI);
+        double the_rest = -Math.Sqrt(Math.PI) * (4 * C + 1) + Math.Sqrt(2) * sqrt_imag;
+        double return_this = (big_sqrt + the_rest) / (4 * Math.Sqrt(Math.PI)) + 1;
+        */
+
+        //Centered Square
+        //double return_this = (1.0 / 2.0) * Math.Sqrt(1.0 / 3.0 + 2.0 * imaginary_part / Math.PI) + 1.0 / 2.0;
+        //println("********************************return_this : " + return_this);
+        //println("********************************return_this1: " + return_this1);
+
+        //best so far
+        double gamma = 0.57721566490153286060651209008240243104215933593992;
+        double e = 2.7182818284590452353602874713526624977572;
+        double gamma_to_the_e = Math.Pow(gamma, e);   // = .2245172519832320
+        double two_root_3_pi = 2 * Math.Sqrt(3 * Math.PI);
+        double return_this = Math.Sqrt(6 * gamma_to_the_e / imaginary_part + 6 * imaginary_part + Math.PI) / two_root_3_pi - 1.0 / 2.0;
+
+        return (return_this);
+    }
+
+    public static Vector ReimannSiegel(double imag, bool fewerTerms = false) {
+        double Ereal(double a, double b) => Math.Pow(Math.E, a) * Math.Cos(b);
+        double Eimag(double a, double b) => Math.Pow(Math.E, a) * Math.Sin(b);
+
+        double V(double t) { 
+            var result = t/2 * Math.Log(t/(2*Math.PI)) - t/2 - Math.PI/8;  // fewer terms      
+            return fewerTerms ? result : result + 1/(48*t) + 7/(5760*Math.Pow(t,3)) + 31/(80640*Math.Pow(t, 5)) + 127/(430080*Math.Pow(t, 7)) + 511/(1216512*Math.Pow(t,9));
+        }
+    
+
+        double Z(double t) {
+            int v(double t) =>  (int)Math.Floor(Math.Sqrt(t/(2*Math.PI)));
+            // double P(double t) =>  Math.Sqrt(t/(2*Math.PI)) - Math.Floor(Math.Sqrt(t/2*Math.PI));
+            double T(double t) =>  Math.Sqrt(t/(2*Math.PI)) - v(t);
+            double phi(double t) =>  Math.Cos(2*Math.PI * (t*t - t - 1.0/16.0)) / Math.Cos(2 * Math.PI * t);
+            double c0(double t) =>  phi(T(t));
+            double c2(double t) =>  0;
+
+            var a = new double[v(t)];
+            for (var k = 0; k < a.Length; k++)
+                a[k] = 1 / Math.Sqrt(k+1) * Math.Cos(V(t) - t * Math.Log(k+1));
+            
+            var b = Math.Pow(-1, v(t)-1) * Math.Pow(2 * Math.PI/t, .25) * (
+                    c0(t) + 
+                    Math.Sqrt(2 * Math.PI/t) * 
+                    c2(t)
+                );
+            
+            return 2 * a.Sum() + b;
+        }
+
+        double Zx(double i) => Z(i) * Ereal(0, -V(i));
+        double Zy(double i) => Z(i) * Eimag(0, -V(i));
+
+        return new Vector(Zx(imag), Zy(imag));
+    }
+}
