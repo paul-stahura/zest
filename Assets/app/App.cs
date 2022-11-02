@@ -26,8 +26,8 @@ public class App : MonoBehaviour
     public Toggle trackBisect;
 
 
-    double _imag = 206.491213762; //Zeta.index_to_imag(5.24);
-    readonly double IMAG_WITH_2_LINKS = Zeta.index_to_imag(2);
+    double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
+    readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(2);
 
     public ZetaSpiral zetaSpiral;
     // This is where code interested in 'subscribing' to changes to the imag variable is done
@@ -43,7 +43,7 @@ public class App : MonoBehaviour
             {
                 _imag = value;
                 imagDisplay.Value = (float)value;                
-                middleIndexDisplay.Value = (float)Zeta.imag_to_index(value);
+                middleIndexDisplay.Value = (float)Zeta.ImagToIndex(value);
 
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
@@ -71,11 +71,11 @@ public class App : MonoBehaviour
         // When you input a middle index value, this updates the imaginary number
         middleIndexDisplay.onValueChanged.AddListener(value =>
         {
-            Imag = Zeta.index_to_imag(value);
+            Imag = Zeta.IndexToImag(value);
 
             // It's possible the value that was set here is invalid so recalculate
             // and display the actual value
-            middleIndexDisplay.Value = (float)Zeta.imag_to_index(_imag);
+            middleIndexDisplay.Value = (float)Zeta.ImagToIndex(_imag);
         });
 
 #region Animation Slider

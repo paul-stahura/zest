@@ -200,68 +200,45 @@ public class Zeta
         return i;
     }
 
-    public static double index_to_imag(double n)  // n is the index of the link in question.  
+    public static double IndexToImag(double index)  // n is the index of the link in question.  
     {
-        /*  Euler
-        double numerator, denominator, result;
-        double C = 0.01900311489814044762029209432973427009446270150034137604224;  //A097671  
-        double C2 = sq(C);
-        double N2 = sq(n);
-        double N3 =N2*n;
-        
-        // imag = (16 π c^2 n^2 - 16 π c^2 n + 4 π c^2 + 16 π c n^3 - 4 π c n + 4 π n^4 + 4 π n^3 + π n^2)/(2 (2 c + n)^2) 
-        //    y = (16 π c^2 n^2 - 16 π c^2 n + 4 π c^2 + 16 π c n^3 - 4 π c n + 4 π n^4 + 4 π n^3 + π n^2)/(2 (2 c + n)^2)     
-        numerator = PI*( 16*C2*N2 - 16*C2*n + 4*C2     + 16*C*N3    - 4*C*n   + 4*N2*N2 + 4*N3    + N2);
-        denominator = 2*sq(2*C+n);
-        result = numerator/denominator;
-       */
-
-        // Newton
-        //double imag = .5f * Math.PI * (4 * n * n + 4 * n + 1);  // not its not .5*PI*(4*n*n - 4*n + 1)  bcuz, y=(1/sqrt(2*pi))*sqrt(x)-.5, in this case, not y=(1/sqrt(2*pi))*sqrt(x)+.5 
-        // OR....imag = Pi(2n^2 + 2n + 1/3)   which is close to Pi(2n^2 + 2n + 1/2)
-        //println("result= " + result + " result2=" + result2);
-
+        //. This is from Zzrob
         // "Einstein" becasue it is exact
         // return ((float_index*2 +1)*Pi/denominator)
         // TODO: denominator lookup
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
-        double imag = (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
+        // double imag = (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
 
         
-
-
-        return imag;
+        // from dfold: Exact conversion from index to imaginary
+        return Math.PI * (2.0 * index + 1.0) / Math.Log(1.0/index + 1.0);
     }
     
-    public static double imag_to_index(double imaginary_part)  //given imag, what is the index of the segment?
+    public static double ImagToIndex(double imag)  //given imag, what is the index of the segment?
     {
-        // Newton
-        //double one_o_sqrt_2_pi = 1 / Math.Sqrt(2 * Math.PI);
-        //double return_this = one_o_sqrt_2_pi * Math.Sqrt(imaginary_part) + .5f;
 
-        // funky, Euler, or whatever we are calling it
-        /*
-        double C = 0.01900311489814044762029209432973427009446270150034137604224;  //A097671  
-        double two_sqrt_2_pi = 2 * Math.Sqrt(2 * Math.PI);
-        double sqrt_imag = Math.Sqrt(imaginary_part);
-        double big_sqrt = Math.Sqrt(16 * Math.PI * Math.Pow(C, 2) + 4 * two_sqrt_2_pi * C * sqrt_imag + 24 * Math.PI * C + 2 * imaginary_part - two_sqrt_2_pi * sqrt_imag + Math.PI);
-        double the_rest = -Math.Sqrt(Math.PI) * (4 * C + 1) + Math.Sqrt(2) * sqrt_imag;
-        double return_this = (big_sqrt + the_rest) / (4 * Math.Sqrt(Math.PI)) + 1;
-        */
 
-        //Centered Square
-        //double return_this = (1.0 / 2.0) * Math.Sqrt(1.0 / 3.0 + 2.0 * imaginary_part / Math.PI) + 1.0 / 2.0;
-        //println("********************************return_this : " + return_this);
-        //println("********************************return_this1: " + return_this1);
+        //best so far -- this is from Zzrob
+        // double gamma = 0.57721566490153286060651209008240243104215933593992;
+        // double e = 2.7182818284590452353602874713526624977572;
+        // double gamma_to_the_e = Math.Pow(gamma, e);   // = .2245172519832320
+        // double two_root_3_pi = 2 * Math.Sqrt(3 * Math.PI);
+        // double return_this = Math.Sqrt(6 * gamma_to_the_e / imaginary_part + 6 * imaginary_part + Math.PI) / two_root_3_pi - 1.0 / 2.0;
 
-        //best so far
-        double gamma = 0.57721566490153286060651209008240243104215933593992;
-        double e = 2.7182818284590452353602874713526624977572;
-        double gamma_to_the_e = Math.Pow(gamma, e);   // = .2245172519832320
-        double two_root_3_pi = 2 * Math.Sqrt(3 * Math.PI);
-        double return_this = Math.Sqrt(6 * gamma_to_the_e / imaginary_part + 6 * imaginary_part + Math.PI) / two_root_3_pi - 1.0 / 2.0;
+        // return (return_this);
 
-        return (return_this);
+
+
+        // from dfold
+        // Returns the approximate middle index of the spiral given the imaginary 
+        // part of the of the input to the Zeta function
+        return Math.Sqrt(
+            1 / (2 * Math.PI) * (
+                1 / (2 * Math.Atan(Math.Sqrt(2))) + 
+                imag + 
+                1 / (imag * (2 * Math.E - 1))
+            ) - .5
+        );
     }
 
     public static Vector ReimannSiegel(double imag, bool fewerTerms = false) {

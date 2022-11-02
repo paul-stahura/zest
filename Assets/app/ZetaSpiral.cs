@@ -13,6 +13,9 @@ public class ZetaSpiral : ImmediateModeShapeDrawer {
     public int middleIndex;
     public Vector2 zeta;
 
+    [SerializeField]
+    public int numLinks = 100;
+
 	public override void DrawShapes( Camera cam ){
 
         zeta = Zeta.ReimannSiegel(app.Imag).ToVector2();
@@ -27,36 +30,9 @@ public class ZetaSpiral : ImmediateModeShapeDrawer {
 			// set static parameter to draw in the local space of this object
 			Draw.Matrix = transform.localToWorldMatrix;
 
-            var mid = Mathf.FloorToInt((float)Zeta.imag_to_index(app.Imag)) + 1;
+            middleIndex = Mathf.FloorToInt((float)Zeta.ImagToIndex(app.Imag)) + 1;
 
-            var start = Vector3.zero;
-            for (var i = 1; i < 67; i++) {
-                var x = Mathf.Cos((float)-app.Imag * Mathf.Log(i)) / Mathf.Pow(i, .5f);
-                var y = Mathf.Sin((float)-app.Imag * Mathf.Log(i)) / Mathf.Pow(i, .5f);
-                var end = new Vector3(start.x + x, start.y + y, 0);
-
-                var color = Color.grey;
-                Draw.Thickness = 1;
-
-                if (i == mid - 1)
-                    color = Color.green;
-                else if (i == mid)
-                {
-                    color = new Color(1, .5f, 0, 1f);
-                    middleLink[0] = start;
-                    middleLink[1] = end;
-                    middleIndex = mid;
-                }
-                else if (i == mid + 1)
-                    color = Color.red;
-
-                if (color != Color.grey)
-                    Draw.Thickness = 4;
-
-			    Draw.Line(start, end, color);
-                start = end;
-            }
-
+            drawSpiral();
             trackLink();
             drawZeta();
             drawBisectingLines();
@@ -67,6 +43,40 @@ public class ZetaSpiral : ImmediateModeShapeDrawer {
 		}
 	}
 
+    public float distance;
+
+    void drawSpiral() {
+        var start = Vector3.zero;
+        numLinks = (int)(app.Imag);
+        for (int i = 1; i < numLinks; i++) {
+            var x = Mathf.Cos((float)-app.Imag * Mathf.Log(i)) / Mathf.Pow(i, .5f);
+            var y = Mathf.Sin((float)-app.Imag * Mathf.Log(i)) / Mathf.Pow(i, .5f);
+            var end = new Vector3(start.x + x, start.y + y, 0);
+
+            var color = Color.grey;
+            Draw.Thickness = 1;
+
+            if (i == middleIndex - 1)
+                color = Color.green;
+            else if (i == middleIndex)
+            {
+                color = new Color(1, .5f, 0, 1f);
+                middleLink[0] = start;
+                middleLink[1] = end;
+            }
+            else if (i == middleIndex + 1)
+                color = Color.red;
+
+            if (color != Color.grey)
+                Draw.Thickness = 4;
+
+            Draw.Line(start, end, color);
+            start = end;
+            distance = Mathf.Abs(zeta.magnitude - start.magnitude);
+            // if (distance <= .02)
+            //     break;
+        }
+    }
     void drawCircleIntersections(Circle c1, Circle c2) {
         using (Draw.StyleScope) {
             var c = c1.IntersectionPoints(c2, true);

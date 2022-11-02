@@ -220,7 +220,7 @@
             <para>
             <code>
             Complex32 x = new Complex32(1f,2f);
-            Complex32 y = Complex32.FromPolarCoordinates(1f, Math.Pi);
+            Complex32 y = Complex32.FromPolarCoordinates(1f, Math.PI);
             Complex32 z = (x + y) / (x - y);
             </code>
             </para>
