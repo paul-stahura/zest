@@ -207,11 +207,13 @@ public class Zeta
         // return ((float_index*2 +1)*Pi/denominator)
         // TODO: denominator lookup
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
-        // double imag = (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
+        var n = index;
+        return (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
+
 
         
         // from dfold: Exact conversion from index to imaginary
-        return Math.PI * (2.0 * index + 1.0) / Math.Log(1.0/index + 1.0);
+        // return Math.PI * (2.0 * index + 1.0) / Math.Log(1.0/index + 1.0);
     }
     
     public static double ImagToIndex(double imag)  //given imag, what is the index of the segment?
@@ -219,26 +221,26 @@ public class Zeta
 
 
         //best so far -- this is from Zzrob
-        // double gamma = 0.57721566490153286060651209008240243104215933593992;
-        // double e = 2.7182818284590452353602874713526624977572;
-        // double gamma_to_the_e = Math.Pow(gamma, e);   // = .2245172519832320
-        // double two_root_3_pi = 2 * Math.Sqrt(3 * Math.PI);
-        // double return_this = Math.Sqrt(6 * gamma_to_the_e / imaginary_part + 6 * imaginary_part + Math.PI) / two_root_3_pi - 1.0 / 2.0;
+        double gamma = 0.57721566490153286060651209008240243104215933593992;
+        double e = 2.7182818284590452353602874713526624977572;
+        double gamma_to_the_e = Math.Pow(gamma, e);   // = .2245172519832320
+        double two_root_3_pi = 2 * Math.Sqrt(3 * Math.PI);
+        double return_this = Math.Sqrt(6 * gamma_to_the_e / imag + 6 * imag + Math.PI) / two_root_3_pi - 1.0 / 2.0;
 
-        // return (return_this);
+        return (return_this);
 
 
 
         // from dfold
         // Returns the approximate middle index of the spiral given the imaginary 
         // part of the of the input to the Zeta function
-        return Math.Sqrt(
-            1 / (2 * Math.PI) * (
-                1 / (2 * Math.Atan(Math.Sqrt(2))) + 
-                imag + 
-                1 / (imag * (2 * Math.E - 1))
-            ) - .5
-        );
+        // return Math.Sqrt(
+        //     1 / (2 * Math.PI) * (
+        //         1 / (2 * Math.Atan(Math.Sqrt(2))) + 
+        //         imag + 
+        //         1 / (imag * (2 * Math.E - 1))
+        //     ) - .5
+        // );
     }
 
     public static Vector ReimannSiegel(double imag, bool fewerTerms = false) {

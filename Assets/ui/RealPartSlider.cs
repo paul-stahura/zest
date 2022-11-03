@@ -27,6 +27,7 @@ public class RealPartSlider : MonoBehaviour
         {
             Value = value;
             onValueChanged?.Invoke(Value);
+                
 
             if (_display != null)
                 _display.text = Value.ToString("0.000");
