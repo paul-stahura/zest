@@ -21,26 +21,12 @@ public class App : MonoBehaviour
     public FloatInput animMax;
     public ImagSlider animSlider;
 
-    //
-    // Camera Tracking
-    //
-    [Header("Camera Tracking")]
-    public Toggle cameraTrackingOff;
-    public Toggle cameraTrackLink;
-    public Toggle cameraTrackBisect;
-
-    [Header("Spiral")]
-    public Slider spiralTransparency;
-    public Toggle drawTrail;
-    public Slider trailLength;
-
-    [Header("Find Zeros")]
-    public Toggle findIntersectionZeros;
 
     double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(2);
 
     public ZetaSpiral zetaSpiral;
+
     // This is where code interested in 'subscribing' to changes to the imag variable is done
     public event Action<double> ImagChanged;
 
@@ -106,27 +92,6 @@ public class App : MonoBehaviour
         animSlider.Max = animMax.Value; // set the default value
 #endregion
 
-#region Camera Tracking
-        cameraTrackLink.onValueChanged.AddListener(val =>
-        {
-            if (!val)
-            {
-                var rot = Quaternion.AngleAxis(0, Vector3.forward);
-                Camera.main.transform.rotation = rot;
-            }
-        });
-        cameraTrackLink.onValueChanged.Invoke(cameraTrackLink.isOn);
-
-        cameraTrackingOff.onValueChanged.AddListener(val => 
-        {
-            if (!val)
-            {
-                Camera.main.transform.position = new Vector3(0, 0, -10);
-                Camera.main.transform.rotation = Quaternion.identity;
-            }
-        });
-        cameraTrackingOff.onValueChanged.Invoke(cameraTrackingOff.isOn);
-#endregion
 
     } 
 
