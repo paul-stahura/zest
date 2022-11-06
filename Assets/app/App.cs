@@ -32,7 +32,8 @@ public class App : MonoBehaviour
 
     double targetImag;
 
-    public double Imag {
+    public double Imag
+    {
         get => _imag;
         set
         {
@@ -44,25 +45,26 @@ public class App : MonoBehaviour
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
         }
-    } 
+    }
 
-    public void Start() {
-        
+    public void Start()
+    {
+
         Imag = imagDisplay.Value;
         targetImag = (float)Imag;
-        
+
         // When you type a new imaginary value into the text box, the code 
         // inside AddListener(...) is called. This is simply a shorthand way
         // to make a one line mini-function that gets executed when that happens.
         // Here, we set Robot3.imag to the value you typed in.
-        imagDisplay.onValueChanged.AddListener(value => 
+        imagDisplay.onValueChanged.AddListener(value =>
         {
             targetImag = value;
 
             // When setting Robot3.imag, if the value is invalid, it will not
             // be changed.  Reset the display to the actual value of imag.
             imagDisplay.Value = value;
-        });   
+        });
 
 
         // When you input a middle index value, this updates the imaginary number
@@ -75,36 +77,44 @@ public class App : MonoBehaviour
             middleIndexDisplay.Value = (float)Zeta.ImagToIndex(_imag);
         });
 
-        indexIntPart.onValueChanged.AddListener(value => {
+        indexIntPart.onValueChanged.AddListener(value =>
+        {
             updateImag(Zeta.IndexToImag(value + indexRealPart.value));
         });
 
-        indexRealPart.onValueChanged.AddListener(value => {
+        var bits = BitConverter.SingleToInt32Bits(1);
+        var max = BitConverter.Int32BitsToSingle(bits - 1);
+        indexRealPart.maxValue = max;
+
+        indexRealPart.onValueChanged.AddListener(value =>
+        {
             updateImag(Zeta.IndexToImag(indexIntPart.value + value));
             // targetImag = (float)Zeta.IndexToImag(indexIntPart.value + value);
         });
 
-#region Animation Slider
+        #region Animation Slider
         animMax.onValueChanged.AddListener(value =>
         {
             animSlider.Max = value;
         });
         animSlider.Max = animMax.Value; // set the default value
-#endregion
+        #endregion
 
 
-    } 
+    }
 
-    void updateImag(double value, bool updateSliders=false) {
+    void updateImag(double value, bool updateSliders = false)
+    {
         // _imag = value;
         targetImag = (float)value;
         t = 0;
-        imagDisplay.Value = (float)value;    
+        imagDisplay.Value = (float)value;
 
-        var index = (float)Zeta.ImagToIndex(value);            
+        var index = (float)Zeta.ImagToIndex(value);
         middleIndexDisplay.Value = index;
 
-        if (updateSliders) {
+        if (updateSliders)
+        {
             indexIntPart.value = Mathf.FloorToInt(index);
             indexRealPart.value = index - Mathf.FloorToInt(index);
         }
@@ -112,16 +122,20 @@ public class App : MonoBehaviour
 
     float t = 0f;
 
-    void Update() {
+    void Update()
+    {
         // The animSlider is zero when it is in the center.
         if (animSlider.Value != 0)
         {
             updateImag(_imag + .04f * animSlider.Value);
-        } else if (_imag != targetImag) {
+        }
+        else if (_imag != targetImag)
+        {
             t += Mathf.Min(1f, 0.5f * Time.deltaTime);
             _imag = Mathf.Lerp((float)_imag, (float)targetImag, t);
         }
-        else {
+        else
+        {
             t = 0;
         }
 

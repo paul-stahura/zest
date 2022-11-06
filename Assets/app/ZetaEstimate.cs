@@ -63,7 +63,7 @@ public class ZetaEstimate : ImmediateModeShapeDrawer
         {
             Draw.Color = new Color(0, 1f, 0, 0.2f); // Color.green;
             Draw.Thickness = .1f;
-            var bipt = BisectingLines.BisectPoint(spiral);
+            var bipt = BisectingLines.BisectPoint(spiral.spiral);
             ShapesUtils.DrawCross(bipt, .1f);
             var radius = bipt.magnitude;
             Draw.Ring(bipt, radius, 2f);
@@ -78,7 +78,7 @@ public class ZetaEstimate : ImmediateModeShapeDrawer
         {
             Draw.Color = new Color(1f, 0, 0, .2f); //Color.red;
             Draw.Thickness = .1f;
-            var pt = spiral.midPt;
+            var pt = spiral.spiral.MiddlePoint.ToVector2();
             ShapesUtils.DrawCross(pt, .1f);
             var radius = pt.magnitude;
             Draw.Ring(pt, radius, 2f);

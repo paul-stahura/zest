@@ -208,14 +208,14 @@ public class Zeta
         // TODO: denominator lookup
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
         var n = index;
-        return (n * 2 + 1) * Math.PI / (Math.Log(n+1)-Math.Log(n));
+        return (n * 2 + 1) * Math.PI / (Math.Log(n + 1) - Math.Log(n));
 
 
-        
+
         // from dfold: Exact conversion from index to imaginary
         // return Math.PI * (2.0 * index + 1.0) / Math.Log(1.0/index + 1.0);
     }
-    
+
     public static double ImagToIndex(double imag)  //given imag, what is the index of the segment?
     {
 
@@ -243,34 +243,37 @@ public class Zeta
         // );
     }
 
-    public static Vector ReimannSiegel(double imag, bool fewerTerms = false) {
+    public static Vector ReimannSiegel(double imag, bool fewerTerms = false)
+    {
         double Ereal(double a, double b) => Math.Pow(Math.E, a) * Math.Cos(b);
         double Eimag(double a, double b) => Math.Pow(Math.E, a) * Math.Sin(b);
 
-        double V(double t) { 
-            var result = t/2 * Math.Log(t/(2*Math.PI)) - t/2 - Math.PI/8;  // fewer terms      
-            return fewerTerms ? result : result + 1/(48*t) + 7/(5760*Math.Pow(t,3)) + 31/(80640*Math.Pow(t, 5)) + 127/(430080*Math.Pow(t, 7)) + 511/(1216512*Math.Pow(t,9));
+        double V(double t)
+        {
+            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
+            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
         }
-    
 
-        double Z(double t) {
-            int v(double t) =>  (int)Math.Floor(Math.Sqrt(t/(2*Math.PI)));
+
+        double Z(double t)
+        {
+            int v(double t) => (int)Math.Floor(Math.Sqrt(t / (2 * Math.PI)));
             // double P(double t) =>  Math.Sqrt(t/(2*Math.PI)) - Math.Floor(Math.Sqrt(t/2*Math.PI));
-            double T(double t) =>  Math.Sqrt(t/(2*Math.PI)) - v(t);
-            double phi(double t) =>  Math.Cos(2*Math.PI * (t*t - t - 1.0/16.0)) / Math.Cos(2 * Math.PI * t);
-            double c0(double t) =>  phi(T(t));
-            double c2(double t) =>  0;
+            double T(double t) => Math.Sqrt(t / (2 * Math.PI)) - v(t);
+            double phi(double t) => Math.Cos(2 * Math.PI * (t * t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
+            double c0(double t) => phi(T(t));
+            double c2(double t) => 0;
 
             var a = new double[v(t)];
             for (var k = 0; k < a.Length; k++)
-                a[k] = 1 / Math.Sqrt(k+1) * Math.Cos(V(t) - t * Math.Log(k+1));
-            
-            var b = Math.Pow(-1, v(t)-1) * Math.Pow(2 * Math.PI/t, .25) * (
-                    c0(t) + 
-                    Math.Sqrt(2 * Math.PI/t) * 
+                a[k] = 1 / Math.Sqrt(k + 1) * Math.Cos(V(t) - t * Math.Log(k + 1));
+
+            var b = Math.Pow(-1, v(t) - 1) * Math.Pow(2 * Math.PI / t, .25) * (
+                    c0(t) +
+                    Math.Sqrt(2 * Math.PI / t) *
                     c2(t)
                 );
-            
+
             return 2 * a.Sum() + b;
         }
 
@@ -278,5 +281,49 @@ public class Zeta
         double Zy(double i) => Z(i) * Eimag(0, -V(i));
 
         return new Vector(Zx(imag), Zy(imag));
+    }
+
+    public struct Spiral
+    {
+        public int MiddleIndex;
+        public Vector MiddlePoint;
+        public Vector[] Links;
+        public double Imag;
+        public Vector ZetaPoint;
+
+        public Spiral(double imag)
+        {
+            var numLinks = (int)imag;
+            this.Imag = imag;
+            this.MiddleIndex = (int)Zeta.ImagToIndex(imag) + 1;
+            this.ZetaPoint = Zeta.ReimannSiegel(imag);
+            this.Links = new Vector[numLinks];
+            this.MiddlePoint = new Vector();
+
+            var start = new Vector();
+            this.Links[0] = start;
+            
+            for (int i = 1; i < numLinks; i++)
+            {
+                var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, .5);
+                var y = Math.Sin(imag * Math.Log(i)) / Math.Pow(i, .5);
+                var end = new Vector(start.x + x, start.y + y);
+
+                if (i == this.MiddleIndex)
+                {
+                    this.MiddlePoint = start + (end - start) / 2;
+                }
+
+                this.Links[i] = end;
+                start = end;
+            }
+        }
+
+        public Vector PointOnLink(int idx, double dist)
+        {
+            var link = Links[idx];
+            link.Normalize();
+            return link * dist;
+        }
     }
 }

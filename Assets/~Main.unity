@@ -13152,7 +13152,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 765330095}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 1
+  m_MaxValue: 0.1
   m_WholeNumbers: 0
   m_Value: 0
   m_OnValueChanged:
@@ -16549,6 +16549,7 @@ GameObject:
   - component: {fileID: 1486109720}
   - component: {fileID: 1486109722}
   - component: {fileID: 1486109721}
+  - component: {fileID: 1486109723}
   m_Layer: 0
   m_Name: ZetaSpiral
   m_TagString: Untagged
@@ -16572,11 +16573,6 @@ MonoBehaviour:
   app: {fileID: 338235377}
   transparency: {fileID: 787073038}
   numLinksReference: 100
-  middleLink:
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  midPt: {x: 0, y: 0}
-  middleIndex: 0
   rsZeta: {x: 0, y: 0}
   drZeta: {x: 0, y: 0}
   distance: 0
@@ -16617,7 +16613,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1486109717}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 812d7ba45d04240c2b34ae47297327fa, type: 3}
   m_Name: 
@@ -16644,6 +16640,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   useCullingMasks: 0
   spiral: {fileID: 1486109718}
+--- !u!114 &1486109723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486109717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e85d278f5015f446cbbda58cf1ef8427, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useCullingMasks: 0
+  spiral: {fileID: 1486109718}
+  app: {fileID: 338235377}
 --- !u!1 &1503435948
 GameObject:
   m_ObjectHideFlags: 0
@@ -18058,7 +18069,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 206.491
+  m_Text: 206.49
 --- !u!222 &1609120646
 CanvasRenderer:
   m_ObjectHideFlags: 0
