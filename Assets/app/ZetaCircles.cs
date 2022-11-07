@@ -4,21 +4,35 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class ZetaEstimate : ImmediateModeShapeDrawer
+public class ZetaCircles : ImmediateModeShapeDrawer
 {
     public float difference;
 
     public App app;
     public ZetaSpiral spiral;
 
+    [Header("Zeta Circles")]
+    public Color zetaColor = Color.green;
+    public Color estimateColor = Color.red;
+    public Slider transparency;
+    public float thickness = 2;
+
     [Header("Intersection Trail")]
-    public Toggle drawTrail;
     public Slider trailLength;
+
     [Header("Intersection Zeros")]
     public Toggle findIntersectionZeros;
     public List<Vector2> trail = new List<Vector2>();
     List<double> intersectionZeros = new List<double>();
 
+    void Start() 
+    {
+        transparency.onValueChanged.AddListener(value => {
+            zetaColor = new Color(zetaColor.r, zetaColor.g, zetaColor.b, value);
+            estimateColor = new Color(estimateColor.r, estimateColor.g, estimateColor.b, value); 
+        });
+        transparency.value = zetaColor.a;
+    }
 
     public override void DrawShapes(Camera cam)
     {
@@ -37,7 +51,7 @@ public class ZetaEstimate : ImmediateModeShapeDrawer
 
             drawCircleIntersections(c1, c2);
 
-            if (drawTrail.isOn)
+            if (trailLength.value > 0)
                 drawIntersectionTrail(c1, c2);
             else if (trail.Count > 0)
                 trail.Clear();
@@ -61,12 +75,12 @@ public class ZetaEstimate : ImmediateModeShapeDrawer
         // to the origin
         using (Draw.StyleScope)
         {
-            Draw.Color = new Color(0, 1f, 0, 0.2f); // Color.green;
-            Draw.Thickness = .1f;
-            var bipt = BisectingLines.BisectPoint(spiral.spiral);
-            ShapesUtils.DrawCross(bipt, .1f);
+            Draw.Color = zetaColor; // Color.green;
+            Draw.Thickness = thickness;
+            var bipt = BisectingLines.BisectPoint(spiral.S);
+            ShapesUtils.DrawCross(bipt, .1f, 1);
             var radius = bipt.magnitude;
-            Draw.Ring(bipt, radius, 2f);
+            Draw.Ring(bipt, radius, thickness);
 
             return new Circle(bipt, radius);
         }
@@ -76,12 +90,12 @@ public class ZetaEstimate : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = new Color(1f, 0, 0, .2f); //Color.red;
-            Draw.Thickness = .1f;
-            var pt = spiral.spiral.MiddlePoint.ToVector2();
-            ShapesUtils.DrawCross(pt, .1f);
+            Draw.Color = estimateColor; 
+            Draw.Thickness = thickness;
+            var pt = spiral.S.MiddlePoint.ToVector2();
+            ShapesUtils.DrawCross(pt, .1f, 1);
             var radius = pt.magnitude;
-            Draw.Ring(pt, radius, 2f);
+            Draw.Ring(pt, radius, thickness);
 
             return new Circle(pt, radius);
         }

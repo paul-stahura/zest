@@ -5,6 +5,15 @@ using Shapes;
 public class BisectingLines : ImmediateModeShapeDrawer
 {
     public ZetaSpiral spiral;
+    public Slider transparency;
+    [SerializeField] public Color color = Color.cyan;
+    public float thickness = 1f;
+
+    void Start()
+    {
+        transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value) );
+        transparency.value = color.a;
+    }
 
     public override void DrawShapes(Camera cam)
     {
@@ -16,9 +25,9 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
 			// set static parameter to draw in the local space of this object
 			Draw.Matrix = transform.localToWorldMatrix;            
-            Draw.Thickness = .5f;
-            Draw.Color = Color.cyan;
-            var bipt = BisectPoint(spiral.spiral);
+            Draw.Thickness = thickness;
+            Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
+            var bipt = BisectPoint(spiral.S);
             Draw.Line(Vector2.zero, spiral.rsZeta);
             Draw.Line(Vector2.zero, bipt);
             Draw.Line(bipt, spiral.rsZeta);

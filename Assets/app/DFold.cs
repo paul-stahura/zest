@@ -48,7 +48,7 @@ public class DFold : ImmediateModeShapeDrawer
             return Math.Sqrt(idx + 1) - Math.Sqrt(idx) - (1 / (2 * Math.Sqrt(idx + 1))) + (1 / (2 * Math.Sqrt(idx)));
         }
 
-        var s = spiral.spiral;
+        var s = spiral.S;
         var mi = s.MiddleIndex;
 
         var middleLink = new Vector2[] 

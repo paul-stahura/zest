@@ -23,28 +23,31 @@ public class ZetaRangeEst : ImmediateModeShapeDrawer
 
                 Draw.Color = Color.yellow;
 
+        // var s = spiral.S;
+        // var start = s.Links[idx];
+        // var end = s.Links[idx + 1];
+
+        // var pos = start + (end - start) / 2;
+        // var rot = RotationOfLink(s, idx);
+        // setCamera(pos, rot);
+
+                var rot = CameraTracking.RotationOfLink(spiral.S, spiral.S.MiddleIndex);
+
                 var index = Mathf.FloorToInt((float)Zeta.ImagToIndex(app.Imag));
                 var imag = Zeta.IndexToImag(index);
-                var line = bisectLine(imag);
-                Draw.Line(line[0], line[1]);
+                var s = new Zeta.Spiral(imag);
+                var pt = BisectingLines.BisectPoint(s);
+                // Draw.Rotation = rot;
+                Draw.Line(pt, s.ZetaPoint);
 
                 imag++;
                 var bits = BitConverter.SingleToInt32Bits((float)imag);
-                var imag2 = BitConverter.Int32BitsToSingle(bits - 1);
-                line = bisectLine(imag2);
-                Draw.Line(line[0], line[1]);
+                imag = BitConverter.Int32BitsToSingle(bits - 1);
+                s = new Zeta.Spiral(imag);
+                pt = BisectingLines.BisectPoint(s);
+                Draw.Rotation = rot;
+                Draw.Line(pt, s.ZetaPoint);
             }
         }
-    }
-
-    Vector2[] bisectLine(double imag)
-    {
-        var spiral = new Zeta.Spiral(imag);
-        var bisect = BisectingLines.BisectPoint(spiral);
-
-        return new Vector2[] {
-            bisect,
-            spiral.ZetaPoint.ToVector2()
-        };
     }
 }

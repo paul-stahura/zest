@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using UnityEngine;
 using Complex = System.Numerics.Complex;
 
 
@@ -295,7 +296,7 @@ public class Zeta
         {
             var numLinks = (int)imag;
             this.Imag = imag;
-            this.MiddleIndex = (int)Zeta.ImagToIndex(imag) + 1;
+            this.MiddleIndex = (int)Zeta.ImagToIndex(imag);
             this.ZetaPoint = Zeta.ReimannSiegel(imag);
             this.Links = new Vector[numLinks];
             this.MiddlePoint = new Vector();
@@ -303,10 +304,10 @@ public class Zeta
             var start = new Vector();
             this.Links[0] = start;
             
-            for (int i = 1; i < numLinks; i++)
+            for (int i = 1; i < this.Links.Length; i++)
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, .5);
-                var y = Math.Sin(imag * Math.Log(i)) / Math.Pow(i, .5);
+                var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, .5);
                 var end = new Vector(start.x + x, start.y + y);
 
                 if (i == this.MiddleIndex)

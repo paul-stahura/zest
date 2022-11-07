@@ -39,9 +39,20 @@ public class App : MonoBehaviour
         {
             // If the imaginary value being set would result in an index 
             // less than 2, ignore it
+            //
+            // Sets the all internal imaginary state with no animation
             if (value != _imag && value >= IMAG_WITH_2_LINKS) // value is a 'magic' variable that contains the NEW value coming to be set
             {
-                updateImag(value, true);
+                _imag = value;
+
+                imagDisplay.Value = (float)value;
+
+                var index = (float)Zeta.ImagToIndex(value);
+                middleIndexDisplay.Value = index;
+
+                indexIntPart.value = Mathf.FloorToInt(index);
+                indexRealPart.value = index - Mathf.FloorToInt(index);
+
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
         }
@@ -59,38 +70,39 @@ public class App : MonoBehaviour
         // Here, we set Robot3.imag to the value you typed in.
         imagDisplay.onValueChanged.AddListener(value =>
         {
-            targetImag = value;
-
-            // When setting Robot3.imag, if the value is invalid, it will not
-            // be changed.  Reset the display to the actual value of imag.
-            imagDisplay.Value = value;
+            Imag = value;
         });
 
 
         // When you input a middle index value, this updates the imaginary number
         middleIndexDisplay.onValueChanged.AddListener(value =>
         {
-            targetImag = Zeta.IndexToImag(value);
-
-            // It's possible the value that was set here is invalid so recalculate
-            // and display the actual value
-            middleIndexDisplay.Value = (float)Zeta.ImagToIndex(_imag);
+            Imag = Zeta.IndexToImag(value);
         });
 
-        indexIntPart.onValueChanged.AddListener(value =>
+        var mgr = indexIntPart.GetComponent<SliderChangeMgr>();
+        mgr.onValueChanged.AddListener(value =>
         {
-            updateImag(Zeta.IndexToImag(value + indexRealPart.value));
+            // Sliders animate the imag to the final value 
+            // and don't fire other events
+            Imag = Zeta.IndexToImag((float)value + indexRealPart.value);
+            // t = 0;
+            // imagDisplay.Value = (float)targetImag;
+
+            // middleIndexDisplay.Value = (float)value + indexRealPart.value;;
         });
+        indexRealPart.maxValue = .99999f;
 
-        var bits = BitConverter.SingleToInt32Bits(1);
-        var max = BitConverter.Int32BitsToSingle(bits - 1);
-        indexRealPart.maxValue = max;
-
-        indexRealPart.onValueChanged.AddListener(value =>
+        mgr = indexRealPart.GetComponent<SliderChangeMgr>();
+        mgr.onValueChanged.AddListener(value =>
         {
-            updateImag(Zeta.IndexToImag(indexIntPart.value + value));
-            // targetImag = (float)Zeta.IndexToImag(indexIntPart.value + value);
+            Imag = Zeta.IndexToImag(indexIntPart.value + value);
+            // t = 0;
+            // imagDisplay.Value = (float)targetImag;
+
+            // middleIndexDisplay.Value =  (float)Zeta.ImagToIndex(targetImag);;
         });
+
 
         #region Animation Slider
         animMax.onValueChanged.AddListener(value =>
@@ -99,25 +111,6 @@ public class App : MonoBehaviour
         });
         animSlider.Max = animMax.Value; // set the default value
         #endregion
-
-
-    }
-
-    void updateImag(double value, bool updateSliders = false)
-    {
-        // _imag = value;
-        targetImag = (float)value;
-        t = 0;
-        imagDisplay.Value = (float)value;
-
-        var index = (float)Zeta.ImagToIndex(value);
-        middleIndexDisplay.Value = index;
-
-        if (updateSliders)
-        {
-            indexIntPart.value = Mathf.FloorToInt(index);
-            indexRealPart.value = index - Mathf.FloorToInt(index);
-        }
     }
 
     float t = 0f;
@@ -127,16 +120,21 @@ public class App : MonoBehaviour
         // The animSlider is zero when it is in the center.
         if (animSlider.Value != 0)
         {
-            updateImag(_imag + .04f * animSlider.Value);
+            Imag += .04f * animSlider.Value; 
         }
-        else if (_imag != targetImag)
+        
+        if (t <= 1.1f) //(_imag != targetImag)
         {
-            t += Mathf.Min(1f, 0.5f * Time.deltaTime);
+            // When thre real part is exactly zero and we lerp toward the final
+            // value, we see a jump as the middle link changes as we transition
+            // to exactly t == 1.  To get rid of that skip, just skip t ahead
+            // to 1 when we get close enough.
+            if (indexRealPart.value == 0 && t > .15)
+                t = 1.2f;
+            else
+                t += .5f * Time.deltaTime;
+
             _imag = Mathf.Lerp((float)_imag, (float)targetImag, t);
-        }
-        else
-        {
-            t = 0;
         }
 
         // else if (trackBisect.isOn)
