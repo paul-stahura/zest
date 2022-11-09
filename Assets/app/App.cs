@@ -13,6 +13,7 @@ public class App : MonoBehaviour
     public FloatInput middleIndexDisplay;
     public Slider indexIntPart;
     public Slider indexRealPart;
+    public FineTuneSlider fineTuneReal;
 
     //
     // Animation slider controls
@@ -51,7 +52,10 @@ public class App : MonoBehaviour
                 middleIndexDisplay.Value = index;
 
                 indexIntPart.value = Mathf.FloorToInt(index);
-                indexRealPart.value = index - Mathf.FloorToInt(index);
+                var realPart = (float)Math.Round(index - Mathf.FloorToInt(index), 6);
+                if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)
+                    fineTuneReal.reset();
+                indexRealPart.value = realPart;
 
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
@@ -83,24 +87,32 @@ public class App : MonoBehaviour
         var mgr = indexIntPart.GetComponent<SliderChangeMgr>();
         mgr.onValueChanged.AddListener(value =>
         {
-            // Sliders animate the imag to the final value 
-            // and don't fire other events
-            Imag = Zeta.IndexToImag((float)value + indexRealPart.value);
-            // t = 0;
-            // imagDisplay.Value = (float)targetImag;
+            var imag = Zeta.IndexToImag((float)value + indexRealPart.value);
+            t = 2;
 
-            // middleIndexDisplay.Value = (float)value + indexRealPart.value;;
+            if (fineTuneReal.factor <= 0.001)
+                Imag = imag;
+            else
+            {
+                targetImag = imag;
+                t = 0;
+            }
         });
         indexRealPart.maxValue = .99999f;
 
         mgr = indexRealPart.GetComponent<SliderChangeMgr>();
         mgr.onValueChanged.AddListener(value =>
         {
-            Imag = Zeta.IndexToImag(indexIntPart.value + value);
-            // t = 0;
-            // imagDisplay.Value = (float)targetImag;
+            var imag = Zeta.IndexToImag(indexIntPart.value + value);
+            t = 2;
 
-            // middleIndexDisplay.Value =  (float)Zeta.ImagToIndex(targetImag);;
+            if (fineTuneReal.factor <= 0.001)
+                Imag = imag;
+            else
+            {
+                targetImag = imag;
+                t = 0;
+            }
         });
 
 
@@ -120,9 +132,9 @@ public class App : MonoBehaviour
         // The animSlider is zero when it is in the center.
         if (animSlider.Value != 0)
         {
-            Imag += .04f * animSlider.Value; 
+            Imag += .04f * animSlider.Value;
         }
-        
+
         if (t <= 1.1f) //(_imag != targetImag)
         {
             // When thre real part is exactly zero and we lerp toward the final

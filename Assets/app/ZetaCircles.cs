@@ -14,6 +14,8 @@ public class ZetaCircles : ImmediateModeShapeDrawer
     [Header("Zeta Circles")]
     public Color zetaColor = Color.green;
     public Color estimateColor = Color.red;
+    public Color otherCircle = Color.cyan;
+
     public Slider transparency;
     public float thickness = 2;
 
@@ -30,6 +32,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         transparency.onValueChanged.AddListener(value => {
             zetaColor = new Color(zetaColor.r, zetaColor.g, zetaColor.b, value);
             estimateColor = new Color(estimateColor.r, estimateColor.g, estimateColor.b, value); 
+            otherCircle = new Color(otherCircle.r, otherCircle.g, otherCircle.b, value);
         });
         transparency.value = zetaColor.a;
     }
@@ -47,7 +50,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
             Draw.Matrix = transform.localToWorldMatrix;
 
             var c1 = drawZetaCircle();
-            var c2 = drawGrossZetaEstimate();
+            var c2 = drawMidpointCircle();
 
             drawCircleIntersections(c1, c2);
 
@@ -86,7 +89,22 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         }
     }
 
-    Circle drawGrossZetaEstimate()
+    Circle drawMidpointCircle()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = estimateColor; 
+            Draw.Thickness = thickness;
+            var pt = spiral.S.middlePoint.ToVector2();
+            ShapesUtils.DrawCross(pt, .1f, 1);
+            var radius = pt.magnitude;
+            Draw.Ring(pt, radius, thickness);
+
+            return new Circle(pt, radius);
+        }
+    }
+
+    Circle drawMidCircle()
     {
         using (Draw.StyleScope)
         {
