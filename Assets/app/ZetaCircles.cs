@@ -51,6 +51,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
 
             var c1 = drawZetaCircle();
             var c2 = drawMidpointCircle();
+            var c3 = drawBisectCircle();
 
             drawCircleIntersections(c1, c2);
 
@@ -104,16 +105,19 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         }
     }
 
-    Circle drawMidCircle()
+    Circle drawBisectCircle()
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = estimateColor; 
+            Draw.Color = otherCircle; 
             Draw.Thickness = thickness;
+
             var pt = spiral.S.middlePoint.ToVector2();
-            ShapesUtils.DrawCross(pt, .1f, 1);
-            var radius = pt.magnitude;
-            Draw.Ring(pt, radius, thickness);
+            var mid = (spiral.S.zetaPoint / 2).ToVector2();
+
+            ShapesUtils.DrawCross(mid, .1f, 1);
+            var radius = mid.magnitude;
+            Draw.Ring(mid, radius, thickness);
 
             return new Circle(pt, radius);
         }
