@@ -6,7 +6,17 @@ using Shapes;
 public class LinkToSpiral : ImmediateModeShapeDrawer
 {
     public ZetaSpiral zs;
-    public App app;
+    public Color color = Color.blue;
+    public float thickness = 1;
+    public Slider transparency;
+
+    void Start()
+    {
+        transparency.onValueChanged.AddListener(value => {
+            color = new Color(color.r, color.g, color.b, value);
+        });
+        transparency.value = color.a;
+    }
 
     public override void DrawShapes(Camera cam)
     {
@@ -16,17 +26,17 @@ public class LinkToSpiral : ImmediateModeShapeDrawer
         {
             Draw.LineGeometry = LineGeometry.Volumetric3D;
             Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Thickness = 1;
 
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
             using (Draw.StyleScope)
             {
+                Draw.Thickness = thickness;
+                Draw.Color = color;
+                
                 var slope = -spiral.zetaPoint.x / spiral.zetaPoint.y;
                 var z = spiral.zetaPoint.ToVector2();
 
-                Draw.Thickness = 1;
-                Draw.Color = Color.blue;
 
                 // draw a line from each of the first links at the same slope as zeta
                 for (var i = 1; i < spiral.middleIndex; i++)

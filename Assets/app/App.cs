@@ -90,7 +90,7 @@ public class App : MonoBehaviour
             var imag = Zeta.IndexToImag((float)value + indexRealPart.value);
             t = 2;
 
-            if (fineTuneReal.factor <= 0.001)
+            if (fineTuneReal.factor <= 0.1)
                 Imag = imag;
             else
             {
@@ -106,7 +106,7 @@ public class App : MonoBehaviour
             var imag = Zeta.IndexToImag(indexIntPart.value + value);
             t = 2;
 
-            if (fineTuneReal.factor <= 0.001)
+            if (fineTuneReal.factor <= 0.1)
                 Imag = imag;
             else
             {
