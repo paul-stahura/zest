@@ -99,4 +99,19 @@ public class FineTuneSlider : MonoBehaviour
 
         return false;
     }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            decreaseRange();
+            decreaseRange();
+        }
+
+        if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            increaseRange();
+            increaseRange();
+        }    
+    }
 }

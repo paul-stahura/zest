@@ -295,7 +295,7 @@ public class Zeta
 
         public Spiral(double imag)
         {
-            var numLinks = (int)imag;
+            var numLinks = (int)(imag / Math.PI + 1);
             this.imag = imag;
             this.middleIndex = (int)Zeta.ImagToIndex(imag);
             this.zetaPoint = Zeta.ReimannSiegel(imag);
