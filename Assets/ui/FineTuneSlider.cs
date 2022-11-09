@@ -13,7 +13,7 @@ public class FineTuneSlider : MonoBehaviour
     public float factor = 1f;
 
     const float MIN_VALUE = 0;
-    const float MAX_VALUE = .999999f;
+    const float MAX_VALUE = .99999f;
     const float MIN_FACTOR = .00001f;
 
     void Start()
@@ -72,7 +72,7 @@ public class FineTuneSlider : MonoBehaviour
         factor = Mathf.Clamp(factor, 0, 1);
         var value = slider.value;
         var min = (float)Math.Round(Mathf.Max(MIN_VALUE, slider.value - factor), 6);
-        var max = (float)Math.Round(MathF.Min(MAX_VALUE, slider.value + factor), 6);
+        var max = (float)Math.Round(Mathf.Min(MAX_VALUE, slider.value + factor), 6);
 
         setRange(min, max);
 
@@ -90,6 +90,9 @@ public class FineTuneSlider : MonoBehaviour
 
     bool setRange(float min, float max)
     {
+        max = Mathf.Clamp(max, slider.value, MAX_VALUE);
+        min = Mathf.Clamp(min, MIN_VALUE, slider.value);
+
         if (min != max)
         {
             slider.minValue = min;

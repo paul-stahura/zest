@@ -88,15 +88,15 @@ public class App : MonoBehaviour
         mgr.onValueChanged.AddListener(value =>
         {
             var imag = Zeta.IndexToImag((float)value + indexRealPart.value);
-            t = 2;
+            // t = 2;
 
-            if (fineTuneReal.factor <= 0.1)
+            // if (fineTuneReal.factor <= 0.1)
                 Imag = imag;
-            else
-            {
-                targetImag = imag;
-                t = 0;
-            }
+            // else
+            // {
+            //     targetImag = imag;
+            //     t = 0;
+            // }
         });
         indexRealPart.maxValue = .99999f;
 
@@ -104,15 +104,15 @@ public class App : MonoBehaviour
         mgr.onValueChanged.AddListener(value =>
         {
             var imag = Zeta.IndexToImag(indexIntPart.value + value);
-            t = 2;
+            // t = 2;
 
-            if (fineTuneReal.factor <= 0.1)
+            // if (fineTuneReal.factor <= 0.1)
                 Imag = imag;
-            else
-            {
-                targetImag = imag;
-                t = 0;
-            }
+            // else
+            // {
+            //     targetImag = imag;
+            //     t = 0;
+            // }
         });
 
 
@@ -144,9 +144,9 @@ public class App : MonoBehaviour
             if (indexRealPart.value == 0 && t > .15)
                 t = 1.2f;
             else
-                t += .5f * Time.deltaTime;
+                t += Time.deltaTime;
 
-            _imag = Mathf.Lerp((float)_imag, (float)targetImag, t);
+            Imag = Mathf.Lerp((float)_imag, (float)targetImag, t);
         }
 
         // else if (trackBisect.isOn)

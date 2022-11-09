@@ -11,7 +11,7 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
     void Start()
     {
-        transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value) );
+        transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
         transparency.value = color.a;
     }
 
@@ -19,18 +19,28 @@ public class BisectingLines : ImmediateModeShapeDrawer
     {
         using (Draw.Command(cam))
         {
-			// set up static parameters. these are used for all following Draw.Line calls
-			Draw.LineGeometry = LineGeometry.Volumetric3D;
-			Draw.ThicknessSpace = ThicknessSpace.Pixels;
+            using (Draw.StyleScope)
+            {
+                // set up static parameters. these are used for all following Draw.Line calls
+                Draw.LineGeometry = LineGeometry.Volumetric3D;
+                Draw.ThicknessSpace = ThicknessSpace.Pixels;
 
-			// set static parameter to draw in the local space of this object
-			Draw.Matrix = transform.localToWorldMatrix;            
-            Draw.Thickness = thickness;
-            Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
-            var bipt = BisectPoint(spiral.S);
-            Draw.Line(Vector2.zero, spiral.rsZeta);
-            Draw.Line(Vector2.zero, bipt);
-            Draw.Line(bipt, spiral.rsZeta);
+                // set static parameter to draw in the local space of this object
+                Draw.Matrix = transform.localToWorldMatrix;
+                Draw.Thickness = thickness;
+                Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
+                var bipt = BisectPoint(spiral.S);
+                Draw.Line(Vector2.zero, spiral.rsZeta);
+                Draw.Line(Vector2.zero, bipt);
+                Draw.Line(bipt, spiral.rsZeta);
+
+                // Draw dashed bisecting line. Extend it past a little bit
+                var z2 = (spiral.rsZeta / 2);
+                var dir = (z2 - bipt).normalized * .5f;
+                Draw.Thickness = thickness * 2;
+                Draw.UseDashes = true;
+                Draw.Line(z2 + dir, bipt - dir);
+            }
         }
     }
 
