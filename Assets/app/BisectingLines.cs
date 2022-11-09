@@ -37,17 +37,17 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
     public static Vector2 BisectPoint(Zeta.Spiral spiral)
     {
-        var idx = spiral.MiddleIndex;
-        var M1 = spiral.Links[idx];
-        var M2 = spiral.Links[idx + 1];
+        var idx = spiral.middleIndex;
+        var M1 = spiral.links[idx];
+        var M2 = spiral.links[idx + 1];
 
         // Finds the intersecting point between the bisecting line and the middle link
-        var slope1 = -spiral.ZetaPoint.x / spiral.ZetaPoint.y;
+        var slope1 = -spiral.zetaPoint.x / spiral.zetaPoint.y;
         var slope2 = (M2.y - M1.y) / (M2.x - M1.x);
 
-        var x = ((slope2 * M2.x - slope1 * spiral.ZetaPoint.x / 2) - (M2.y - spiral.ZetaPoint.y / 2)) / (slope2 - slope1);
+        var x = ((slope2 * M2.x - slope1 * spiral.zetaPoint.x / 2) - (M2.y - spiral.zetaPoint.y / 2)) / (slope2 - slope1);
 
-        var y = slope1 * (x - spiral.ZetaPoint.x / 2) + spiral.ZetaPoint.y / 2;
+        var y = slope1 * (x - spiral.zetaPoint.x / 2) + spiral.zetaPoint.y / 2;
 
         return new Vector2((float)x, (float)y);
     }

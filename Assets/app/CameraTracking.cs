@@ -31,15 +31,15 @@ public class CameraTracking : ImmediateModeShapeDrawer
         using (Draw.Command(cam))
         {
             if (trackMiddle.isOn)
-                trackLink(spiral.S.MiddleIndex);
+                trackLink(spiral.S.middleIndex);
         }
     }
 
     void trackLink(int idx)
     {
         var s = spiral.S;
-        var start = s.Links[idx];
-        var end = s.Links[idx + 1];
+        var start = s.links[idx];
+        var end = s.links[idx + 1];
 
         var pos = start + (end - start) / 2;
         var rot = RotationOfLink(s, idx);
@@ -70,8 +70,8 @@ public class CameraTracking : ImmediateModeShapeDrawer
     // at the given index appears horizontal when rendered.
     public static Quaternion RotationOfLink(Zeta.Spiral s, int idx)
     {
-        Vector3 start = s.Links[idx];
-        Vector3 end = s.Links[idx + 1];
+        Vector3 start = s.links[idx];
+        Vector3 end = s.links[idx + 1];
 
         var temp = end - start;
         var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;

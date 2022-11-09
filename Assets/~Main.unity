@@ -2769,7 +2769,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &390378486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2782,6 +2782,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2991553825874105aefe80b35068b4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  app: {fileID: 338235377}
 --- !u!4 &390378487
 Transform:
   m_ObjectHideFlags: 0
@@ -5236,7 +5237,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 861729478}
   m_OnClick:
     m_PersistentCalls:
@@ -7983,7 +7984,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: .12345 - .12345
+  m_Text: .12345 - .12345  (doesnt work)
 --- !u!222 &1293709016
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9782,7 +9783,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 206.4912
+  m_Text: 206.491
 --- !u!222 &1609120646
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12389,7 +12390,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 2059521441}
   m_OnClick:
     m_PersistentCalls:

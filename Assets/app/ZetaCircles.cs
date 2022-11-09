@@ -92,7 +92,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         {
             Draw.Color = estimateColor; 
             Draw.Thickness = thickness;
-            var pt = spiral.S.MiddlePoint.ToVector2();
+            var pt = spiral.S.middlePoint.ToVector2();
             ShapesUtils.DrawCross(pt, .1f, 1);
             var radius = pt.magnitude;
             Draw.Ring(pt, radius, thickness);

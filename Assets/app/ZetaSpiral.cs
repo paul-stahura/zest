@@ -57,17 +57,17 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
     void drawSpiral()
     {
-        if (S.Links[0] == null)
+        if (S.links[0] == null)
             return;
             
         using (Draw.StyleScope)
         {
             // Since our links are zero-based, the middle index into the array
             // is not the middle link number starting from one.
-            var middleLink = S.MiddleIndex + 1;
+            var middleLink = S.middleIndex + 1;
 
             Draw.Thickness = 1; // 4px wide
-            for (int i = 1; i < S.Links.Length; i++)
+            for (int i = 1; i < S.links.Length; i++)
             {
                 var color = Color.grey;
                 color.a = transparency.value;
@@ -89,8 +89,8 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                     Draw.Thickness = 4;
                 }
 
-                var start = S.Links[i - 1].ToVector2();
-                var end = S.Links[i];
+                var start = S.links[i - 1].ToVector2();
+                var end = S.links[i];
 
                 Draw.Line(start, end, color);
             }

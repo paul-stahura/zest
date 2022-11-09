@@ -49,12 +49,12 @@ public class DFold : ImmediateModeShapeDrawer
         }
 
         var s = spiral.S;
-        var mi = s.MiddleIndex;
+        var mi = s.middleIndex;
 
         var middleLink = new Vector2[] 
         {
-            s.Links[mi],
-            s.Links[mi + 1]
+            s.links[mi],
+            s.links[mi + 1]
         };
 
         var halfPt = middleLink[0] + (middleLink[1] - middleLink[0]) / 2;

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using Complex = System.Numerics.Complex;
-
+using MoonSharp.Interpreter;
 
 // public static class ComplexExt
 // {
@@ -284,45 +284,46 @@ public class Zeta
         return new Vector(Zx(imag), Zy(imag));
     }
 
-    public struct Spiral
+    [MoonSharpUserData]
+    public class Spiral
     {
-        public int MiddleIndex;
-        public Vector MiddlePoint;
-        public Vector[] Links;
-        public double Imag;
-        public Vector ZetaPoint;
+        public int middleIndex;
+        public Vector middlePoint;
+        public Vector[] links;
+        public double imag;
+        public Vector zetaPoint;
 
         public Spiral(double imag)
         {
             var numLinks = (int)imag;
-            this.Imag = imag;
-            this.MiddleIndex = (int)Zeta.ImagToIndex(imag);
-            this.ZetaPoint = Zeta.ReimannSiegel(imag);
-            this.Links = new Vector[numLinks];
-            this.MiddlePoint = new Vector();
+            this.imag = imag;
+            this.middleIndex = (int)Zeta.ImagToIndex(imag);
+            this.zetaPoint = Zeta.ReimannSiegel(imag);
+            this.links = new Vector[numLinks];
+            this.middlePoint = new Vector();
 
             var start = new Vector();
-            this.Links[0] = start;
+            this.links[0] = start;
             
-            for (int i = 1; i < this.Links.Length; i++)
+            for (int i = 1; i < this.links.Length; i++)
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, .5);
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, .5);
                 var end = new Vector(start.x + x, start.y + y);
 
-                if (i == this.MiddleIndex)
+                if (i == this.middleIndex)
                 {
-                    this.MiddlePoint = start + (end - start) / 2;
+                    this.middlePoint = start + (end - start) / 2;
                 }
 
-                this.Links[i] = end;
+                this.links[i] = end;
                 start = end;
             }
         }
 
         public Vector PointOnLink(int idx, double dist)
         {
-            var link = Links[idx];
+            var link = links[idx];
             link.Normalize();
             return link * dist;
         }

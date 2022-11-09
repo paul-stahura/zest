@@ -31,14 +31,14 @@ public class ZetaRangeEst : ImmediateModeShapeDrawer
         // var rot = RotationOfLink(s, idx);
         // setCamera(pos, rot);
 
-                var rot = CameraTracking.RotationOfLink(spiral.S, spiral.S.MiddleIndex);
+                var rot = CameraTracking.RotationOfLink(spiral.S, spiral.S.middleIndex);
 
                 var index = Mathf.FloorToInt((float)Zeta.ImagToIndex(app.Imag));
                 var imag = Zeta.IndexToImag(index);
                 var s = new Zeta.Spiral(imag);
                 var pt = BisectingLines.BisectPoint(s);
                 // Draw.Rotation = rot;
-                Draw.Line(pt, s.ZetaPoint);
+                Draw.Line(pt, s.zetaPoint);
 
                 imag++;
                 var bits = BitConverter.SingleToInt32Bits((float)imag);
@@ -46,7 +46,7 @@ public class ZetaRangeEst : ImmediateModeShapeDrawer
                 s = new Zeta.Spiral(imag);
                 pt = BisectingLines.BisectPoint(s);
                 Draw.Rotation = rot;
-                Draw.Line(pt, s.ZetaPoint);
+                Draw.Line(pt, s.zetaPoint);
             }
         }
     }
