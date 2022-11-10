@@ -36,7 +36,7 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
                 // Draw dashed bisecting line. Extend it past a little bit
                 var z2 = (spiral.rsZeta / 2);
-                var dir = (z2 - bipt).normalized * .5f;
+                var dir = (z2 - bipt).normalized * .5f; 
                 Draw.Thickness = thickness * 2;
                 Draw.UseDashes = true;
                 Draw.Line(z2 + dir, bipt - dir);
