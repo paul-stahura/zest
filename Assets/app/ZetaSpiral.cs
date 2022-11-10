@@ -88,6 +88,11 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                     color = Color.red;
                     Draw.Thickness = 4;
                 }
+                else if (i == S.links.Length - 1)
+                {
+                    color = Color.red;
+                    Draw.Thickness = 2;
+                }
 
                 var start = S.links[i - 1].ToVector2();
                 var end = S.links[i];

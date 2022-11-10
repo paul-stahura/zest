@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class LinkToSpiral : ImmediateModeShapeDrawer
+public class JointsToSpirals : ImmediateModeShapeDrawer
 {
     public ZetaSpiral zs;
     public Color color = Color.blue;
@@ -39,31 +39,18 @@ public class LinkToSpiral : ImmediateModeShapeDrawer
                 var z = spiral.zetaPoint.ToVector2();
                 var bipt = BisectingLines.BisectPoint(zs.S);
                 
-                var z2 = (spiral.zetaPoint / 2);
-                var dir = (bipt - z2).normalized; 
-                // Draw.Line(z2 + dir, bipt - dir);
-
-                var pt = spiral.links[1].ToVector2();
-
-                var biline = z2 + bipt;
-                //  the formula to calculate the projection of a vector B onto another A is:
-                // projection of b onto a = (A dot B) / mag(A)
-
+                var z2 = (spiral.zetaPoint / 2).ToVector2();
 
                 // draw a line from each of the first links at the same slope as zeta
                 for (var i = 1; i < spiral.middleIndex; i++)
                 {
                     var from = spiral.links[i].ToVector2();
 
-                    var dot = Vector2.Dot(dir, from);
-                    // Draw.Line(Vector2.zero, dir * dot);
-                    var to = dir * dot + z2;
-                    var len = (to - from).magnitude * 2;
+                    var norm = (z2).normalized;
+                    var dot = Vector2.Dot(from, norm); 
+                    var to = z + from - 2 * dot * norm; // reflect from about a normal (z2)
 
-                    Draw.Line(from, from + z.normalized * len);
-
-                    // var to = from + z.normalized * proj;
-                    // Draw.Line(from, to);
+                    Draw.Line(from, to);
                 }
             }
         }
