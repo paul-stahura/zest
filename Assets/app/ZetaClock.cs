@@ -10,10 +10,19 @@ public class ZetaClock : ImmediateModeShapeDrawer
     public ZetaSpiral zetaSprial;
     public App app;
 
+    public double startImag;
+
     Dictionary<int, double> zetaTime = new Dictionary<int, double>();
     void OnApplicationQuit()
     {
-        using (StreamWriter sr = File.CreateText(@"clock.csv"))
+        if (0 == zetaTime.Count)
+            return;
+
+        var num = 1;
+        while (File.Exists($"clock-{num}.csv"))
+            num++;
+
+        using (StreamWriter sr = File.CreateText($"clock-{num}.csv"))
         {
             foreach (var kv in zetaTime)
                 sr.WriteLine($"{kv.Key},{kv.Value}");
@@ -22,17 +31,27 @@ public class ZetaClock : ImmediateModeShapeDrawer
 
     void Start()
     {
-        using (StreamReader sr = File.OpenText(@"clock.csv"))
-        {
-            string line = "";
-            while ((line = sr.ReadLine()) != null)
-            {
-                var tokens = line.Split(new char[] {','});
-                zetaTime.Add(int.Parse(tokens[0]), double.Parse(tokens[1]));
-            }
-        }
+        var num = 1;
+        while (File.Exists($"clock-{num}.csv"))
+            num++;
 
-        Debug.Log("loaded " + zetaTime.Count + " entries");
+        num--;
+        if (File.Exists($"clock-{num}.csv"))
+        {
+            using (StreamReader sr = File.OpenText($"clock-{num}.csv"))
+            {
+                string line = "";
+                while ((line = sr.ReadLine()) != null)
+                {
+                    var tokens = line.Split(new char[] { ',' });
+                    startImag = double.Parse(tokens[1]);
+                    zetaTime.Add(int.Parse(tokens[0]), startImag);
+                }
+            }
+            Debug.Log("loaded " + zetaTime.Count + " entries");
+        }
+        // if (startImag != 0)
+        //     app.Imag = startImag;
     }
 
     public int hour;
@@ -92,16 +111,21 @@ public class ZetaClock : ImmediateModeShapeDrawer
         }
         else
         {
+            added++;
+            if (added % 100 == 0)
+                OnApplicationQuit(); // save
+
             duplicate = 0;
         }
 
         if (zetaTime.Count < 43200)
-            app.Imag += .001;
+            app.Imag += .0005;
 
         count = zetaTime.Count;
     }
 
     public int duplicate = 0;
+    public int added;
 
     public int count;
 
