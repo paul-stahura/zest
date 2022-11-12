@@ -50,6 +50,18 @@ func z(t float64) float64 {
 	return 2*a + b
 }
 
+func indexToImag(n float64) float64 {
+	return (n*2 + 1) * math.Pi / (math.Log(n+1) - math.Log(n))
+}
+
+func imagToIndex(imag float64) float64 {
+	gamma := 0.57721566490153286060651209008240243104215933593992
+	e := 2.7182818284590452353602874713526624977572
+	gamma_to_the_e := math.Pow(gamma, e) // = .2245172519832320
+	two_root_3_pi := 2 * math.Sqrt(3*math.Pi)
+	return math.Sqrt(6*gamma_to_the_e/imag+6*imag+math.Pi)/two_root_3_pi - 1.0/2.0
+}
+
 func reimannSiegel(imag float64) vector2d.Vector {
 	v := make(vector2d.Vector, 2)
 
@@ -60,4 +72,26 @@ func reimannSiegel(imag float64) vector2d.Vector {
 	v[1] = zi * eimag(0, vvi)
 
 	return v
+}
+
+func spiral(imag float64, numLinks int) []vector2d.Vector {
+	// mi := int(imagToIndex(imag))
+	// zp := reimannSiegel(imag)
+	links := make([]vector2d.Vector, numLinks)
+	// mp := vector2d.Vector{}
+
+	start := vector2d.Vector{0, 0}
+	links[0] = start
+
+	for i := 1; i < numLinks; i++ {
+		ii := float64(i)
+		x := math.Cos(imag*math.Log(ii)) / math.Pow(ii, .5)
+		y := -math.Sin(imag*math.Log(ii)) / math.Pow(ii, .5)
+
+		end := vector2d.Vector{start[0] + x, start[1] + y}
+		links[i] = end
+		start = end
+	}
+
+	return links
 }
