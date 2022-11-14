@@ -35,18 +35,20 @@ public class ZetaRangeEst : ImmediateModeShapeDrawer
 
                 var index = Mathf.FloorToInt((float)Zeta.ImagToIndex(app.Imag));
                 var imag = Zeta.IndexToImag(index);
-                var s = new Zeta.Spiral(imag);
+                var real = app.Real;
+
+                var s = new Zeta.Spiral(new System.Numerics.Complex(real, imag), app.useReimannSiegel.isOn);
                 var pt = BisectingLines.BisectPoint(s);
                 // Draw.Rotation = rot;
-                Draw.Line(pt, s.zetaPoint);
+                Draw.Line(pt, s.zeta.ToVector2());
 
                 imag++;
                 var bits = BitConverter.SingleToInt32Bits((float)imag);
                 imag = BitConverter.Int32BitsToSingle(bits - 1);
-                s = new Zeta.Spiral(imag);
+                s = new Zeta.Spiral(new System.Numerics.Complex(real, imag), app.useReimannSiegel.isOn);
                 pt = BisectingLines.BisectPoint(s);
                 Draw.Rotation = rot;
-                Draw.Line(pt, s.zetaPoint);
+                Draw.Line(pt, s.zeta.ToVector2());
             }
         }
     }

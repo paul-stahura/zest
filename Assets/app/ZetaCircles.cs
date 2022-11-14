@@ -113,7 +113,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
             Draw.Thickness = thickness;
 
             var pt = spiral.S.middlePoint.ToVector2();
-            var mid = (spiral.S.zetaPoint / 2).ToVector2();
+            var mid = (spiral.S.zeta.ToVector() / 2).ToVector2();
 
             ShapesUtils.DrawCross(mid, .1f, 1);
             var radius = mid.magnitude;

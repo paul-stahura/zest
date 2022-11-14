@@ -244,13 +244,15 @@ public class Zeta
         // );
     }
 
-    public static Vector ReimannSiegel(double imag, bool fewerTerms = false)
+    public static Complex ReimannSiegel(Complex s)
     {
         double Ereal(double a, double b) => Math.Pow(Math.E, a) * Math.Cos(b);
         double Eimag(double a, double b) => Math.Pow(Math.E, a) * Math.Sin(b);
 
         double V(double t)
         {
+            var fewerTerms = false;
+
             var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
             return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
         }
@@ -281,7 +283,9 @@ public class Zeta
         double Zx(double i) => Z(i) * Ereal(0, -V(i));
         double Zy(double i) => Z(i) * Eimag(0, -V(i));
 
-        return new Vector(Zx(imag), Zy(imag));
+        var imag = s.Imaginary;
+
+        return new Complex(Zx(imag), Zy(imag));
     }
 
     [MoonSharpUserData]
@@ -290,25 +294,35 @@ public class Zeta
         public int middleIndex;
         public Vector middlePoint;
         public Vector[] links;
-        public double imag;
-        public Vector zetaPoint;
+        public Complex input;
+        public Complex zeta;
 
-        public Spiral(double imag)
+        public Spiral(Complex s, bool useReimannSiegel)
         {
-            var numLinks = (int)(imag / Math.PI + 1);
-            this.imag = imag;
-            this.middleIndex = (int)Zeta.ImagToIndex(imag);
-            this.zetaPoint = Zeta.ReimannSiegel(imag);
+            this.input = s;
+            var numLinks = (int)(input.Imaginary / Math.PI + 1);
+            this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
+
+            if (useReimannSiegel)
+                this.zeta = Zeta.ReimannSiegel(input);
+            else
+            {
+                this.zeta = Zeta.Compute(input);
+            }
+            
             this.links = new Vector[numLinks];
             this.middlePoint = new Vector();
 
             var start = new Vector();
             this.links[0] = start;
+
+            var imag = this.input.Imaginary;
+            var real = this.input.Real;
             
             for (int i = 1; i < this.links.Length; i++)
             {
-                var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, .5);
-                var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, .5);
+                var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
+                var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
                 var end = new Vector(start.x + x, start.y + y);
 
                 if (i == this.middleIndex)

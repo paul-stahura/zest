@@ -22,8 +22,12 @@ public class App : MonoBehaviour
     public FloatInput animMax;
     public ImagSlider animSlider;
 
+    [Header("Real Part Control")]
+    public Slider realPartSlider;
+    public Toggle useReimannSiegel;
 
-    double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
+
+    public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(2);
 
     public ZetaSpiral zetaSpiral;
@@ -58,6 +62,20 @@ public class App : MonoBehaviour
                 indexRealPart.value = realPart;
 
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
+            }
+        }
+    }
+
+    public double _real = 0.5;
+    public double Real
+    {
+        get => _real;
+        set
+        {
+            if (value != _real)
+            {
+                _real = value;
+                realPartSlider.value = (float)_real;
             }
         }
     }
@@ -122,6 +140,20 @@ public class App : MonoBehaviour
             animSlider.Max = value;
         });
         animSlider.Max = animMax.Value; // set the default value
+        #endregion
+
+        #region Real Part Slider
+        realPartSlider.onValueChanged.AddListener(value => {
+            if (useReimannSiegel.isOn && value != .5f)
+                useReimannSiegel.isOn = false;
+                
+            Real = value;
+        });
+
+        useReimannSiegel.onValueChanged.AddListener(value => {
+            if (value == true)
+                realPartSlider.value = .5f;
+        });
         #endregion
     }
 

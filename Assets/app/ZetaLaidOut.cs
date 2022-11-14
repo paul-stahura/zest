@@ -21,7 +21,7 @@ public class ZetaLaidOut : ImmediateModeShapeDrawer
             Draw.LineGeometry = LineGeometry.Volumetric3D;
             Draw.ThicknessSpace = ThicknessSpace.Pixels;
 
-            var z = spiral.zetaPoint;
+            var z = spiral.zeta.ToVector();
             z.Normalize();
 
             // set static parameter to draw in the local space of this object
@@ -31,7 +31,7 @@ public class ZetaLaidOut : ImmediateModeShapeDrawer
                 for (var i = 1; i < 2; i++)
                 {
                     var m = 1 / Math.Sqrt(i);
-                    var pt = spiral.zetaPoint + z * m;
+                    var pt = z + z * m;
 
                     Draw.Color = Color.magenta;
                 }

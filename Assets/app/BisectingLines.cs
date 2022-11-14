@@ -25,18 +25,22 @@ public class BisectingLines : ImmediateModeShapeDrawer
                 Draw.LineGeometry = LineGeometry.Volumetric3D;
                 Draw.ThicknessSpace = ThicknessSpace.Pixels;
 
+                var zetaPt = spiral.S.zeta.ToVector2();
+
                 // set static parameter to draw in the local space of this object
                 Draw.Matrix = transform.localToWorldMatrix;
                 Draw.Thickness = thickness;
                 Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
                 var bipt = BisectPoint(spiral.S);
-                Draw.Line(Vector2.zero, spiral.rsZeta);
+                Draw.Line(Vector2.zero, zetaPt);
                 Draw.Line(Vector2.zero, bipt);
-                Draw.Line(bipt, spiral.rsZeta);
+                Draw.Line(bipt, zetaPt);
+
+
 
                 // Draw dashed bisecting line. Extend it past a little bit
-                var z2 = (spiral.rsZeta / 2);
-                var dir = (z2 - bipt).normalized * .5f; 
+                var z2 = (zetaPt / 2);
+                var dir = (z2 - bipt).normalized * .5f;
                 Draw.Thickness = thickness * 2;
                 Draw.UseDashes = true;
                 Draw.Line(z2 + dir, bipt - dir);
@@ -51,13 +55,15 @@ public class BisectingLines : ImmediateModeShapeDrawer
         var M1 = spiral.links[idx];
         var M2 = spiral.links[idx + 1];
 
+        var pt = spiral.zeta.ToVector();
+
         // Finds the intersecting point between the bisecting line and the middle link
-        var slope1 = -spiral.zetaPoint.x / spiral.zetaPoint.y;
+        var slope1 = -pt.x / pt.y;
         var slope2 = (M2.y - M1.y) / (M2.x - M1.x);
 
-        var x = ((slope2 * M2.x - slope1 * spiral.zetaPoint.x / 2) - (M2.y - spiral.zetaPoint.y / 2)) / (slope2 - slope1);
+        var x = ((slope2 * M2.x - slope1 * pt.x / 2) - (M2.y - pt.y / 2)) / (slope2 - slope1);
 
-        var y = slope1 * (x - spiral.zetaPoint.x / 2) + spiral.zetaPoint.y / 2;
+        var y = slope1 * (x - pt.x / 2) + pt.y / 2;
 
         return new Vector2((float)x, (float)y);
     }

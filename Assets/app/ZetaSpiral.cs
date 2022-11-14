@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using Complex=System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,24 +18,15 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     public Slider transparency;
     public int numLinksReference = 100;
 
-    // Zeta coordinate calculated from Reiman Siegel algo
-    public Vector2 rsZeta;
-    // Zeta coordinate calculated from our old Zzrob algo
-    public Vector2 drZeta;
-
     public Zeta.Spiral S;
 
     public void Start()
     {
-        S = new Zeta.Spiral(app.Imag);
+        S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
     }
 
     public override void DrawShapes(Camera cam)
     {
-
-        rsZeta = Zeta.ReimannSiegel(app.Imag).ToVector2();
-        drZeta = Zeta.Compute(new System.Numerics.Complex(0.5, app.Imag)).ToVector2();
-
         using (Draw.Command(cam))
         {
 
@@ -46,7 +38,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
 
-            S = new Zeta.Spiral(app.Imag);
+            S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
             drawSpiral();
             drawZeta();
         }
@@ -106,16 +98,18 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
+            var pt = S.zeta.ToVector2();
+
             // Draw the Reiman Siegel
             Draw.Color = Color.green;
             Draw.Thickness = 1;
-            Draw.Ring(rsZeta, .08f);
-            ShapesUtils.DrawCross(rsZeta, .1f);
+            Draw.Ring(pt, .08f);
+            ShapesUtils.DrawCross(pt, .1f);
 
             // Draw David's aglo from Zzrob
             Draw.Color = Color.cyan;
-            Draw.Ring(drZeta, .08f);
-            ShapesUtils.DrawCross(drZeta, .1f);
+            Draw.Ring(pt, .08f);
+            ShapesUtils.DrawCross(pt, .1f);
         }
     }
 }
