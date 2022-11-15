@@ -24,13 +24,12 @@ public class BisectingLines : ImmediateModeShapeDrawer
                 // set up static parameters. these are used for all following Draw.Line calls
                 Draw.LineGeometry = LineGeometry.Volumetric3D;
                 Draw.ThicknessSpace = ThicknessSpace.Pixels;
-
-                var zetaPt = spiral.S.zeta.ToVector2();
-
-                // set static parameter to draw in the local space of this object
                 Draw.Matrix = transform.localToWorldMatrix;
                 Draw.Thickness = thickness;
                 Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
+
+                var zetaPt = spiral.S.zeta.ToVector2();
+
                 var bipt = BisectPoint(spiral.S);
                 Draw.Line(Vector2.zero, zetaPt);
                 Draw.Line(Vector2.zero, bipt);
