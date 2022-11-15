@@ -325,7 +325,7 @@ public class Zeta
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
                 var end = new Vector(start.x + x, start.y + y);
 
-                if (i == this.middleIndex)
+                if (i == this.middleIndex + 1)
                 {
                     this.middlePoint = start + (end - start) / 2;
                 }
