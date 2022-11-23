@@ -1,53 +1,47 @@
 using System;
-using MathNet.Numerics.LinearAlgebra;
 using Shapes;
 
 public class Matrix
 {
-    Matrix<double> matrix;
+    double[][] matrix;
 
     public Matrix()
     {
-        matrix = Matrix<double>.Build.DenseIdentity(3, 3);
-    }
-
-    public Matrix(Matrix<double> m)
-    {
-        this.matrix = m;
+        matrix = new double[3][];
     }
 
     public Matrix(double theta, double len)
     {
-        matrix = Matrix<double>.Build.DenseIdentity(3, 3);
+        matrix = new double[3][];
 
-        matrix.SetColumn(0, new double[] { Math.Cos(theta), Math.Sin(theta), 0 });
-        matrix.SetColumn(1, new double[] { -Math.Sin(theta), Math.Cos(theta), 0 });
-        matrix.SetColumn(2, new double[] { len, 0, 1 });
+        matrix[0] = new double[3] { Math.Cos(theta), Math.Sin(theta), 0 };
+        matrix[1] = new double[3] { -Math.Sin(theta), Math.Cos(theta), 0 };
+        matrix[2] = new double[3] { len, 0, 1 };
     }
 
     public void SetThetaLen(double theta, double len)
     {
-        matrix = Matrix<double>.Build.DenseIdentity(3, 3);
+        matrix = new double[3][];
 
-        matrix.SetColumn(0, new double[] { Math.Cos(theta), Math.Sin(theta), 0 });
-        matrix.SetColumn(1, new double[] { -Math.Sin(theta), Math.Cos(theta), 0 });
-        matrix.SetColumn(2, new double[] { len, 0, 1 });
+        matrix[0] = new double[3] { Math.Cos(theta), Math.Sin(theta), 0 };
+        matrix[1] = new double[3] { -Math.Sin(theta), Math.Cos(theta), 0 };
+        matrix[2] = new double[3] { len, 0, 1 };
     }
 
-    public static Matrix operator *(Matrix a, Matrix b) => new Matrix(a.matrix * b.matrix);
+    // public static Matrix operator *(Matrix a, Matrix b) => new Matrix(a.matrix * b.matrix);
 
     // The first index always refers to the row and the second index to the column
     // https://numerics.mathdotnet.com/Matrix.html
     public double this[int row, int col]
     {
-        get { return matrix[row, col]; }
-        set { matrix[row, col] = value; }
+        get { return matrix[row][col]; }
+        set { matrix[row][col] = value; }
     }
 
     public Vector Position
     {
-        get { return new Vector(matrix[0, 2], matrix[1, 2]); }
-        set { matrix.SetColumn(2, new double[] { value.x, value.y, 1 }); }
+        get { return new Vector(matrix[0][2], matrix[1][2]); }
+        set { matrix[2] = new double[3] { value.x, value.y, 1 }; }
     }
 
     public void LineTo(Matrix to)

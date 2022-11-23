@@ -1,24 +1,23 @@
 using System;
 using UnityEngine;
-using MathNet.Numerics.LinearAlgebra;
 
 public class Vector
 {
-    Vector<double> vector;
+    double[] vector;
 
     public Vector()
     {
-        vector = Vector<double>.Build.Dense(2);
+        vector = new double[2];
     }
 
     public Vector(double x, double y)
     {
-        vector = Vector<double>.Build.DenseOfArray(new double[] { x, y });
+        vector = new double[2] { x, y };
     }
 
     public Vector(Vector2 v)
     {
-        vector = Vector<double>.Build.DenseOfArray(new double[] { v.x, v.y });
+        vector = new double[2] { v.x, v.y };
     }
 
     public double x
@@ -45,13 +44,13 @@ public class Vector
     public static Vector operator -(Vector a, Vector b) => new Vector(a.x - b.x, a.y - b.y);
     public static Vector operator *(Vector a, Vector b) => new Vector(a.x * b.x, a.y * b.y);
     public static Vector operator *(Vector a, double m) => new Vector(a.x * m, a.y * m);
-    public static Vector operator *(Vector a, Matrix m)
-    {
-        var mat = new Matrix();
-        mat.Position = a;
+    // public static Vector operator *(Vector a, Matrix m)
+    // {
+    //     var mat = new Matrix();
+    //     mat.Position = a;
 
-        return (mat * m).Position;
-    }
+    //     return (mat * m).Position;
+    // }
 
     public static Vector operator /(Vector a, double d) => new Vector(a.x / d, a.y / d);
 
@@ -62,7 +61,9 @@ public class Vector
 
     public void Normalize()
     {
-        vector.Normalize(1);
+        var distance = Math.Sqrt(x * x + y * y);
+        x = x / distance;
+        y = y / distance;
     }
 
     public double DistanceTo(Vector b)
