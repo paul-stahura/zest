@@ -4,10 +4,10 @@ using UnityEngine.UI;
 
 public class FineTuneSlider : MonoBehaviour
 {
-    public Slider intPart;
     public Slider slider;
     public Button zoomInButton;
     public Button zoomOutButton;
+    public Button resetButton;
     public Text display;
 
     public float factor = 1f;
@@ -23,6 +23,9 @@ public class FineTuneSlider : MonoBehaviour
         zoomInButton.onClick.AddListener(decreaseRange);
         zoomOutButton.onClick.AddListener(increaseRange);
 
+        if (resetButton != null)
+            resetButton.onClick.AddListener( () => reset() );
+
         updateDisplay();
     }
 
@@ -30,6 +33,7 @@ public class FineTuneSlider : MonoBehaviour
     {
         factor = 1;
         setRange(0, 1);
+        slider.value = .5f;
         zoomInButton.interactable = true;
         zoomOutButton.interactable = false;
         updateDisplay();

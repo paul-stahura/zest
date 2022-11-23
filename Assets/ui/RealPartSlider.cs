@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 public class RealPartSlider : MonoBehaviour
 {
     public float tolerance = 0.02f;
+    public bool snap;
     Slider _slider;
 
 #pragma warning disable 649
@@ -39,7 +40,7 @@ public class RealPartSlider : MonoBehaviour
 
     void handleMouseUp(PointerEventData data)
     {
-        if (Mathf.Abs(Value - .5f) < tolerance)
+        if (snap && Mathf.Abs(Value - .5f) < tolerance)
         {
             _slider.value = .5f;
         }
