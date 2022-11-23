@@ -24,7 +24,10 @@ public class FineTuneSlider : MonoBehaviour
         zoomOutButton.onClick.AddListener(increaseRange);
 
         if (resetButton != null)
-            resetButton.onClick.AddListener( () => reset() );
+            resetButton.onClick.AddListener( () => {
+                reset();
+                slider.value = .5f; 
+            });
 
         updateDisplay();
     }
@@ -33,7 +36,6 @@ public class FineTuneSlider : MonoBehaviour
     {
         factor = 1;
         setRange(0, 1);
-        slider.value = .5f;
         zoomInButton.interactable = true;
         zoomOutButton.interactable = false;
         updateDisplay();

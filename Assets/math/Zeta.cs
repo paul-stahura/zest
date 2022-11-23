@@ -4,42 +4,8 @@ using UnityEngine;
 using Complex = System.Numerics.Complex;
 using MoonSharp.Interpreter;
 
-// public static class ComplexExt
-// {
-//     public static double Mod(this Complex a)
-//     {
-//         return Math.Sqrt((a.Real * a.Real) + (a.Imaginary * a.Imaginary));
-//     }
-
-//     public static Complex Neg(this Complex a)
-//     {
-//         return new Complex(-1 * a.Real, -1 * a.Imaginary);
-//     }
-
-//     public static double Arg(this Complex a)
-//     {
-//         if (a.Imaginary != 0.0) return 2.0 * Math.Atan((a.Mod() - a.Real) / a.Imaginary);
-//         if (a.Real > 0.0) return 0.0;
-//         if (a.Real < 0.0) return Math.PI;
-//         return 1.0 / 0.0; //argument is undefined at the origin
-//     }
-
-//     public static Complex Pow(this int a, Complex exp)
-//     {
-//         return ((double)a).Pow(exp);
-//     }
-
-//     // real number raised to complex power
-//     public static Complex Pow(this double a, Complex exp)
-//     {
-//         return new Complex(Math.Pow(a, exp.Real) * Math.Cos((exp.Imaginary) * Math.Log(a)),
-//             Math.Pow(a, exp.Real) * Math.Sin((exp.Imaginary) * Math.Log(a)));
-//     }
-// }
-
 public class Zeta
 {
-
     const int MIN_N = 100;
     const int MAX_N = 1000000;
     const double TWO_PI = (Math.PI * 2);

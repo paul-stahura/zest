@@ -24,6 +24,7 @@ public class App : MonoBehaviour
 
     [Header("Real Part Control")]
     public Slider realPartSlider;
+    public FineTuneSlider realPartFineTune;
     public Toggle useReimannSiegel;
 
 
@@ -152,7 +153,10 @@ public class App : MonoBehaviour
 
         useReimannSiegel.onValueChanged.AddListener(value => {
             if (value == true)
+            {
+                realPartFineTune.reset();
                 realPartSlider.value = .5f;
+            }
         });
         #endregion
     }

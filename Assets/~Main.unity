@@ -1915,6 +1915,7 @@ MonoBehaviour:
   animMax: {fileID: 1747059880}
   animSlider: {fileID: 77397250}
   realPartSlider: {fileID: 1520086063}
+  realPartFineTune: {fileID: 875429035}
   useReimannSiegel: {fileID: 13229941}
   _imag: 206.491213762
   zetaSpiral: {fileID: 1486109718}
