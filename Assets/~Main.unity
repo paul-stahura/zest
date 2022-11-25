@@ -7119,7 +7119,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1474621936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7127,7 +7127,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1474621935}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69ed47496b8584781ae9744c422ed813, type: 3}
   m_Name: 
@@ -7202,6 +7202,7 @@ MonoBehaviour:
   transparency: {fileID: 787073038}
   numLinksReference: 100
   distance: 0
+  zetaPt: {x: 0, y: 0}
 --- !u!4 &1486109719
 Transform:
   m_ObjectHideFlags: 0
