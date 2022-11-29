@@ -10,6 +10,8 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
     public float thickness = 1;
     public Slider transparency;
 
+    public Toggle showJust2;
+
     void Start()
     {
         transparency.onValueChanged.AddListener(value =>
@@ -17,6 +19,10 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             color = new Color(color.r, color.g, color.b, value);
         });
         transparency.value = color.a;
+
+        showJust2.onValueChanged.AddListener(val => {
+
+        });
     }
 
     public override void DrawShapes(Camera cam)
@@ -42,8 +48,14 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
                 
                 var z2 = (pt / 2).ToVector2();
 
+                var start = 1;
+                if (showJust2.isOn)
+                {
+                    start = spiral.middleIndex - 1;
+                }
+
                 // draw a line from each of the first links at the same slope as zeta
-                for (var i = 1; i < spiral.middleIndex; i++)
+                for (var i = start; i <= spiral.middleIndex; i++)
                 {
                     var from = spiral.links[i].ToVector2();
 
