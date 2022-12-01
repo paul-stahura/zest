@@ -27,14 +27,23 @@ public class ZetaCircles : ImmediateModeShapeDrawer
     public List<Vector2> trail = new List<Vector2>();
     List<double> intersectionZeros = new List<double>();
 
+    void OnApplicationQuit()
+    {
+        var name = gameObject.name;
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
+    }
+
     void Start() 
     {
+        var name = gameObject.name;
+
         transparency.onValueChanged.AddListener(value => {
             zetaColor = new Color(zetaColor.r, zetaColor.g, zetaColor.b, value);
             estimateColor = new Color(estimateColor.r, estimateColor.g, estimateColor.b, value); 
             otherCircle = new Color(otherCircle.r, otherCircle.g, otherCircle.b, value);
         });
-        transparency.value = zetaColor.a;
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", zetaColor.a);
     }
 
     public override void DrawShapes(Camera cam)

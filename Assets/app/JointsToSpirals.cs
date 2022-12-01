@@ -12,17 +12,26 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
 
     public Toggle showJust2;
 
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.SetFloat("JointsToSpirals-Transparency", transparency.value);
+        PlayerPrefs.SetInt("JointsToSpirals-ShowJust2", showJust2.isOn ? 1 : 0);
+
+        PlayerPrefs.Save();
+    }
+
     void Start()
     {
         transparency.onValueChanged.AddListener(value =>
         {
             color = new Color(color.r, color.g, color.b, value);
         });
-        transparency.value = color.a;
+        transparency.value = PlayerPrefs.GetFloat("JointsToSpirals-Transparency", color.a);
 
         showJust2.onValueChanged.AddListener(val => {
 
         });
+        showJust2.isOn = PlayerPrefs.GetInt("JointsToSpirals-ShowJust2", 0) != 0 ? true : false;
     }
 
     public override void DrawShapes(Camera cam)
@@ -48,7 +57,7 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
                 
                 var z2 = (pt / 2).ToVector2();
 
-                var start = 1;
+                var start = 0;
                 if (showJust2.isOn)
                 {
                     start = spiral.middleIndex - 1;

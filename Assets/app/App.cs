@@ -81,10 +81,16 @@ public class App : MonoBehaviour
         }
     }
 
+
+    void OnApplicationQuit()
+    {
+    }
+
     public void Start()
     {
-
         Imag = imagDisplay.Value;
+        var lines = Resources.Load("zeta-zeros.txt");
+   
         targetImag = (float)Imag;
 
         // When you type a new imaginary value into the text box, the code 
@@ -102,6 +108,7 @@ public class App : MonoBehaviour
         {
             Imag = Zeta.IndexToImag(value);
         });
+        // middleIndexDisplay.Value = (float)Zeta.ImagToIndex(Imag);
 
         var mgr = indexIntPart.GetComponent<SliderChangeMgr>();
         mgr.onValueChanged.AddListener(value =>

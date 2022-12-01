@@ -20,9 +20,18 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
     public Zeta.Spiral S;
 
+    void OnApplicationQuit()
+    {
+        var name = gameObject.name;
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
+    }
     public void Start()
     {
         S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
+
+        var name = gameObject.name;
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
     }
 
     public override void DrawShapes(Camera cam)

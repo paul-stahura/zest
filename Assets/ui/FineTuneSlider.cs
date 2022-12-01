@@ -8,7 +8,8 @@ public class FineTuneSlider : MonoBehaviour
     public Button zoomInButton;
     public Button zoomOutButton;
     public Button resetButton;
-    public Text display;
+    public Text rangeDisplay;
+    public Text sliderValueDisplay;
 
     public float factor = 1f;
 
@@ -16,10 +17,28 @@ public class FineTuneSlider : MonoBehaviour
     const float MAX_VALUE = .99999f;
     const float MIN_FACTOR = .00001f;
 
+    void OnApplicationQuit()
+    {
+        var name = gameObject.name;
+        // PlayerPrefs.SetFloat(name + "-Factor", factor);
+        // PlayerPrefs.SetString(name + "-RangeDisplay", rangeDisplay.text);
+        // PlayerPrefs.SetString(name + "-SliderValueDisplay", sliderValueDisplay.text);
+        // PlayerPrefs.SetFloat(name + "-MinValue", slider.minValue);
+        // PlayerPrefs.SetFloat(name + "-MaxValue", slider.maxValue);
+        // PlayerPrefs.SetFloat(name + "-Slider", slider.value);
+        // PlayerPrefs.Save();
+    }
+
     void Start()
     {
-        slider.minValue = MIN_VALUE;
-        slider.maxValue = MAX_VALUE;
+        var name = gameObject.name;
+        // factor = PlayerPrefs.GetFloat(name + "-Factor", 1f);
+        // rangeDisplay.text = PlayerPrefs.GetString(name + "-RangeDisplay", rangeDisplay.text);
+        // sliderValueDisplay.text = PlayerPrefs.GetString(name + "-SliderValueDisplay", sliderValueDisplay.text);
+        // slider.minValue = PlayerPrefs.GetFloat(name + "-MinValue", MIN_VALUE);
+        // slider.maxValue = PlayerPrefs.GetFloat(name + "-MaxValue", MAX_VALUE);
+        // slider.value = PlayerPrefs.GetFloat(name + "-Slider", slider.value);
+
         zoomInButton.onClick.AddListener(decreaseRange);
         zoomOutButton.onClick.AddListener(increaseRange);
 
@@ -30,6 +49,8 @@ public class FineTuneSlider : MonoBehaviour
             });
 
         updateDisplay();
+
+        // slider.onValueChanged.Invoke(slider.value);
     }
 
     public void reset()
@@ -43,7 +64,7 @@ public class FineTuneSlider : MonoBehaviour
 
     void updateDisplay()
     {
-        display.text = slider.minValue.ToString("0.#######") + " to " + slider.maxValue.ToString(".#######");
+        rangeDisplay.text = slider.minValue.ToString("0.#######") + " to " + slider.maxValue.ToString(".#######");
         // + ": " + slider.minValue.ToString(".#######") + " - " + slider.maxValue.ToString(".#######");
     }
 

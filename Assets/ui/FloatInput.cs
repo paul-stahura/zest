@@ -30,6 +30,12 @@ public class FloatInput : MonoBehaviour
 
     [SerializeField] public FloatEvent onValueChanged = new FloatEvent();
 
+    void OnApplicationQuit()
+    {
+        // PlayerPrefs.SetFloat(gameObject.name + "-Value", Value);
+        // PlayerPrefs.Save();
+    }
+
     void Awake()
     {
         input = GetComponentInParent<InputField>(); // find the actual control
@@ -40,6 +46,8 @@ public class FloatInput : MonoBehaviour
     {
         input.onValueChanged.AddListener(validate);  // listen for changes
         input.onEndEdit.AddListener(verify);
+
+        // Value = PlayerPrefs.GetFloat(gameObject.name + "-Value", Value);
 
         // onValueChanged.Invoke(this.Value);
     }

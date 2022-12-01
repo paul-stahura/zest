@@ -16,14 +16,20 @@ public class RealPartSlider : MonoBehaviour
     [SerializeField] Text _display;
 #pragma warning restore 649
 
-    public float Max;
     public float Value { get; private set; }
 
     [SerializeField] public FloatEvent onValueChanged = new FloatEvent();
 
+    void OnApplicationQuit()
+    {
+        var name = gameObject.name;
+        // PlayerPrefs.SetFloat(name + "-Value", Value);
+        // PlayerPrefs.Save();
+    }
     void Start()
     {
         _slider = GetComponent<Slider>();
+
         _slider.onValueChanged.AddListener(value =>
         {
             Value = value;
@@ -33,6 +39,7 @@ public class RealPartSlider : MonoBehaviour
             if (_display != null)
                 _display.text = Value.ToString("0.000");
         });
+        // _slider.value = PlayerPrefs.GetFloat(gameObject.name + "-Value", _slider.value);
 
         var m = GetComponent<MouseEventCapture>();
         m.OnMouseUp += handleMouseUp;

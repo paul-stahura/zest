@@ -9,10 +9,15 @@ public class BisectingLines : ImmediateModeShapeDrawer
     [SerializeField] public Color color = Color.cyan;
     public float thickness = 1f;
 
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.SetFloat("BisectingLines-Transparency", transparency.value);
+        PlayerPrefs.Save();
+    }
     void Start()
     {
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
-        transparency.value = color.a;
+        transparency.value = PlayerPrefs.GetFloat("BisectingLines-Transparency", color.a);
     }
 
     public override void DrawShapes(Camera cam)

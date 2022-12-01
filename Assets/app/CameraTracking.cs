@@ -6,6 +6,12 @@ public class CameraTracking : ImmediateModeShapeDrawer
     public Toggle trackMiddle;
     public ZetaSpiral spiral;
 
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.SetInt("CameraTracking", trackMiddle.isOn ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+
     public void Start()
     {
         #region Camera Tracking
@@ -22,6 +28,8 @@ public class CameraTracking : ImmediateModeShapeDrawer
                 Camera.main.transform.rotation = Quaternion.identity;
             }
         });
+        trackMiddle.isOn = PlayerPrefs.GetInt("CameraTracking") != 0 ? true : false;
+
         trackMiddle.onValueChanged.Invoke(trackMiddle.isOn);
         #endregion
 
