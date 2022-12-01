@@ -61,14 +61,16 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
+            Draw.Color = Color.magenta;
+            Draw.Thickness = 4;
+
             var mi = zs.S.middleIndex - 1;
 
-            var first = true;
+            var count = 0;
             var start = new Vector2();
-
-            for (var idx = (double)mi; idx < mi + 2; idx += .05)
+            
+            for (var imag = Zeta.IndexToImag(mi); imag < Zeta.IndexToImag(mi + 1); imag += .05)
             {
-                var imag = app.Imag; //Zeta.IndexToImag(idx);
                 var spiral = new Zeta.Spiral(new System.Numerics.Complex(app.Real, imag), false);
 
 
@@ -78,22 +80,28 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
                 var z2 = (pt / 2).ToVector2(); // zeta over 2
                 var zeta = pt.ToVector2();
 
-                var from = spiral.links[(int)idx].ToVector2();
+                var from = spiral.links[spiral.middleIndex].ToVector2();
                 var norm = (z2).normalized;
                 var dot = Vector2.Dot(from, norm);
                 var to = zeta + from - 2 * dot * norm; // reflect from about a normal (z2)
 
-                // if (first)
+                // if (count == 0)
                 // {
                 //     start = to;
-                //     first = false;
+                //     count++;
                 //     continue;
                 // }
 
                 // Draw.Line(start, to);
                 // start = to;
+                // count++;
+
+                if (count == 3)
+                    break;
+
+                count++;
                 ShapesUtils.DrawCross(to);
-                break;
+                // break;
             }
         }
     }
