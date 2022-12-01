@@ -89,8 +89,6 @@ public class App : MonoBehaviour
     public void Start()
     {
         Imag = imagDisplay.Value;
-        var lines = Resources.Load("zeta-zeros.txt");
-   
         targetImag = (float)Imag;
 
         // When you type a new imaginary value into the text box, the code 

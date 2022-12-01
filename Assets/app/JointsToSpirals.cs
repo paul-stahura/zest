@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
 public class JointsToSpirals : ImmediateModeShapeDrawer
 {
+    public App app;
     public ZetaSpiral zs;
     public Color color = Color.blue;
     public float thickness = 1;
@@ -12,10 +14,15 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
 
     public Toggle showJust2;
 
+    int currentIndex;
+
+    List<Vector2> trail = new List<Vector2>();
+
+
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat("JointsToSpirals-Transparency", transparency.value);
-        PlayerPrefs.SetInt("JointsToSpirals-ShowJust2", showJust2.isOn ? 1 : 0);
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetInt(name + "-ShowJust2", showJust2.isOn ? 1 : 0);
 
         PlayerPrefs.Save();
     }
@@ -26,18 +33,17 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
         {
             color = new Color(color.r, color.g, color.b, value);
         });
-        transparency.value = PlayerPrefs.GetFloat("JointsToSpirals-Transparency", color.a);
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
 
-        showJust2.onValueChanged.AddListener(val => {
+        showJust2.onValueChanged.AddListener(val =>
+        {
 
         });
-        showJust2.isOn = PlayerPrefs.GetInt("JointsToSpirals-ShowJust2", 0) != 0 ? true : false;
+        showJust2.isOn = PlayerPrefs.GetInt(name + "-ShowJust2", 0) != 0 ? true : false;
     }
 
     public override void DrawShapes(Camera cam)
     {
-        var spiral = zs.S;
-
         using (Draw.Command(cam))
         {
             Draw.LineGeometry = LineGeometry.Volumetric3D;
@@ -45,39 +51,89 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
 
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
-            using (Draw.StyleScope)
+
+            drawJointsToSpirals();
+            drawTrail();
+        }
+    }
+
+    void drawTrail()
+    {
+        using (Draw.StyleScope)
+        {
+            var mi = zs.S.middleIndex - 1;
+
+            var first = true;
+            var start = new Vector2();
+
+            for (var idx = (double)mi; idx < mi + 2; idx += .05)
             {
-                Draw.Thickness = thickness;
-                Draw.Color = color;
-                
+                var imag = app.Imag; //Zeta.IndexToImag(idx);
+                var spiral = new Zeta.Spiral(new System.Numerics.Complex(app.Real, imag), false);
+
+
                 var pt = spiral.zeta.ToVector();
                 var slope = -pt.x / pt.y;
-                var z = pt.ToVector2();
-                var bipt = BisectingLines.BisectPoint(zs.S);
-                
-                var z2 = (pt / 2).ToVector2();
 
-                var start = 0;
-                if (showJust2.isOn)
-                {
-                    start = spiral.middleIndex - 1;
-                }
+                var z2 = (pt / 2).ToVector2(); // zeta over 2
+                var zeta = pt.ToVector2();
 
-                // draw a line from each of the first links at the same slope as zeta
-                for (var i = start; i <= spiral.middleIndex; i++)
-                {
-                    var from = spiral.links[i].ToVector2();
+                var from = spiral.links[(int)idx].ToVector2();
+                var norm = (z2).normalized;
+                var dot = Vector2.Dot(from, norm);
+                var to = zeta + from - 2 * dot * norm; // reflect from about a normal (z2)
 
-                    var norm = (z2).normalized;
-                    var dot = Vector2.Dot(from, norm); 
-                    var to = z + from - 2 * dot * norm; // reflect from about a normal (z2)
+                // if (first)
+                // {
+                //     start = to;
+                //     first = false;
+                //     continue;
+                // }
 
-                    Draw.Line(from, to);
-                }
+                // Draw.Line(start, to);
+                // start = to;
+                ShapesUtils.DrawCross(to);
+                break;
             }
         }
     }
 
+    void drawJointsToSpirals()
+    {
+        var spiral = zs.S;
+
+        using (Draw.StyleScope)
+        {
+            Draw.Thickness = thickness;
+            Draw.Color = color;
+
+            var pt = spiral.zeta.ToVector();
+            var slope = -pt.x / pt.y;
+            var z = pt.ToVector2();
+            var bipt = BisectingLines.BisectPoint(zs.S);
+
+            var z2 = (pt / 2).ToVector2();
+
+            var start = 0;
+            if (showJust2.isOn)
+            {
+                start = spiral.middleIndex - 1;
+            }
+
+            // draw a line from each of the first links at the same slope as zeta
+            for (var i = start; i <= spiral.middleIndex; i++)
+            {
+                var from = spiral.links[i].ToVector2();
+
+                var norm = (z2).normalized;
+                var dot = Vector2.Dot(from, norm);
+                var to = z + from - 2 * dot * norm; // reflect from about a normal (z2)
+
+                Draw.Line(from, to);
+            }
+        }
+
+    }
     Vector2 zeta(Zeta.Spiral spiral)
     {
         var idx = spiral.middleIndex;

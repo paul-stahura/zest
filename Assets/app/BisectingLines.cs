@@ -11,13 +11,13 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat("BisectingLines-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
         PlayerPrefs.Save();
     }
     void Start()
     {
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
-        transparency.value = PlayerPrefs.GetFloat("BisectingLines-Transparency", color.a);
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
     }
 
     public override void DrawShapes(Camera cam)

@@ -29,18 +29,16 @@ public class ZetaCircles : ImmediateModeShapeDrawer
 
     void OnApplicationQuit()
     {
-        var name = gameObject.name;
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
         PlayerPrefs.Save();
     }
 
-    void Start() 
+    void Start()
     {
-        var name = gameObject.name;
-
-        transparency.onValueChanged.AddListener(value => {
+        transparency.onValueChanged.AddListener(value =>
+        {
             zetaColor = new Color(zetaColor.r, zetaColor.g, zetaColor.b, value);
-            estimateColor = new Color(estimateColor.r, estimateColor.g, estimateColor.b, value); 
+            estimateColor = new Color(estimateColor.r, estimateColor.g, estimateColor.b, value);
             otherCircle = new Color(otherCircle.r, otherCircle.g, otherCircle.b, value);
         });
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", zetaColor.a);
@@ -103,7 +101,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = estimateColor; 
+            Draw.Color = estimateColor;
             Draw.Thickness = thickness;
             var pt = spiral.S.middlePoint.ToVector2();
             ShapesUtils.DrawCross(pt, .1f, 1);
@@ -118,7 +116,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = otherCircle; 
+            Draw.Color = otherCircle;
             Draw.Thickness = thickness;
 
             var pt = spiral.S.middlePoint.ToVector2();
@@ -200,6 +198,8 @@ public class ZetaCircles : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
+            Draw.Color = new Color(1, 1, 1, transparency.value);
+
             var c = c1.IntersectionPoints(c2, true);
             ShapesUtils.DrawCross(new Vector2((float)c.x, (float)c.y), .1f);
             c = c1.IntersectionPoints(c2, false);
