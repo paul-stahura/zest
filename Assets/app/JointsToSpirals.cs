@@ -125,7 +125,7 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             }
 
             // draw a line from each of the first links at the same slope as zeta
-            for (var i = start; i < spiral.spirals.Length; i++)
+            for (var i = start; i < spiral.middleIndex; i++)
             {
                 var from = spiral.links[i].ToVector2();
                 var to = spiral.spirals[i]; // reflect from about a normal (z2)

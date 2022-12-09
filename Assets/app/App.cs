@@ -33,6 +33,13 @@ public class App : MonoBehaviour
 
     public ZetaSpiral zetaSpiral;
 
+
+    int frameCount = 0;
+    float dt = 0.0f;
+    public float fps = 0.0f;
+    float updateRate = 1.0f;  // 4 updates per sec.
+
+
     // This is where code interested in 'subscribing' to changes to the imag variable is done
     public event Action<double> ImagChanged;
 
@@ -115,7 +122,7 @@ public class App : MonoBehaviour
             // t = 2;
 
             // if (fineTuneReal.factor <= 0.1)
-                Imag = imag;
+            Imag = imag;
             // else
             // {
             //     targetImag = imag;
@@ -131,7 +138,7 @@ public class App : MonoBehaviour
             // t = 2;
 
             // if (fineTuneReal.factor <= 0.1)
-                Imag = imag;
+            Imag = imag;
             // else
             // {
             //     targetImag = imag;
@@ -149,14 +156,16 @@ public class App : MonoBehaviour
         #endregion
 
         #region Real Part Slider
-        realPartSlider.onValueChanged.AddListener(value => {
+        realPartSlider.onValueChanged.AddListener(value =>
+        {
             if (useReimannSiegel.isOn && value != .5f)
                 useReimannSiegel.isOn = false;
-                
+
             Real = value;
         });
 
-        useReimannSiegel.onValueChanged.AddListener(value => {
+        useReimannSiegel.onValueChanged.AddListener(value =>
+        {
             if (value == true)
             {
                 realPartFineTune.reset();
@@ -170,6 +179,15 @@ public class App : MonoBehaviour
 
     void Update()
     {
+        frameCount++;
+        dt += Time.deltaTime;
+        if (dt > 1.0f / updateRate)
+        {
+            fps = frameCount / dt;
+            frameCount = 0;
+            dt -= 1.0f / updateRate;
+        }
+
         // The animSlider is zero when it is in the center.
         if (animSlider.Value != 0)
         {
@@ -220,9 +238,4 @@ public class App : MonoBehaviour
         //     trackBisectFirstFrame = true;
         // }
     }
-
-
-
-
-
 }

@@ -543,7 +543,7 @@ GameObject:
   - component: {fileID: 77057466}
   - component: {fileID: 77057465}
   m_Layer: 5
-  m_Name: RP - range label
+  m_Name: RP - range display label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2164,6 +2164,7 @@ MonoBehaviour:
   useReimannSiegel: {fileID: 13229941}
   _imag: 206.491213762
   zetaSpiral: {fileID: 1486109718}
+  fps: 0
   _real: 0.5
 --- !u!224 &338235378
 RectTransform:
@@ -5276,7 +5277,7 @@ GameObject:
   - component: {fileID: 866151209}
   - component: {fileID: 866151208}
   m_Layer: 5
-  m_Name: Index Real Slider Display
+  m_Name: index real part slider value
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5404,7 +5405,7 @@ MonoBehaviour:
   zoomOutButton: {fileID: 144118697}
   resetButton: {fileID: 1155685402}
   rangeDisplay: {fileID: 77057465}
-  sliderValueDisplay: {fileID: 1022219973}
+  sliderValueDisplay: {fileID: 831115374}
   factor: 1
 --- !u!114 &875429036
 MonoBehaviour:
@@ -5470,7 +5471,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useCullingMasks: 0
-  app: {fileID: 338235377}
+  app: {fileID: 0}
   zs: {fileID: 1486109718}
   color: {r: 0, g: 0.38835526, b: 1, a: 0.5019608}
   thickness: 2
@@ -8608,6 +8609,11 @@ MonoBehaviour:
   app: {fileID: 338235377}
   transparency: {fileID: 787073038}
   numLinksReference: 100
+  lengthCutoff: 0
+  drawLinkSpirals: 0
+  drawSprialMarkers: 0
+  skipEvery: 0
+  spiralCount: 0
   distance: 0
 --- !u!4 &1486109719
 Transform:

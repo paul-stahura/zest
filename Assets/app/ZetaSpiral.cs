@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Complex=System.Numerics.Complex;
+using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +18,15 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     public Slider transparency;
     public int numLinksReference = 100;
 
+    // Dont draw a line until the total length of the vectors is at least this
+    public float lengthCutoff = .01f;
+    // Don't draw the spiral after the middle links.  Only draw a line to each spiral
+    public bool drawLinkSpirals = false;
+    // Draw a cross marking the location of each spiral
+    public bool drawSprialMarkers = false;
+    // Skip drawing this many lines before drawing the next line. They are so short you can't see them anyway
+    public int skipEvery = 2;
+    public int spiralCount; 
     public Zeta.Spiral S;
 
     void OnApplicationQuit()
@@ -49,9 +58,12 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                 S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
             else
                 S.Update(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
-                
+
             drawSpiral();
             drawZeta();
+
+            drawOutline();
+            drawSpiralMarker();
         }
     }
 
@@ -62,7 +74,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     {
         if (S.links[0] == null)
             return;
-            
+
         using (Draw.StyleScope)
         {
             // Since our links are zero-based, the middle index into the array
@@ -70,6 +82,12 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             var middleLink = S.middleIndex + 1;
 
             Draw.Thickness = 1; // 4px wide
+
+            numLinksReference = S.numLinks;
+
+            int skipCount = 0;
+
+            var start = S.links[0].ToVector2();
             for (int i = 1; i < S.numLinks; i++)
             {
                 var color = Color.grey;
@@ -97,13 +115,67 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                     Draw.Thickness = 2;
                 }
 
-                var start = S.links[i - 1].ToVector2();
+
                 var end = S.links[i];
 
+                spiralCount = S.spirals.Length;
+
+                if (i >= middleLink + 2)
+                {
+                    if (drawLinkSpirals)
+                        return;
+
+                    // // Debug.Log($"i:{i} len-sq:{(end - start).sqrMagnitude}");
+                    if (app.fps < 5)
+                        lengthCutoff += float.MinValue;
+                    else if (app.fps > 30)
+                        lengthCutoff -= .00001f;
+
+                    lengthCutoff = Mathf.Clamp(lengthCutoff, 0, .01f);
+                    if ((end - start).sqrMagnitude < lengthCutoff)
+                        continue;
+
+                    if (skipCount > skipEvery)
+                    {
+                        skipCount = 0;
+                    }
+                    else
+                    {
+                        skipCount++;
+                        continue;
+                    }
+                }
+
                 Draw.Line(start, end, color);
+                start = end;
             }
         }
     }
+
+    void drawOutline()
+    {
+        if (!drawLinkSpirals)
+            return;
+
+        var start = S.spirals[0];
+        for (var i = 0; i < S.spirals.Length - 1; i++)
+        {
+            var end = S.spirals[i];
+            Draw.Line(start, end);
+            start = end;
+        }
+    }
+
+    void drawSpiralMarker()
+    {
+        if (!drawSprialMarkers)
+            return;
+
+        for (var i = 0; i < S.middleIndex; i++)
+            ShapesUtils.DrawCross(S.spirals[i]);
+    }
+
+
 
     void drawZeta()
     {
