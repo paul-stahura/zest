@@ -134,7 +134,8 @@ public class App : MonoBehaviour
         mgr = indexRealPart.GetComponent<SliderChangeMgr>();
         mgr.onValueChanged.AddListener(value =>
         {
-            var imag = Zeta.IndexToImag(indexIntPart.value + value);
+            var idx = (int)Zeta.ImagToIndex(_imag);
+            var imag = Zeta.IndexToImag(idx + value);
             // t = 2;
 
             // if (fineTuneReal.factor <= 0.1)
