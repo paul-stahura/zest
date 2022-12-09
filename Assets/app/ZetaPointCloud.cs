@@ -8,7 +8,9 @@ using Shapes;
 
 public class ZetaPointCloud : ImmediateModeShapeDrawer
 {
-    public List<Vector3> mats = new List<Vector3>();
+    public App app;
+    int middleIndex;
+    public Dictionary<int, Vector3[]> mats = new Dictionary<int, Vector3[]>();
 
     public Material material;
     ComputeBuffer buffer;
@@ -19,12 +21,26 @@ public class ZetaPointCloud : ImmediateModeShapeDrawer
         string line;
         using (var sr = File.OpenText("Assets/data/zero-transforms.csv"))
         {
+            var v = new List<Vector3>();
+
+            var lastMi = 1;
+
             while ((line = sr.ReadLine()) != null)
             {
                 var tokens = line.Split(",");
                 var i = int.Parse(tokens[0]);
-                var idx = int.Parse(tokens[1]);
+                var mi = int.Parse(tokens[1]);
                 var pos = new Vector3(float.Parse(tokens[2]), float.Parse(tokens[3]), 0);
+
+                if (mi != lastMi)
+                {
+                    mats.Add(lastMi, v.ToArray());
+                    v.Clear();
+                    lastMi = mi;
+                }
+
+                v.Add(pos);
+
                 // var x = float.Parse(tokens[4]);
                 // var y = float.Parse(tokens[5]);
                 // var z = float.Parse(tokens[6]);
@@ -39,7 +55,6 @@ public class ZetaPointCloud : ImmediateModeShapeDrawer
                 // }
 
                 // var pos = m.GetPosition();
-                mats.Add(pos);
                 // mats.Add((float)0);
                 // mats.Add((float)0);
             }
@@ -47,7 +62,23 @@ public class ZetaPointCloud : ImmediateModeShapeDrawer
         // buffer = new ComputeBuffer(mats.Count, sizeof(float) * 4);
         // buffer.SetData(mats.ToArray());
 
-        MeshUtils.QuadsFromPoints(transform, mats.ToArray(), material, size);
+        middleIndex = (int)Zeta.ImagToIndex(app.Imag);
+        MeshUtils.QuadsFromPoints(transform, mats[middleIndex], material, size);
+    }
+
+    void Update()
+    {
+        var mi = (int)Zeta.ImagToIndex(app.Imag);
+        if (mi == middleIndex)
+            return;
+
+        middleIndex = mi;
+        while (transform.childCount > 0)
+            DestroyImmediate(transform.GetChild(0).gameObject);
+
+        Vector3[] v;
+        if (mats.TryGetValue(middleIndex, out v))
+            MeshUtils.QuadsFromPoints(transform, mats[middleIndex], material, size);
     }
 
     void OnDestroy()
@@ -60,7 +91,7 @@ public class ZetaPointCloud : ImmediateModeShapeDrawer
     // {
     //     if (buffer == null)
     //         return;
-            
+
     //     material.SetPass(0);
     //     Graphics.DrawProceduralNow(MeshTopology.Points, buffer.count);
     // }

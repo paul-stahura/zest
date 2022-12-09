@@ -117,7 +117,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
                 spiralCount = S.spirals.Length;
 
-                if (i >= middleLink + 2)
+                if (i >= middleLink + 2 && S.middleIndex > 150)
                 {
                     if (drawLinkSpirals)
                         return;
