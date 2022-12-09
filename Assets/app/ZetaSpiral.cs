@@ -67,9 +67,6 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
         }
     }
 
-
-    public float distance;
-
     void drawSpiral()
     {
         if (S.links[0] == null)
@@ -127,9 +124,9 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
                     // // Debug.Log($"i:{i} len-sq:{(end - start).sqrMagnitude}");
                     if (app.fps < 5)
-                        lengthCutoff += float.MinValue;
+                        lengthCutoff += .000001f;
                     else if (app.fps > 30)
-                        lengthCutoff -= .00001f;
+                        lengthCutoff -= .000001f;
 
                     lengthCutoff = Mathf.Clamp(lengthCutoff, 0, .01f);
                     if ((end - start).sqrMagnitude < lengthCutoff)
