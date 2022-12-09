@@ -45,7 +45,11 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
 
-            S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
+            if (S == null)
+                S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
+            else
+                S.Update(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
+                
             drawSpiral();
             drawZeta();
         }
@@ -66,7 +70,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             var middleLink = S.middleIndex + 1;
 
             Draw.Thickness = 1; // 4px wide
-            for (int i = 1; i < S.links.Length; i++)
+            for (int i = 1; i < S.numLinks; i++)
             {
                 var color = Color.grey;
                 color.a = transparency.value;
@@ -87,7 +91,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                     color = Color.red;
                     Draw.Thickness = 4;
                 }
-                else if (i == S.links.Length - 1)
+                else if (i == S.numLinks - 1)
                 {
                     color = Color.red;
                     Draw.Thickness = 2;

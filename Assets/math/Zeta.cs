@@ -259,14 +259,35 @@ public class Zeta
     {
         public int middleIndex;
         public Vector middlePoint;
+        public int numLinks;
         public Vector[] links;
         public Complex input;
         public Complex zeta;
+        public Vector2[] spirals;
 
         public Spiral(Complex s, bool useReimannSiegel)
         {
             this.input = s;
-            var numLinks = (int)(input.Imaginary / Math.PI + 1);
+            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
+            this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
+
+            this.links = new Vector[numLinks * 2];
+            for (var i = 0; i < this.links.Length; i++)
+                this.links[i] = new Vector();
+
+            this.middlePoint = new Vector();
+
+            spirals = new Vector2[middleIndex + 1];
+            for (var i = 0; i <= middleIndex; i++)
+                this.spirals[i] = new Vector2();
+
+            Update(s, useReimannSiegel);
+        }
+
+        public void Update(Complex s, bool useReimannSiegel)
+        {
+            this.input = s;
+            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
             this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
 
             if (useReimannSiegel)
@@ -275,30 +296,38 @@ public class Zeta
             {
                 this.zeta = Zeta.Compute(input);
             }
-            
-            this.links = new Vector[numLinks];
-            this.middlePoint = new Vector();
 
-            var start = new Vector();
-            this.links[0] = start;
+            if (this.links.Length < numLinks)
+            {
+                var prevLen = this.links.Length;
+                Array.Resize<Vector>(ref this.links, numLinks * 2);
+                for (var i = prevLen; i < this.links.Length; i++)
+                    this.links[i] = new Vector();
+            }
+
+            var start = this.links[0];
+            start.x = 0; start.y = 0;
 
             var imag = this.input.Imaginary;
             var real = this.input.Real;
-            
-            for (int i = 1; i < this.links.Length; i++)
+
+            for (int i = 1; i < numLinks; i++)
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
-                var end = new Vector(start.x + x, start.y + y);
+                var end = this.links[i];
+                end.x = start.x + x;
+                end.y = start.y + y;
 
                 if (i == this.middleIndex + 1)
                 {
                     this.middlePoint = start + (end - start) / 2;
                 }
 
-                this.links[i] = end;
                 start = end;
             }
+
+            findSpirals();
         }
 
         public Vector PointOnLink(int idx, double dist)
@@ -306,6 +335,35 @@ public class Zeta
             var link = links[idx];
             link.Normalize();
             return link * dist;
+        }
+
+
+        void findSpirals()
+        {
+            var pt = this.zeta.ToVector();
+            var slope = -pt.x / pt.y;
+            var z = pt.ToVector2();
+            var bipt = BisectingLines.BisectPoint(this);
+
+            var z2 = (pt / 2).ToVector2();
+
+            if (this.spirals.Length <= middleIndex)
+            {
+                var prevLen = this.spirals.Length;
+                Array.Resize<Vector2>(ref this.spirals, middleIndex + 1);
+                for (var i = prevLen; i < this.spirals.Length; i++)
+                    this.spirals[i] = new Vector2();
+            }
+
+            // draw a line from each of the first links at the same slope as zeta
+            for (var i = 0; i <= this.middleIndex; i++)
+            {
+                var from = this.links[i].ToVector2();
+
+                var norm = (z2).normalized;
+                var dot = Vector2.Dot(from, norm);
+                this.spirals[i] = z + from - 2 * dot * norm; // reflect from about a normal (z2)
+            }
         }
     }
 }

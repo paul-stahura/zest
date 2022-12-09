@@ -46,6 +46,9 @@ public class ZetaCircles : ImmediateModeShapeDrawer
 
     public override void DrawShapes(Camera cam)
     {
+        if (transparency.value == 0 || spiral.S == null)
+            return;
+
         using (Draw.Command(cam))
         {
             // set up static parameters. these are used for all following Draw.Line calls

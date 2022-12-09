@@ -44,6 +44,9 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
 
     public override void DrawShapes(Camera cam)
     {
+        if (transparency.value == 0 || zs.S == null)
+            return;
+
         using (Draw.Command(cam))
         {
             Draw.LineGeometry = LineGeometry.Volumetric3D;
@@ -53,7 +56,7 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             Draw.Matrix = transform.localToWorldMatrix;
 
             drawJointsToSpirals();
-            drawTrail();
+            // drawTrail();
         }
     }
 
@@ -68,7 +71,7 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
 
             var count = 0;
             var start = new Vector2();
-            
+
             for (var imag = Zeta.IndexToImag(mi); imag < Zeta.IndexToImag(mi + 1); imag += .05)
             {
                 var spiral = new Zeta.Spiral(new System.Numerics.Complex(app.Real, imag), false);
@@ -115,13 +118,6 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             Draw.Thickness = thickness;
             Draw.Color = color;
 
-            var pt = spiral.zeta.ToVector();
-            var slope = -pt.x / pt.y;
-            var z = pt.ToVector2();
-            var bipt = BisectingLines.BisectPoint(zs.S);
-
-            var z2 = (pt / 2).ToVector2();
-
             var start = 0;
             if (showJust2.isOn)
             {
@@ -129,19 +125,16 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             }
 
             // draw a line from each of the first links at the same slope as zeta
-            for (var i = start; i <= spiral.middleIndex; i++)
+            for (var i = start; i < spiral.spirals.Length; i++)
             {
                 var from = spiral.links[i].ToVector2();
-
-                var norm = (z2).normalized;
-                var dot = Vector2.Dot(from, norm);
-                var to = z + from - 2 * dot * norm; // reflect from about a normal (z2)
+                var to = spiral.spirals[i]; // reflect from about a normal (z2)
 
                 Draw.Line(from, to);
             }
         }
-
     }
+
     Vector2 zeta(Zeta.Spiral spiral)
     {
         var idx = spiral.middleIndex;

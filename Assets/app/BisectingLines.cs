@@ -22,6 +22,9 @@ public class BisectingLines : ImmediateModeShapeDrawer
 
     public override void DrawShapes(Camera cam)
     {
+        if (transparency.value == 0 || spiral.S == null)
+            return;
+
         using (Draw.Command(cam))
         {
             using (Draw.StyleScope)
