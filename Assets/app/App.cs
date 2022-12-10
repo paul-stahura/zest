@@ -42,6 +42,7 @@ public class App : MonoBehaviour
 
     // This is where code interested in 'subscribing' to changes to the imag variable is done
     public event Action<double> ImagChanged;
+    public event Action<double> RealChanged;
 
     double targetImag;
 
@@ -84,6 +85,7 @@ public class App : MonoBehaviour
             {
                 _real = value;
                 realPartSlider.value = (float)_real;
+                RealChanged?.Invoke(value);
             }
         }
     }

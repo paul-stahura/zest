@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using Complex = System.Numerics.Complex;
 using MoonSharp.Interpreter;
@@ -13,6 +14,8 @@ public class Zeta
     const double CABS_Z_MAX = 10000.0;
     const int MAX_ITS = 5000;
     const double MAX_GAMMA = 450;
+
+    static List<int> primes;
 
     static double[] b_coeff = {
         1.0000000000000000000000000000000,
@@ -55,7 +58,29 @@ public class Zeta
         0.36899182659531622704E-5
     };
 
-    public static Complex Compute(Complex s)
+
+    public static Complex[] EulersProduct(Complex s, int depth)
+    {
+        if (Zeta.primes == null)
+        {
+            string path = "primes.csv";
+            Zeta.primes = FileUtils.LoadFromFile(path);
+        }
+
+        Complex[] result = new Complex[depth];
+        result[0] = 1 / (1 - Complex.Pow(2, -s));
+
+        for (var i = 1; i < depth; i++)
+        {
+            var p = primes[i];
+            var c = 1 / (1 - Complex.Pow(p, -s));
+            result[i] = result[i - 1] * c;
+        }
+
+        return result;
+    }
+
+    public static Complex EulerMaclauren(Complex s)
     {
         Complex z, g;
         if (s.Real < 0.0)
@@ -146,7 +171,7 @@ public class Zeta
         // if (verb == 1) printf("0: %.16lG + %.16lG\n", s.Real, s.Imaginary);
         while (diff > epsilon && cabs_z < CABS_Z_MAX && i < MAX_ITS)
         {
-            z = Compute(s);
+            z = EulerMaclauren(s);
             diff = Complex.Abs(z.Real - s.Real);
             cabs_z = Complex.Abs(z);
             i++;
@@ -294,7 +319,7 @@ public class Zeta
                 this.zeta = Zeta.ReimannSiegel(input);
             else
             {
-                this.zeta = Zeta.Compute(input);
+                this.zeta = Zeta.EulerMaclauren(input);
             }
 
             if (this.links.Length < numLinks)
