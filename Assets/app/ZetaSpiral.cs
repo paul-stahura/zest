@@ -16,22 +16,30 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
     [SerializeField]
     public Slider transparency;
-    public int numLinksReference = 100;
+
+    [SerializeField]
+    public Slider targetTransparency;
 
     // Dont draw a line until the total length of the vectors is at least this
-    public float lengthCutoff = .01f;
-    // Don't draw the spiral after the middle links.  Only draw a line to each spiral
-    public bool drawLinkSpirals = false;
-    // Draw a cross marking the location of each spiral
-    public bool drawSprialMarkers = false;
+    [SerializeField]
+    public Slider cutoffLength;
+
     // Skip drawing this many lines before drawing the next line. They are so short you can't see them anyway
-    public int skipEvery = 2;
-    public int spiralCount; 
+    [SerializeField]
+    public Slider skipEvery;
+
+    public int numLinksReference = 100;
+
+
+    // Don't draw the spiral after the middle links.  Only draw a line to each spiral
+    public Toggle onlyDrawOutline;
+    // Draw a cross marking the location of each spiral
     public Zeta.Spiral S;
 
     void OnApplicationQuit()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-ZetaTargetTransparency", targetTransparency.value);
         PlayerPrefs.Save();
     }
     public void Start()
@@ -39,6 +47,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
         S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
 
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
+        targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
     }
 
     public override void DrawShapes(Camera cam)
@@ -60,10 +69,9 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                 S.Update(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
 
             drawSpiral();
-            drawZeta();
+            drawZetaTarget();
 
             drawOutline();
-            drawSpiralMarker();
         }
     }
 
@@ -78,7 +86,6 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             // is not the middle link number starting from one.
             var middleLink = S.middleIndex + 1;
 
-            Draw.Thickness = 1; // 4px wide
 
             numLinksReference = S.numLinks;
 
@@ -89,7 +96,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             {
                 var color = Color.grey;
                 color.a = transparency.value;
-                Draw.Thickness = 1;
+                Draw.Thickness = 1 + transparency.value;
 
                 if (i == middleLink - 1)
                 {
@@ -115,24 +122,14 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
                 var end = S.links[i];
 
-                spiralCount = S.spirals.Length;
 
-                if (i >= middleLink + 2 && S.middleIndex > 150)
+                if (i >= middleLink + 2)
                 {
-                    if (drawLinkSpirals)
-                        return;
-
-                    // // Debug.Log($"i:{i} len-sq:{(end - start).sqrMagnitude}");
-                    if (app.fps < 5)
-                        lengthCutoff += .000001f;
-                    else if (app.fps > 30)
-                        lengthCutoff -= .000001f;
-
-                    lengthCutoff = Mathf.Clamp(lengthCutoff, 0, .01f);
-                    if ((end - start).sqrMagnitude < lengthCutoff)
+                    if ((end - start).sqrMagnitude < cutoffLength.value)
                         continue;
 
-                    if (skipCount > skipEvery)
+                    
+                    if (skipCount >= skipEvery.value)
                     {
                         skipCount = 0;
                     }
@@ -141,6 +138,9 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                         skipCount++;
                         continue;
                     }
+
+                    if (onlyDrawOutline.isOn)
+                        return;
                 }
 
                 Draw.Line(start, end, color);
@@ -151,7 +151,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
     void drawOutline()
     {
-        if (!drawLinkSpirals)
+        if (!onlyDrawOutline.isOn)
             return;
 
         var start = S.spirals[0];
@@ -163,31 +163,18 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
         }
     }
 
-    void drawSpiralMarker()
-    {
-        if (!drawSprialMarkers)
-            return;
-
-        for (var i = 0; i < S.middleIndex; i++)
-            ShapesUtils.DrawCross(S.spirals[i]);
-    }
 
 
-
-    void drawZeta()
+    void drawZetaTarget()
     {
         using (Draw.StyleScope)
         {
             var pt = S.zeta.ToVector2();
 
-            // Draw the Reiman Siegel
-            Draw.Color = Color.green;
-            Draw.Thickness = 1;
-            Draw.Ring(pt, .08f);
-            ShapesUtils.DrawCross(pt, .1f);
+            var color = Color.cyan;
+            color.a = targetTransparency.value;
 
-            // Draw David's aglo from Zzrob
-            Draw.Color = Color.cyan;
+            Draw.Color = color;
             Draw.Ring(pt, .08f);
             ShapesUtils.DrawCross(pt, .1f);
         }
