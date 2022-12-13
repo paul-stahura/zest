@@ -177,6 +177,8 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             Draw.Color = color;
             Draw.Ring(pt, .08f);
             ShapesUtils.DrawCross(pt, .1f);
+
+            Draw.Ring(pt, 1f);
         }
     }
 }
