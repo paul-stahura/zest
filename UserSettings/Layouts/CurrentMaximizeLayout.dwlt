@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 611
+  controlID: 91
 --- !u!114 &2
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -142,7 +142,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 200}
   m_MaxSize: {x: 16192, y: 16192}
   vertical: 1
-  controlID: 566
+  controlID: 92
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -167,7 +167,7 @@ MonoBehaviour:
   m_MinSize: {x: 200, y: 100}
   m_MaxSize: {x: 16192, y: 8096}
   vertical: 0
-  controlID: 543
+  controlID: 93
 --- !u!114 &5
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -228,7 +228,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 34fbfffffc4d00007a510000b4510000be510000
+      m_ExpandedIDs: 2cfbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -700,9 +700,9 @@ MonoBehaviour:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 28530000
-    m_LastClickedID: 21288
-    m_ExpandedIDs: 000000000c5300000e5300001053000012530000145300001653000000ca9a3bffffff7f
+    m_SelectedIDs: 3a530000
+    m_LastClickedID: 21306
+    m_ExpandedIDs: 000000001c5300001e5300002053000022530000245300002653000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -730,7 +730,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000000c5300000e5300001053000012530000145300001653000000ca9a3bffffff7f
+    m_ExpandedIDs: 000000001c5300001e53000020530000225300002453000026530000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -755,8 +755,8 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: fe500000
-    m_LastClickedInstanceID: 20734
+    m_SelectedInstanceIDs: 
+    m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000
     m_RenameOverlay:
@@ -877,7 +877,7 @@ MonoBehaviour:
     m_CachedPref: 160
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
-  m_LastInspectedObjectInstanceID: 20734
+  m_LastInspectedObjectInstanceID: -1
   m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
   m_InspectorMode: 0
@@ -1532,13 +1532,13 @@ MonoBehaviour:
       workTreeStatus: 3
     changedFilesText: 3 changed files
     lastCurrentBranchChangedEvent:
-      updatedTimeString: 2022-12-13T12:18:35.801-07:00
+      updatedTimeString: 2022-12-13T16:57:38.985-07:00
       cacheType: 1
     lastStatusEntriesChangedEvent:
-      updatedTimeString: 2022-12-13T12:18:21.752-07:00
+      updatedTimeString: 2022-12-13T16:57:39.156-07:00
       cacheType: 6
     lastLocksChangedEvent:
-      updatedTimeString: 2022-12-13T12:18:24.252-07:00
+      updatedTimeString: 2022-12-13T16:57:41.531-07:00
       cacheType: 7
   historyView:
     currentLogHasUpdate: 0
