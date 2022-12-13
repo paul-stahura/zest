@@ -70,7 +70,6 @@ public class JointsToSpirals : ImmediateModeShapeDrawer
             var mi = zs.S.middleIndex - 1;
 
             var count = 0;
-            var start = new Vector2();
 
             for (var imag = Zeta.IndexToImag(mi); imag < Zeta.IndexToImag(mi + 1); imag += .05)
             {

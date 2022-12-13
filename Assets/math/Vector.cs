@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Vector
 {
-    double[] vector;
+    public double[] vector;
 
     public Vector()
     {

@@ -96,7 +96,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             {
                 var color = Color.grey;
                 color.a = transparency.value;
-                Draw.Thickness = 1 + transparency.value;
+                Draw.Thickness = 1;
 
                 if (i == middleLink - 1)
                 {
@@ -155,7 +155,7 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             return;
 
         var start = S.spirals[0];
-        for (var i = 0; i < S.spirals.Length - 1; i++)
+        for (var i = 0; i < S.middleIndex; i++)
         {
             var end = S.spirals[i];
             Draw.Line(start, end);
