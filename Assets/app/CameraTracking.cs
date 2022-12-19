@@ -3,34 +3,45 @@ using UnityEngine.UI;
 using Shapes;
 public class CameraTracking : ImmediateModeShapeDrawer
 {
+    public Toggle trackOrigin;
     public Toggle trackMiddle;
+    public Toggle trackSpiral;
     public ZetaSpiral spiral;
+    public IntInput spiralNumber;
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetInt("CameraTracking", trackMiddle.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiral", trackSpiral.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiralNum", spiralNumber.Value);
+
         PlayerPrefs.Save();
     }
 
     public void Start()
     {
         #region Camera Tracking
-        trackMiddle.onValueChanged.AddListener(val =>
+        trackOrigin.onValueChanged.AddListener(tracking =>
         {
-            if (!val)
-            {
-                var rot = Quaternion.AngleAxis(0, Vector3.forward);
-                Camera.main.transform.rotation = rot;
-            }
-            else
-            {
-                Camera.main.transform.position = new Vector3(0, 0, -10);
-                Camera.main.transform.rotation = Quaternion.identity;
-            }
+            if (tracking)
+                resetCamera();
         });
-        trackMiddle.isOn = PlayerPrefs.GetInt("CameraTracking") != 0 ? true : false;
+        trackOrigin.isOn = PlayerPrefs.GetInt("TrackOrigin") != 0 ? true : false;
 
-        trackMiddle.onValueChanged.Invoke(trackMiddle.isOn);
+        // trackMiddle.onValueChanged.AddListener(tracking =>
+        // {
+        //     if (!tracking)
+        //         return;
+
+        //     Camera.main.transform.position = new Vector3(0, 0, -10);
+        //     Camera.main.transform.rotation = Quaternion.identity;
+        // });
+        trackMiddle.isOn = PlayerPrefs.GetInt("TrackMiddle") != 0 ? true : false;
+        trackSpiral.isOn = PlayerPrefs.GetInt("TrackSpiral") != 0 ? true : false;
+        spiralNumber.Value = PlayerPrefs.GetInt("TrackSpiralNum");
+
+        // trackMiddle.onValueChanged.Invoke(trackMiddle.isOn);
         #endregion
 
     }
@@ -39,7 +50,21 @@ public class CameraTracking : ImmediateModeShapeDrawer
         using (Draw.Command(cam))
         {
             if (trackMiddle.isOn)
+            { 
                 trackLink(spiral.S.middleIndex);
+                return;
+            }
+
+            if (trackSpiral.isOn)
+            {
+                var s = spiral.S.spirals;
+                var rot = Quaternion.AngleAxis(0, Vector3.forward);
+                if (spiralNumber.Value >= s.Length)
+                    spiralNumber.Value = s.Length - 1;
+
+                var pt = s[spiralNumber.Value];
+                setCamera(pt, rot);
+            }
         }
     }
 
@@ -73,6 +98,12 @@ public class CameraTracking : ImmediateModeShapeDrawer
         Camera.main.transform.position = transform.position + pos;
     }
 
+    void resetCamera()
+    {
+        var rot = Quaternion.AngleAxis(0, Vector3.forward);
+        var pos = new Vector3(0, 0, -10);
+        setCamera(pos, rot);
+    }
 
     // Calculates the rotation required to orient the camera so that the link
     // at the given index appears horizontal when rendered.
