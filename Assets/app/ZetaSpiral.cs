@@ -73,7 +73,7 @@ public partial class ZetaSpiral : MonoBehaviour
 
     void drawSpiral(Zeta.Spiral sprial)
     {
-        if (sprial.links[0] == null)
+        if (sprial.joints[0] == null)
             return;
 
         using (Draw.StyleScope)
@@ -87,7 +87,7 @@ public partial class ZetaSpiral : MonoBehaviour
 
             int skipCount = 0;
 
-            var start = sprial.links[0].ToVector2();
+            var start = sprial.joints[0].ToVector2();
             for (int i = 1; i < sprial.numLinks; i++)
             {
                 var color = Color.grey;
@@ -109,14 +109,14 @@ public partial class ZetaSpiral : MonoBehaviour
                     color = Color.red;
                     Draw.Thickness = 4;
                 }
-                else if (i == sprial.numLinks - 1)
-                {
-                    color = Color.red;
-                    Draw.Thickness = 2;
-                }
+                // else if (i == sprial.numLinks - 1)
+                // {
+                //     color = Color.red;
+                //     Draw.Thickness = 2;
+                // }
 
 
-                var end = sprial.links[i];
+                var end = sprial.joints[i];
 
 
                 if (i >= middleLink + 2)

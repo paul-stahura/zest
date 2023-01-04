@@ -58,8 +58,8 @@ public class BisectingLines : MonoBehaviour
     public static Vector2 BisectPoint(Zeta.Spiral spiral)
     {
         var idx = spiral.middleIndex;
-        var M1 = spiral.links[idx];
-        var M2 = spiral.links[idx + 1];
+        var M1 = spiral.joints[idx];
+        var M2 = spiral.joints[idx + 1];
 
         var pt = spiral.zeta.ToVector();
 

@@ -5,7 +5,8 @@ public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
     public Toggle trackMiddle;
-    public Toggle trackSpiral;
+    public Toggle trackSpiralCenter;
+    public Toggle trackSpiralLink;
     public App app;
     public IntInput spiralNumber;
 
@@ -13,7 +14,9 @@ public class CameraTracking : MonoBehaviour
     {
         PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
-        PlayerPrefs.SetInt("TrackSpiral", trackSpiral.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
+
         PlayerPrefs.SetInt("TrackSpiralNum", spiralNumber.Value);
 
         PlayerPrefs.Save();
@@ -29,19 +32,11 @@ public class CameraTracking : MonoBehaviour
         });
         trackOrigin.isOn = PlayerPrefs.GetInt("TrackOrigin") != 0 ? true : false;
 
-        // trackMiddle.onValueChanged.AddListener(tracking =>
-        // {
-        //     if (!tracking)
-        //         return;
-
-        //     Camera.main.transform.position = new Vector3(0, 0, -10);
-        //     Camera.main.transform.rotation = Quaternion.identity;
-        // });
         trackMiddle.isOn = PlayerPrefs.GetInt("TrackMiddle") != 0 ? true : false;
-        trackSpiral.isOn = PlayerPrefs.GetInt("TrackSpiral") != 0 ? true : false;
+        trackSpiralCenter.isOn = PlayerPrefs.GetInt("TrackSpiralCenter") != 0 ? true : false;
+        trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
         spiralNumber.Value = PlayerPrefs.GetInt("TrackSpiralNum");
 
-        // trackMiddle.onValueChanged.Invoke(trackMiddle.isOn);
         #endregion
 
         app.DrawSprial += drawShapes;
@@ -49,29 +44,62 @@ public class CameraTracking : MonoBehaviour
     }
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        var mi = Zeta.ImagToIndex(app.Imag);
+        var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
+
+        using (Draw.StyleScope)
+        {
+            var j1 = spiral.joints[i];
+            var j2 = spiral.joints[i + 1];
+            Draw.LineGeometry = LineGeometry.Volumetric3D;
+            Draw.ThicknessSpace = ThicknessSpace.Pixels;
+            Draw.Matrix = transform.localToWorldMatrix;
+            Draw.Thickness = 10;
+            Draw.Color = new Color(1, 1f, 0, .2f);
+            Draw.Line(j1, j2);
+
+            // j1 = spiral.joints[i - 2];
+            // j2 = spiral.joints[i - 1];
+            // Draw.Color = Color.green;
+            // Draw.Line(j1, j2);
+
+            // if (i + 2 < spiral.joints.Length - 1)
+            // {
+            //     j1 = spiral.joints[i + 1];
+            //     j2 = spiral.joints[i + 1];
+            //     Draw.Color = Color.red;
+            //     Draw.Line(j1, j2);
+            // }
+        }
+
         if (trackMiddle.isOn)
         {
             trackLink(spiral.middleIndex, spiral);
             return;
         }
 
-        if (trackSpiral.isOn)
-        {
-            var s = spiral.spirals;
-            var rot = Quaternion.AngleAxis(0, Vector3.forward);
-            if (spiralNumber.Value >= s.Length)
-                spiralNumber.Value = s.Length - 1;
+        if (spiralNumber.Value >= spiral.spirals.Length)
+            spiralNumber.Value = spiral.spirals.Length - 1;
 
-            var pt = s[spiralNumber.Value];
+        if (trackSpiralCenter.isOn)
+        {
+            var rot = Quaternion.AngleAxis(0, Vector3.forward);
+
+            var pt = spiral.spirals[spiralNumber.Value];
             setCamera(pt, rot);
+        }
+
+        if (trackSpiralLink.isOn)
+        {
+            trackLink(i, spiral);
         }
     }
 
     void trackLink(int idx, Zeta.Spiral spiral)
     {
         var s = spiral;
-        var start = s.links[idx];
-        var end = s.links[idx + 1];
+        var start = s.joints[idx];
+        var end = s.joints[idx + 1];
 
         var pos = start + (end - start) / 2;
         var rot = RotationOfLink(s, idx);
@@ -108,8 +136,8 @@ public class CameraTracking : MonoBehaviour
     // at the given index appears horizontal when rendered.
     public static Quaternion RotationOfLink(Zeta.Spiral s, int idx)
     {
-        Vector3 start = s.links[idx];
-        Vector3 end = s.links[idx + 1];
+        Vector3 start = s.joints[idx];
+        Vector3 end = s.joints[idx + 1];
 
         var temp = end - start;
         var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;

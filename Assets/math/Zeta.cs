@@ -285,7 +285,7 @@ public class Zeta
         public int middleIndex;
         public Vector middlePoint;
         public int numLinks;
-        public Vector[] links;
+        public Vector[] joints;
         public Complex input;
         public Complex zeta;
         public Vector2[] spirals;
@@ -293,12 +293,12 @@ public class Zeta
         public Spiral(Complex s, bool useReimannSiegel)
         {
             this.input = s;
-            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
             this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
+            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
 
-            this.links = new Vector[numLinks * 2];
-            for (var i = 0; i < this.links.Length; i++)
-                this.links[i] = new Vector();
+            this.joints = new Vector[numLinks * 2];
+            for (var i = 0; i < this.joints.Length; i++)
+                this.joints[i] = new Vector();
 
             this.middlePoint = new Vector();
 
@@ -312,25 +312,26 @@ public class Zeta
         public void Update(Complex s, bool useReimannSiegel)
         {
             this.input = s;
-            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
-            this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
+            var nl = (int)(input.Imaginary / Math.PI + 1);
+
+            var mi = Zeta.ImagToIndex(input.Imaginary);
+            this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2; // need to an extra for proper final link tracking
+            this.middleIndex = (int)mi;
 
             if (useReimannSiegel)
                 this.zeta = Zeta.ReimannSiegel(input);
             else
-            {
                 this.zeta = Zeta.EulerMaclauren(input);
-            }
 
-            if (this.links.Length < numLinks)
+            if (this.joints.Length < numLinks)
             {
-                var prevLen = this.links.Length;
-                Array.Resize<Vector>(ref this.links, numLinks * 2);
-                for (var i = prevLen; i < this.links.Length; i++)
-                    this.links[i] = new Vector();
+                var prevLen = this.joints.Length;
+                Array.Resize<Vector>(ref this.joints, numLinks * 2);
+                for (var i = prevLen; i < this.joints.Length; i++)
+                    this.joints[i] = new Vector();
             }
 
-            var start = this.links[0];
+            var start = this.joints[0];
             start.x = 0; start.y = 0;
 
             var imag = this.input.Imaginary;
@@ -340,7 +341,7 @@ public class Zeta
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
-                var end = this.links[i];
+                var end = this.joints[i];
                 end.x = start.x + x;
                 end.y = start.y + y;
 
@@ -357,11 +358,20 @@ public class Zeta
 
         public Vector PointOnLink(int idx, double dist)
         {
-            var link = links[idx];
+            var link = joints[idx];
             link.Normalize();
             return link * dist;
         }
 
+        
+        public double SpiralMiddleIndex(double index, double spiral)
+        {
+            // given index and joint/spiral num, return index/number of the 
+            // Spiral Middle Link, works for any spiral (last spiral is number j=0)
+
+            // S_{mlink}\left(i,j\right)=\frac{2i\left(i+1\right)}{\left(2j+1\right)}+\frac{1}{3\left(2j+1\right)}
+            return (2*index * (index + 1)) / (2 * spiral + 1) + 1/(3 * (2 * spiral + 1)) - 1;
+        }
 
         void findSpirals()
         {
@@ -383,7 +393,7 @@ public class Zeta
             // draw a line from each of the first links at the same slope as zeta
             for (var i = 0; i <= this.middleIndex; i++)
             {
-                var from = this.links[i].ToVector2();
+                var from = this.joints[i].ToVector2();
 
                 var norm = (z2).normalized;
                 var dot = Vector2.Dot(from, norm);

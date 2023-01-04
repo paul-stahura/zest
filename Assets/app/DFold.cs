@@ -53,8 +53,8 @@ public class DFold : MonoBehaviour
 
         var middleLink = new Vector2[]
         {
-            s.links[mi],
-            s.links[mi + 1]
+            s.joints[mi],
+            s.joints[mi + 1]
         };
 
         var halfPt = middleLink[0] + (middleLink[1] - middleLink[0]) / 2;

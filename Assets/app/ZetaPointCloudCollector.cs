@@ -80,8 +80,8 @@ public class ZetaPointCloudCollector : MonoBehaviour
 
         var s = new Zeta.Spiral(new Complex(.5, i), false);
         var idx = s.middleIndex;
-        var start = s.links[idx];
-        var end = s.links[idx + 1];
+        var start = s.joints[idx];
+        var end = s.joints[idx + 1];
 
         var pos = (start + (end - start) / 2).ToVector2();
         var rot = rotationOfLink(s, idx);
@@ -94,8 +94,8 @@ public class ZetaPointCloudCollector : MonoBehaviour
     // at the given index appears horizontal when rendered.
     Quaternion rotationOfLink(Zeta.Spiral s, int idx)
     {
-        Vector3 start = s.links[idx];
-        Vector3 end = s.links[idx + 1];
+        Vector3 start = s.joints[idx];
+        Vector3 end = s.joints[idx + 1];
 
         var temp = end - start;
         var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;

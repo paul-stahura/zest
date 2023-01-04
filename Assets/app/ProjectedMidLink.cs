@@ -31,8 +31,8 @@ public class ProjectedMidLink : MonoBehaviour
             Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
 
             var mi = spiral.middleIndex;
-            var pt1 = spiral.links[mi].ToVector2();
-            var pt2 = spiral.links[mi + 1].ToVector2();
+            var pt1 = spiral.joints[mi].ToVector2();
+            var pt2 = spiral.joints[mi + 1].ToVector2();
             var z = spiral.zeta.ToVector2();
 
             pt1 = z.normalized * Vector2.Dot(pt1, z) / z.magnitude;
