@@ -2811,6 +2811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e36934f2288d4e0cbd8d9e60f469618, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  useCullingMasks: 0
   imagDisplay: {fileID: 208021766}
   middleIndexDisplay: {fileID: 472822037}
   indexIntPart: {fileID: 1075897543}
@@ -2874,8 +2875,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d3654cf657f24751b7d64e677f851c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
-  spiral: {fileID: 1486109718}
+  app: {fileID: 338235377}
   transparency: {fileID: 1902568538}
   color: {r: 1, g: 0.56976867, b: 0, a: 0.5019608}
   thickness: 1
@@ -2892,7 +2892,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &341932281
 GameObject:
@@ -4260,10 +4260,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bcacc062be9c4f408cb20d7c1fc892d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
   difference: 0
   app: {fileID: 338235377}
-  spiral: {fileID: 1486109718}
   zetaColor: {r: 0, g: 1, b: 0, a: 0.5019608}
   estimateColor: {r: 1, g: 0, b: 0, a: 1}
   otherCircle: {r: 0, g: 1, b: 1, a: 1}
@@ -4285,7 +4283,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &544635774
 GameObject:
@@ -5256,8 +5254,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 812467acff78c4cb0bd7d489413dd8f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
-  zs: {fileID: 1486109718}
+  app: {fileID: 0}
   transparency: {fileID: 0}
 --- !u!4 &698246276
 Transform:
@@ -5272,7 +5269,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &707715550
 GameObject:
@@ -7372,9 +7369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eefb741ea1ab64ea09ff062081e9239d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
-  app: {fileID: 0}
-  zs: {fileID: 1486109718}
+  app: {fileID: 338235377}
   color: {r: 0, g: 0.38835526, b: 1, a: 0.5019608}
   thickness: 2
   transparency: {fileID: 1638181150}
@@ -7392,7 +7387,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &907597822
 GameObject:
@@ -9468,7 +9463,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1168559602
 GameObject:
@@ -11686,66 +11681,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1457354860}
   m_CullTransparentMesh: 0
---- !u!1 &1474621935
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1474621937}
-  - component: {fileID: 1474621936}
-  m_Layer: 0
-  m_Name: Zeta Clock
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &1474621936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1474621935}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69ed47496b8584781ae9744c422ed813, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  useCullingMasks: 0
-  zetaSprial: {fileID: 1486109718}
-  app: {fileID: 338235377}
-  startImag: 0
-  hour: 0
-  minute: 0
-  second: 0
-  hourAngle: 0
-  minAngle: 180
-  secAngle: 0
-  hourDeg: 0
-  minDeg: 0
-  secDeg: 0
-  duplicate: 0
-  added: 0
-  count: 0
---- !u!4 &1474621937
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1474621935}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1486109717
 GameObject:
   m_ObjectHideFlags: 0
@@ -11776,7 +11711,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bfbc999dd334187813f640cbd0b321, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
   app: {fileID: 338235377}
   transparency: {fileID: 787073038}
   targetTransparency: {fileID: 1591194602}
@@ -11811,11 +11745,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44ed4dc670ca24eb7b69adc23899d2c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
   trackOrigin: {fileID: 1287062697}
   trackMiddle: {fileID: 49055167}
   trackSpiral: {fileID: 1344761104}
-  spiral: {fileID: 1486109718}
+  app: {fileID: 338235377}
   spiralNumber: {fileID: 243260367}
 --- !u!1 &1496133463
 GameObject:
@@ -16070,7 +16003,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1918800400
 MonoBehaviour:
@@ -16281,8 +16214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89b39e6a7c1e64b32a5321af9e363461, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  useCullingMasks: 0
-  spiral: {fileID: 1486109718}
+  app: {fileID: 338235377}
   transparency: {fileID: 1902568538}
   color: {r: 1, g: 0.5, b: 0, a: 1}
   thickness: 6
@@ -16299,7 +16231,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1936660015
 GameObject:

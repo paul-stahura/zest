@@ -54,7 +54,7 @@ public class LuaExperiments : MonoBehaviour
             script.Globals["imag"] = app.Imag;
             script.Globals["index"] = Zeta.ImagToIndex(app.Imag);
 
-            var spiral = UserData.Create(app.zetaSpiral.S);
+            var spiral = UserData.Create(app.spiral);
             script.Globals.Set("spiral", spiral);
 
             var draw = UserData.Create(new DrawProxy());
@@ -71,7 +71,7 @@ public class LuaExperiments : MonoBehaviour
             script.Globals["imag"] = app.Imag;
             script.Globals["index"] = Zeta.ImagToIndex(app.Imag);
 
-            DynValue obj = UserData.Create(app.zetaSpiral.S);
+            DynValue obj = UserData.Create(app.spiral);
             script.Globals.Set("spiral", obj);
 
 

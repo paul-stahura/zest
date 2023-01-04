@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class BisectingLines : ImmediateModeShapeDrawer
+public class BisectingLines : MonoBehaviour
 {
-    public ZetaSpiral spiral;
+    public App app;
     public Slider transparency;
     [SerializeField] public Color color = Color.cyan;
     public float thickness = 1f;
@@ -18,40 +18,39 @@ public class BisectingLines : ImmediateModeShapeDrawer
     {
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
+
+        app.DrawSprial += drawShapes;
     }
 
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        if (transparency.value == 0 || spiral.S == null)
+        if (transparency.value == 0)
             return;
 
-        using (Draw.Command(cam))
+        using (Draw.StyleScope)
         {
-            using (Draw.StyleScope)
-            {
-                // set up static parameters. these are used for all following Draw.Line calls
-                Draw.LineGeometry = LineGeometry.Volumetric3D;
-                Draw.ThicknessSpace = ThicknessSpace.Pixels;
-                Draw.Matrix = transform.localToWorldMatrix;
-                Draw.Thickness = thickness;
-                Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
+            // set up static parameters. these are used for all following Draw.Line calls
+            Draw.LineGeometry = LineGeometry.Volumetric3D;
+            Draw.ThicknessSpace = ThicknessSpace.Pixels;
+            Draw.Matrix = transform.localToWorldMatrix;
+            Draw.Thickness = thickness;
+            Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
 
-                var zetaPt = spiral.S.zeta.ToVector2();
+            var zetaPt = spiral.zeta.ToVector2();
 
-                var bipt = BisectPoint(spiral.S);
-                Draw.Line(Vector2.zero, zetaPt);
-                Draw.Line(Vector2.zero, bipt);
-                Draw.Line(bipt, zetaPt);
+            var bipt = BisectPoint(spiral);
+            Draw.Line(Vector2.zero, zetaPt);
+            Draw.Line(Vector2.zero, bipt);
+            Draw.Line(bipt, zetaPt);
 
 
 
-                // Draw dashed bisecting line. Extend it past a little bit
-                var z2 = (zetaPt / 2);
-                var dir = (z2 - bipt).normalized * .5f;
-                Draw.Thickness = thickness * 2;
-                Draw.UseDashes = true;
-                Draw.Line(z2 + dir, bipt - dir);
-            }
+            // Draw dashed bisecting line. Extend it past a little bit
+            var z2 = (zetaPt / 2);
+            var dir = (z2 - bipt).normalized * .5f;
+            Draw.Thickness = thickness * 2;
+            Draw.UseDashes = true;
+            Draw.Line(z2 + dir, bipt - dir);
         }
     }
 

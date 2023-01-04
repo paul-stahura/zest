@@ -4,12 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class ZetaCircles : ImmediateModeShapeDrawer
+public class ZetaCircles : MonoBehaviour
 {
     public float difference;
 
     public App app;
-    public ZetaSpiral spiral;
 
     [Header("Zeta Circles")]
     public Color zetaColor = Color.green;
@@ -42,48 +41,47 @@ public class ZetaCircles : ImmediateModeShapeDrawer
             otherCircle = new Color(otherCircle.r, otherCircle.g, otherCircle.b, value);
         });
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", zetaColor.a);
+
+        app.DrawSprial += drawShapes;
     }
 
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        if (transparency.value == 0 || spiral.S == null)
+        if (transparency.value == 0)
             return;
 
-        using (Draw.Command(cam))
+        // set up static parameters. these are used for all following Draw.Line calls
+        Draw.LineGeometry = LineGeometry.Volumetric3D;
+        Draw.ThicknessSpace = ThicknessSpace.Pixels;
+        Draw.Thickness = 1;
+
+        // set static parameter to draw in the local space of this object
+        Draw.Matrix = transform.localToWorldMatrix;
+
+        var c1 = drawZetaCircle(spiral);
+        var c2 = drawMidpointCircle(spiral);
+        var c3 = drawBisectCircle(spiral);
+
+        drawCircleIntersections(c1, c2);
+
+        if (trailLength.value > 0)
+            drawIntersectionTrail(c1, c2);
+        else if (trail.Count > 0)
+            trail.Clear();
+
+        if (findIntersectionZeros.isOn)
+            findZeros(c1, c2);
+        else if (intersectionZeros.Count > 0)
         {
-            // set up static parameters. these are used for all following Draw.Line calls
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Thickness = 1;
-
-            // set static parameter to draw in the local space of this object
-            Draw.Matrix = transform.localToWorldMatrix;
-
-            var c1 = drawZetaCircle();
-            var c2 = drawMidpointCircle();
-            var c3 = drawBisectCircle();
-
-            drawCircleIntersections(c1, c2);
-
-            if (trailLength.value > 0)
-                drawIntersectionTrail(c1, c2);
-            else if (trail.Count > 0)
-                trail.Clear();
-
-            if (findIntersectionZeros.isOn)
-                findZeros(c1, c2);
-            else if (intersectionZeros.Count > 0)
+            using (StreamWriter file = new("intersection-zeros.csv"))
             {
-                using (StreamWriter file = new("intersection-zeros.csv"))
-                {
-                    foreach (var z in intersectionZeros)
-                        file.WriteLine(z.ToString());
-                };
-            }
+                foreach (var z in intersectionZeros)
+                    file.WriteLine(z.ToString());
+            };
         }
     }
 
-    Circle drawZetaCircle()
+    Circle drawZetaCircle(Zeta.Spiral spiral)
     {
         // get the distance from the bisecting point of the middle link 
         // to the origin
@@ -91,7 +89,7 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         {
             Draw.Color = zetaColor; // Color.green;
             Draw.Thickness = thickness;
-            var bipt = BisectingLines.BisectPoint(spiral.S);
+            var bipt = BisectingLines.BisectPoint(spiral);
             ShapesUtils.DrawCross(bipt, .1f, 1);
             var radius = bipt.magnitude;
             Draw.Ring(bipt, radius, thickness);
@@ -100,13 +98,13 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         }
     }
 
-    Circle drawMidpointCircle()
+    Circle drawMidpointCircle(Zeta.Spiral spiral)
     {
         using (Draw.StyleScope)
         {
             Draw.Color = estimateColor;
             Draw.Thickness = thickness;
-            var pt = spiral.S.middlePoint.ToVector2();
+            var pt = spiral.middlePoint.ToVector2();
             ShapesUtils.DrawCross(pt, .1f, 1);
             var radius = pt.magnitude;
             Draw.Ring(pt, radius, thickness);
@@ -115,15 +113,15 @@ public class ZetaCircles : ImmediateModeShapeDrawer
         }
     }
 
-    Circle drawBisectCircle()
+    Circle drawBisectCircle(Zeta.Spiral spiral)
     {
         using (Draw.StyleScope)
         {
             Draw.Color = otherCircle;
             Draw.Thickness = thickness;
 
-            var pt = spiral.S.middlePoint.ToVector2();
-            var mid = (spiral.S.zeta.ToVector() / 2).ToVector2();
+            var pt = spiral.middlePoint.ToVector2();
+            var mid = (spiral.zeta.ToVector() / 2).ToVector2();
 
             ShapesUtils.DrawCross(mid, .1f, 1);
             var radius = mid.magnitude;

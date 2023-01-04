@@ -3,20 +3,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class ZetaLaidOut : ImmediateModeShapeDrawer
+public class ZetaLaidOut : MonoBehaviour
 {
-    public ZetaSpiral zs;
+    public App app;
     public Slider transparency;
 
     void Start()
     {
+        app.DrawSprial += drawShapes;
     }
 
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        var spiral = zs.S;
-
-        using (Draw.Command(cam))
+        using (Draw.StyleScope)
         {
             Draw.LineGeometry = LineGeometry.Volumetric3D;
             Draw.ThicknessSpace = ThicknessSpace.Pixels;
@@ -26,15 +25,12 @@ public class ZetaLaidOut : ImmediateModeShapeDrawer
 
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
-            using (Draw.StyleScope)
+            for (var i = 1; i < 2; i++)
             {
-                for (var i = 1; i < 2; i++)
-                {
-                    var m = 1 / Math.Sqrt(i);
-                    var pt = z + z * m;
+                var m = 1 / Math.Sqrt(i);
+                var pt = z + z * m;
 
-                    Draw.Color = Color.magenta;
-                }
+                Draw.Color = Color.magenta;
             }
         }
     }

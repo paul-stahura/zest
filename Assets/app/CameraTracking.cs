@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
-public class CameraTracking : ImmediateModeShapeDrawer
+public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
     public Toggle trackMiddle;
     public Toggle trackSpiral;
-    public ZetaSpiral spiral;
+    public App app;
     public IntInput spiralNumber;
 
     void OnApplicationQuit()
@@ -44,33 +44,32 @@ public class CameraTracking : ImmediateModeShapeDrawer
         // trackMiddle.onValueChanged.Invoke(trackMiddle.isOn);
         #endregion
 
+        app.DrawSprial += drawShapes;
+
     }
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        using (Draw.Command(cam))
+        if (trackMiddle.isOn)
         {
-            if (trackMiddle.isOn)
-            { 
-                trackLink(spiral.S.middleIndex);
-                return;
-            }
+            trackLink(spiral.middleIndex, spiral);
+            return;
+        }
 
-            if (trackSpiral.isOn)
-            {
-                var s = spiral.S.spirals;
-                var rot = Quaternion.AngleAxis(0, Vector3.forward);
-                if (spiralNumber.Value >= s.Length)
-                    spiralNumber.Value = s.Length - 1;
+        if (trackSpiral.isOn)
+        {
+            var s = spiral.spirals;
+            var rot = Quaternion.AngleAxis(0, Vector3.forward);
+            if (spiralNumber.Value >= s.Length)
+                spiralNumber.Value = s.Length - 1;
 
-                var pt = s[spiralNumber.Value];
-                setCamera(pt, rot);
-            }
+            var pt = s[spiralNumber.Value];
+            setCamera(pt, rot);
         }
     }
 
-    void trackLink(int idx)
+    void trackLink(int idx, Zeta.Spiral spiral)
     {
-        var s = spiral.S;
+        var s = spiral;
         var start = s.links[idx];
         var end = s.links[idx + 1];
 

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using Shapes;
 
 
-public partial class ZetaSpiral : ImmediateModeShapeDrawer
+public partial class ZetaSpiral : MonoBehaviour
 {
 
     [SerializeField]
@@ -34,7 +34,6 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     // Don't draw the spiral after the middle links.  Only draw a line to each spiral
     public Toggle onlyDrawOutline;
     // Draw a cross marking the location of each spiral
-    public Zeta.Spiral S;
 
     void OnApplicationQuit()
     {
@@ -44,13 +43,13 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
     }
     public void Start()
     {
-        S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
-
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
+
+        app.DrawSprial += drawShapes;
     }
 
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         using (Draw.Command(cam))
         {
@@ -63,36 +62,33 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
 
-            if (S == null)
-                S = new Zeta.Spiral(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
-            else
-                S.Update(new Complex(app.Real, app.Imag), app.useReimannSiegel.isOn);
 
-            drawSpiral();
-            drawZetaTarget();
 
-            drawOutline();
+            drawSpiral(spiral);
+            drawZetaTarget(spiral);
+
+            drawOutline(spiral);
         }
     }
 
-    void drawSpiral()
+    void drawSpiral(Zeta.Spiral sprial)
     {
-        if (S.links[0] == null)
+        if (sprial.links[0] == null)
             return;
 
         using (Draw.StyleScope)
         {
             // Since our links are zero-based, the middle index into the array
             // is not the middle link number starting from one.
-            var middleLink = S.middleIndex + 1;
+            var middleLink = sprial.middleIndex + 1;
 
 
-            numLinksReference = S.numLinks;
+            numLinksReference = sprial.numLinks;
 
             int skipCount = 0;
 
-            var start = S.links[0].ToVector2();
-            for (int i = 1; i < S.numLinks; i++)
+            var start = sprial.links[0].ToVector2();
+            for (int i = 1; i < sprial.numLinks; i++)
             {
                 var color = Color.grey;
                 color.a = transparency.value;
@@ -113,14 +109,14 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
                     color = Color.red;
                     Draw.Thickness = 4;
                 }
-                else if (i == S.numLinks - 1)
+                else if (i == sprial.numLinks - 1)
                 {
                     color = Color.red;
                     Draw.Thickness = 2;
                 }
 
 
-                var end = S.links[i];
+                var end = sprial.links[i];
 
 
                 if (i >= middleLink + 2)
@@ -149,15 +145,15 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
         }
     }
 
-    void drawOutline()
+    void drawOutline(Zeta.Spiral spiral)
     {
         if (!onlyDrawOutline.isOn)
             return;
 
-        var start = S.spirals[0];
-        for (var i = 0; i < S.spirals.Length - 1; i++)
+        var start = spiral.spirals[0];
+        for (var i = 0; i < spiral.spirals.Length - 1; i++)
         {
-            var end = S.spirals[i];
+            var end = spiral.spirals[i];
             Draw.Line(start, end);
             start = end;
         }
@@ -165,11 +161,11 @@ public partial class ZetaSpiral : ImmediateModeShapeDrawer
 
 
 
-    void drawZetaTarget()
+    void drawZetaTarget(Zeta.Spiral sprial)
     {
         using (Draw.StyleScope)
         {
-            var pt = S.zeta.ToVector2();
+            var pt = sprial.zeta.ToVector2();
 
             var color = Color.cyan;
             color.a = targetTransparency.value;

@@ -1,9 +1,11 @@
 using System;
+using Complex = System.Numerics.Complex;
+
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class App : MonoBehaviour
+public class App : ImmediateModeShapeDrawer
 {
 
     [Header("Index Controls")]
@@ -39,10 +41,12 @@ public class App : MonoBehaviour
     public float fps = 0.0f;
     float updateRate = 1.0f;  // 4 updates per sec.
 
+    public Zeta.Spiral spiral;
 
     // This is where code interested in 'subscribing' to changes to the imag variable is done
     public event Action<double> ImagChanged;
     public event Action<double> RealChanged;
+    public event Action<Camera, Zeta.Spiral> DrawSprial;
 
     double targetImag;
 
@@ -70,6 +74,11 @@ public class App : MonoBehaviour
                     fineTuneReal.reset();
                 indexRealPart.value = realPart;
 
+                if (spiral == null)
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                else
+                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
         }
@@ -90,6 +99,17 @@ public class App : MonoBehaviour
         }
     }
 
+    public override void DrawShapes(Camera cam)
+    {
+        using (Draw.Command(cam))
+        {
+            // The animSlider is zero when it is in the center.
+            if (animSlider.Value != 0)
+                Imag += .04f * animSlider.Value;
+
+            DrawSprial?.Invoke(cam, spiral);
+        }
+    }
 
     void OnApplicationQuit()
     {
@@ -189,12 +209,6 @@ public class App : MonoBehaviour
             fps = frameCount / dt;
             frameCount = 0;
             dt -= 1.0f / updateRate;
-        }
-
-        // The animSlider is zero when it is in the center.
-        if (animSlider.Value != 0)
-        {
-            Imag += .04f * animSlider.Value;
         }
 
         if (t <= 1.1f) //(_imag != targetImag)
