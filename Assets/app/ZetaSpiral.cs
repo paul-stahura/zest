@@ -90,7 +90,7 @@ public partial class ZetaSpiral : MonoBehaviour
             var start = sprial.joints[0].ToVector2();
             for (int i = 1; i < sprial.numLinks; i++)
             {
-                var color = Color.grey;
+                var color = Color.white;
                 color.a = transparency.value;
                 Draw.Thickness = 1 + transparency.value;
 
