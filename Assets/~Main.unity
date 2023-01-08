@@ -7458,6 +7458,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   app: {fileID: 338235377}
   color: {r: 0, g: 0.38835526, b: 1, a: 0.5019608}
+  Material: {fileID: 2100000, guid: 3896e3823d0c04b23bd2da32e6bf8285, type: 2}
   thickness: 2
   transparency: {fileID: 1638181150}
   showJust2: {fileID: 102129671}
@@ -7468,7 +7469,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 906453630}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

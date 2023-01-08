@@ -1,6 +1,6 @@
 ﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "X-Reticle/PointShader"
+Shader "X-Zest/PointShader"
 {
 	Properties
 	{
@@ -17,7 +17,9 @@ Shader "X-Reticle/PointShader"
 			#pragma vertex vert
 			#pragma fragment frag
 
-			float4 Color;
+            StructuredBuffer<float2> points;
+			uniform float4 _Color;
+
 
 			struct VertexInput
 			{
@@ -31,10 +33,10 @@ Shader "X-Reticle/PointShader"
 				float size : PSIZE;
 			};
 
-			VertexOutput vert(VertexInput v) {
+			VertexOutput vert(uint id : SV_VertexID) {
 				VertexOutput o;
-				o.position = UnityObjectToClipPos(v.position);
-				o.color = Color;
+				o.position = UnityObjectToClipPos(float4(points[id], 0.0f, 1.0f));
+				o.color = _Color;
 				o.size = 1;
 				return o;
 			}

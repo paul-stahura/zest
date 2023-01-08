@@ -90,8 +90,4 @@ public class Vector
     {
         return new Vector(Math.Abs(x), Math.Abs(y));
     }
-
-
-   
-
 }
