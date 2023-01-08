@@ -44,34 +44,6 @@ public class CameraTracking : MonoBehaviour
     }
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        var mi = Zeta.ImagToIndex(app.Imag);
-        var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
-
-        using (Draw.StyleScope)
-        {
-            var j1 = spiral.joints[i];
-            var j2 = spiral.joints[i + 1];
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Matrix = transform.localToWorldMatrix;
-            Draw.Thickness = 10;
-            Draw.Color = new Color(1, 1f, 0, .2f);
-            Draw.Line(j1, j2);
-
-            // j1 = spiral.joints[i - 2];
-            // j2 = spiral.joints[i - 1];
-            // Draw.Color = Color.green;
-            // Draw.Line(j1, j2);
-
-            // if (i + 2 < spiral.joints.Length - 1)
-            // {
-            //     j1 = spiral.joints[i + 1];
-            //     j2 = spiral.joints[i + 1];
-            //     Draw.Color = Color.red;
-            //     Draw.Line(j1, j2);
-            // }
-        }
-
         if (trackMiddle.isOn)
         {
             trackLink(spiral.middleIndex, spiral);
@@ -91,6 +63,9 @@ public class CameraTracking : MonoBehaviour
 
         if (trackSpiralLink.isOn)
         {
+            var mi = Zeta.ImagToIndex(app.Imag);
+            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
+
             trackLink(i, spiral);
         }
     }
