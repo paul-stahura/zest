@@ -11,8 +11,6 @@ public class JointsToSpirals : MonoBehaviour
     public Color dotColor = Color.magenta;
     public Color trailColor = Color.blue;
 
-    public Material DotMaterial;
-    public Material TrailMaterial;
 
     public float thickness = 1;
 
@@ -38,30 +36,9 @@ public class JointsToSpirals : MonoBehaviour
 
     void Start()
     {
-        transparency.onValueChanged.AddListener(value =>
-        {
-            color.a = value;
-        });
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
-
-        dotTransparency.onValueChanged.AddListener(value =>
-        {
-            dotColor.a = value;
-            DotMaterial.SetColor("_Color", dotColor);
-        });
         dotTransparency.value = PlayerPrefs.GetFloat(name + "-DotTransparency", 1f);
-
-        trailTransparency.onValueChanged.AddListener(value =>
-        {
-            trailColor.a = value;
-            TrailMaterial.SetColor("_Color", trailColor);
-        });
         trailTransparency.value = PlayerPrefs.GetFloat(name + "-TrailTransparency", 1f);
-
-        showJust2.onValueChanged.AddListener(val =>
-        {
-
-        });
         showJust2.isOn = PlayerPrefs.GetInt(name + "-ShowJust2", 0) != 0 ? true : false;
 
         app.DrawSprial += drawShapes;
@@ -76,13 +53,19 @@ public class JointsToSpirals : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            drawTrail(s);
+            drawCenterPoints(cam, s);
+        }
+
+        using (Draw.StyleScope)
+        {
+            // drawTrail(s);
         }
     }
 
     void drawJointsToSpirals(Zeta.Spiral spiral)
     {
         Draw.Thickness = thickness;
+        color.a = transparency.value;
         Draw.Color = color;
 
         var start = 0;
@@ -99,19 +82,28 @@ public class JointsToSpirals : MonoBehaviour
 
             Draw.Line(from, to);
         }
-
-        setShaderPoints(spiral);
     }
 
-    void setShaderPoints(Zeta.Spiral spiral)
+    void drawCenterPoints(Camera cam, Zeta.Spiral spiral)
     {
-        var p = new Vector3[spiral.middleIndex];
+        var SCALAR = 200f;
+        // var p = new Vector3[spiral.middleIndex];
+        // for (var i = 0; i < spiral.middleIndex; i++)
+        // {
+        //     var s = spiral.spirals[i];
+        //     p[i] = new Vector3(s.x, s.y, 0);
+        // }
+        // MeshUtils.ChildrenFromPoints(transform, "Points", p, Material, Vector3.one);
+        dotColor.a = dotTransparency.value;
+        Draw.Color = dotColor;
+
+        var size = cam.orthographicSize / SCALAR;
+        var rc = new Rect(0, 0, size, size);
         for (var i = 0; i < spiral.middleIndex; i++)
         {
-            var s = spiral.spirals[i];
-            p[i] = new Vector3(s.x, s.y, 0);
+            var from = spiral.spirals[i];
+            Draw.Rectangle(from, rc);
         }
-        MeshUtils.ChildrenFromPoints(transform, "Points", p, DotMaterial, Vector3.one);
     }
 
     void drawTrail(Zeta.Spiral spiral)
@@ -173,7 +165,6 @@ public class JointsToSpirals : MonoBehaviour
 
         // trailParent.transform.rotation = rot;
 
-        MeshUtils.ChildrenFromPoints(trailParent.transform, "Trail", trail.ToArray(),TrailMaterial,Vector3.one);
     }
 
     public GameObject trailParent;
