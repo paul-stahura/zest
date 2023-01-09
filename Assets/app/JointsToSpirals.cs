@@ -9,23 +9,28 @@ public class JointsToSpirals : MonoBehaviour
     public App app;
     public Color color = Color.blue;
     public Color dotColor = Color.magenta;
-    public Material Material;
+    public Color trailColor = Color.blue;
+
+    public Material DotMaterial;
+    public Material TrailMaterial;
 
     public float thickness = 1;
+
     public Slider transparency;
-    public Slider txCenterDot;
+    public Slider dotTransparency;
+    public Slider trailTransparency;
 
     public Toggle showJust2;
 
-    int currentIndex;
 
-    List<Vector2> trail = new List<Vector2>();
+    List<Vector3> trail = new List<Vector3>();
 
 
     void OnApplicationQuit()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.SetFloat(name + "-TxCenterdot", txCenterDot.value);
+        PlayerPrefs.SetFloat(name + "-DotTransparency", dotTransparency.value);
+        PlayerPrefs.SetFloat(name + "-TxCenterTrail", trailTransparency.value);
         PlayerPrefs.SetInt(name + "-ShowJust2", showJust2.isOn ? 1 : 0);
 
         PlayerPrefs.Save();
@@ -39,12 +44,19 @@ public class JointsToSpirals : MonoBehaviour
         });
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
 
-        txCenterDot.onValueChanged.AddListener(value =>
+        dotTransparency.onValueChanged.AddListener(value =>
         {
             dotColor.a = value;
-            Material.SetColor("_Color", dotColor);
+            DotMaterial.SetColor("_Color", dotColor);
         });
-        txCenterDot.value = PlayerPrefs.GetFloat(name + "-TxCenterdot", 1f);
+        dotTransparency.value = PlayerPrefs.GetFloat(name + "-DotTransparency", 1f);
+
+        trailTransparency.onValueChanged.AddListener(value =>
+        {
+            trailColor.a = value;
+            TrailMaterial.SetColor("_Color", trailColor);
+        });
+        trailTransparency.value = PlayerPrefs.GetFloat(name + "-TrailTransparency", 1f);
 
         showJust2.onValueChanged.AddListener(val =>
         {
@@ -99,13 +111,72 @@ public class JointsToSpirals : MonoBehaviour
             var s = spiral.spirals[i];
             p[i] = new Vector3(s.x, s.y, 0);
         }
-        MeshUtils.ChildrenFromPoints(transform, "Points", p, Material, Vector3.one);
+        MeshUtils.ChildrenFromPoints(transform, "Points", p, DotMaterial, Vector3.one);
     }
 
     void drawTrail(Zeta.Spiral spiral)
     {
+        if (trailTransparency.value == 0)
+        {
+            return;
+        }
 
+        // for (var i = 0; i < spiral.spirals.Length; i++)
+        // {
+        //     var s = spiral.spirals[i];
+        //     if (trail.Contains(s))
+        //         continue;
+
+        //     trail.Add(new Vector3(s.x, s.y, 0));
+        // }
+
+        var spiralNumber = 2;
+
+        var mi = Zeta.ImagToIndex(app.Imag);
+        var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber);
+
+        // Highlight the spiral middle link
+        var j1 = spiral.joints[i];
+        var j2 = spiral.joints[i + 1];
+
+        var s = spiral.spirals[spiralNumber];
+        var pt = new Vector(s.x, s.y);
+
+        trailParent.transform.localPosition = j1.ToVector3();   
+
+
+        // Offset vector from the middle link first point
+        var p = (pt - j1).ToVector3();
+
+//
+// TODO:
+// You need the angle of the line between these two lines:
+// j1 and p
+// j1 and j2
+// then apply that rotation to trail transform to move all the previous mesh points
+// then add the latest point
+// 
+        var temp = (j2 - j1).ToVector3();
+        var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;
+
+        // var rot = Quaternion.AngleAxis(180 - angle, Vector3.forward);
+
+        // https://forum.unity.com/threads/rotate-vector-by-quaternion.21687/
+        // p = Quaternion.Inverse(rot) * p;
+        // if (trail.Count == 0)
+
+        if (!trail.Contains(p))
+            trail.Add(p);
+
+        while (trail.Count > 65535)
+            trail.RemoveAt(0);
+
+        // trailParent.transform.rotation = rot;
+
+        MeshUtils.ChildrenFromPoints(trailParent.transform, "Trail", trail.ToArray(),TrailMaterial,Vector3.one);
     }
+
+    public GameObject trailParent;
 
     // void calculateTrail(Zeta.Spiral spiral)
     // {

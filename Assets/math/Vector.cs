@@ -59,6 +59,11 @@ public class Vector
         return new Vector2((float)x, (float)y);
     }
 
+    public Vector3 ToVector3(float z=0)
+    {
+        return new Vector3((float)x, (float)y, z);
+    }
+
     public void Normalize()
     {
         var distance = Math.Sqrt(x * x + y * y);

@@ -47,10 +47,7 @@ public class SpiralMiddleLink : MonoBehaviour
             // Highlight the spiral middle link
             var j1 = spiral.joints[i];
             var j2 = spiral.joints[i + 1];
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Matrix = transform.localToWorldMatrix;
-            Draw.Thickness = 10 * .5f / cam.orthographicSize;
+            Draw.Thickness = 5 / cam.orthographicSize;
             Draw.Color = mlColor;
             Draw.Line(j1, j2);
 
