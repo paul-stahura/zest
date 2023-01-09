@@ -44,25 +44,22 @@ public class SpiralMiddleLink : MonoBehaviour
             var mi = Zeta.ImagToIndex(app.Imag);
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
 
-            using (Draw.StyleScope)
-            {
-                // Highlight the spiral middle link
-                var j1 = spiral.joints[i];
-                var j2 = spiral.joints[i + 1];
-                Draw.LineGeometry = LineGeometry.Volumetric3D;
-                Draw.ThicknessSpace = ThicknessSpace.Pixels;
-                Draw.Matrix = transform.localToWorldMatrix;
-                Draw.Thickness = 10 * .5f / cam.orthographicSize;
-                Draw.Color = mlColor;
-                Draw.Line(j1, j2);
+            // Highlight the spiral middle link
+            var j1 = spiral.joints[i];
+            var j2 = spiral.joints[i + 1];
+            Draw.LineGeometry = LineGeometry.Volumetric3D;
+            Draw.ThicknessSpace = ThicknessSpace.Pixels;
+            Draw.Matrix = transform.localToWorldMatrix;
+            Draw.Thickness = 10 * .5f / cam.orthographicSize;
+            Draw.Color = mlColor;
+            Draw.Line(j1, j2);
 
-                // circle with center at the right most side of the link 
-                // (the side closer to zeta) with radius = 1/2 link length
-                Draw.Thickness = 1;
-                Draw.Color = mlCircle;
-                var radius = (float) (j2 - j1).Length / 2;
-                Draw.Ring(j2, radius, 1f); 
-            }
+            // circle with center at the right most side of the link 
+            // (the side closer to zeta) with radius = 1/2 link length
+            Draw.Thickness = 1;
+            Draw.Color = mlCircle;
+            var radius = (float)(j2 - j1).Length / 2;
+            Draw.Ring(j2, radius, 1f);
         }
     }
 }

@@ -103,6 +103,12 @@ public class App : ImmediateModeShapeDrawer
     {
         using (Draw.Command(cam))
         {
+            Draw.LineGeometry = LineGeometry.Volumetric3D;
+            Draw.ThicknessSpace = ThicknessSpace.Pixels;
+
+            // set static parameter to draw in the local space of this object
+            Draw.Matrix = transform.localToWorldMatrix;
+            
             // The animSlider is zero when it is in the center.
             if (animSlider.Value != 0)
                 Imag += .04f * animSlider.Value;

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using Shapes;
 
 
-public partial class EulersProduct : ImmediateModeShapeDrawer
+public partial class EulersProduct : MonoBehaviour
 {
 
     [SerializeField]
@@ -49,20 +49,14 @@ public partial class EulersProduct : ImmediateModeShapeDrawer
             iterLabel.text = $"Iterations: {v}";
         });
         iterations.onValueChanged.Invoke(iterations.value);
+
+        app.DrawSprial += drawShapes;
     }
 
-    public override void DrawShapes(Camera cam)
+    void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        using (Draw.Command(cam))
+        using (Draw.StyleScope)
         {
-
-            // set up static parameters. these are used for all following Draw.Line calls
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-
-            // set static parameter to draw in the local space of this object
-            Draw.Matrix = transform.localToWorldMatrix;
-
             drawSpiral();
         }
     }
@@ -75,24 +69,21 @@ public partial class EulersProduct : ImmediateModeShapeDrawer
         if (transparency.value == 0)
             return;
 
-        using (Draw.StyleScope)
+        Draw.Thickness = 1;
+        var color = Color.yellow;
+        color.a = transparency.value;
+        Draw.Color = color;
+
+        var start = points[0].ToVector2();
+        for (var i = 1; i < points.Length; i++)
         {
-            Draw.Thickness = 1;
-            var color = Color.yellow;
-            color.a = transparency.value;
-            Draw.Color = color;
-
-            var start = points[0].ToVector2();
-            for (var i = 1; i < points.Length; i++)
-            {
-                var end = points[i].ToVector2();
-                Draw.Line(start, end);
-                start = end;
-            }
-
-            Draw.Color = Color.yellow;
-            Draw.Ring(start, .04f);
-            ShapesUtils.DrawCross(start);
+            var end = points[i].ToVector2();
+            Draw.Line(start, end);
+            start = end;
         }
+
+        Draw.Color = Color.yellow;
+        Draw.Ring(start, .04f);
+        ShapesUtils.DrawCross(start);
     }
 }

@@ -16,12 +16,7 @@ public class ZetaRangeEst : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            // set up static parameters. these are used for all following Draw.Line calls
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
             Draw.Thickness = 1f;
-            // set static parameter to draw in the local space of this object
-            Draw.Matrix = transform.localToWorldMatrix;
 
             Draw.Color = Color.yellow;
 

@@ -50,34 +50,32 @@ public class ZetaCircles : MonoBehaviour
         if (transparency.value == 0)
             return;
 
-        // set up static parameters. these are used for all following Draw.Line calls
-        Draw.LineGeometry = LineGeometry.Volumetric3D;
-        Draw.ThicknessSpace = ThicknessSpace.Pixels;
-        Draw.Thickness = 1;
-
-        // set static parameter to draw in the local space of this object
-        Draw.Matrix = transform.localToWorldMatrix;
-
-        var c1 = drawZetaCircle(spiral);
-        var c2 = drawMidpointCircle(spiral);
-        var c3 = drawBisectCircle(spiral);
-
-        drawCircleIntersections(c1, c2);
-
-        if (trailLength.value > 0)
-            drawIntersectionTrail(c1, c2);
-        else if (trail.Count > 0)
-            trail.Clear();
-
-        if (findIntersectionZeros.isOn)
-            findZeros(c1, c2);
-        else if (intersectionZeros.Count > 0)
+        using (Draw.StyleScope)
         {
-            using (StreamWriter file = new("intersection-zeros.csv"))
+
+            Draw.Thickness = 1;
+
+            var c1 = drawZetaCircle(spiral);
+            var c2 = drawMidpointCircle(spiral);
+            var c3 = drawBisectCircle(spiral);
+
+            drawCircleIntersections(c1, c2);
+
+            if (trailLength.value > 0)
+                drawIntersectionTrail(c1, c2);
+            else if (trail.Count > 0)
+                trail.Clear();
+
+            if (findIntersectionZeros.isOn)
+                findZeros(c1, c2);
+            else if (intersectionZeros.Count > 0)
             {
-                foreach (var z in intersectionZeros)
-                    file.WriteLine(z.ToString());
-            };
+                using (StreamWriter file = new("intersection-zeros.csv"))
+                {
+                    foreach (var z in intersectionZeros)
+                        file.WriteLine(z.ToString());
+                };
+            }
         }
     }
 

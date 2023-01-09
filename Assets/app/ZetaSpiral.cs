@@ -51,22 +51,18 @@ public partial class ZetaSpiral : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        using (Draw.Command(cam))
+        using (Draw.StyleScope)
         {
-
-            // set up static parameters. these are used for all following Draw.Line calls
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Thickness = 1;
-
-            // set static parameter to draw in the local space of this object
-            Draw.Matrix = transform.localToWorldMatrix;
-
-
-
             drawSpiral(spiral);
-            drawZetaTarget(spiral);
+        }
 
+        using (Draw.StyleScope)
+        {
+            drawZetaTarget(spiral);
+        }
+
+        using (Draw.StyleScope)
+        {
             drawOutline(spiral);
         }
     }
@@ -76,73 +72,72 @@ public partial class ZetaSpiral : MonoBehaviour
         if (sprial.joints[0] == null)
             return;
 
-        using (Draw.StyleScope)
+        Draw.Thickness = 1;
+        // Since our links are zero-based, the middle index into the array
+        // is not the middle link number starting from one.
+        var middleLink = sprial.middleIndex + 1;
+
+
+        numLinksReference = sprial.numLinks;
+
+        int skipCount = 0;
+
+        var start = sprial.joints[0].ToVector2();
+        for (int i = 1; i < sprial.numLinks; i++)
         {
-            // Since our links are zero-based, the middle index into the array
-            // is not the middle link number starting from one.
-            var middleLink = sprial.middleIndex + 1;
+            var color = Color.white;
+            color.a = transparency.value;
+            Draw.Thickness = 1 + transparency.value;
 
-
-            numLinksReference = sprial.numLinks;
-
-            int skipCount = 0;
-
-            var start = sprial.joints[0].ToVector2();
-            for (int i = 1; i < sprial.numLinks; i++)
+            if (i == middleLink - 1)
             {
-                var color = Color.white;
-                color.a = transparency.value;
-                Draw.Thickness = 1 + transparency.value;
-
-                if (i == middleLink - 1)
-                {
-                    color = Color.green;
-                    Draw.Thickness = 4;
-                }
-                else if (i == middleLink)
-                {
-                    color = new Color(1, .5f, 0, 1f); // orange
-                    Draw.Thickness = 4;
-                }
-                else if (i == middleLink + 1)
-                {
-                    color = Color.red;
-                    Draw.Thickness = 4;
-                }
-                // else if (i == sprial.numLinks - 1)
-                // {
-                //     color = Color.red;
-                //     Draw.Thickness = 2;
-                // }
-
-
-                var end = sprial.joints[i];
-
-
-                if (i >= middleLink + 2)
-                {
-                    if ((end - start).sqrMagnitude < cutoffLength.value)
-                        continue;
-
-                    
-                    if (skipCount >= skipEvery.value)
-                    {
-                        skipCount = 0;
-                    }
-                    else
-                    {
-                        skipCount++;
-                        continue;
-                    }
-
-                    if (onlyDrawOutline.isOn)
-                        return;
-                }
-
-                Draw.Line(start, end, color);
-                start = end;
+                color = Color.green;
+                Draw.Thickness = 4;
             }
+            else if (i == middleLink)
+            {
+                color = new Color(1, .5f, 0, 1f); // orange
+                Draw.Thickness = 4;
+            }
+            else if (i == middleLink + 1)
+            {
+                color = Color.red;
+                Draw.Thickness = 4;
+            }
+            // else if (i == sprial.numLinks - 1)
+            // {
+            //     color = Color.red;
+            //     Draw.Thickness = 2;
+            // }
+
+
+            var end = sprial.joints[i];
+
+
+            if (i >= middleLink + 2)
+            {
+                if ((end - start).sqrMagnitude < cutoffLength.value)
+                    continue;
+
+
+                if (skipCount >= skipEvery.value)
+                {
+                    skipCount = 0;
+                }
+                else
+                {
+                    skipCount++;
+                    continue;
+                }
+
+                if (onlyDrawOutline.isOn)
+                    return;
+            }
+
+            Draw.Line(start, end, color);
+            start = end;
         }
+
     }
 
     void drawOutline(Zeta.Spiral spiral)
@@ -163,18 +158,16 @@ public partial class ZetaSpiral : MonoBehaviour
 
     void drawZetaTarget(Zeta.Spiral sprial)
     {
-        using (Draw.StyleScope)
-        {
-            var pt = sprial.zeta.ToVector2();
+        var pt = sprial.zeta.ToVector2();
 
-            var color = Color.cyan;
-            color.a = targetTransparency.value;
+        var color = Color.cyan;
+        color.a = targetTransparency.value;
 
-            Draw.Color = color;
-            Draw.Ring(pt, .08f);
-            ShapesUtils.DrawCross(pt, .1f);
+        Draw.Color = color;
+        Draw.Ring(pt, .08f);
+        ShapesUtils.DrawCross(pt, .1f);
 
-            Draw.Ring(pt, 1f);
-        }
+        Draw.Ring(pt, 1f);
+
     }
 }

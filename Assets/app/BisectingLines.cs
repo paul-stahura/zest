@@ -29,10 +29,6 @@ public class BisectingLines : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            // set up static parameters. these are used for all following Draw.Line calls
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Matrix = transform.localToWorldMatrix;
             Draw.Thickness = thickness;
             Draw.Color = new Color(color.r, color.g, color.b, transparency.value);
 

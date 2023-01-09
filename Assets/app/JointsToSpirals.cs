@@ -8,10 +8,12 @@ public class JointsToSpirals : MonoBehaviour
 {
     public App app;
     public Color color = Color.blue;
+    public Color dotColor = Color.magenta;
     public Material Material;
 
     public float thickness = 1;
     public Slider transparency;
+    public Slider txCenterDot;
 
     public Toggle showJust2;
 
@@ -23,6 +25,7 @@ public class JointsToSpirals : MonoBehaviour
     void OnApplicationQuit()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-TxCenterdot", txCenterDot.value);
         PlayerPrefs.SetInt(name + "-ShowJust2", showJust2.isOn ? 1 : 0);
 
         PlayerPrefs.Save();
@@ -32,10 +35,16 @@ public class JointsToSpirals : MonoBehaviour
     {
         transparency.onValueChanged.AddListener(value =>
         {
-            color = new Color(color.r, color.g, color.b, value);
+            color.a = value;
         });
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
-        // Material.SetColor("_Color", color);
+
+        txCenterDot.onValueChanged.AddListener(value =>
+        {
+            dotColor.a = value;
+            Material.SetColor("_Color", dotColor);
+        });
+        txCenterDot.value = PlayerPrefs.GetFloat(name + "-TxCenterdot", 1f);
 
         showJust2.onValueChanged.AddListener(val =>
         {
@@ -50,14 +59,12 @@ public class JointsToSpirals : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-
-            // set static parameter to draw in the local space of this object
-            Draw.Matrix = transform.localToWorldMatrix;
-
             drawJointsToSpirals(s);
-            // drawTrail();
+        }
+
+        using (Draw.StyleScope)
+        {
+            drawTrail(s);
         }
     }
 
@@ -84,63 +91,70 @@ public class JointsToSpirals : MonoBehaviour
         setShaderPoints(spiral);
     }
 
-    void setShaderPoints(Zeta.Spiral spiral) {
+    void setShaderPoints(Zeta.Spiral spiral)
+    {
         var p = new Vector3[spiral.spirals.Length];
-        for (var i = 0; i < spiral.spirals.Length; i++) {
+        for (var i = 0; i < spiral.spirals.Length; i++)
+        {
             var s = spiral.spirals[i];
             p[i] = new Vector3(s.x, s.y, 0);
         }
         MeshUtils.ChildrenFromPoints(transform, "Points", p, Material, Vector3.one);
     }
 
-// void drawTrail()
-// {
-//     using (Draw.StyleScope)
-//     {
-//         Draw.Color = Color.magenta;
-//         Draw.Thickness = 4;
+    void drawTrail(Zeta.Spiral spiral)
+    {
 
-//         var mi = zs.S.middleIndex - 1;
+    }
 
-//         var count = 0;
-//         var start = new Vector2();
+    // void calculateTrail(Zeta.Spiral spiral)
+    // {
+    //     using (Draw.StyleScope)
+    //     {
+    //         Draw.Color = Color.magenta;
+    //         Draw.Thickness = 4;
 
-//         for (var imag = Zeta.IndexToImag(mi); imag < Zeta.IndexToImag(mi + 1); imag += .05)
-//         {
-//             var spiral = new Zeta.Spiral(new System.Numerics.Complex(app.Real, imag), false);
+    //         var mi = spiral.middleIndex - 1;
+
+    //         var count = 0;
+    //         var start = new Vector2();
+
+    //         for (var imag = Zeta.IndexToImag(mi); imag < Zeta.IndexToImag(mi + 1); imag += .05)
+    //         {
+    //             var spiral = new Zeta.Spiral(new System.Numerics.Complex(app.Real, imag), false);
 
 
-//             var pt = spiral.zeta.ToVector();
-//             var slope = -pt.x / pt.y;
+    //             var pt = spiral.zeta.ToVector();
+    //             var slope = -pt.x / pt.y;
 
-//             var z2 = (pt / 2).ToVector2(); // zeta over 2
-//             var zeta = pt.ToVector2();
+    //             var z2 = (pt / 2).ToVector2(); // zeta over 2
+    //             var zeta = pt.ToVector2();
 
-//             var from = spiral.links[spiral.middleIndex].ToVector2();
-//             var norm = (z2).normalized;
-//             var dot = Vector2.Dot(from, norm);
-//             var to = zeta + from - 2 * dot * norm; // reflect from about a normal (z2)
+    //             var from = spiral.links[spiral.middleIndex].ToVector2();
+    //             var norm = (z2).normalized;
+    //             var dot = Vector2.Dot(from, norm);
+    //             var to = zeta + from - 2 * dot * norm; // reflect from about a normal (z2)
 
-//             // if (count == 0)
-//             // {
-//             //     start = to;
-//             //     count++;
-//             //     continue;
-//             // }
+    //             // if (count == 0)
+    //             // {
+    //             //     start = to;
+    //             //     count++;
+    //             //     continue;
+    //             // }
 
-//             // Draw.Line(start, to);
-//             // start = to;
-//             // count++;
+    //             // Draw.Line(start, to);
+    //             // start = to;
+    //             // count++;
 
-//             if (count == 3)
-//                 break;
+    //             if (count == 3)
+    //                 break;
 
-//             count++;
-//             ShapesUtils.DrawCross(to);
-//             // break;
-//         }
-//     }
-// }
+    //             count++;
+    //             ShapesUtils.DrawCross(to);
+    //             // break;
+    //         }
+    //     }
+    // }
 }
 
 
