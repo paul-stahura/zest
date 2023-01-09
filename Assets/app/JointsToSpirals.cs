@@ -92,9 +92,6 @@ public class JointsToSpirals : MonoBehaviour
         }
         MeshUtils.ChildrenFromPoints(transform, "Points", p, Material, Vector3.one);
     }
-}
-
-
 
 // void drawTrail()
 // {
@@ -144,3 +141,7 @@ public class JointsToSpirals : MonoBehaviour
 //         }
 //     }
 // }
+}
+
+
+

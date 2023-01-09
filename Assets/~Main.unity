@@ -557,7 +557,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 98.2125, y: 25}
+  m_SizeDelta: {x: 95.106, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &49055167
 MonoBehaviour:
@@ -2339,7 +2339,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 29.1835, y: 28}
+  m_SizeDelta: {x: 34.706, y: 28}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &243260367
 MonoBehaviour:
@@ -2644,8 +2644,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   app: {fileID: 338235377}
   spiralNumber: {fileID: 243260367}
-  transparency: {fileID: 1914141423}
-  color: {r: 1, g: 1, b: 0, a: 1}
+  txMidLink: {fileID: 1914141423}
+  txMidLinkCircle: {fileID: 56214452}
+  mlColor: {r: 1, g: 1, b: 0, a: 0.20392157}
+  mlCircle: {r: 1, g: 0.5668886, b: 0, a: 1}
 --- !u!4 &267643925
 Transform:
   m_ObjectHideFlags: 0
@@ -8593,7 +8595,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 56.5522, y: 30}
+  m_SizeDelta: {x: 53.7909, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &881675908
 MonoBehaviour:
@@ -12596,7 +12598,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 74.846, y: 30}
+  m_SizeDelta: {x: 70.0138, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1344761104
 MonoBehaviour:
@@ -20423,7 +20425,7 @@ MonoBehaviour:
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 1
     m_MaxSize: 40
     m_Alignment: 0
     m_AlignByGeometry: 0
