@@ -46,17 +46,19 @@ public static class MeshUtils
             MeshRenderer renderer;
 
             var go = GameObject.Find(name + " Mesh-" + meshID);
-            if (go == null)
+            if (go != null)
             {
-                go = new GameObject(name + " Mesh-" + meshID);
-                filter = go.AddComponent<MeshFilter>();
-                renderer = go.AddComponent<MeshRenderer>();
+                // In the case of Zest, when you change the index to a smaller number
+                // and therefore reduce the number of spirals, Unity complains
+                // about the number of triangles not matching or something
+                // along those lines. I couldn't quickly figure it out so
+                // for now, I'm just creating new GameObjects every time.
+                GameObject.Destroy(go);
             }
-            else
-            {
-                filter = go.GetComponent<MeshFilter>();
-                renderer = go.GetComponent<MeshRenderer>();
-            }
+
+            go = new GameObject(name + " Mesh-" + meshID);
+            filter = go.AddComponent<MeshFilter>();
+            renderer = go.AddComponent<MeshRenderer>();
 
             go.transform.SetParent(parent, false);
             go.layer = parent.gameObject.layer;
@@ -73,8 +75,6 @@ public static class MeshUtils
 
             if (colors != null)
                 filter.mesh.colors = colors.Slice<Color>(start, end);
-
-
 
             if (uv != null)
                 filter.mesh.uv = uv.Slice<Vector2>(start, end);

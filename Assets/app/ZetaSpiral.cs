@@ -146,7 +146,7 @@ public partial class ZetaSpiral : MonoBehaviour
             return;
 
         var start = spiral.spirals[0];
-        for (var i = 0; i < spiral.spirals.Length - 1; i++)
+        for (var i = 0; i < spiral.middleIndex; i++)
         {
             var end = spiral.spirals[i];
             Draw.Line(start, end);

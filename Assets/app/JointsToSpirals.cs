@@ -93,8 +93,8 @@ public class JointsToSpirals : MonoBehaviour
 
     void setShaderPoints(Zeta.Spiral spiral)
     {
-        var p = new Vector3[spiral.spirals.Length];
-        for (var i = 0; i < spiral.spirals.Length; i++)
+        var p = new Vector3[spiral.middleIndex];
+        for (var i = 0; i < spiral.middleIndex; i++)
         {
             var s = spiral.spirals[i];
             p[i] = new Vector3(s.x, s.y, 0);

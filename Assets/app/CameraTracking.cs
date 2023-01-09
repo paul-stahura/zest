@@ -50,8 +50,8 @@ public class CameraTracking : MonoBehaviour
             return;
         }
 
-        if (spiralNumber.Value >= spiral.spirals.Length)
-            spiralNumber.Value = spiral.spirals.Length - 1;
+        if (spiralNumber.Value >= spiral.middleIndex)
+            spiralNumber.Value = spiral.middleIndex - 1;
 
         if (trackSpiralCenter.isOn)
         {
