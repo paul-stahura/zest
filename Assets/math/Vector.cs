@@ -32,6 +32,11 @@ public class Vector
         set { this.vector[1] = value; }
     }
 
+    public Vector Clone()
+    {
+        return new Vector(this.x, this.y);
+    }
+
     public override string ToString()
     {   
         var format = "0.00000";
@@ -64,11 +69,15 @@ public class Vector
         return new Vector3((float)x, (float)y, z);
     }
 
-    public void Normalize()
+    public Vector Normalized()
     {
         var distance = Math.Sqrt(x * x + y * y);
-        x = x / distance;
-        y = y / distance;
+       return new Vector(x / distance, y / distance);
+    }
+
+    public double Dot(Vector v)
+    {
+        return x*v.x + y*v.y;
     }
 
     public double DistanceTo(Vector b)

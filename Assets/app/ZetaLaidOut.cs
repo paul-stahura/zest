@@ -18,7 +18,7 @@ public class ZetaLaidOut : MonoBehaviour
         using (Draw.StyleScope)
         {
             var z = spiral.zeta.ToVector();
-            z.Normalize();
+            z = z.Normalized();
 
             for (var i = 1; i < 2; i++)
             {

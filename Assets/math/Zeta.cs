@@ -359,7 +359,7 @@ public class Zeta
         public Vector PointOnLink(int idx, double dist)
         {
             var link = joints[idx];
-            link.Normalize();
+            link = link.Normalized();
             return link * dist;
         }
 
@@ -375,13 +375,20 @@ public class Zeta
 
         void findSpirals()
         {
-            var pt = this.zeta.ToVector();
-            var slope = -pt.x / pt.y;
-            var z = pt.ToVector2();
-            var bipt = BisectingLines.BisectPoint(this);
+            // Zeta is a complex number 
+            // Convert the complex number to a vector 
+            // then scale it by 2.
+            // 
+            // zeta / 2
+            var zeta = this.zeta.ToVector();
+            var z2 = zeta / 2; 
 
-            var z2 = (pt / 2).ToVector2();
+            // Copy zeta vector and normalize it.
+            var norm = zeta.Normalized();
 
+            // Paul: Ignore this
+            // If the array that holds the spiral points is not big enough
+            // resize the array to hold enough points
             if (this.spirals.Length <= middleIndex)
             {
                 var prevLen = this.spirals.Length;
@@ -390,14 +397,14 @@ public class Zeta
                     this.spirals[i] = new Vector2();
             }
 
-            // draw a line from each of the first links at the same slope as zeta
+            // Loop through all the joints up to the middle index.
+            //
             for (var i = 0; i <= this.middleIndex; i++)
             {
-                var from = this.joints[i].ToVector2();
-
-                var norm = (z2).normalized;
-                var dot = Vector2.Dot(from, norm);
-                this.spirals[i] = z + from - 2 * dot * norm; // reflect from about a normal (z2)
+                var joint = this.joints[i];
+                
+                var dot = joint.Dot(norm);
+                this.spirals[i] = zeta + joint - norm * 2 * dot; // reflect from about a normal (z2)
             }
         }
     }
