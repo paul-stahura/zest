@@ -86,7 +86,7 @@ public class JointsToSpirals : MonoBehaviour
 
     void drawCenterPoints(Camera cam, Zeta.Spiral spiral)
     {
-        var SCALAR = 200f;
+        var SCALAR = 400f;
         // var p = new Vector3[spiral.middleIndex];
         // for (var i = 0; i < spiral.middleIndex; i++)
         // {
@@ -98,7 +98,7 @@ public class JointsToSpirals : MonoBehaviour
         Draw.Color = dotColor;
 
         var size = cam.orthographicSize / SCALAR;
-        var rc = new Rect(0, 0, size, size);
+        var rc = new Rect(-size, -size, size*2, size*2);
         for (var i = 0; i < spiral.middleIndex; i++)
         {
             var from = spiral.spirals[i];
