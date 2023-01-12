@@ -61,7 +61,7 @@ public class SpiralMiddleLink : MonoBehaviour
 
             Draw.Thickness = 1;
             Draw.Color = mlCircle;
-            for (var l = i; l < i + (int)spiralNumber.value; l++)
+            for (var l = i; l < i + (int)mi; l++)
             {
                 j1 = spiral.joints[l];
                 j2 = spiral.joints[l + 1];
