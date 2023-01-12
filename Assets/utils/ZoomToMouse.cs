@@ -9,7 +9,7 @@ using System;
 /// </summary>
 public class ZoomToMouse : MonoBehaviour
 {
-    const float MAXIMUM_ZOOM = 0.0001f;
+    const float MAXIMUM_ZOOM = 0.00005f;
     const float DEFAULT_ZOOM = 690f;
     const float MINIMUM_ZOOM = 2400f;
 
