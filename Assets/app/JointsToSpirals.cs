@@ -106,9 +106,12 @@ public class JointsToSpirals : MonoBehaviour
             var from = spiral.spirals[i];
             Draw.Rectangle(from, rc);
 
-            var l = (int)spiral.SpiralMiddleIndex(index, i);
-            var link = spiral.joints[l+1] - spiral.joints[l];
-            link.Dot(from);
+            // I was going to draw a line straight down from the dot to the link
+            // but its not finished here. This is to diagnose the wiggling dot.
+            //
+            // var l = (int)spiral.SpiralMiddleIndex(index, i);
+            // var link = spiral.joints[l+1] - spiral.joints[l];
+            // link.Dot(from);
         }
     }
 
