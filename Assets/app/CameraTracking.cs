@@ -8,7 +8,7 @@ public class CameraTracking : MonoBehaviour
     public Toggle trackSpiralCenter;
     public Toggle trackSpiralLink;
     public App app;
-    public IntInput spiralNumber;
+    public Slider spiralNumber;
 
     public Canvas canvas;
 
@@ -21,7 +21,7 @@ public class CameraTracking : MonoBehaviour
         PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
 
-        PlayerPrefs.SetInt("TrackSpiralNum", spiralNumber.Value);
+        PlayerPrefs.SetInt("TrackSpiralNum", (int)spiralNumber.value);
 
         PlayerPrefs.Save();
     }
@@ -39,7 +39,7 @@ public class CameraTracking : MonoBehaviour
         trackMiddle.isOn = PlayerPrefs.GetInt("TrackMiddle") != 0 ? true : false;
         trackSpiralCenter.isOn = PlayerPrefs.GetInt("TrackSpiralCenter") != 0 ? true : false;
         trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
-        spiralNumber.Value = PlayerPrefs.GetInt("TrackSpiralNum");
+        spiralNumber.value = PlayerPrefs.GetInt("TrackSpiralNum");
 
         #endregion
 
@@ -66,21 +66,23 @@ public class CameraTracking : MonoBehaviour
             return;
         }
 
-        if (spiralNumber.Value >= spiral.middleIndex)
-            spiralNumber.Value = spiral.middleIndex - 1;
+        if (spiralNumber.value >= spiral.middleIndex)
+        {
+            spiralNumber.value = spiral.middleIndex - 1;
+        }
 
         if (trackSpiralCenter.isOn)
         {
             var rot = Quaternion.AngleAxis(0, Vector3.forward);
 
-            var pt = spiral.spirals[spiralNumber.Value];
+            var pt = spiral.spirals[(int)spiralNumber.value];
             setCamera(pt, rot);
         }
 
         if (trackSpiralLink.isOn)
         {
             var mi = Zeta.ImagToIndex(app.Imag);
-            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
+            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             trackLink(i, spiral);
         }

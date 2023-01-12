@@ -7,7 +7,9 @@ using Shapes;
 public class SpiralMiddleLink : MonoBehaviour
 {
     public App app;
-    public IntInput spiralNumber;
+    public Slider spiralNumber;
+    public Text spiralNumDisplay;
+
     public Slider txMidLink;
     public Slider txMidLinkCircle;
 
@@ -34,15 +36,19 @@ public class SpiralMiddleLink : MonoBehaviour
             mlCircle = new Color(mlCircle.r, mlCircle.g, mlCircle.b, value);
         });
         txMidLinkCircle.value = PlayerPrefs.GetFloat(name + "-TxMidLinkCircle", mlCircle.a);
+
+        spiralNumber.onValueChanged.AddListener(value => spiralNumDisplay.text = value.ToString());
         app.DrawSprial += drawShapes;
     }
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        spiralNumber.maxValue = spiral.middleIndex - 1;
+
         using (Draw.StyleScope)
         {
             var mi = Zeta.ImagToIndex(app.Imag);
-            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.Value);
+            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             // Highlight the spiral middle link
             var j1 = spiral.joints[i];
