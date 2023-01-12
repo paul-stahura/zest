@@ -63,6 +63,10 @@ public class SpiralMiddleLink : MonoBehaviour
             Draw.Color = mlCircle;
             for (var l = i; l < i + (int)mi; l++)
             {
+                // when looking at the end spiral ...
+                if (l + 1 >= spiral.joints.Length)
+                    return;
+
                 j1 = spiral.joints[l];
                 j2 = spiral.joints[l + 1];
                 // circle with center at the right most side of the link 
