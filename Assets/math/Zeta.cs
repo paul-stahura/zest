@@ -288,7 +288,7 @@ public class Zeta
         public Vector[] joints;
         public Complex input;
         public Complex zeta;
-        public Vector2[] spirals;
+        public Vector[] spirals;
 
         public Spiral(Complex s, bool useReimannSiegel)
         {
@@ -296,15 +296,15 @@ public class Zeta
             this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
             this.numLinks = (int)(input.Imaginary / Math.PI + 1);
 
-            this.joints = new Vector[numLinks * 2];
+            this.joints = new Vector[numLinks];
             for (var i = 0; i < this.joints.Length; i++)
                 this.joints[i] = new Vector();
 
             this.middlePoint = new Vector();
 
-            spirals = new Vector2[middleIndex + 1];
+            spirals = new Vector[middleIndex + 1];
             for (var i = 0; i <= middleIndex; i++)
-                this.spirals[i] = new Vector2();
+                this.spirals[i] = new Vector();
 
             Update(s, useReimannSiegel);
         }
@@ -323,16 +323,10 @@ public class Zeta
             else
                 this.zeta = Zeta.EulerMaclauren(input);
 
-            if (this.joints.Length < numLinks)
-            {
-                var prevLen = this.joints.Length;
-                Array.Resize<Vector>(ref this.joints, numLinks * 2);
-                for (var i = prevLen; i < this.joints.Length; i++)
-                    this.joints[i] = new Vector();
-            }
+            this.joints = new Vector[numLinks];
 
-            var start = this.joints[0];
-            start.x = 0; start.y = 0;
+            var start = new Vector();
+            this.joints[0] = start;
 
             var imag = this.input.Imaginary;
             var real = this.input.Real;
@@ -341,9 +335,8 @@ public class Zeta
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
-                var end = this.joints[i];
-                end.x = start.x + x;
-                end.y = start.y + y;
+                var end = new Vector(start.x + x, start.y + y);
+                this.joints[i] = end;
 
                 if (i == this.middleIndex + 1)
                 {
@@ -386,16 +379,7 @@ public class Zeta
             // Copy zeta vector and normalize it.
             var norm = zeta.Normalized();
 
-            // Paul: Ignore this
-            // If the array that holds the spiral points is not big enough
-            // resize the array to hold enough points
-            if (this.spirals.Length <= middleIndex)
-            {
-                var prevLen = this.spirals.Length;
-                Array.Resize<Vector2>(ref this.spirals, middleIndex + 1);
-                for (var i = prevLen; i < this.spirals.Length; i++)
-                    this.spirals[i] = new Vector2();
-            }
+            spirals = new Vector[middleIndex + 1];
 
             // Loop through all the joints up to the middle index.
             //

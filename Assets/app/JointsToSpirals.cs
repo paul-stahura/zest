@@ -97,12 +97,18 @@ public class JointsToSpirals : MonoBehaviour
         dotColor.a = dotTransparency.value;
         Draw.Color = dotColor;
 
+        var index = Zeta.ImagToIndex(spiral.input.Imaginary);
+
         var size = cam.orthographicSize / SCALAR;
-        var rc = new Rect(-size, -size, size*2, size*2);
+        var rc = new Rect(-size, -size, size * 2, size * 2);
         for (var i = 0; i < spiral.middleIndex; i++)
         {
             var from = spiral.spirals[i];
             Draw.Rectangle(from, rc);
+
+            var l = (int)spiral.SpiralMiddleIndex(index, i);
+            var link = spiral.joints[l+1] - spiral.joints[l];
+            link.Dot(from);
         }
     }
 
@@ -134,20 +140,20 @@ public class JointsToSpirals : MonoBehaviour
         var s = spiral.spirals[spiralNumber];
         var pt = new Vector(s.x, s.y);
 
-        trailParent.transform.localPosition = j1.ToVector3();   
+        trailParent.transform.localPosition = j1.ToVector3();
 
 
         // Offset vector from the middle link first point
         var p = (pt - j1).ToVector3();
 
-//
-// TODO:
-// You need the angle of the line between these two lines:
-// j1 and p
-// j1 and j2
-// then apply that rotation to trail transform to move all the previous mesh points
-// then add the latest point
-// 
+        //
+        // TODO:
+        // You need the angle of the line between these two lines:
+        // j1 and p
+        // j1 and j2
+        // then apply that rotation to trail transform to move all the previous mesh points
+        // then add the latest point
+        // 
         var temp = (j2 - j1).ToVector3();
         var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;
 

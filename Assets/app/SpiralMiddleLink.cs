@@ -47,7 +47,7 @@ public class SpiralMiddleLink : MonoBehaviour
             // Highlight the spiral middle link
             var j1 = spiral.joints[i];
             var j2 = spiral.joints[i + 1];
-            Draw.Thickness = 5 / cam.orthographicSize;
+            Draw.Thickness = 8;
             Draw.Color = mlColor;
             Draw.Line(j1, j2);
 
