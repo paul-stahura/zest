@@ -206,8 +206,15 @@ public class App : ImmediateModeShapeDrawer
 
     float t = 0f;
 
+    public Canvas canvas;
     void Update()
     {
+        if (Input.GetKeyUp("space"))
+        {
+            var active = canvas.gameObject.activeSelf;
+            canvas.gameObject.SetActive(!active);
+        }
+
         frameCount++;
         dt += Time.deltaTime;
         if (dt > 1.0f / updateRate)

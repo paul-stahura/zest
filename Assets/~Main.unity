@@ -3197,6 +3197,7 @@ MonoBehaviour:
   zetaSpiral: {fileID: 1486109718}
   fps: 0
   _real: 0.5
+  canvas: {fileID: 1762227779}
 --- !u!224 &338235378
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13811,6 +13812,9 @@ MonoBehaviour:
   trackSpiralLink: {fileID: 881675908}
   app: {fileID: 338235377}
   spiralNumber: {fileID: 243260367}
+  canvas: {fileID: 1762227779}
+  canvasOffset: {x: 0, y: 0}
+  corners: []
 --- !u!1 &1496133463
 GameObject:
   m_ObjectHideFlags: 0

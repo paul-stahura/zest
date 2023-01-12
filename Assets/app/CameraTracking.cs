@@ -10,6 +10,10 @@ public class CameraTracking : MonoBehaviour
     public App app;
     public IntInput spiralNumber;
 
+    public Canvas canvas;
+
+    public float canvasOffset;
+
     void OnApplicationQuit()
     {
         PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
@@ -42,8 +46,20 @@ public class CameraTracking : MonoBehaviour
         app.DrawSprial += drawShapes;
 
     }
+
+    public float OFFSET = .44f;
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        var active = canvas.gameObject.activeSelf;
+        if (active)
+        {            
+            canvasOffset = OFFSET * cam.orthographicSize;
+        }
+        else 
+        {
+            canvasOffset = 0;
+        }
+
         if (trackMiddle.isOn)
         {
             trackLink(spiral.middleIndex, spiral);
@@ -93,7 +109,7 @@ public class CameraTracking : MonoBehaviour
     void setCamera(Vector3 pos, Quaternion rot)
     {
         // Make Camera z opposite when tracking is enabled.
-        pos = new Vector3(pos.x, pos.y, Camera.main.transform.position.z);
+        pos = new Vector3(pos.x + canvasOffset, pos.y, Camera.main.transform.position.z);
 
 
         Camera.main.transform.rotation = rot;
