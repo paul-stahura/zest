@@ -12,7 +12,7 @@ public class CameraTracking : MonoBehaviour
 
     public Canvas canvas;
 
-    public float canvasOffset;
+    public Vector3 canvasOffset;
 
     void OnApplicationQuit()
     {
@@ -32,7 +32,7 @@ public class CameraTracking : MonoBehaviour
         trackOrigin.onValueChanged.AddListener(tracking =>
         {
             if (tracking)
-                resetCamera();
+                resetCamera(Camera.main);
         });
         trackOrigin.isOn = PlayerPrefs.GetInt("TrackOrigin") != 0 ? true : false;
 
@@ -47,22 +47,22 @@ public class CameraTracking : MonoBehaviour
 
     }
 
-    public float OFFSET = .44f;
+    public Vector2 OFFSET = new Vector2(.44f, 0f);
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         var active = canvas.gameObject.activeSelf;
         if (active)
-        {            
-            canvasOffset = OFFSET * cam.orthographicSize;
-        }
-        else 
         {
-            canvasOffset = 0;
+            canvasOffset = Vector2.one;
+        }
+        else
+        {
+            canvasOffset = Vector2.zero;
         }
 
         if (trackMiddle.isOn)
         {
-            trackLink(spiral.middleIndex, spiral);
+            trackLink(cam, spiral.middleIndex, spiral);
             return;
         }
 
@@ -76,7 +76,7 @@ public class CameraTracking : MonoBehaviour
             var rot = Quaternion.AngleAxis(0, Vector3.forward);
 
             var pt = spiral.spirals[(int)spiralNumber.value];
-            setCamera(pt, rot);
+            setCamera(cam, pt, rot);
         }
 
         if (trackSpiralLink.isOn)
@@ -84,11 +84,11 @@ public class CameraTracking : MonoBehaviour
             var mi = Zeta.ImagToIndex(app.Imag);
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
-            trackLink(i, spiral);
+            trackLink(cam, i, spiral);
         }
     }
 
-    void trackLink(int idx, Zeta.Spiral spiral)
+    void trackLink(Camera cam, int idx, Zeta.Spiral spiral)
     {
         var s = spiral;
         var start = s.joints[idx];
@@ -96,7 +96,7 @@ public class CameraTracking : MonoBehaviour
 
         var pos = start + (end - start) / 2;
         var rot = RotationOfLink(s, idx);
-        setCamera(pos, rot);
+        setCamera(cam, pos, rot);
     }
 
     /// <summary>
@@ -108,21 +108,26 @@ public class CameraTracking : MonoBehaviour
     /// </summary>
     /// <param name="pos"></param>
     /// <param name="rot"></param>
-    void setCamera(Vector3 pos, Quaternion rot)
+    void setCamera(Camera cam, Vector3 pos, Quaternion rot)
     {
+        var aspect = (float)Screen.width / (float)Screen.height;
+        canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
+        // canvasOffset += (rot * OFFSET);
+
+
         // Make Camera z opposite when tracking is enabled.
-        pos = new Vector3(pos.x + canvasOffset, pos.y, Camera.main.transform.position.z);
+        pos = new Vector3(pos.x + canvasOffset.x, pos.y + canvasOffset.y, cam.transform.position.z);
 
 
-        Camera.main.transform.rotation = rot;
-        Camera.main.transform.position = transform.position + pos;
+        cam.transform.rotation = rot;
+        cam.transform.position = transform.position + pos;
     }
 
-    void resetCamera()
+    void resetCamera(Camera cam)
     {
         var rot = Quaternion.AngleAxis(0, Vector3.forward);
         var pos = new Vector3(0, 0, -10);
-        setCamera(pos, rot);
+        setCamera(cam, pos, rot);
     }
 
     // Calculates the rotation required to orient the camera so that the link

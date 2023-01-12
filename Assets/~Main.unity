@@ -14069,8 +14069,8 @@ MonoBehaviour:
   app: {fileID: 338235377}
   spiralNumber: {fileID: 504216557}
   canvas: {fileID: 1762227779}
-  canvasOffset: 0
-  OFFSET: 0.44
+  canvasOffset: {x: 0, y: 0, z: 0}
+  OFFSET: {x: 0, y: 0}
 --- !u!1 &1496133463
 GameObject:
   m_ObjectHideFlags: 0

@@ -57,12 +57,19 @@ public class SpiralMiddleLink : MonoBehaviour
             Draw.Color = mlColor;
             Draw.Line(j1, j2);
 
-            // circle with center at the right most side of the link 
-            // (the side closer to zeta) with radius = 1/2 link length
+            var center = j2.Clone();
+
             Draw.Thickness = 1;
             Draw.Color = mlCircle;
-            var radius = (float)(j2 - j1).Length / 2;
-            Draw.Ring(j2, radius, 1f);
+            for (var l = i; l < i + (int)spiralNumber.value; l++)
+            {
+                j1 = spiral.joints[l];
+                j2 = spiral.joints[l + 1];
+                // circle with center at the right most side of the link 
+                // (the side closer to zeta) with radius = 1/2 link length
+                var radius = (float)(j2 - j1).Length / 2;
+                Draw.Ring(center, radius, 1f);
+            }
         }
     }
 }
