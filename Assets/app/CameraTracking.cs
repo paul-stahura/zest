@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
@@ -7,6 +8,7 @@ public class CameraTracking : MonoBehaviour
     public Toggle trackMiddle;
     public Toggle trackSpiralCenter;
     public Toggle trackSpiralLink;
+    public Toggle trackJointIMinusN;
     public App app;
     public Slider spiralNumber;
 
@@ -20,6 +22,7 @@ public class CameraTracking : MonoBehaviour
         PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackJointI-N", trackJointIMinusN.isOn ? 1 : 0);
 
         PlayerPrefs.SetInt("TrackSpiralNum", (int)spiralNumber.value);
 
@@ -39,6 +42,7 @@ public class CameraTracking : MonoBehaviour
         trackMiddle.isOn = PlayerPrefs.GetInt("TrackMiddle") != 0 ? true : false;
         trackSpiralCenter.isOn = PlayerPrefs.GetInt("TrackSpiralCenter") != 0 ? true : false;
         trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
+        trackJointIMinusN.isOn = PlayerPrefs.GetInt("TrackJointI-N") != 0 ? true : false;
         spiralNumber.value = PlayerPrefs.GetInt("TrackSpiralNum");
 
         #endregion
@@ -81,9 +85,24 @@ public class CameraTracking : MonoBehaviour
 
         if (trackSpiralLink.isOn)
         {
+            spiralNumber.minValue = 0;
+            spiralNumber.maxValue = spiral.middleIndex;
+
             var mi = Zeta.ImagToIndex(app.Imag);
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
+            trackLink(cam, i, spiral);
+        }
+
+        if (trackJointIMinusN.isOn)
+        {
+            spiralNumber.minValue = 1;
+            spiralNumber.maxValue = 10;
+
+            // 2/11/2023 "changes to code" email
+            var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
+            var joint = Math.Floor(mi) - spiralNumber.value;
+            var i = (int)spiral.SpiralMiddleIndex(mi, joint);
             trackLink(cam, i, spiral);
         }
     }
@@ -98,6 +117,7 @@ public class CameraTracking : MonoBehaviour
         var rot = RotationOfLink(s, idx);
         setCamera(cam, pos, rot);
     }
+
 
     /// <summary>
     /// Sets the camera's position to an offset from the Robot3's position. 

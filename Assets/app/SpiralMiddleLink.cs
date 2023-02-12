@@ -43,8 +43,6 @@ public class SpiralMiddleLink : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        spiralNumber.maxValue = spiral.middleIndex - 1;
-
         using (Draw.StyleScope)
         {
             var mi = Zeta.ImagToIndex(app.Imag);
