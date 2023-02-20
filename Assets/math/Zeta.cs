@@ -363,7 +363,9 @@ public class Zeta
             // Spiral Middle Link, works for any spiral (last spiral is number j=0)
 
             // S_{mlink}\left(i,j\right)=\frac{2i\left(i+1\right)}{\left(2j+1\right)}+\frac{1}{3\left(2j+1\right)}
-            return (2*index * (index + 1)) / (2 * spiral + 1) + 1/(3 * (2 * spiral + 1)) - 1;
+            var i = (2*index * (index + 1)) / (2 * spiral + 1) + 1/(3 * (2 * spiral + 1)) - 1;
+
+            return i;
         }
 
         void findSpirals()

@@ -70,10 +70,10 @@ public class CameraTracking : MonoBehaviour
             return;
         }
 
-        if (spiralNumber.value >= spiral.middleIndex)
-        {
-            spiralNumber.value = spiral.middleIndex - 1;
-        }
+        // if (spiralNumber.value >= spiral.middleIndex)
+        // {
+        //     spiralNumber.value = spiral.middleIndex - 1;
+        // }
 
         if (trackSpiralCenter.isOn)
         {
@@ -96,11 +96,12 @@ public class CameraTracking : MonoBehaviour
 
         if (trackJointIMinusN.isOn)
         {
+            var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
+
             spiralNumber.minValue = 1;
-            spiralNumber.maxValue = 10;
+            spiralNumber.maxValue = (int)mi; // cannot be greater than middle index or you get a negative joint value below
 
             // 2/11/2023 "changes to code" email
-            var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
             var joint = Math.Floor(mi) - spiralNumber.value;
             var i = (int)spiral.SpiralMiddleIndex(mi, joint);
             trackLink(cam, i, spiral);
@@ -110,6 +111,7 @@ public class CameraTracking : MonoBehaviour
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral)
     {
         var s = spiral;
+
         var start = s.joints[idx];
         var end = s.joints[idx + 1];
 
