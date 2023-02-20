@@ -79,7 +79,7 @@ public partial class ZetaSpiral : MonoBehaviour
         int skipCount = 0;
 
         // If the visibleLinks slider is at max value, don't limit visibility.  Draw all links
-        bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue;
+        bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue && CameraTracking.trackingIndex > -1;
 
         var startIndex = 1;
         var endIndex = sprial.numLinks;
