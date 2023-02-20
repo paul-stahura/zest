@@ -11,21 +11,17 @@ using Shapes;
 public partial class ZetaSpiral : MonoBehaviour
 {
 
-    [SerializeField]
     public App app;
-
-    [SerializeField]
     public Slider transparency;
-
-    [SerializeField]
     public Slider targetTransparency;
+    public Slider visibleLinks;
+
+
 
     // Dont draw a line until the total length of the vectors is at least this
-    [SerializeField]
     public Slider cutoffLength;
 
     // Skip drawing this many lines before drawing the next line. They are so short you can't see them anyway
-    [SerializeField]
     public Slider skipEvery;
 
     public int numLinksReference = 100;
@@ -82,8 +78,19 @@ public partial class ZetaSpiral : MonoBehaviour
 
         int skipCount = 0;
 
-        var start = sprial.joints[0].ToVector2();
-        for (int i = 1; i < sprial.numLinks; i++)
+        // If the visibleLinks slider is at max value, don't limit visibility.  Draw all links
+        bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue;
+
+        var startIndex = 1;
+        var endIndex = sprial.numLinks;
+
+        if (limitVisibleLinks) {
+            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value + 1, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
+            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, sprial.numLinks);
+        }
+
+        var start = sprial.joints[startIndex - 1].ToVector2();
+        for (int i = startIndex; i < endIndex; i++)
         {
             var color = Color.white;
             color.a = transparency.value;

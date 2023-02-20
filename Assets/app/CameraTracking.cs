@@ -15,6 +15,8 @@ public class CameraTracking : MonoBehaviour
     public Canvas canvas;
 
     public Vector3 canvasOffset;
+    // this is the link index the camera is tracking. -1 if not tracking
+    public static int trackingIndex;
 
     void OnApplicationQuit()
     {
@@ -70,10 +72,8 @@ public class CameraTracking : MonoBehaviour
             return;
         }
 
-        // if (spiralNumber.value >= spiral.middleIndex)
-        // {
-        //     spiralNumber.value = spiral.middleIndex - 1;
-        // }
+        // default to not tracking any link index
+        trackingIndex = -1;
 
         if (trackSpiralCenter.isOn)
         {
@@ -110,6 +110,8 @@ public class CameraTracking : MonoBehaviour
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral)
     {
+        trackingIndex = idx;
+
         var s = spiral;
 
         var start = s.joints[idx];
