@@ -12,9 +12,9 @@ public class CameraTracking : MonoBehaviour
     public App app;
     public Slider spiralNumber;
 
-    public Canvas canvas;
+    public RectTransform verticalUI;
 
-    public Vector3 canvasOffset;
+
     // this is the link index the camera is tracking. -1 if not tracking
     public static int trackingIndex;
 
@@ -53,19 +53,8 @@ public class CameraTracking : MonoBehaviour
 
     }
 
-    public Vector2 OFFSET = new Vector2(.44f, 0f);
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        var active = canvas.gameObject.activeSelf;
-        if (active)
-        {
-            canvasOffset = Vector2.one;
-        }
-        else
-        {
-            canvasOffset = Vector2.zero;
-        }
-
         if (trackMiddle.isOn)
         {
             trackLink(cam, spiral.middleIndex, spiral);
@@ -98,7 +87,7 @@ public class CameraTracking : MonoBehaviour
         {
             var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
 
-            spiralNumber.minValue = 1;
+            spiralNumber.minValue = 0;
             spiralNumber.maxValue = (int)mi; // cannot be greater than middle index or you get a negative joint value below
 
             // 2/11/2023 "changes to code" email
@@ -122,7 +111,6 @@ public class CameraTracking : MonoBehaviour
         setCamera(cam, pos, rot);
     }
 
-
     /// <summary>
     /// Sets the camera's position to an offset from the Robot3's position. 
     /// Also sets the camera's absolute rotation.
@@ -134,10 +122,12 @@ public class CameraTracking : MonoBehaviour
     /// <param name="rot"></param>
     void setCamera(Camera cam, Vector3 pos, Quaternion rot)
     {
+        var OFFSET = Vector2.zero;
+        if (verticalUI.gameObject.activeInHierarchy)
+            OFFSET = new Vector2(1f - verticalUI.position.x / Screen.width, 0);
+            
         var aspect = (float)Screen.width / (float)Screen.height;
-        canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
-        // canvasOffset += (rot * OFFSET);
-
+        var canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
 
         // Make Camera z opposite when tracking is enabled.
         pos = new Vector3(pos.x + canvasOffset.x, pos.y + canvasOffset.y, cam.transform.position.z);
