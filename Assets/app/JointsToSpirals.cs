@@ -75,7 +75,7 @@ public class JointsToSpirals : MonoBehaviour
         }
 
         // draw a line from each of the first links at the same slope as zeta
-        for (var i = start; i < spiral.middleIndex; i++)
+        for (var i = start; i <= spiral.middleIndex; i++)
         {
             var from = spiral.joints[i];
             var to = spiral.spirals[i]; // reflect from about a normal (z2)
@@ -101,7 +101,7 @@ public class JointsToSpirals : MonoBehaviour
 
         var size = cam.orthographicSize / SCALAR;
         var rc = new Rect(-size, -size, size * 2, size * 2);
-        for (var i = 0; i < spiral.middleIndex; i++)
+        for (var i = 0; i <= spiral.middleIndex; i++)
         {
             var from = spiral.spirals[i];
             Draw.Rectangle(from, rc);
