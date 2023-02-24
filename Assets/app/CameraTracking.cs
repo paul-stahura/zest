@@ -93,11 +93,11 @@ public class CameraTracking : MonoBehaviour
             // 2/11/2023 "changes to code" email
             var joint = Math.Floor(mi) - spiralNumber.value;
             var i = (int)spiral.SpiralMiddleIndex(mi, joint);
-            trackLink(cam, i, spiral);
+            trackLink(cam, i, spiral, false);
         }
     }
 
-    void trackLink(Camera cam, int idx, Zeta.Spiral spiral)
+    void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)
     {
         trackingIndex = idx;
 
@@ -106,7 +106,12 @@ public class CameraTracking : MonoBehaviour
         var start = s.joints[idx];
         var end = s.joints[idx + 1];
 
-        var pos = start + (end - start) / 2;
+        var pos = end;
+        if (trackCenter)
+        {
+            pos = start + (end - start) / 2;;
+        }
+
         var rot = RotationOfLink(s, idx);
         setCamera(cam, pos, rot);
     }

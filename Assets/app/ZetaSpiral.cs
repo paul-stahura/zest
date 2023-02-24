@@ -99,16 +99,19 @@ public partial class ZetaSpiral : MonoBehaviour
             if (i == middleLink - 1)
             {
                 color = Color.green;
+                color.a = transparency.value;
                 Draw.Thickness = 4;
             }
             else if (i == middleLink)
             {
                 color = new Color(1, .5f, 0, 1f); // orange
+                color.a = transparency.value;
                 Draw.Thickness = 4;
             }
             else if (i == middleLink + 1)
             {
                 color = Color.red;
+                color.a = transparency.value;
                 Draw.Thickness = 4;
             }
             // else if (i == sprial.numLinks - 1)

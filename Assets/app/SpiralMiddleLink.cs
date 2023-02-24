@@ -59,6 +59,12 @@ public class SpiralMiddleLink : MonoBehaviour
 
             Draw.Thickness = 1;
             Draw.Color = mlCircle;
+            if (CameraTracking.trackingIndex != -1)
+            {
+                i = CameraTracking.trackingIndex;
+                center = spiral.joints[i + 1];
+            }
+
             for (var l = i; l < i + (int)mi; l++)
             {
                 // when looking at the end spiral ...
