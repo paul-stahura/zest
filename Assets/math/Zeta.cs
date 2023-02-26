@@ -302,8 +302,8 @@ public class Zeta
 
             this.middlePoint = new Vector();
 
-            spirals = new Vector[middleIndex + 1];
-            for (var i = 0; i <= middleIndex; i++)
+            spirals = new Vector[middleIndex + 2];
+            for (var i = 0; i < spirals.Length; i++)
                 this.spirals[i] = new Vector();
 
             Update(s, useReimannSiegel);
@@ -381,11 +381,11 @@ public class Zeta
             // Copy zeta vector and normalize it.
             var norm = zeta.Normalized();
 
-            spirals = new Vector[middleIndex + 1];
+            spirals = new Vector[middleIndex + 2];
 
             // Loop through all the joints up to the middle index.
             //
-            for (var i = 0; i <= this.middleIndex; i++)
+            for (var i = 0; i < spirals.Length; i++)
             {
                 var joint = this.joints[i];
                 

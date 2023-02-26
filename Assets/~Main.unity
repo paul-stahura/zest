@@ -1239,7 +1239,7 @@ GameObject:
   - component: {fileID: 102129670}
   - component: {fileID: 102129671}
   m_Layer: 5
-  m_Name: only 2
+  m_Name: Just 3 Checkbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11103,7 +11103,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: just 2
+  m_Text: Just 3
 --- !u!222 &1045207718
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -14656,8 +14656,6 @@ MonoBehaviour:
   app: {fileID: 338235377}
   spiralNumber: {fileID: 504216557}
   verticalUI: {fileID: 1714238992}
-  canvasOffset: {x: 0, y: 0, z: 0}
-  OFFSET: {x: 0, y: 0}
 --- !u!1 &1496133463
 GameObject:
   m_ObjectHideFlags: 0
