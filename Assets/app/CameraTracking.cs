@@ -14,8 +14,22 @@ public class CameraTracking : MonoBehaviour
 
     public RectTransform verticalUI;
 
+    [Header("Tracked Link")]
+    /// <summary>
+    /// Controls the transparency of the highlight on the tracked link
+    /// </summary>
+    public Slider linkHighlightTransparency;
+    /// <summary>
+    /// The color of the highlight over the tracked link
+    /// </summary>
+    public Color linkHighlight;
+    public float thickness;
 
-    // this is the link index the camera is tracking. -1 if not tracking
+
+    /// <summary>
+    /// This is the index of the link the camera is tracking. If the camera is
+    /// not tracking a link, this will be -1
+    /// </summary>
     public static int trackingIndex;
 
     void OnApplicationQuit()
@@ -114,6 +128,14 @@ public class CameraTracking : MonoBehaviour
 
         var rot = RotationOfLink(s, idx);
         setCamera(cam, pos, rot);
+
+        using (Draw.StyleScope)
+        {
+            linkHighlight.a = linkHighlightTransparency.value;
+            Draw.Color = linkHighlight;
+            Draw.Thickness = thickness;
+            Draw.Line(start, end);
+        }
     }
 
     /// <summary>

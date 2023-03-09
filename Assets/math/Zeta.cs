@@ -357,6 +357,13 @@ public class Zeta
         }
 
         
+        /// <summary>
+        /// Calculates the link that is the approximate center of a spiral.
+        /// </summary>
+        /// <param name="index">The middle index of the spiral</param>
+        /// <param name="spiral">Spiral number where 0 is the last spiral, 
+        /// 1 is the second to last spiral etc.</param>
+        /// <returns>Approximate index of the link that is the middle spiral link</returns>
         public double SpiralMiddleIndex(double index, double spiral)
         {
             // given index and joint/spiral num, return index/number of the 

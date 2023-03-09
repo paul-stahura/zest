@@ -94,6 +94,12 @@ public class App : ImmediateModeShapeDrawer
             {
                 _real = value;
                 realPartSlider.value = (float)_real;
+
+                if (spiral == null)
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                else
+                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+
                 RealChanged?.Invoke(value);
             }
         }

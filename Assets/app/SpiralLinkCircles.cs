@@ -4,33 +4,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 
-public class SpiralMiddleLink : MonoBehaviour
+public class SpiralLinkCircles : MonoBehaviour
 {
     public App app;
     public Slider spiralNumber;
     public Text spiralNumDisplay;
 
-    public Slider txMidLink;
-    public Slider txMidLinkCircle;
+    [Tooltip("Transparency of the circles")]
+    public Slider txMidLinkCircle; // circles transparency
 
-    public Color mlColor;
     public Color mlCircle;
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-TxMidLink", txMidLink.value);
-        PlayerPrefs.SetFloat(name + "-TxMidLinkCircle", txMidLink.value);
+        PlayerPrefs.SetFloat(name + "-TxMidLinkCircle", txMidLinkCircle.value);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        txMidLink.onValueChanged.AddListener(value =>
-        {
-            mlColor = new Color(mlColor.r, mlColor.g, mlColor.b, value);
-        });
-        txMidLink.value = PlayerPrefs.GetFloat(name + "-TxMidLink", mlColor.a);
-
         txMidLinkCircle.onValueChanged.AddListener(value =>
         {
             mlCircle = new Color(mlCircle.r, mlCircle.g, mlCircle.b, value);
@@ -41,6 +33,12 @@ public class SpiralMiddleLink : MonoBehaviour
         app.DrawSprial += drawShapes;
     }
 
+    
+    //
+    // Draws concentric circles with the center on the next joint to the link
+    // the camera is tracking. The number of circles is the current middle index (MI).
+    // The radius is 1/2 the link length from the current link and the next -MI-
+    // link lengths.
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         using (Draw.StyleScope)
@@ -51,14 +49,13 @@ public class SpiralMiddleLink : MonoBehaviour
             // Highlight the spiral middle link
             var j1 = spiral.joints[i];
             var j2 = spiral.joints[i + 1];
-            Draw.Thickness = 8;
-            Draw.Color = mlColor;
-            Draw.Line(j1, j2);
 
             var center = j2.Clone();
 
             Draw.Thickness = 1;
             Draw.Color = mlCircle;
+
+            // If the camera is tracking a link, draw the circles on that link instead
             if (CameraTracking.trackingIndex != -1)
             {
                 i = CameraTracking.trackingIndex;
