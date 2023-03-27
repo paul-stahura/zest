@@ -36,9 +36,9 @@ public class SpiralLinkCircles : MonoBehaviour
     
     //
     // Draws concentric circles with the center on the next joint to the link
-    // the camera is tracking. The number of circles is the current middle index (MI).
-    // The radius is 1/2 the link length from the current link and the next -MI-
-    // link lengths.
+    // the camera is tracking. The number of circles is the current middle index
+    // (MI). The radius is 1/2 the link length from the current link and the
+    // next -MI- link lengths.
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         using (Draw.StyleScope)

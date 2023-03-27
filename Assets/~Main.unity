@@ -9464,7 +9464,8 @@ MonoBehaviour:
   transparency: {fileID: 1638181150}
   dotTransparency: {fileID: 988684345}
   trailTransparency: {fileID: 1364041421}
-  showJust2: {fileID: 102129671}
+  showJust3: {fileID: 102129671}
+  size: 50
 --- !u!4 &906453632
 Transform:
   m_ObjectHideFlags: 0

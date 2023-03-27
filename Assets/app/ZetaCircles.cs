@@ -45,6 +45,7 @@ public class ZetaCircles : MonoBehaviour
         app.DrawSprial += drawShapes;
     }
 
+    // 27 Mar, 2023 - this is currently unused.
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         if (transparency.value == 0)

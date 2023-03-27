@@ -20,7 +20,17 @@ public class ThreePointCircle : MonoBehaviour
         app.DrawSprial += drawShapes;
     }
 
-
+    /// <summary>
+    /// Draws a circle using the three "dark spirals" near the middle link. A
+    /// "dark spiral" is where a spiral would be theoretically but since there
+    /// aren't enough links to define it / show it around the middle link, you
+    /// can't see it. 
+    ///
+    /// They are essentially calculated the same as the regular spiral
+    /// locations, we just keep going to and past the middle link.
+    /// </summary>
+    /// <param name="cam"></param>
+    /// <param name="spiral"></param>
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
         var i = spiral.middleIndex - 1;
