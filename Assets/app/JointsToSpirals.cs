@@ -15,6 +15,7 @@ public class JointsToSpirals : MonoBehaviour
 
     public Slider transparency;
     public Slider lineCount;
+    public Text lineLengthTxt;
 
     void OnApplicationQuit()
     {
@@ -44,6 +45,7 @@ public class JointsToSpirals : MonoBehaviour
         using (Draw.StyleScope)
         {
             drawCenterPoints(cam, s);
+            drawConnectingLines(cam, s);
         }
 
         using (Draw.StyleScope)
@@ -164,6 +166,25 @@ public class JointsToSpirals : MonoBehaviour
             Draw.Ring(pt, orth / size / 2);
             ShapesUtils.DrawCross(pt, orth / size, .5f);
         }
+    }
+
+    // If the middle two spiral centers are visible, draw a line between them
+    // and calculate the length of the line
+    void drawConnectingLines(Camera cam, Zeta.Spiral spiral)
+    {
+        if (lineCount.value < 2)
+            return;
+
+        var pt1 = spiral.spirals[spiral.middleIndex + 1];
+        var pt2 = spiral.spirals[spiral.middleIndex];
+
+        var c = Color.yellow;
+        c.a = SRMath.Ease(0, 1, transparency.value, SRMath.EaseType.ExpoEaseOut);
+        Draw.Color = c;
+        Draw.Thickness = 1;
+        Draw.Line(pt1, pt2);
+
+        lineLengthTxt.text = "Line Length: " + ((pt2 - pt1).Length * Math.Sqrt(spiral.middleIndex+1)).ToString("0.000");
     }
 
     public float size = 50f;
