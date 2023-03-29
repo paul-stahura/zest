@@ -11,6 +11,11 @@ public class ThreePointCircle : MonoBehaviour
     public Slider transparency;
     public Color color;
 
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+    }
+
     // Start is called before the first frame update
     void Start()
     {

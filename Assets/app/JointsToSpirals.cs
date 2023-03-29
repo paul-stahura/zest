@@ -9,28 +9,17 @@ public class JointsToSpirals : MonoBehaviour
     public App app;
     public Color color = Color.blue;
     public Color dotColor = Color.magenta;
-    public Color trailColor = Color.blue;
 
 
     public float thickness = 1;
 
     public Slider transparency;
-    public Slider dotTransparency;
-    public Slider trailTransparency;
-
-    [Tooltip("Shows only the three joints-to-spirals around the middle link")]
-    public Toggle showJust3;
-
-
-    List<Vector3> trail = new List<Vector3>();
-
+    public Slider lineCount;
 
     void OnApplicationQuit()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.SetFloat(name + "-DotTransparency", dotTransparency.value);
-        PlayerPrefs.SetFloat(name + "-TxCenterTrail", trailTransparency.value);
-        PlayerPrefs.SetInt(name + "-ShowJust2", showJust3.isOn ? 1 : 0);
+        PlayerPrefs.SetFloat(name + "-LineCount", lineCount.value);
 
         PlayerPrefs.Save();
     }
@@ -38,15 +27,15 @@ public class JointsToSpirals : MonoBehaviour
     void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
-        dotTransparency.value = PlayerPrefs.GetFloat(name + "-DotTransparency", 1f);
-        trailTransparency.value = PlayerPrefs.GetFloat(name + "-TrailTransparency", 1f);
-        showJust3.isOn = PlayerPrefs.GetInt(name + "-ShowJust2", 0) != 0 ? true : false;
+        lineCount.value = PlayerPrefs.GetFloat(name + "-LineCount", 1f);
 
         app.DrawSprial += drawShapes;
     }
 
     void drawShapes(Camera cam, Zeta.Spiral s)
     {
+        lineCount.maxValue = s.spirals.Length;
+
         using (Draw.StyleScope)
         {
             drawJointsToSpirals(cam, s);
@@ -67,14 +56,10 @@ public class JointsToSpirals : MonoBehaviour
     void drawJointsToSpirals(Camera cam, Zeta.Spiral spiral)
     {
         Draw.Thickness = thickness;
-        color.a = transparency.value;
+        color.a = SRMath.Ease(0, .75f, transparency.value, SRMath.EaseType.ExpoEaseIn);
         Draw.Color = color;
 
-        var start = 0;
-        if (showJust3.isOn)
-        {
-            start = spiral.middleIndex - 1;
-        }
+        var start = spiral.spirals.Length - (int)lineCount.value;
 
         // draw a line from each of the first links at the same slope as zeta
         for (var i = start; i < spiral.spirals.Length; i++)
@@ -119,13 +104,11 @@ public class JointsToSpirals : MonoBehaviour
     /// <param name="spiral"></param>
     void drawCenterPoints(Camera cam, Zeta.Spiral spiral)
     {
-        dotColor.a = dotTransparency.value / 2;
+        dotColor.a = SRMath.Ease(0, 1, transparency.value, SRMath.EaseType.ExpoEaseOut);
         Draw.Color = dotColor;
         Draw.Thickness = 1;
 
-        var start = 0;
-        if (showJust3.isOn)
-            start = spiral.middleIndex - 1;
+        var start = spiral.spirals.Length - (int)lineCount.value;
 
         for (var i = start; i < spiral.spirals.Length; i++)
         {
@@ -146,28 +129,40 @@ public class JointsToSpirals : MonoBehaviour
 
                 if (orth < 1.5f && i == spiral.middleIndex)
                 {
+                    ShapesUtils.DrawCross(pt, orth / size * 2, .5f);
+
+                    var c = dotColor;
+                    c.a = c.a / 2;
+                    Draw.Color = c;
                     var offset = orth / size;
                     Draw.Rectangle(pt - new Vector2(offset, offset), new Rect
                     {
                         width = orth / size * 2,
                         height = orth / size * 2
                     });
+                    Draw.Color = dotColor;
 
-                    ShapesUtils.DrawCross(pt, orth / size * 2, .5f);
-                    // continue;
+                    continue;
                 }
 
                 if (orth < 1.5f && i == spiral.middleIndex + 1)
                 {
+                    ShapesUtils.DrawCross(pt, orth / size * 2, .5f);
+
+                    var c = dotColor;
+                    c.a = c.a / 2;
+                    Draw.Color = c;
+
                     Draw.Pie(pt, orth / size, 0, Mathf.PI / 2);
                     Draw.Pie(pt, orth / size, Mathf.PI, 1.5f * Mathf.PI);
-                    ShapesUtils.DrawCross(pt, orth / size * 2, .5f);
-                    // continue;
+
+                    Draw.Color = dotColor;
+                    continue;
                 }
             }
 
-            Draw.Ring(pt, orth / size);
-            ShapesUtils.DrawCross(pt, orth / size * 2, .5f);
+            Draw.Ring(pt, orth / size / 2);
+            ShapesUtils.DrawCross(pt, orth / size, .5f);
         }
     }
 
