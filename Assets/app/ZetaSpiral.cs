@@ -13,21 +13,26 @@ public partial class ZetaSpiral : MonoBehaviour
 
     public App app;
     public Slider transparency;
-    public Slider targetTransparency;
     public Slider visibleLinks;
+    public Slider targetTransparency;
+
+    [Header("Reverse Spiral")]
+    public Toggle showReverseSpiral;
+    public Color reverseSpiralColor;
 
 
 
     // Dont draw a line until the total length of the vectors is at least this
+    [HideInInspector]
     public Slider cutoffLength;
 
     // Skip drawing this many lines before drawing the next line. They are so short you can't see them anyway
+    [HideInInspector]
     public Slider skipEvery;
-
-    public int numLinksReference = 100;
 
 
     // Don't draw the spiral after the middle links.  Only draw a line to each spiral
+    [HideInInspector]
     public Toggle onlyDrawOutline;
     // Draw a cross marking the location of each spiral
 
@@ -35,13 +40,14 @@ public partial class ZetaSpiral : MonoBehaviour
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
         PlayerPrefs.SetFloat(name + "-ZetaTargetTransparency", targetTransparency.value);
+        PlayerPrefs.SetInt(name + "-ShowReverseSpiral", showReverseSpiral.isOn ? 1 : 0);
         PlayerPrefs.Save();
     }
     public void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
-
+        showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
         app.DrawSprial += drawShapes;
     }
 
@@ -61,6 +67,11 @@ public partial class ZetaSpiral : MonoBehaviour
         {
             drawOutline(spiral);
         }
+
+        using (Draw.StyleScope)
+        {
+            drawReverseSpiral(cam, spiral);
+        }
     }
 
     void drawSpiral(Zeta.Spiral sprial)
@@ -73,9 +84,6 @@ public partial class ZetaSpiral : MonoBehaviour
         // is not the middle link number starting from one.
         var middleLink = sprial.middleIndex + 1;
 
-
-        numLinksReference = sprial.numLinks;
-
         int skipCount = 0;
 
         // If the visibleLinks slider is at max value, don't limit visibility.  Draw all links
@@ -84,7 +92,8 @@ public partial class ZetaSpiral : MonoBehaviour
         var startIndex = 1;
         var endIndex = sprial.numLinks;
 
-        if (limitVisibleLinks) {
+        if (limitVisibleLinks)
+        {
             startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value + 1, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
             endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, sprial.numLinks);
         }
@@ -179,5 +188,45 @@ public partial class ZetaSpiral : MonoBehaviour
 
         Draw.Ring(pt, 1f);
 
+    }
+
+
+    void drawReverseSpiral(Camera cam, Zeta.Spiral spiral)
+    {
+        if (!showReverseSpiral.isOn)
+            return;
+
+        if (spiral.joints[0] == null)
+            return;
+
+        Draw.Thickness = 1;
+        var c  = reverseSpiralColor;
+        c.a = transparency.value;
+        Draw.Color = c;
+
+        var startIndex = 0;
+        var endIndex = spiral.joints.Length - 1;;
+        bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue && CameraTracking.trackingIndex > -1;
+        if (limitVisibleLinks)
+        {
+            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
+            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 1, CameraTracking.trackingIndex + (int)visibleLinks.value + 1, spiral.numLinks);
+        }
+
+        var zeta = spiral.zeta.ToVector();
+        var z2 = zeta / 2;
+
+        // Copy zeta vector and normalize it.
+        var norm = zeta.Normalized();
+
+
+        var from = zeta + spiral.joints[endIndex].Reflect(norm);
+        for (int i = endIndex - 1; i >= startIndex; i--)
+        {
+            var to = zeta + spiral.joints[i].Reflect(norm);
+
+            Draw.Line(from, to);
+            from = to;
+        }
     }
 }

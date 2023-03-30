@@ -104,4 +104,11 @@ public class Vector
     {
         return new Vector(Math.Abs(x), Math.Abs(y));
     }
+
+    public Vector Reflect(Vector normal)
+    {
+        var dot = this.Dot(normal);
+        var reflected = this - normal * dot * 2;
+        return reflected;
+    }
 }
