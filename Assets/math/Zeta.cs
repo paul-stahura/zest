@@ -290,6 +290,12 @@ public class Zeta
         public Complex zeta;
         public Vector[] spirals;
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="useReimannSiegel">Reimann Siegel can only be used when
+        /// the real part is .5</param>
         public Spiral(Complex s, bool useReimannSiegel)
         {
             this.input = s;
@@ -364,7 +370,7 @@ public class Zeta
         /// <param name="spiral">Spiral number where 0 is the last spiral, 
         /// 1 is the second to last spiral etc.</param>
         /// <returns>Approximate index of the link that is the middle spiral link</returns>
-        public double SpiralMiddleIndex(double index, double spiral)
+        public static double SpiralMiddleIndex(double index, double spiral)
         {
             // given index and joint/spiral num, return index/number of the 
             // Spiral Middle Link, works for any spiral (last spiral is number j=0)

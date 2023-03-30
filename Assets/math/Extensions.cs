@@ -23,6 +23,11 @@ public static class Extensions
     {
         return Math.Pow(d, exp);
     }
+
+    public static Complex ToComplex(this Vector v)
+    {
+        return new Complex(v.x, v.y);
+    }
 }
 
 // public static class ComplexExt

@@ -92,7 +92,7 @@ public class CameraTracking : MonoBehaviour
             spiralNumber.maxValue = spiral.middleIndex;
 
             var mi = Zeta.ImagToIndex(app.Imag);
-            var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
+            var i = (int)Zeta.Spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             trackLink(cam, i, spiral);
         }
@@ -106,7 +106,7 @@ public class CameraTracking : MonoBehaviour
 
             // 2/11/2023 "changes to code" email
             var joint = Math.Floor(mi) - spiralNumber.value;
-            var i = (int)spiral.SpiralMiddleIndex(mi, joint);
+            var i = (int)Zeta.Spiral.SpiralMiddleIndex(mi, joint);
             trackLink(cam, i, spiral, false);
         }
     }
