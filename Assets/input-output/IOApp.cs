@@ -3,10 +3,16 @@ using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using Shapes;
 
 public class IOApp : ImmediateModeShapeDrawer
 {
+    Vector imagStart = new Vector(.5, 189.5416); // index: 5.0
+    Vector imagEnd = new Vector(5.24, 264.9393); // index: 5.999999
+
+    public Camera camera;
+    public DrawShapesEvent onDrawShapes = new DrawShapesEvent();
     public override void DrawShapes(Camera cam)
     {
         using (Draw.Command(cam))
@@ -17,39 +23,9 @@ public class IOApp : ImmediateModeShapeDrawer
 
             using (Draw.StyleScope)
             {
-                drawGrid();
+                onDrawShapes.Invoke(camera);
             }
         }
-    }
-
-    void drawGrid() 
-    {
-        Draw.Thickness = 1f;
-        var c = Color.gray;
-        
-
-        for (var x = -10.0f; x <= 10.0f; x += .5f)
-        {
-            if (x % 10f == 0)
-{                Draw.Thickness = 4f;
-                c.a = 1f;
-                Draw.Color = c;
-}            else
-{                Draw.Thickness = .5f;
-}
-            Draw.Line(new Vector2(x, -10), new Vector2(x, 10));
-        }
-        
-        for (var y = -10.0f; y <= 10.0f; y += .5f)
-        {
-            if (y % 10 == 0)
-                Draw.Thickness = 4f;
-            else
-                Draw.Thickness = .5f;
-
-            Draw.Line(new Vector2(-10, y), new Vector2(10, y));
-        }
-
     }
 
     void OnApplicationQuit()
@@ -64,5 +40,5 @@ public class IOApp : ImmediateModeShapeDrawer
     void Update()
     {
 
-   }
+    }
 }
