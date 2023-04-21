@@ -25,16 +25,24 @@ public class ZInput : MonoBehaviour
         endReal.onValueChanged.AddListener(value => imagEnd.x = value);
         endImag.onValueChanged.AddListener(value => imagEnd.y = value);
 
+        setInputValues();
+
+    }
+
+    void setInputValues()
+    {
         startReal.Value = (float)imagStart.x;
         startImag.Value = (float)imagStart.y;
         endReal.Value = (float)imagEnd.x;
         endImag.Value = (float)imagEnd.y;
-
     }
+
     public void onClick()
     {
         imagStart.x = .5;
         imagEnd.x = .5;
+
+        setInputValues();
     }
 
 
@@ -81,10 +89,7 @@ public class ZInput : MonoBehaviour
                 {
                     imagEnd = new Vector(worldPos);
                 }
-                startReal.Value = (float)imagStart.x;
-                startImag.Value = (float)imagStart.y;
-                endReal.Value = (float)imagEnd.x;
-                endImag.Value = (float)imagEnd.y;
+                setInputValues();
             }
         }
         else
