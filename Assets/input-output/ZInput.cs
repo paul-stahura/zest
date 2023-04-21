@@ -24,6 +24,12 @@ public class ZInput : MonoBehaviour
         startImag.onValueChanged.AddListener(value => imagStart.y = value);
         endReal.onValueChanged.AddListener(value => imagEnd.x = value);
         endImag.onValueChanged.AddListener(value => imagEnd.y = value);
+
+        startReal.Value = (float)imagStart.x;
+        startImag.Value = (float)imagStart.y;
+        endReal.Value = (float)imagEnd.x;
+        endImag.Value = (float)imagEnd.y;
+
     }
     public void onClick()
     {
