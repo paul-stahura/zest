@@ -24,10 +24,6 @@ public class Graph : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            Draw.LineGeometry = LineGeometry.Volumetric3D;
-            Draw.ThicknessSpace = ThicknessSpace.Pixels;
-            Draw.Matrix = transform.localToWorldMatrix;
-
             // Draw the main grid
             Draw.Thickness = 1;
             // Draw.Color = mainGridColor;

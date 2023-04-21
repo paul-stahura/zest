@@ -3,6 +3,8 @@ using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 using Shapes;
 
 public class App : ImmediateModeShapeDrawer
@@ -273,5 +275,10 @@ public class App : ImmediateModeShapeDrawer
         // {
         //     trackBisectFirstFrame = true;
         // }
+    }
+
+    public void onClick()
+    {
+        SceneManager.LoadScene("~Input-Output");
     }
 }

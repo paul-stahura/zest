@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Complex = System.Numerics.Complex;
 
 public class Vector
 {
@@ -38,13 +39,15 @@ public class Vector
     }
 
     public override string ToString()
-    {   
+    {
         var format = "0.00000";
         return $"{x.ToString(format)},{y.ToString(format)}";
     }
 
     public static implicit operator Vector2(Vector v) => v.ToVector2();
     public static implicit operator Vector3(Vector v) => new Vector3((float)v.x, (float)v.y, 0);
+    public static implicit operator Complex(Vector v) => v.ToComplex();
+    
     public static Vector operator +(Vector a, Vector b) => new Vector(a.x + b.x, a.y + b.y);
     public static Vector operator -(Vector a, Vector b) => new Vector(a.x - b.x, a.y - b.y);
     public static Vector operator *(Vector a, Vector b) => new Vector(a.x * b.x, a.y * b.y);
@@ -64,7 +67,7 @@ public class Vector
         return new Vector2((float)x, (float)y);
     }
 
-    public Vector3 ToVector3(float z=0)
+    public Vector3 ToVector3(float z = 0)
     {
         return new Vector3((float)x, (float)y, z);
     }
@@ -72,12 +75,12 @@ public class Vector
     public Vector Normalized()
     {
         var distance = Math.Sqrt(x * x + y * y);
-       return new Vector(x / distance, y / distance);
+        return new Vector(x / distance, y / distance);
     }
 
     public double Dot(Vector v)
     {
-        return x*v.x + y*v.y;
+        return x * v.x + y * v.y;
     }
 
     public double DistanceTo(Vector b)
@@ -85,11 +88,11 @@ public class Vector
         return Distance(this, b);
     }
 
-    public double Length { get { return Math.Sqrt(x*x + y*y); } }
+    public double Length { get { return Math.Sqrt(x * x + y * y); } }
 
     public static double Distance(Vector a, Vector b)
     {
-        double dist =  Math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+        double dist = Math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
         /*
         if(double.IsNaN(dist))
         {
@@ -110,5 +113,15 @@ public class Vector
         var dot = this.Dot(normal);
         var reflected = this - normal * dot * 2;
         return reflected;
+    }
+
+    public Vector Lerp(Vector b, double t)
+    {
+        return this + (b - this) * t;
+    }
+
+    public Complex ToComplex()
+    {
+        return new Complex(x, y);
     }
 }
