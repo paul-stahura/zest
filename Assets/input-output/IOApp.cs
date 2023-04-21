@@ -8,10 +8,8 @@ using Shapes;
 
 public class IOApp : ImmediateModeShapeDrawer
 {
-    Vector imagStart = new Vector(.5, 189.5416); // index: 5.0
-    Vector imagEnd = new Vector(5.24, 264.9393); // index: 5.999999
 
-    public Camera camera;
+    public Camera cam;
     public DrawShapesEvent onDrawShapes = new DrawShapesEvent();
     public override void DrawShapes(Camera cam)
     {
@@ -23,7 +21,7 @@ public class IOApp : ImmediateModeShapeDrawer
 
             using (Draw.StyleScope)
             {
-                onDrawShapes.Invoke(camera);
+                onDrawShapes.Invoke(cam);
             }
         }
     }
