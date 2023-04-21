@@ -55,9 +55,9 @@ public class ZInput : MonoBehaviour
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1;
-            Draw.Disc(imagStart, radius, Color.red);
+            Draw.Disc(imagStart, radius, Color.green);
             Draw.Disc(imagEnd, radius, Color.red);
-            Draw.Line(imagStart, imagEnd, Color.red);
+            Draw.Line(imagStart, imagEnd, Color.white);
         }
     }
     public bool dragging = false;
