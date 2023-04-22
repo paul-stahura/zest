@@ -26,7 +26,6 @@ public class ZInput : MonoBehaviour
         endImag.onValueChanged.AddListener(value => imagEnd.y = value);
 
         setInputValues();
-
     }
 
     void setInputValues()
@@ -48,16 +47,22 @@ public class ZInput : MonoBehaviour
 
     public void OnDrawShapes(Camera cam)
     {
-        var start = Vector2.zero;
+        // var start = Vector2.zero;
         radius = cam.orthographicSize / 50;
 
 
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1;
-            Draw.Disc(imagStart, radius, Color.green);
-            Draw.Disc(imagEnd, radius, Color.red);
-            Draw.Line(imagStart, imagEnd, Color.white);
+            var start = imagStart.ToVector2();
+            start.y /= 100;
+
+            var end = imagEnd.ToVector2();
+            end.y /= 100;
+
+            Draw.Disc(start, radius, Color.green);
+            Draw.Disc(end, radius, Color.red);
+            Draw.Line(start, end, Color.white);
         }
     }
     public bool dragging = false;
@@ -65,15 +70,21 @@ public class ZInput : MonoBehaviour
 
     void Update()
     {
+        var start = imagStart.ToVector2();
+        start.y /= 100;
+
+        var end = imagEnd.ToVector2();
+        end.y /= 100;   
+
         if (Input.GetMouseButton(0))
         {
             var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            if (Vector2.Distance(worldPos, imagStart) < radius)
+            if (Vector2.Distance(worldPos, start) < radius)
             {
                 dragging = true;
                 dragStart = true;
             }
-            else if (Vector2.Distance(worldPos, imagEnd) < radius)
+            else if (Vector2.Distance(worldPos, end) < radius)
             {
                 dragging = true;
                 dragStart = false;
@@ -83,11 +94,13 @@ public class ZInput : MonoBehaviour
             {
                 if (dragStart)
                 {
-                    imagStart = new Vector(worldPos);
+                    start = new Vector(worldPos);
+                    imagStart = new Vector(start.x, start.y * 100);
                 }
                 else
                 {
-                    imagEnd = new Vector(worldPos);
+                    end = new Vector(worldPos);
+                    imagEnd = new Vector(end.x, end.y * 100);
                 }
                 setInputValues();
             }

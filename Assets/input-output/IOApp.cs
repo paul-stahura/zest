@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Linq;
 using Complex = System.Numerics.Complex;
 
 using UnityEngine;
@@ -20,10 +22,7 @@ public class IOApp : ImmediateModeShapeDrawer
             Draw.ThicknessSpace = ThicknessSpace.Pixels;
             Draw.Matrix = transform.localToWorldMatrix;
 
-            using (Draw.StyleScope)
-            {
-                onDrawShapes.Invoke(cam);
-            }
+            onDrawShapes.Invoke(cam);
         }
     }
 
@@ -31,10 +30,7 @@ public class IOApp : ImmediateModeShapeDrawer
     {
     }
 
-    public void Start()
-    {
 
-    }
 
     void Update()
     {

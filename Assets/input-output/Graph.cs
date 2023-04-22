@@ -39,6 +39,9 @@ public class Graph : MonoBehaviour
             Draw.Line(Vector2.zero, new Vector2(center.x + width, 0), mainGridColor);
             Draw.Line(Vector2.zero, new Vector2(0, center.y + height), mainGridColor);
 
+            Draw.Line(new Vector2(1f, 0), new Vector2(1f, center.y + height), mainGridColor);
+
+
             // Draw the sub grid
             Draw.Thickness = .5f;
             Draw.Color = gridColor;
