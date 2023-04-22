@@ -37,6 +37,9 @@ public class App : ImmediateModeShapeDrawer
 
     public ZetaSpiral zetaSpiral;
 
+    public Slider extendSpiralCount;
+
+
 
     int frameCount = 0;
     float dt = 0.0f;
@@ -100,7 +103,10 @@ public class App : ImmediateModeShapeDrawer
                 if (spiral == null)
                     spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
                 else
+                {
+                    spiral.extendSpiralCount = (int)extendSpiralCount.value;
                     spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+                }
 
                 RealChanged?.Invoke(value);
             }
@@ -208,6 +214,12 @@ public class App : ImmediateModeShapeDrawer
                 realPartFineTune.reset();
                 realPartSlider.value = .5f;
             }
+        });
+
+        extendSpiralCount.onValueChanged.AddListener(value =>
+        {
+            spiral.extendSpiralCount = (int)extendSpiralCount.value;
+            spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
         });
         #endregion
     }

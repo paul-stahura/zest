@@ -290,6 +290,8 @@ public class Zeta
         public Complex zeta;
         public Vector[] spirals;
 
+        public int extendSpiralCount = 0;
+
         public Spiral(Complex s, bool useReimannSiegel)
         {
             this.input = s;
@@ -315,7 +317,7 @@ public class Zeta
             var nl = (int)(input.Imaginary / Math.PI + 1);
 
             var mi = Zeta.ImagToIndex(input.Imaginary);
-            this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2; // need to an extra for proper final link tracking
+            this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
             this.middleIndex = (int)mi;
 
             if (useReimannSiegel)
