@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,9 @@ public class ZInput : MonoBehaviour
     float radius;
 
     public Lean.Touch.LeanTouch _leanDrag;
+
+    public Action OnDragStart;
+    public Action OnDragEnd;
 
     void Start()
     {
@@ -42,6 +46,7 @@ public class ZInput : MonoBehaviour
         imagEnd.x = .5;
 
         setInputValues();
+        OnDragEnd?.Invoke();
     }
 
 
@@ -74,18 +79,24 @@ public class ZInput : MonoBehaviour
         start.y /= 100;
 
         var end = imagEnd.ToVector2();
-        end.y /= 100;   
+        end.y /= 100;
 
         if (Input.GetMouseButton(0))
         {
             var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             if (Vector2.Distance(worldPos, start) < radius)
             {
+                if (!dragging)
+                    OnDragStart?.Invoke();
+
                 dragging = true;
                 dragStart = true;
             }
             else if (Vector2.Distance(worldPos, end) < radius)
             {
+                if (!dragging)
+                    OnDragStart?.Invoke();
+
                 dragging = true;
                 dragStart = false;
             }
@@ -107,6 +118,9 @@ public class ZInput : MonoBehaviour
         }
         else
         {
+            if (dragging)
+                OnDragEnd?.Invoke();
+
             dragging = false;
         }
 

@@ -13,8 +13,12 @@ public class Overlay : MonoBehaviour
 
     public Toggle show;
 
+    public Slider transparency;
+
     public void Start()
     {
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", 1);
+
         // Read the CSV file
         var lines = File.ReadAllLines("Assets/data/teardrops.csv");
 
@@ -37,6 +41,12 @@ public class Overlay : MonoBehaviour
         show.isOn = false;
     }
 
+    void OnApplicationQuit()
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
+    }
+
     public void OnDrawShapes(Camera cam)
     {
         if (!show.isOn)
@@ -50,22 +60,28 @@ public class Overlay : MonoBehaviour
         {
             if (points1 != null)
             {
+                var col = Color.red;
+                col.a = transparency.value;
+
                 var start = points1[0];
                 for (int i = 1; i < points1.Length; i++)
                 {
                     var end = points1[i];
-                    Draw.Line(start, end, 1, Color.red);
+                    Draw.Line(start, end, 1, col);
                     start = end;
                 }
             }
 
             if (points2 != null)
             {
+                var col = Color.blue;
+                col.a = transparency.value;
+
                 var start = points2[0];
                 for (int i = 1; i < points2.Length; i++)
                 {
                     var end = points2[i];
-                    Draw.Line(start, end, 1, Color.blue);
+                    Draw.Line(start, end, 1, col);
                     start = end;
                 }
             }
