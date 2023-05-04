@@ -15,6 +15,8 @@ public class Overlay : MonoBehaviour
 
     public Slider transparency;
 
+    public ZTrace zTrace1;
+
     public void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", 1);
@@ -37,6 +39,11 @@ public class Overlay : MonoBehaviour
         // Get the points
         points1 = coordinates.Select(c => c.Item1).ToArray();
         points2 = coordinates.Select(c => c.Item2).ToArray();
+
+        if (zTrace1 != null)
+        {
+            // zTrace1.FromOutput(points1);
+        }
 
         show.isOn = false;
     }

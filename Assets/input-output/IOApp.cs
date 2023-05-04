@@ -22,6 +22,14 @@ public class IOApp : ImmediateModeShapeDrawer
             Draw.ThicknessSpace = ThicknessSpace.Pixels;
             Draw.Matrix = transform.localToWorldMatrix;
 
+            Draw.Thickness = 6;
+            var c = Color.blue;
+            c.a = .5f;
+            
+            Draw.Line(new Vector2(.00915f, 0), new Vector2(1, 0), c);
+            // ShapesUtils.DrawCross()
+
+
             onDrawShapes.Invoke(cam);
         }
     }

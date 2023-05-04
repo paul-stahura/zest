@@ -33,7 +33,7 @@ public class App : ImmediateModeShapeDrawer
 
 
     public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
-    readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(2);
+    readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1);
 
     public ZetaSpiral zetaSpiral;
 

@@ -1,9 +1,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
 using Complex = System.Numerics.Complex;
-using MoonSharp.Interpreter;
 
 public class Zeta
 {
@@ -15,7 +13,6 @@ public class Zeta
     const int MAX_ITS = 5000;
     const double MAX_GAMMA = 450;
 
-    static List<int> primes;
 
     static double[] b_coeff = {
         1.0000000000000000000000000000000,
@@ -57,28 +54,6 @@ public class Zeta
         -0.26190838401581408670E-4,
         0.36899182659531622704E-5
     };
-
-
-    public static Complex[] EulersProduct(Complex s, int depth)
-    {
-        if (Zeta.primes == null)
-        {
-            string path = "primes.csv";
-            Zeta.primes = FileUtils.LoadFromFile(path);
-        }
-
-        Complex[] result = new Complex[depth];
-        result[0] = 1 / (1 - Complex.Pow(2, -s));
-
-        for (var i = 1; i < depth; i++)
-        {
-            var p = primes[i];
-            var c = 1 / (1 - Complex.Pow(p, -s));
-            result[i] = result[i - 1] * c;
-        }
-
-        return result;
-    }
 
     public static Complex EulerMaclauren(Complex s)
     {
@@ -235,11 +210,6 @@ public class Zeta
         // );
     }
 
-    /// <summary>
-    /// Only works when the real part is .5
-    /// </summary>
-    /// <param name="s"></param>
-    /// <returns></returns>
     public static Complex ReimannSiegel(Complex s)
     {
         double Ereal(double a, double b) => Math.Pow(Math.E, a) * Math.Cos(b);
@@ -284,134 +254,4 @@ public class Zeta
         return new Complex(Zx(imag), Zy(imag));
     }
 
-    [MoonSharpUserData]
-    public class Spiral
-    {
-        public int middleIndex;
-        public Vector middlePoint;
-        public int numLinks;
-        public Vector[] joints;
-        public Complex input;
-        public Complex zeta;
-        public Vector[] spirals;
-
-        public int extendSpiralCount = 0;
-
-        public Spiral(Complex s, bool useReimannSiegel)
-        {
-            this.input = s;
-            this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
-            this.numLinks = (int)(input.Imaginary / Math.PI + 1);
-
-            this.joints = new Vector[numLinks];
-            for (var i = 0; i < this.joints.Length; i++)
-                this.joints[i] = new Vector();
-
-            this.middlePoint = new Vector();
-
-            spirals = new Vector[middleIndex + 2];
-            for (var i = 0; i < spirals.Length; i++)
-                this.spirals[i] = new Vector();
-
-            Update(s, useReimannSiegel);
-        }
-
-        public void Update(Complex s, bool useReimannSiegel)
-        {
-            this.input = s;
-            var nl = (int)(input.Imaginary / Math.PI + 1);
-
-            var mi = Zeta.ImagToIndex(input.Imaginary);
-            this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
-            this.middleIndex = (int)mi;
-
-            if (useReimannSiegel)
-                this.zeta = Zeta.ReimannSiegel(input);
-            else
-                this.zeta = Zeta.EulerMaclauren(input);
-
-            this.joints = new Vector[numLinks];
-
-            var start = new Vector();
-            this.joints[0] = start;
-
-            var imag = this.input.Imaginary;
-            var real = this.input.Real;
-
-            for (int i = 1; i < numLinks; i++)
-            {
-                var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
-                var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
-                var end = new Vector(start.x + x, start.y + y);
-                this.joints[i] = end;
-
-                if (i == this.middleIndex + 1)
-                {
-                    this.middlePoint = start + (end - start) / 2;
-                }
-
-                start = end;
-            }
-
-            findSpirals();
-        }
-
-        public Vector PointOnLink(int idx, double dist)
-        {
-            var link = joints[idx];
-            link = link.Normalized();
-            return link * dist;
-        }
-
-        
-        /// <summary>
-        /// Calculates the link that is the approximate center of a spiral.
-        /// </summary>
-        /// <param name="index">The middle index of the spiral</param>
-        /// <param name="spiral">Spiral number where 0 is the last spiral, 
-        /// 1 is the second to last spiral etc.</param>
-        /// <returns>Approximate index of the link that is the middle spiral link</returns>
-        public double SpiralMiddleIndex(double index, double spiral)
-        {
-            // given index and joint/spiral num, return index/number of the 
-            // Spiral Middle Link, works for any spiral (last spiral is number j=0)
-
-            // S_{mlink}\left(i,j\right)=\frac{2i\left(i+1\right)}{\left(2j+1\right)}+\frac{1}{3\left(2j+1\right)}
-
-            // GPT 3.5
-            // (2index^2 + 3index + 2spiral)/(2spiral + 1)
-            // GPT4:
-            // (2 * index^2 + 2 * index - 2 * spiral + 2) / (3 * (2 * spiral + 1))
-
-            var i = (2*index * (index + 1)) / (2 * spiral + 1) + 1/(3 * (2 * spiral + 1)) - 1;
-
-            return i;
-        }
-
-        void findSpirals()
-        {
-            // Zeta is a complex number 
-            // Convert the complex number to a vector 
-            // then scale it by 2.
-            // 
-            // zeta / 2
-            var zeta = this.zeta.ToVector();
-            var z2 = zeta / 2; 
-
-            // Copy zeta vector and normalize it.
-            var norm = zeta.Normalized();
-
-            spirals = new Vector[middleIndex + 2];
-
-            // Loop through all the joints up to the middle index.
-            //
-            for (var i = 0; i < spirals.Length; i++)
-            {
-                var joint = this.joints[i];
-                
-                var dot = joint.Dot(norm);
-                this.spirals[i] = zeta + joint - norm * 2 * dot; // reflect from about a normal (z2)
-            }
-        }
-    }
 }

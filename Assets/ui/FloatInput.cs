@@ -28,6 +28,9 @@ public class FloatInput : MonoBehaviour
         }
     }
 
+    public static implicit operator double(FloatInput v) => (double)v.Value;
+    
+
     [SerializeField] public FloatEvent onValueChanged = new FloatEvent();
 
     void OnApplicationQuit()

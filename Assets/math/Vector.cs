@@ -120,6 +120,11 @@ public class Vector
         return this + (b - this) * t;
     }
 
+    public static Vector Lerp(Vector a, Vector b, double t)
+    {
+        return a + (b - a) * t;
+    }
+    
     public Complex ToComplex()
     {
         return new Complex(x, y);

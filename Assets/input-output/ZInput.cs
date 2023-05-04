@@ -7,8 +7,8 @@ using Shapes;
 
 public class ZInput : MonoBehaviour
 {
-    public Vector imagStart = new Vector(.5f, 189.5416f); // index: 5.0
-    public Vector imagEnd = new Vector(.5f, 264.9393f); // index: 5.999999
+    public Vector imagStart = new Vector(.5f, 0); // index: 5.0
+    public Vector imagEnd = new Vector(.5f, Math.PI); // index: 5.999999
 
     public FloatInput startReal;
     public FloatInput startImag;
@@ -60,10 +60,10 @@ public class ZInput : MonoBehaviour
         {
             Draw.Thickness = 1;
             var start = imagStart.ToVector2();
-            start.y /= 100;
+            // start.y /= 100;
 
             var end = imagEnd.ToVector2();
-            end.y /= 100;
+            // end.y /= 100;
 
             Draw.Disc(start, radius, Color.green);
             Draw.Disc(end, radius, Color.red);
@@ -76,10 +76,10 @@ public class ZInput : MonoBehaviour
     void Update()
     {
         var start = imagStart.ToVector2();
-        start.y /= 100;
+        // start.y /= 100;
 
         var end = imagEnd.ToVector2();
-        end.y /= 100;
+        // end.y /= 100;
 
         if (Input.GetMouseButton(0))
         {
@@ -106,12 +106,12 @@ public class ZInput : MonoBehaviour
                 if (dragStart)
                 {
                     start = new Vector(worldPos);
-                    imagStart = new Vector(start.x, start.y * 100);
+                    imagStart = new Vector(start.x, start.y);
                 }
                 else
                 {
                     end = new Vector(worldPos);
-                    imagEnd = new Vector(end.x, end.y * 100);
+                    imagEnd = new Vector(end.x, end.y);
                 }
                 setInputValues();
             }
