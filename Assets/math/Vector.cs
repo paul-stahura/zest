@@ -103,6 +103,11 @@ public class Vector
         return dist;
     }
 
+    public double Distance(Vector2 a)
+    {
+        return Distance(this, new Vector(a));
+    }
+
     public Vector Abs()
     {
         return new Vector(Math.Abs(x), Math.Abs(y));

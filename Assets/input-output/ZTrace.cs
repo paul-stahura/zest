@@ -8,17 +8,14 @@ using Complex = System.Numerics.Complex;
 
 public class ZTrace : MonoBehaviour
 {
-    [Dropdown("states")]
-    public string state;
-    string[] states = new string[] { "None", "Line", "Circumference", "Disc" };
-
     public FloatInput fromReal;
     public FloatInput fromImag;
 
     public FloatInput toReal;
     public FloatInput toImag;
     public Button reset;
-    public int numPoints = 1000;
+    public int pointsPerSegment = 10;
+    public int controlPoints = 10;
     public Color color = Color.magenta;
     public Slider transparency;
     public Toggle useReimannSegal;
@@ -26,41 +23,63 @@ public class ZTrace : MonoBehaviour
     public Lean.Touch.LeanTouch _leanDrag;
 
 
-    public bool draggingFrom = false;
-    public bool draggingTo = false;
-    public bool dragging = false;
+    public int dragging = -1;
     public bool mousebutton = false;
     public bool leanTouch = true;
     bool invert = false;
 
     float radius;
+    public float radiusScalar = 50;
 
+    protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
 
     public delegate Complex ZetaFunction(Complex z);
-    ZetaFunction ZetaFn = Zeta.ReimannSiegel;
+    ZetaFunction ZetaFn = Zeta.EulerMaclauren;
 
     void Start()
     {
-        useReimannSegal.onValueChanged.AddListener((bool value) =>
-        {
-            if (value)
-            {
-                fromReal.Value = .5f;
-                toReal.Value = .5f;
-                ZetaFn = Zeta.ReimannSiegel;
-            }
-            else
-                ZetaFn = Zeta.EulerMaclauren;
-        });
+        // useReimannSegal.onValueChanged.AddListener((bool value) =>
+        // {
+        //     if (value)
+        //     {
+        //         fromReal.Value = .5f;
+        //         toReal.Value = .5f;
+        //         ZetaFn = Zeta.ReimannSiegel;
+        //     }
+        //     else
+        //         ZetaFn = Zeta.EulerMaclauren;
+        // });
 
         reset.onClick.AddListener(() =>
         {
             fromReal.Value = .5f;
             toReal.Value = .5f;
+
+            resetControlPoints();
         });
 
-        Debug.Log(name + " start");
+        fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
+        toImag.onValueChanged.AddListener((float _) => resetControlPoints());
+        fromReal.onValueChanged.AddListener((float _) => resetControlPoints());
+        toReal.onValueChanged.AddListener((float _) => resetControlPoints());
+
+        reset.onClick.Invoke();
+
+        calculate();
+    }
+
+    void resetControlPoints()
+    {
+        inputPts.Clear();
+
+        var inc = 1f / controlPoints;
+        for (double i = 0; i <= 1; i += .1)
+        {
+            var pt = new Vector(.5, fromImag.Value).Lerp(new Vector(.5, toImag.Value), i);
+            inputPts.Add(pt);
+        }
+
         calculate();
     }
 
@@ -69,7 +88,7 @@ public class ZTrace : MonoBehaviour
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1;
-            radius = cam.orthographicSize / 50;
+            radius = cam.orthographicSize / radiusScalar;
 
             if (outputPts.Count == 0)
                 return;
@@ -80,10 +99,7 @@ public class ZTrace : MonoBehaviour
             // draw the output
             for (int i = 1; i < outputPts.Count; i++)
             {
-                if (state == "Disc")
-                    ShapesUtils.DrawCross(outputPts[i].ToVector2(), .01f, .5f);
-                else
-                    Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
+                Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
             }
         }
     }
@@ -93,177 +109,161 @@ public class ZTrace : MonoBehaviour
         if (fromReal != .5 || toReal != .5)
             ZetaFn = Zeta.EulerMaclauren;
 
-        var from = new Vector(fromReal, fromImag);
-        var to = new Vector(toReal, toImag);
+        var wasDragging = dragging > -1;
+        // if the mouse button is released, stop dragging
+        dragging = Input.GetMouseButton(0) == false ? -1 : dragging;
+        if (dragging == -1 && wasDragging)
+            endDrag();
 
-        var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        if (Vector2.Distance(worldPos, from) < radius || Vector2.Distance(worldPos, to) < radius)
+        // See if the mouse is close to the line.  If it is, draw a circle at the nearest point on the line.
+        // If the mouse is near any point on the line, snap the circle to that point.
+        // If we are currently dragging, ignore.
+        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        var discColor = color;
+        discColor.a = discColor.a * .5f;
+        var from = handleDragControlPoint(inputPts[0]);
+        drawControlPoint(from);
+
+        for (var i = 1; i < inputPts.Count; i++)
         {
-            Draw.Disc(from, radius, color);
-            Draw.Disc(to, radius, color);
+            var to = handleDragControlPoint(inputPts[i]);
+            drawControlPoint(to);
 
-            dragging = draggingFrom || draggingTo;
-
-            mousebutton = Input.GetMouseButton(0);
-            leanTouch = _leanDrag.enabled;
-
-            if (Input.GetMouseButton(0))
-            {
-                // if the mouse button is down and we are not currently dragging
-                if (!dragging)
-                    beginDrag();
-                
-                // else, since the mouse is down and we are dragging, keep dragging
-                else if (dragging)
-                    drag();
-            }
-            else if (dragging) // mouse button is up but we are still dragging
-                endDrag();
-
+            Draw.Line(from, to, color);
+            from = to;
         }
 
-        switch (state)
-        {
-            case "Line":
-                Draw.Line(from, to, color);
-                break;
-            case "Circumference":
-                Draw.Ring(from, (float)(to - from).Length, color);
-                break;
-            case "Disc":
-                var c = color;
-                c.a = c.a / 4;
-                Draw.Disc(from, (float)(to - from).Length, c);
-                break;
-            default:
-                throw new System.NotImplementedException(state + " is not implemented");
-        }
+        drawOutputControlPoints();
     }
+
+    void drawControlPoint(Vector2 pt)
+    {
+        var discColor = color;
+
+        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var dist = Vector2.Distance(mousePos, pt);
+        if (dist > radius)
+        {
+            discColor.a = discColor.a * .5f;
+        }
+
+        Draw.Disc(pt, radius, discColor);
+    }
+
+    Vector2 handleDragControlPoint(Vector pt)
+    {
+        var index = inputPts.IndexOf(pt);
+        if (dragging == index)
+            return drag(pt);
+
+        if (dragging == -1 && isMouseOverControlPoint(pt) && Input.GetMouseButton(0))
+        {
+            return drag(pt);
+        }
+
+        return pt;
+    }
+
+    bool isMouseOverControlPoint(Vector pt)
+    {
+        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var dist = pt.Distance(mousePos);
+        return dist < radius;
+    }
+
+    Vector2 nearestPointOnFiniteLine(Vector2 start, Vector2 end, Vector2 pnt)
+    {
+        // Finds the nearest point on the line segment to the mouse.
+        var line = (end - start);
+        var len = line.magnitude;
+        line.Normalize();
+
+        var v = pnt - start;
+        var d = Vector2.Dot(v, line);
+        d = Mathf.Clamp(d, 0f, len);
+        return start + line * d;
+    }
+
+
+
 
     protected void calculate()
     {
+        //
+        // Interpolates between the control points and calculates the Zeta function in between each pair of points.
+        //
         if (invert) // don't calculate if we are deriving from points passed in
             return;
 
-        switch (state)
-        {
-            case "Line":
-                calculateLine();
-                break;
-            case "Circumference":
-                calculateCircumference();
-                break;
-            case "Disc":
-                calculateDisc();
-                break;
-            default:
-                throw new System.NotImplementedException(state + " is not implemented");
-
-        }
-    }
-
-    protected void calculateLine()
-    {
-        var from = new Vector(fromReal, fromImag);
-        var to = new Vector(toReal, toImag);
-
-        double inc = 1d / numPoints;
-        Debug.Assert(inc > 0);
         outputPts.Clear();
-        for (double i = 0; i <= 1; i += inc)
+        var from = inputPts[0];
+        for (var i = 1; i < inputPts.Count; i++)
         {
-            var c = Vector.Lerp(from, to, i);
-            outputPts.Add(Zeta.EulerMaclauren(c));
+            var to = inputPts[i];
+            double inc = 1d / pointsPerSegment;
+            Debug.Assert(inc > 0);
+            for (double j = 0; j <= 1; j += inc)
+            {
+                var c = Vector.Lerp(from, to, j);
+                outputPts.Add(Zeta.EulerMaclauren(c));
+            }
+            from = to;
         }
     }
 
-    protected void calculateCircumference()
+    void drawOutputControlPoints()
     {
-        var from = new Vector(fromReal, fromImag);
-        var to = new Vector(toReal, toImag);
+        //
+        // Calculates the Zeta function for the control points and draws a disc for each one.
+        //
+        Vector to = new Vector();
+        var discColor = color;
+        discColor.a = discColor.a * .5f;
 
-        outputPts.Clear();
-        var center = from;
-        var radius = (to - from).Length;
-
-        for (int i = 0; i < numPoints; i++)
+        var from = inputPts[0];
+        for (var i = 1; i < inputPts.Count; i++)
         {
-            var angle = i * 2 * Math.PI / numPoints;
-            var point = center + new Vector(Math.Cos(angle), Math.Sin(angle)) * radius;
-            outputPts.Add(Zeta.EulerMaclauren(point));
+            to = inputPts[i];
+
+            // draw the dragged point without alpha
+            if (inputPts.IndexOf(from) == dragging)
+                Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, color);
+
+            Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+            from = to;
         }
 
-        outputPts.Add(outputPts[0]); // close the loop
+        Draw.Disc(Zeta.EulerMaclauren(to).ToVector2(), radius, discColor);
     }
 
-    protected void calculateDisc()
+    Vector2 drag(Vector pt)
     {
-        var from = new Vector(fromReal, fromImag);
-        var to = new Vector(toReal, toImag);
-
-        outputPts.Clear();
-        var center = from;
-        var radius = (to - from).Length;
-        var num = dragging ? numPoints / 100 : numPoints * 100;
-        for (int i = 0; i < num; i++)
+        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        dragging = inputPts.IndexOf(pt);
+        if (dragging == 0)
         {
-            var pt = center + new Vector(UnityEngine.Random.insideUnitCircle) * radius;
-            outputPts.Add(Zeta.EulerMaclauren(pt));
+            fromReal.Value = mousePos.x;
+            fromImag.Value = mousePos.y;
         }
-    }
-
-    protected void beginDrag()
-    {
-        var from = new Vector(fromReal, fromImag);
-        var to = new Vector(toReal, toImag);
-
-        var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        if (Vector2.Distance(worldPos, from) <= radius)
+        else if (dragging == inputPts.Count - 1)
         {
-            draggingFrom = true;
-
-            fromReal.Value = worldPos.x;
-            fromImag.Value = worldPos.y;
-        }
-        else if (Vector2.Distance(worldPos, to) <= radius)
-        {
-            draggingTo = true;
-            toReal.Value = worldPos.x;
-            toImag.Value = worldPos.y;
+            toReal.Value = mousePos.x;
+            toImag.Value = mousePos.y;
         }
 
-        dragging = draggingFrom || draggingTo;
-        _leanDrag.enabled = !dragging;
+        _leanDrag.enabled = false;
+
+        inputPts[dragging] = new Vector(mousePos);
 
         calculate();
-    }
 
-    protected void drag()
-    {
-        var vec = new Vector(fromReal, fromImag);
-        if (draggingTo)
-            vec = new Vector(toReal, toImag);
-
-        var worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        if (draggingFrom)
-        {
-            fromReal.Value = worldPos.x;
-            fromImag.Value = worldPos.y;
-        }
-        else
-        {
-            toReal.Value = worldPos.x;
-            toImag.Value = worldPos.y;
-        }
-
-        calculate();
+        return mousePos;
     }
 
     protected void endDrag()
     {
-        draggingFrom = false;
-        draggingTo = false;
-        dragging = false;
+        dragging = -1;
         _leanDrag.enabled = true;
         calculate();
     }
