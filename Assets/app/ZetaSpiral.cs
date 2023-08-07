@@ -74,15 +74,15 @@ public partial class ZetaSpiral : MonoBehaviour
         }
     }
 
-    void drawSpiral(Zeta.Spiral sprial)
+    void drawSpiral(Zeta.Spiral spiral)
     {
-        if (sprial.joints[0] == null)
+        if (spiral.joints[0] == null)
             return;
 
         Draw.Thickness = 1;
         // Since our links are zero-based, the middle index into the array
         // is not the middle link number starting from one.
-        var middleLink = sprial.middleIndex + 1;
+        var middleLink = spiral.middleIndex + 1;
 
         int skipCount = 0;
 
@@ -90,15 +90,15 @@ public partial class ZetaSpiral : MonoBehaviour
         bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue && CameraTracking.trackingIndex > -1;
 
         var startIndex = 1;
-        var endIndex = sprial.numLinks;
+        var endIndex = spiral.numLinks;
 
         if (limitVisibleLinks)
         {
             startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value + 1, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
-            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, sprial.numLinks);
+            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, spiral.numLinks);
         }
 
-        var start = sprial.joints[startIndex - 1].ToVector2();
+        var start = spiral.joints[startIndex - 1].ToVector2();
         for (int i = startIndex; i < endIndex; i++)
         {
             var color = Color.white;
@@ -130,7 +130,7 @@ public partial class ZetaSpiral : MonoBehaviour
             // }
 
 
-            var end = sprial.joints[i];
+            var end = spiral.joints[i];
 
 
             if (i >= middleLink + 2)
