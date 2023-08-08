@@ -10,24 +10,21 @@ using Shapes;
 public class ZetaAngleSorted : MonoBehaviour
 {
     public App app;
-    public Color color = Color.blue;
+    public Color color = new Color(255,179,0,1);
 
     public float thickness = 1;
 
     public Slider transparency;
-    public Slider numLinks;
 
     void OnApplicationQuit()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-
         PlayerPrefs.Save();
     }
 
     void Start()
     {
-        transparency.value = 1f; // PlayerPrefs.GetFloat(name + "-Transparency", color.a);
-
+        transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
         app.DrawSprial += drawShapes;
     }
 
@@ -62,7 +59,6 @@ public class ZetaAngleSorted : MonoBehaviour
         // sort jointAngles by angle
         jointAngles = jointAngles.OrderBy(j => j.angle).ToList();
 
-        numLinks.maxValue = jointAngles.Count;
         Draw.Thickness = thickness;
 
         // Since our links are zero-based, the middle index into the array
@@ -75,12 +71,10 @@ public class ZetaAngleSorted : MonoBehaviour
         // find the joint that has the same length as the middle link
         // var middleLinkJoint = joints.ToList().IndexOf(joints.Where(j => Vector.Distance(joints[middleLink - 1], j) == middleLinkLength).First());
 
-        var startIndex = 1;
-        var endIndex = 10;  //jointAngles.Count;
         var start = new Vector2();  //joints[jointAngles[startIndex - 1].index];
-        for (int i = 0; i < (int)numLinks.value; i++)
+        for (int i = 0; i < jointAngles.Count; i++)
         {
-            // color.a = transparency.value;
+            color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
             var end = joints[jointAngles[i].index];
