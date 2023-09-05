@@ -6,6 +6,7 @@ public class ProjectedMidLink : MonoBehaviour
 {
     public App app;
     public Slider transparency;
+    
     [SerializeField] public Color color = new Color(1, .5f, 0, 1);
     public float thickness = 6f;
 
