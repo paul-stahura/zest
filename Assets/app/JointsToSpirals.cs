@@ -19,10 +19,7 @@ public class JointsToSpirals : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.SetFloat(name + "-LineCount", lineCount.value);
-
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
 
     void Start()
@@ -31,6 +28,7 @@ public class JointsToSpirals : MonoBehaviour
         lineCount.value = PlayerPrefs.GetFloat(name + "-LineCount", 1f);
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
     }
 
     void drawShapes(Camera cam, Zeta.Spiral s)
@@ -52,6 +50,14 @@ public class JointsToSpirals : MonoBehaviour
         {
             // drawTrail(s);
         }
+    }
+
+    private void savePlayerPrefs()
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-LineCount", lineCount.value);
+
+        PlayerPrefs.Save();
     }
 
 

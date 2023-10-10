@@ -17,7 +17,7 @@ public class SpiralLinkCircles : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-TxMidLinkCircle", txMidLinkCircle.value);
+        savePlayerPrefs();
     }
 
     // Start is called before the first frame update
@@ -31,6 +31,13 @@ public class SpiralLinkCircles : MonoBehaviour
 
         spiralNumber.onValueChanged.AddListener(value => spiralNumDisplay.text = value.ToString());
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
+
+    void savePlayerPrefs() 
+    {
+        PlayerPrefs.SetFloat(name + "-TxMidLinkCircle", txMidLinkCircle.value);
+        PlayerPrefs.Save();
     }
 
     

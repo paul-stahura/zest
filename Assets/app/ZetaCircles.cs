@@ -28,8 +28,7 @@ public class ZetaCircles : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
 
     void Start()
@@ -43,6 +42,13 @@ public class ZetaCircles : MonoBehaviour
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", zetaColor.a);
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
+
+    void savePlayerPrefs() 
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
     }
 
     // 27 Mar, 2023 - this is currently unused.
