@@ -42,7 +42,7 @@ public class IOApp : ImmediateModeShapeDrawer
     void Start() 
     {
         // checks if we are on the correct scene when we start the app
-        string sceneOnStart = PlayerPrefs.GetString("ActiveSceneOnStart");
+        string sceneOnStart = PlayerPrefs.GetString("ActiveSceneOnStart", SceneManager.GetActiveScene().name);
         if(sceneOnStart != SceneManager.GetActiveScene().name) {
             SceneManager.LoadScene(sceneOnStart);
             return;
