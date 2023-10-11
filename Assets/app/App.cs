@@ -135,10 +135,18 @@ public class App : ImmediateModeShapeDrawer
 
     void OnApplicationQuit()
     {
+        UpdateActiveSceneOnStart(SceneManager.GetActiveScene().name);
     }
 
     public void Start()
     {
+        // checks if we are on the correct scene when we start the app
+        string sceneOnStart = PlayerPrefs.GetString("ActiveSceneOnStart");
+        if(sceneOnStart != SceneManager.GetActiveScene().name) {
+            SceneManager.LoadScene(sceneOnStart);
+            return;
+        }
+
         Imag = imagDisplay.Value;
         targetImag = (float)Imag;
 
@@ -293,6 +301,16 @@ public class App : ImmediateModeShapeDrawer
 
     public void onClick()
     {
+        string nextScene = "~Input-Output";
+        // since we check active scene on load whenever we change scenes we need to update the playerPref before the scene changes.
+        UpdateActiveSceneOnStart(nextScene);
+        SceneManager.LoadScene(nextScene);
+    }
+
+    private void UpdateActiveSceneOnStart(string startScene) {
+        PlayerPrefs.SetString("ActiveSceneOnStart", startScene);
+
+        PlayerPrefs.Save();
         SceneChange.Invoke();
         
         SceneManager.LoadScene("~Input-Output");
