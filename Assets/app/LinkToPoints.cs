@@ -32,6 +32,9 @@ public class LinkToPoints : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        if (transparency.value == 0)
+            return;
+            
         using (Draw.StyleScope)
         {
             Draw.Thickness = thickness;
@@ -68,6 +71,8 @@ public class LinkToPoints : MonoBehaviour
                 }
                 else
                 {
+                    if (i % 50 != 0) continue;
+
                     // Calculate lerp factor based on the ratio of the lengths
                     float lerpFactor = len1 / (len1 + len2);
                     Color lerpedColor = Color.Lerp(startColor, endColor, lerpFactor);
