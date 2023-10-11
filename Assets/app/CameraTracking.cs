@@ -34,15 +34,7 @@ public class CameraTracking : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
-        PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
-        PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
-        PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
-        PlayerPrefs.SetInt("TrackJointI-N", trackJointIMinusN.isOn ? 1 : 0);
-
-        PlayerPrefs.SetInt("TrackSpiralNum", (int)spiralNumber.value);
-
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
 
     public void Start()
@@ -64,7 +56,19 @@ public class CameraTracking : MonoBehaviour
         #endregion
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
 
+    void savePlayerPrefs() {
+        PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackJointI-N", trackJointIMinusN.isOn ? 1 : 0);
+
+        PlayerPrefs.SetInt("TrackSpiralNum", (int)spiralNumber.value);
+
+        PlayerPrefs.Save();
     }
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)

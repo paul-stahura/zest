@@ -11,8 +11,7 @@ public class BisectingLines : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
     void Start()
     {
@@ -20,6 +19,12 @@ public class BisectingLines : MonoBehaviour
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
+
+    void savePlayerPrefs() {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
     }
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)

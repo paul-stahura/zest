@@ -18,14 +18,20 @@ public class ZetaAngleSorted : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
 
     void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
+
+    void savePlayerPrefs() 
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
     }
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)

@@ -17,10 +17,15 @@ public class LinkToPoints : MonoBehaviour
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
     }
 
     void OnApplicationQuit()
     {
+        savePlayerPrefs();
+    }
+
+    void savePlayerPrefs() {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
         PlayerPrefs.Save();
     }
@@ -37,9 +42,9 @@ public class LinkToPoints : MonoBehaviour
             var end = spiral.zeta.ToVector2();
 
             // Define your colors here
-            Color equalColor = Color.green; // For equal lengths
-            Color startColor = Color.red;   // Starting color for unequal lengths
-            Color endColor = Color.blue;    // Ending color for unequal lengths
+            Color equalColor = Color.green * new Color(1, 1, 1, transparency.value); // For equal lengths
+            Color startColor = Color.red * new Color(1, 1, 1, transparency.value);   // Starting color for unequal lengths
+            Color endColor = Color.blue * new Color(1, 1, 1, transparency.value);    // Ending color for unequal lengths
 
             // get 100 starting points evenly from pt1 to pt2
             var numPoints = 1000f;

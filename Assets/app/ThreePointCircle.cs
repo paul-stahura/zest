@@ -13,7 +13,7 @@ public class ThreePointCircle : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        savePlayerPrefs();
     }
 
     // Start is called before the first frame update
@@ -23,6 +23,13 @@ public class ThreePointCircle : MonoBehaviour
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
+    }
+
+    void savePlayerPrefs()
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.Save();
     }
 
     /// <summary>

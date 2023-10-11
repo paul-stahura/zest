@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 using Shapes;
+using System.Runtime.CompilerServices;
 
 public class App : ImmediateModeShapeDrawer
 {
@@ -52,6 +53,7 @@ public class App : ImmediateModeShapeDrawer
     public event Action<double> ImagChanged;
     public event Action<double> RealChanged;
     public event Action<Camera, Zeta.Spiral> DrawSprial;
+    public event Action SceneChange;
 
     double targetImag;
 
@@ -309,5 +311,8 @@ public class App : ImmediateModeShapeDrawer
         PlayerPrefs.SetString("ActiveSceneOnStart", startScene);
 
         PlayerPrefs.Save();
+        SceneChange.Invoke();
+        
+        SceneManager.LoadScene("~Input-Output");
     }
 }

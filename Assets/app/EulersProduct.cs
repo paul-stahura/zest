@@ -26,9 +26,7 @@ public partial class EulersProduct : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.SetFloat(name + "-Iterations", iterations.value);
-        PlayerPrefs.Save();
+        savePlayerPrefs();
     }
     public void Start()
     {
@@ -51,6 +49,7 @@ public partial class EulersProduct : MonoBehaviour
         iterations.onValueChanged.Invoke(iterations.value);
 
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
     }
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
@@ -59,6 +58,13 @@ public partial class EulersProduct : MonoBehaviour
         {
             drawSpiral();
         }
+    }
+
+    void savePlayerPrefs() 
+    {
+        PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-Iterations", iterations.value);
+        PlayerPrefs.Save();
     }
 
     void drawSpiral()
