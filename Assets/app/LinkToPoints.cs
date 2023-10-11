@@ -17,10 +17,15 @@ public class LinkToPoints : MonoBehaviour
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
         app.DrawSprial += drawShapes;
+        app.SceneChange += savePlayerPrefs;
     }
 
     void OnApplicationQuit()
     {
+        savePlayerPrefs();
+    }
+
+    void savePlayerPrefs() {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
         PlayerPrefs.Save();
     }
