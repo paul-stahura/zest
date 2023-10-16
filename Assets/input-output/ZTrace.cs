@@ -8,9 +8,11 @@ using Complex = System.Numerics.Complex;
 
 public class ZTrace : MonoBehaviour
 {
+    public Camera inputCamera;
     public FloatInput fromReal;
     public FloatInput fromImag;
 
+    public Camera outputCamera;
     public FloatInput toReal;
     public FloatInput toImag;
     public Button reset;
@@ -87,16 +89,17 @@ public class ZTrace : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            Draw.Thickness = 1;
-            radius = cam.orthographicSize / radiusScalar;
-
             if (outputPts.Count == 0)
                 return;
 
             // draw the input
-            drawInput(cam);
-
+            drawInput(inputCamera);
+            
             // draw the output
+            cam = outputCamera;
+            Draw.Thickness = 1;
+            radius = cam.orthographicSize / radiusScalar;
+
             for (int i = 1; i < outputPts.Count; i++)
             {
                 Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
@@ -106,6 +109,9 @@ public class ZTrace : MonoBehaviour
 
     protected void drawInput(Camera cam)
     {
+        Draw.Thickness = 1;
+        radius = cam.orthographicSize / radiusScalar;
+
         if (fromReal != .5 || toReal != .5)
             ZetaFn = Zeta.EulerMaclauren;
 
@@ -118,7 +124,7 @@ public class ZTrace : MonoBehaviour
         // See if the mouse is close to the line.  If it is, draw a circle at the nearest point on the line.
         // If the mouse is near any point on the line, snap the circle to that point.
         // If we are currently dragging, ignore.
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = inputCamera.ScreenToWorldPoint(Input.mousePosition);
 
         var discColor = color;
         discColor.a = discColor.a * .5f;
@@ -141,7 +147,7 @@ public class ZTrace : MonoBehaviour
     {
         var discColor = color;
 
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = getCameraInFocus().ScreenToWorldPoint(Input.mousePosition);
         var dist = Vector2.Distance(mousePos, pt);
         if (dist > radius)
         {
@@ -167,7 +173,7 @@ public class ZTrace : MonoBehaviour
 
     bool isMouseOverControlPoint(Vector pt)
     {
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = getCameraInFocus().ScreenToWorldPoint(Input.mousePosition);
         var dist = pt.Distance(mousePos);
         return dist < radius;
     }
@@ -239,7 +245,7 @@ public class ZTrace : MonoBehaviour
 
     Vector2 drag(Vector pt)
     {
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = getCameraInFocus().ScreenToWorldPoint(Input.mousePosition);
         dragging = inputPts.IndexOf(pt);
         if (dragging == 0)
         {
@@ -266,5 +272,16 @@ public class ZTrace : MonoBehaviour
         dragging = -1;
         _leanDrag.enabled = true;
         calculate();
+    }
+
+    // returns a camera with the mouse in it's viewport
+    Camera getCameraInFocus()
+    {
+        Vector3 viewPos = outputCamera.ScreenToViewportPoint(Input.mousePosition);
+        if(viewPos.x > 0 && viewPos.x < 1 && viewPos.y > 0 && viewPos.y < 1)
+        {
+            return outputCamera;
+        }
+        return inputCamera;
     }
 }
