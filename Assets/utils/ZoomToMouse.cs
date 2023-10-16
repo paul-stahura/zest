@@ -38,11 +38,9 @@ public class ZoomToMouse : MonoBehaviour
 
     void Update()
     {
-        //
-        // If the mouse is outside the program window, bail out
-        //
-        Rect screenRect = new Rect(0, 0, Screen.width, Screen.height);
-        if (!screenRect.Contains(Input.mousePosition))
+        // If the mouse is outside the camera viewport rect, bail out
+        Vector2 normalizedMousePos = new Vector2(Input.mousePosition.x / Screen.width, Input.mousePosition.y / Screen.height);
+        if (!_camera.rect.Contains(normalizedMousePos))
             return;
 
         var sensitivity = _sensitivity;
