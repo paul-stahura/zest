@@ -15,6 +15,7 @@ public partial class ZetaSpiral : MonoBehaviour
     public Slider transparency;
     public Slider visibleLinks;
     public Slider targetTransparency;
+    public Color spiralColor = Color.white;
 
     [Header("Reverse Spiral")]
     public Toggle showReverseSpiral;
@@ -109,7 +110,7 @@ public partial class ZetaSpiral : MonoBehaviour
         var start = spiral.joints[startIndex - 1].ToVector2();
         for (int i = startIndex; i < endIndex; i++)
         {
-            var color = Color.white;
+            var color = spiralColor;
             color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
