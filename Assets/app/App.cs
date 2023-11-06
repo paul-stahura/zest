@@ -3,10 +3,18 @@ using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 using Shapes;
 using System.Runtime.CompilerServices;
+
+public enum SpiralFormulas
+{
+    ReimannSiegel = 0,
+    EulerMaclauren = 1,
+    EtaFormula = 2
+}
 
 public class App : ImmediateModeShapeDrawer
 {
@@ -30,7 +38,8 @@ public class App : ImmediateModeShapeDrawer
     [Header("Real Part Control")]
     public Slider realPartSlider;
     public FineTuneSlider realPartFineTune;
-    public Toggle useReimannSiegel;
+    public TMP_Dropdown spiralFormula;
+
 
 
     public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
@@ -82,9 +91,9 @@ public class App : ImmediateModeShapeDrawer
                 indexRealPart.value = realPart;
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 else
-                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
 
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
@@ -103,11 +112,11 @@ public class App : ImmediateModeShapeDrawer
                 realPartSlider.value = (float)_real;
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 else
                 {
                     spiral.extendSpiralCount = (int)extendSpiralCount.value;
-                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 }
 
                 RealChanged?.Invoke(value);
@@ -211,25 +220,27 @@ public class App : ImmediateModeShapeDrawer
         #region Real Part Slider
         realPartSlider.onValueChanged.AddListener(value =>
         {
-            if (useReimannSiegel.isOn && value != .5f)
-                useReimannSiegel.isOn = false;
+            if (spiralFormula.value != (int)SpiralFormulas.EulerMaclauren && value != .5f)
+                spiralFormula.value = (int)SpiralFormulas.EulerMaclauren;
 
             Real = value;
         });
 
-        useReimannSiegel.onValueChanged.AddListener(value =>
+        spiralFormula.onValueChanged.AddListener(value =>
         {
-            if (value == true)
+            if (spiralFormula.value != (int)SpiralFormulas.EulerMaclauren)
             {
                 realPartFineTune.reset();
                 realPartSlider.value = .5f;
             }
+
+            spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
         });
 
         extendSpiralCount.onValueChanged.AddListener(value =>
         {
             spiral.extendSpiralCount = (int)extendSpiralCount.value;
-            spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+            spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
         });
         #endregion
     }
