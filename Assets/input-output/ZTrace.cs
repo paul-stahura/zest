@@ -60,6 +60,9 @@ public class ZTrace : MonoBehaviour
             fromReal.Value = .5f;
             toReal.Value = .5f;
 
+            fromImag.Value = 0f;
+            toImag.Value = 1f;
+
             resetControlPoints();
         });
 
@@ -70,7 +73,8 @@ public class ZTrace : MonoBehaviour
 
         reset.onClick.Invoke();
 
-        calculate();
+        // resetControlPoints();
+        // calculate();
     }
 
     void resetControlPoints()
@@ -213,10 +217,12 @@ public class ZTrace : MonoBehaviour
             return;
 
         outputPts.Clear();
-        var from = inputPts[0];
+        // var from = inputPts[0];
+        var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
         {
-            var to = inputPts[i];
+            // var to = inputPts[i];
+            var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
             double inc = 1d / pointsPerSegment;
             Debug.Assert(inc > 0);
             for (double j = 0; j <= 1; j += inc)
@@ -241,10 +247,12 @@ public class ZTrace : MonoBehaviour
             var discColor = color;
             discColor.a = discColor.a * .5f;
 
-            var from = inputPts[0];
+            // var from = inputPts[0];
+            var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
             for (var i = 1; i < inputPts.Count; i++)
             {
-                to = inputPts[i];
+                // to = inputPts[i];
+                to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
 
                 // draw the dragged point without alpha
                 if (inputPts.IndexOf(from) == dragging)
