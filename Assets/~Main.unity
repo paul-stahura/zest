@@ -3662,8 +3662,7 @@ MonoBehaviour:
   animSlider: {fileID: 77397250}
   realPartSlider: {fileID: 1520086063}
   realPartFineTune: {fileID: 875429035}
-  useReimannSiegel: {fileID: 0}
-  spiralFormula: {fileID: 0}
+  spiralFormula: {fileID: 1784845675}
   _imag: 206.491213762
   zetaSpiral: {fileID: 1486109718}
   extendSpiralCount: {fileID: 1271723114}
