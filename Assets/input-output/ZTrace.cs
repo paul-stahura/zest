@@ -228,7 +228,9 @@ public class ZTrace : MonoBehaviour
             for (double j = 0; j <= 1; j += inc)
             {
                 var c = Vector.Lerp(from, to, j);
-                outputPts.Add(Zeta.EulerMaclauren(c));
+                // outputPts.Add(Zeta.EulerMaclauren(c));
+                outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
+                Debug.Log(fromImag.Value + " " + toImag.Value);
             }
             from = to;
         }
