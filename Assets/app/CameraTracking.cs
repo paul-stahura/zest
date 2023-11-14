@@ -140,13 +140,13 @@ public class CameraTracking : MonoBehaviour
         var rot = RotationOfLink(s, idx);
         setCamera(cam, pos, rot);
 
-        using (Draw.StyleScope)
-        {
-            linkHighlight.a = linkHighlightTransparency.value;
-            Draw.Color = linkHighlight;
-            Draw.Thickness = thickness;
-            Draw.Line(start, end);
-        }
+        // using (Draw.StyleScope)
+        // {
+        //     linkHighlight.a = linkHighlightTransparency.value;
+        //     Draw.Color = linkHighlight;
+        //     Draw.Thickness = thickness;
+        //     Draw.Line(start, end);
+        // }
     }
 
     void DrawTeardrop(Zeta.Spiral spiral)
