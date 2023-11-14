@@ -11103,7 +11103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 963194227}
   zSpiral: {fileID: 1486109718}
-  invert: 0
+  invertButton: 0
 --- !u!1 &981246226
 GameObject:
   m_ObjectHideFlags: 0
@@ -16437,6 +16437,9 @@ MonoBehaviour:
   linkHighlightTransparency: {fileID: 1914141423}
   linkHighlight: {r: 1, g: 1, b: 0, a: 0.11372549}
   thickness: 4
+  TeardropTransparency: {fileID: 1914141423}
+  TeardropColorA: {r: 1, g: 0, b: 0, a: 1}
+  TeardropColorB: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &1486109721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20863,7 +20866,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Camera Link Transp.
+  m_Text: Teardrop Transp.
 --- !u!222 &1799474367
 CanvasRenderer:
   m_ObjectHideFlags: 0
