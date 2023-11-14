@@ -165,27 +165,27 @@ public class CameraTracking : MonoBehaviour
 
             double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
             Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-            Vector tDropa(double t) => a(t) * psi(t) + new Vector(1.0, 0.0);
-            Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI) + new Vector(1.0, 0.0);
+            Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
+            Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
             
-            Vector trackDrop(Vector v) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) * 1.0 / Math.Sqrt(spiral.middleIndex) + spiral.joints[spiral.middleIndex]; 
+            Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
 
             double i = 0;
             double inc = 1d/200;
-            var start = trackDrop(tDropa(i));
+            var start = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
             for (i = inc; i <= 1+inc; i += inc)
             {
-                var end = trackDrop(tDropa(i));
+                var end = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
                 Draw.Line(start, end);
                 start = end;
             }
 
             Draw.Color = TeardropColorB;
             i = 0;
-            start = trackDrop(tDropb(i));
+            start = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
-                var end = trackDrop(tDropb(i));
+                var end = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
                 Draw.Line(start, end);
                 start = end;
             }
