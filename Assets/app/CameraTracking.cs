@@ -175,6 +175,11 @@ public class CameraTracking : MonoBehaviour
             var start = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
             for (i = inc; i <= 1+inc; i += inc)
             {
+                // skip 0.25 && 0.75
+                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
+                    i += inc;
+                }
+
                 var end = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
                 Draw.Line(start, end);
                 start = end;
@@ -185,6 +190,11 @@ public class CameraTracking : MonoBehaviour
             start = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
+                // skip 0.25 && 0.75
+                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
+                    i += inc;
+                }
+                
                 var end = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
                 Draw.Line(start, end);
                 start = end;
