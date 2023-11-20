@@ -6,6 +6,8 @@ public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
     public Toggle trackMiddle;
+    public Toggle trackTdropA;
+    public Toggle trackTdropB;
     public Toggle trackSpiralCenter;
     public Toggle trackSpiralLink;
     public Toggle trackJointIMinusN;
@@ -80,7 +82,7 @@ public class CameraTracking : MonoBehaviour
         if (trackMiddle.isOn)
         {
             trackLink(cam, spiral.middleIndex, spiral);
-            DrawTeardrop(spiral);
+            DrawTeardrop(cam, spiral);
             return;
         }
 
@@ -119,7 +121,7 @@ public class CameraTracking : MonoBehaviour
             trackLink(cam, i, spiral, false);
         }
 
-        DrawTeardrop(spiral);
+        DrawTeardrop(cam, spiral);
     }
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)
@@ -149,12 +151,19 @@ public class CameraTracking : MonoBehaviour
         // }
     }
 
-    void DrawTeardrop(Zeta.Spiral spiral)
+    void DrawTeardrop(Camera cam, Zeta.Spiral spiral)
     {
         if(TeardropTransparency.value < 0.05f)
         {
             return;
         }
+
+        double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
+        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
+        Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
+        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
+        
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
 
         using (Draw.StyleScope)
         {
@@ -162,13 +171,6 @@ public class CameraTracking : MonoBehaviour
             TeardropColorB.a = TeardropTransparency.value;
             Draw.Color = TeardropColorA;
             Draw.Thickness = 1 + TeardropTransparency.value;
-
-            double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
-            Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-            Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
-            Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
-            
-            Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
 
             double i = 0;
             double inc = 1d/200;
@@ -194,10 +196,44 @@ public class CameraTracking : MonoBehaviour
                 if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
                     i += inc;
                 }
-                
+
                 var end = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
                 Draw.Line(start, end);
                 start = end;
+            }
+        }
+
+        // Dots
+        using (Draw.StyleScope)
+        {
+            Color dotColor = Color.cyan;
+            dotColor.a = TeardropTransparency.value;
+            Draw.Color = dotColor;
+            Draw.Thickness = 1 + TeardropTransparency.value;
+
+            var index = Zeta.ImagToIndex(spiral.input.ToVector().y);
+            index -= Math.Floor(index);
+
+            var orth = Mathf.Min(1f, cam.orthographicSize);
+            var size = 50.0f;
+
+            var pt = trackDrop(tDropa(index), spiral.joints[spiral.middleIndex + 1]);
+            Draw.Ring(pt, orth / size / 2);
+            ShapesUtils.DrawCross(pt, orth / size, .5f);
+
+            if(trackTdropA.isOn)
+            {
+                setCamera(cam, pt, RotationOfLink(spiral, spiral.middleIndex));
+            }
+
+            index = 1 - index;
+            pt = trackDrop(tDropb(index), spiral.joints[spiral.middleIndex]);
+            Draw.Ring(pt, orth / size / 2);
+            ShapesUtils.DrawCross(pt, orth / size, .5f);
+
+            if(trackTdropB.isOn)
+            {
+                setCamera(cam, pt, RotationOfLink(spiral, spiral.middleIndex));
             }
         }
     }
