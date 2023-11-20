@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 
 using Shapes;
 using System.Runtime.CompilerServices;
+using Unity.VersionControl.Git;
 
 public enum SpiralFormulas
 {
@@ -39,13 +40,15 @@ public class App : ImmediateModeShapeDrawer
     public Slider realPartSlider;
     public FineTuneSlider realPartFineTune;
     public TMP_Dropdown spiralFormula;
-
+    public Toggle drawSecondSpiral;
 
 
     public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1);
 
     public ZetaSpiral zetaSpiral;
+    public ZetaSpiral secondSpiral;
+
 
     public Slider extendSpiralCount;
 
@@ -139,6 +142,28 @@ public class App : ImmediateModeShapeDrawer
                 Imag += .04f * animSlider.Value;
 
             DrawSprial?.Invoke(cam, spiral);
+            zetaSpiral.DrawShapes(cam, spiral);
+
+            if(drawSecondSpiral.isOn)
+            {
+                Zeta.Spiral s2;
+                if(spiralFormula.value == (int)SpiralFormulas.EtaFormula)
+                {
+                    if(spiral.input.Real != 0.5)
+                    {
+                        s2 = new Zeta.Spiral(spiral.input, SpiralFormulas.EulerMaclauren);
+                    }
+                    else
+                    {
+                        s2 = new Zeta.Spiral(spiral.input, SpiralFormulas.EulerMaclauren);
+                    }
+                }
+                else
+                {
+                    s2 = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
+                }
+                secondSpiral.DrawShapes(cam, s2);
+            }
         }
     }
 

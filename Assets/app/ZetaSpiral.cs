@@ -47,7 +47,7 @@ public partial class ZetaSpiral : MonoBehaviour
         visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
         showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
-        app.DrawSprial += drawShapes;
+        // app.DrawSprial += drawShapes;
         app.SceneChange += savePlayerPrefs;
     }
 
@@ -60,7 +60,7 @@ public partial class ZetaSpiral : MonoBehaviour
         PlayerPrefs.Save();
     }
 
-    void drawShapes(Camera cam, Zeta.Spiral spiral)
+    public void DrawShapes(Camera cam, Zeta.Spiral spiral)
     {
         using (Draw.StyleScope)
         {
