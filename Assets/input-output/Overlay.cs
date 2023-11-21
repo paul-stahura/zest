@@ -50,12 +50,12 @@ public class Overlay : MonoBehaviour
         if (!show.isOn)
             return;
 
-        Draw.LineGeometry = LineGeometry.Volumetric3D;
-        Draw.ThicknessSpace = ThicknessSpace.Pixels;
-        Draw.Matrix = transform.localToWorldMatrix;
-
         using (Draw.StyleScope)
         {
+            Draw.LineGeometry = LineGeometry.Volumetric3D;
+            Draw.ThicknessSpace = ThicknessSpace.Pixels;
+            Draw.Matrix = transform.localToWorldMatrix;
+
             if (points1 != null)
             {
                 var col = Color.red;

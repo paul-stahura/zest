@@ -8,9 +8,13 @@ using Complex = System.Numerics.Complex;
 
 public class ZTrace : MonoBehaviour
 {
+    public Camera inputCamera;
+    public Transform inputOrigin;
     public FloatInput fromReal;
     public FloatInput fromImag;
 
+    public Camera outputCamera;
+    public Transform outputOrigin;
     public FloatInput toReal;
     public FloatInput toImag;
     public Button reset;
@@ -87,16 +91,20 @@ public class ZTrace : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            Draw.Thickness = 1;
-            radius = cam.orthographicSize / radiusScalar;
-
             if (outputPts.Count == 0)
                 return;
 
-            // draw the input
-            drawInput(cam);
+            Draw.Thickness = 1;
 
+            // draw the input
+            radius = inputCamera.orthographicSize / radiusScalar;
+            Draw.Matrix = inputOrigin.localToWorldMatrix;
+            drawInput(inputCamera);
+            
             // draw the output
+            radius = outputCamera.orthographicSize / radiusScalar;
+            Draw.Matrix = outputOrigin.localToWorldMatrix;
+
             for (int i = 1; i < outputPts.Count; i++)
             {
                 Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
@@ -118,17 +126,17 @@ public class ZTrace : MonoBehaviour
         // See if the mouse is close to the line.  If it is, draw a circle at the nearest point on the line.
         // If the mouse is near any point on the line, snap the circle to that point.
         // If we are currently dragging, ignore.
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = inputCamera.ScreenToWorldPoint(Input.mousePosition);
 
         var discColor = color;
         discColor.a = discColor.a * .5f;
         var from = handleDragControlPoint(inputPts[0]);
-        drawControlPoint(from);
+        drawControlPoint(from, inputCamera);
 
         for (var i = 1; i < inputPts.Count; i++)
         {
             var to = handleDragControlPoint(inputPts[i]);
-            drawControlPoint(to);
+            drawControlPoint(to, inputCamera);
 
             Draw.Line(from, to, color);
             from = to;
@@ -137,12 +145,17 @@ public class ZTrace : MonoBehaviour
         drawOutputControlPoints();
     }
 
-    void drawControlPoint(Vector2 pt)
+    void drawControlPoint(Vector2 pt, Camera cam)
     {
         var discColor = color;
-
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = cam.ScreenToWorldPoint(Input.mousePosition);
+        // I must be using the matrix here incorrectly so im using a simple transformation instead
+        // mousePos = inputOrigin.worldToLocalMatrix * mousePos;
+        mousePos -= new Vector(inputOrigin.position.x, inputOrigin.position.y);
         var dist = Vector2.Distance(mousePos, pt);
+
+        radius = cam.orthographicSize / radiusScalar;
+
         if (dist > radius)
         {
             discColor.a = discColor.a * .5f;
@@ -158,6 +171,7 @@ public class ZTrace : MonoBehaviour
             return drag(pt);
 
         if (dragging == -1 && isMouseOverControlPoint(pt) && Input.GetMouseButton(0))
+        // + new Vector(inputOrigin.position.x, inputOrigin.position.y)
         {
             return drag(pt);
         }
@@ -167,8 +181,10 @@ public class ZTrace : MonoBehaviour
 
     bool isMouseOverControlPoint(Vector pt)
     {
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        var cam = getCameraInFocus();
+        var mousePos = cam.ScreenToWorldPoint(Input.mousePosition) - new Vector(inputOrigin.position.x, inputOrigin.position.y);
         var dist = pt.Distance(mousePos);
+        radius = cam.orthographicSize / radiusScalar;
         return dist < radius;
     }
 
@@ -214,32 +230,38 @@ public class ZTrace : MonoBehaviour
 
     void drawOutputControlPoints()
     {
-        //
-        // Calculates the Zeta function for the control points and draws a disc for each one.
-        //
-        Vector to = new Vector();
-        var discColor = color;
-        discColor.a = discColor.a * .5f;
-
-        var from = inputPts[0];
-        for (var i = 1; i < inputPts.Count; i++)
+        using (Draw.StyleScope)
         {
-            to = inputPts[i];
+            Draw.Matrix = outputOrigin.localToWorldMatrix;
+            radius = outputCamera.orthographicSize / radiusScalar;
+            //
+            // Calculates the Zeta function for the control points and draws a disc for each one.
+            //
+            Vector to = new Vector();
+            var discColor = color;
+            discColor.a = discColor.a * .5f;
 
-            // draw the dragged point without alpha
-            if (inputPts.IndexOf(from) == dragging)
-                Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, color);
+            var from = inputPts[0];
+            for (var i = 1; i < inputPts.Count; i++)
+            {
+                to = inputPts[i];
 
-            Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
-            from = to;
+                // draw the dragged point without alpha
+                if (inputPts.IndexOf(from) == dragging)
+                    Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+
+                Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+                from = to;
+            }
+
+            Draw.Disc(Zeta.EulerMaclauren(to).ToVector2(), radius, discColor);
         }
-
-        Draw.Disc(Zeta.EulerMaclauren(to).ToVector2(), radius, discColor);
     }
 
     Vector2 drag(Vector pt)
     {
-        var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        // var mousePos = getCameraInFocus().ScreenToWorldPoint(Input.mousePosition);
+        var mousePos = inputCamera.ScreenToWorldPoint(Input.mousePosition);
         dragging = inputPts.IndexOf(pt);
         if (dragging == 0)
         {
@@ -254,11 +276,11 @@ public class ZTrace : MonoBehaviour
 
         _leanDrag.enabled = false;
 
-        inputPts[dragging] = new Vector(mousePos);
+        inputPts[dragging] = new Vector(mousePos) - new Vector(inputOrigin.position.x, inputOrigin.position.y);
 
         calculate();
 
-        return mousePos;
+        return mousePos - new Vector(inputOrigin.position.x, inputOrigin.position.y);
     }
 
     protected void endDrag()
@@ -266,5 +288,16 @@ public class ZTrace : MonoBehaviour
         dragging = -1;
         _leanDrag.enabled = true;
         calculate();
+    }
+
+    // returns a camera with the mouse in it's viewport
+    Camera getCameraInFocus()
+    {
+        Vector3 viewPos = outputCamera.ScreenToViewportPoint(Input.mousePosition);
+        if(viewPos.x > 0 && viewPos.x < 1 && viewPos.y > 0 && viewPos.y < 1)
+        {
+            return outputCamera;
+        }
+        return inputCamera;
     }
 }

@@ -6,6 +6,8 @@ public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
     public Toggle trackMiddle;
+    public Toggle trackTdropA;
+    public Toggle trackTdropB;
     public Toggle trackSpiralCenter;
     public Toggle trackSpiralLink;
     public Toggle trackJointIMinusN;
@@ -25,6 +27,7 @@ public class CameraTracking : MonoBehaviour
     public Color linkHighlight;
     public float thickness;
 
+    private MiddleLinkTeardrop middleLinkTeardrop;
 
     /// <summary>
     /// This is the index of the link the camera is tracking. If the camera is
@@ -52,7 +55,8 @@ public class CameraTracking : MonoBehaviour
         trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
         trackJointIMinusN.isOn = PlayerPrefs.GetInt("TrackJointI-N") != 0 ? true : false;
         spiralNumber.value = PlayerPrefs.GetInt("TrackSpiralNum");
-
+        
+        middleLinkTeardrop = GetComponent<MiddleLinkTeardrop>();
         #endregion
 
         app.DrawSprial += drawShapes;
@@ -113,6 +117,16 @@ public class CameraTracking : MonoBehaviour
             var i = (int)spiral.SpiralMiddleIndex(mi, joint);
             trackLink(cam, i, spiral, false);
         }
+
+        if(trackTdropA.isOn)
+        {
+            setCamera(cam, middleLinkTeardrop.TdropDotA, RotationOfLink(spiral, spiral.middleIndex));
+        }
+
+        if(trackTdropA.isOn)
+        {
+            setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
+        }
     }
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)
@@ -133,13 +147,13 @@ public class CameraTracking : MonoBehaviour
         var rot = RotationOfLink(s, idx);
         setCamera(cam, pos, rot);
 
-        using (Draw.StyleScope)
-        {
-            linkHighlight.a = linkHighlightTransparency.value;
-            Draw.Color = linkHighlight;
-            Draw.Thickness = thickness;
-            Draw.Line(start, end);
-        }
+        // using (Draw.StyleScope)
+        // {
+        //     linkHighlight.a = linkHighlightTransparency.value;
+        //     Draw.Color = linkHighlight;
+        //     Draw.Thickness = thickness;
+        //     Draw.Line(start, end);
+        // }
     }
 
     /// <summary>
