@@ -42,35 +42,28 @@ public class MiddleLinkTeardrop : MonoBehaviour
             TeardropColorB.a = TeardropTransparency.value;
             Draw.Color = TeardropColorA;
             Draw.Thickness = 1 + TeardropTransparency.value;
-
+            
             double i = 0;
             double inc = 1d/200;
-            var start = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
+            var startA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
+            var startB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
-                // skip 0.25 && 0.75
-                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
+                // Tdrop is undefined at 0.25 and 0.75, so we skip these values
+                if(Mathf.Approximately((float)i, 0.25f) || Mathf.Approximately((float)i, 0.75f)) {
                     i += inc;
                 }
 
-                var end = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-                Draw.Line(start, end);
-                start = end;
-            }
+                var endA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
+                var endB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
 
-            Draw.Color = TeardropColorB;
-            i = 0;
-            start = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
-            for (i = inc; i <= 1+inc; i += inc)
-            {
-                // skip 0.25 && 0.75
-                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
-                    i += inc;
-                }
+                Draw.Color = TeardropColorA;
+                Draw.Line(startA, endA);
+                startA = endA;
 
-                var end = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
-                Draw.Line(start, end);
-                start = end;
+                Draw.Color = TeardropColorB;
+                Draw.Line(startB, endB);
+                startB = endB;
             }
         }
 
