@@ -3743,10 +3743,9 @@ MonoBehaviour:
   realPartSlider: {fileID: 1520086063}
   realPartFineTune: {fileID: 875429035}
   spiralFormula: {fileID: 1784845675}
-  drawSecondSpiral: {fileID: 1736488641}
   _imag: 206.491213762
   zetaSpiral: {fileID: 1486109718}
-  secondSpiral: {fileID: 573008885}
+  secondSpiral: {fileID: 0}
   extendSpiralCount: {fileID: 1271723114}
   fps: 0
   _real: 0.5
@@ -6530,7 +6529,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 573008886}
-  - component: {fileID: 573008885}
+  - component: {fileID: 573008887}
   m_Layer: 0
   m_Name: SecondSpiral
   m_TagString: Untagged
@@ -6538,28 +6537,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &573008885
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 573008884}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 82bfbc999dd334187813f640cbd0b321, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  app: {fileID: 338235377}
-  transparency: {fileID: 787073038}
-  visibleLinks: {fileID: 716126805}
-  targetTransparency: {fileID: 1591194602}
-  spiralColor: {r: 0.33333334, g: 0.96862745, b: 1, a: 1}
-  showReverseSpiral: {fileID: 1420668648}
-  reverseSpiralColor: {r: 0.4153718, g: 0.3066038, b: 1, a: 1}
-  cutoffLength: {fileID: 341932283}
-  skipEvery: {fileID: 2002183836}
-  onlyDrawOutline: {fileID: 764695370}
 --- !u!4 &573008886
 Transform:
   m_ObjectHideFlags: 0
@@ -6575,6 +6552,23 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &573008887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 573008884}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 952e25adeba054847a789ec59e4d4415, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  app: {fileID: 338235377}
+  drawSecondSpiral: {fileID: 1736488641}
+  spiralFormula: {fileID: 1784845675}
+  secondZetaSpiral: {fileID: 1486109718}
+  secondSpiralColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &583542692
 GameObject:
   m_ObjectHideFlags: 0
