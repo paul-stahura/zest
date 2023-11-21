@@ -155,7 +155,7 @@ public class App : ImmediateModeShapeDrawer
                     }
                     else
                     {
-                        s2 = new Zeta.Spiral(spiral.input, SpiralFormulas.EulerMaclauren);
+                        s2 = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
                     }
                 }
                 else
