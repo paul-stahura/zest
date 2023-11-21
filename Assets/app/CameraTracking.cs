@@ -123,7 +123,7 @@ public class CameraTracking : MonoBehaviour
             setCamera(cam, middleLinkTeardrop.TdropDotA, RotationOfLink(spiral, spiral.middleIndex));
         }
 
-        if(trackTdropA.isOn)
+        if(trackTdropB.isOn)
         {
             setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
         }
