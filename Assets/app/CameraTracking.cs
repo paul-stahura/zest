@@ -27,10 +27,7 @@ public class CameraTracking : MonoBehaviour
     public Color linkHighlight;
     public float thickness;
 
-    [Header("Teardrop")]
-    public Slider TeardropTransparency;
-    public Color TeardropColorA = Color.red;
-    public Color TeardropColorB = Color.green;
+    private MiddleLinkTeardrop middleLinkTeardrop;
 
     /// <summary>
     /// This is the index of the link the camera is tracking. If the camera is
@@ -58,7 +55,8 @@ public class CameraTracking : MonoBehaviour
         trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
         trackJointIMinusN.isOn = PlayerPrefs.GetInt("TrackJointI-N") != 0 ? true : false;
         spiralNumber.value = PlayerPrefs.GetInt("TrackSpiralNum");
-
+        
+        middleLinkTeardrop = GetComponent<MiddleLinkTeardrop>();
         #endregion
 
         app.DrawSprial += drawShapes;
@@ -82,7 +80,6 @@ public class CameraTracking : MonoBehaviour
         if (trackMiddle.isOn)
         {
             trackLink(cam, spiral.middleIndex, spiral);
-            DrawTeardrop(cam, spiral);
             return;
         }
 
@@ -121,7 +118,15 @@ public class CameraTracking : MonoBehaviour
             trackLink(cam, i, spiral, false);
         }
 
-        DrawTeardrop(cam, spiral);
+        if(trackTdropA.isOn)
+        {
+            setCamera(cam, middleLinkTeardrop.TdropDotA, RotationOfLink(spiral, spiral.middleIndex));
+        }
+
+        if(trackTdropA.isOn)
+        {
+            setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
+        }
     }
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)
@@ -149,93 +154,6 @@ public class CameraTracking : MonoBehaviour
         //     Draw.Thickness = thickness;
         //     Draw.Line(start, end);
         // }
-    }
-
-    void DrawTeardrop(Camera cam, Zeta.Spiral spiral)
-    {
-        if(TeardropTransparency.value < 0.05f)
-        {
-            return;
-        }
-
-        double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
-        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-        Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
-        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
-        
-        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
-
-        using (Draw.StyleScope)
-        {
-            TeardropColorA.a = TeardropTransparency.value;
-            TeardropColorB.a = TeardropTransparency.value;
-            Draw.Color = TeardropColorA;
-            Draw.Thickness = 1 + TeardropTransparency.value;
-
-            double i = 0;
-            double inc = 1d/200;
-            var start = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-            for (i = inc; i <= 1+inc; i += inc)
-            {
-                // skip 0.25 && 0.75
-                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
-                    i += inc;
-                }
-
-                var end = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-                Draw.Line(start, end);
-                start = end;
-            }
-
-            Draw.Color = TeardropColorB;
-            i = 0;
-            start = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
-            for (i = inc; i <= 1+inc; i += inc)
-            {
-                // skip 0.25 && 0.75
-                if(i >= 0.249 && i <= 0.251 || i >= 0.749 && i <= 0.751) {
-                    i += inc;
-                }
-
-                var end = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
-                Draw.Line(start, end);
-                start = end;
-            }
-        }
-
-        // Dots
-        using (Draw.StyleScope)
-        {
-            Color dotColor = Color.cyan;
-            dotColor.a = TeardropTransparency.value;
-            Draw.Color = dotColor;
-            Draw.Thickness = 1 + TeardropTransparency.value;
-
-            var index = Zeta.ImagToIndex(spiral.input.ToVector().y);
-            index -= Math.Floor(index);
-
-            var orth = Mathf.Min(1f, cam.orthographicSize);
-            var size = 50.0f;
-
-            var pt = trackDrop(tDropa(index), spiral.joints[spiral.middleIndex + 1]);
-            Draw.Ring(pt, orth / size / 2);
-            ShapesUtils.DrawCross(pt, orth / size, .5f);
-
-            if(trackTdropA.isOn)
-            {
-                setCamera(cam, pt, RotationOfLink(spiral, spiral.middleIndex));
-            }
-
-            index = 1 - index;
-            pt = trackDrop(tDropb(index), spiral.joints[spiral.middleIndex]);
-            Draw.Ring(pt, orth / size / 2);
-            ShapesUtils.DrawCross(pt, orth / size, .5f);
-
-            if(trackTdropB.isOn)
-            {
-                setCamera(cam, pt, RotationOfLink(spiral, spiral.middleIndex));
-            }
-        }
     }
 
     /// <summary>
@@ -282,19 +200,5 @@ public class CameraTracking : MonoBehaviour
         var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;
 
         return Quaternion.AngleAxis(angle, Vector3.forward);
-    }
-
-    public static double LinkRad(Zeta.Spiral s, int idx)
-    {
-        Vector3 start = s.joints[idx];
-        Vector3 end = s.joints[idx + 1];
-
-        var temp = end - start;
-        return Mathf.Atan2(temp.y, temp.x);
-    }
-
-    public static Vector RotateAround(Vector point, Vector pivot, double rad)
-    {
-        return new Vector ((point.x - pivot.x) * Math.Cos(rad) - (point.y - pivot.y) * Math.Sin(rad) + pivot.x, (point.x - pivot.x) * Math.Sin(rad) + (point.y - pivot.y) * Math.Cos(rad) + pivot.y);
     }
 }

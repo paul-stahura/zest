@@ -16933,6 +16933,7 @@ GameObject:
   - component: {fileID: 1486109719}
   - component: {fileID: 1486109718}
   - component: {fileID: 1486109720}
+  - component: {fileID: 1486109721}
   m_Layer: 0
   m_Name: ZetaSpiral
   m_TagString: Untagged
@@ -17002,6 +17003,19 @@ MonoBehaviour:
   linkHighlightTransparency: {fileID: 1914141423}
   linkHighlight: {r: 1, g: 1, b: 0, a: 0.11372549}
   thickness: 4
+--- !u!114 &1486109721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486109717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30583f7faacae294cbaaabbbbd7fd4a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  app: {fileID: 338235377}
   TeardropTransparency: {fileID: 1914141423}
   TeardropColorA: {r: 1, g: 0, b: 0, a: 1}
   TeardropColorB: {r: 0, g: 1, b: 0, a: 1}
