@@ -11,6 +11,8 @@ public class ZetaSolver : MonoBehaviour
     [Header("IndexPlane")]
     public Camera indexCamera;
     public Transform indexPlaneOrigin;
+    public Vector2 indexPlaneOffset = new Vector2(0, 0);
+
     public int numOfBands = 3;
     public Vector2 bandSize = new Vector2(0.25f, 1);
     [Tooltip("Number of dots between")] public Vector2 bandDensity = new Vector2(10, 40);
@@ -23,7 +25,7 @@ public class ZetaSolver : MonoBehaviour
     };
     [Range(0, 1)] public float bandTransparency = 1;
     // public float dotRadiusScalar = 300;
-    public float indexDotRadius = 1.0f;
+    [Range(0, 4)] public float indexDotRadius = 2.0f;
     private struct IndexDot
     {
         public IndexDot(Vector pPos, Color pColor)
@@ -41,7 +43,7 @@ public class ZetaSolver : MonoBehaviour
     public Transform teardropPlaneOrigin;
     [Range(0, 1)] public float teardropDotTransparency = 1;
     // public float dotRadiusScalar = 300;
-    public float teardropDotRadius = 1.0f;
+    [Range(0, 4)] public float teardropDotRadius = 2.0f;
     private struct TeardropDot
     {
         public TeardropDot(Vector pPos, IndexDot pPair)
@@ -94,7 +96,8 @@ public class ZetaSolver : MonoBehaviour
             {
                 for(double y = 0; y < bandSize.y + yIncrement; y += yIncrement)
                 {
-                    var offset = new Vector(indexPlaneOrigin.position.x, indexPlaneOrigin.position.y) + new Vector(bandSize.x * band, 0);
+                    var offset = new Vector(indexPlaneOrigin.position.x + indexPlaneOffset.x, indexPlaneOrigin.position.y + indexPlaneOffset.y);
+                    offset += new Vector(bandSize.x * band, 0);
                     var pt = new Vector(x, y) + offset;
                     _indexDots.Add(new IndexDot(pt, drawColor));
                 }
