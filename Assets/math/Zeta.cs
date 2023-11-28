@@ -83,20 +83,8 @@ public class Zeta
 
     public static Complex TearDrop(double floor, double ceil, Complex s)
     {
-        
-        double V(double t)
-        {
-            var fewerTerms = false;
-
-            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
-            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
-        }
-
-        Complex em = EulerMaclauren(s);
         // TODO: reverse
-        Complex emReverse = em;
-        // Complex opoint = RotateAround(new Vector(0, 0), emReverse.ToVector(), 2 * V(s.Imaginary) + (Math.PI / 2)) + em;
-        Complex opoint = em;
+        Complex opoint = Sprialr(s);
 
         Vector J(double t, Complex s)
         {
@@ -115,6 +103,25 @@ public class Zeta
         Complex tDrop = new Complex(Math.Cos(aopoint) * dopoint, -Math.Sin(aopoint) * dopoint);
         tDrop *= Math.Sqrt(ceil);
         return tDrop;
+    }
+
+    public static Complex Sprialr(Complex s)
+    {
+        double V(double t)
+        {
+            var fewerTerms = false;
+
+            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
+            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
+        }
+
+        Complex em = EulerMaclauren(s);
+        Vector emReverse = em.ToVector();
+        emReverse = new Vector(emReverse.y, emReverse.x);
+
+        var result = em;
+        // result = RotateAround(new Vector(0, 0), emReverse, -2 * V(s.Imaginary) + (Math.PI / 2)) + em;
+        return result;
     }
 
     public static Vector RotateAround(Vector pivot, Vector point, double rad)
