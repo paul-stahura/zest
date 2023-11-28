@@ -389,7 +389,7 @@ GameObject:
   - component: {fileID: 233922655}
   - component: {fileID: 233922660}
   m_Layer: 0
-  m_Name: OutputCamera
+  m_Name: TeardropCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -491,7 +491,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 233922654}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 100, y: 0, z: -20}
+  m_LocalPosition: {x: 10, y: 0, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -712,7 +712,7 @@ GameObject:
   m_Component:
   - component: {fileID: 392526123}
   m_Layer: 0
-  m_Name: OutputOrigin
+  m_Name: TeardropOrigin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -726,7 +726,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 392526122}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 100, y: 0, z: 0}
+  m_LocalPosition: {x: 10, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4688,7 +4688,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1877475310}
   m_Layer: 0
-  m_Name: InputOrigin
+  m_Name: IndexOrigin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4814,17 +4814,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 223594a0a1f99024caea8e6283fa4e1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IndexCamera: {fileID: 758547731}
-  IndexPlaneOrigin: {fileID: 1877475310}
-  NumOfBands: 4
-  BandColors:
+  indexCamera: {fileID: 758547731}
+  indexPlaneOrigin: {fileID: 1877475310}
+  numOfBands: 4
+  bandSize: {x: 0.25, y: 1}
+  bandDensity: {x: 10, y: 180}
+  bandColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 1, a: 1}
-  BandTransparency: 1
-  dotRadiusScalar: 300
-  TeardropCamera: {fileID: 0}
+  bandTransparency: 1
+  indexDotRadius: 2
+  TeardropCamera: {fileID: 233922658}
+  teardropPlaneOrigin: {fileID: 392526123}
+  teardropDotTransparency: 1
+  teardropDotRadius: 2
 --- !u!4 &1912177839
 Transform:
   m_ObjectHideFlags: 0
