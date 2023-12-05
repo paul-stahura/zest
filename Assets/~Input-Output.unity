@@ -4239,9 +4239,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -348.87488, y: -29.200012}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 348.8766, y: 221.4521}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 1, y: 1}
 --- !u!114 &1773185824
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4795,6 +4795,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1912177839}
   - component: {fileID: 1912177838}
+  - component: {fileID: 1912177840}
   m_Layer: 0
   m_Name: ZetaSolver
   m_TagString: Untagged
@@ -4819,18 +4820,16 @@ MonoBehaviour:
   indexPlaneOffset: {x: 0, y: 0}
   numOfBands: 4
   bandSize: {x: 0.25, y: 1}
-  bandDensity: {x: 10, y: 180}
+  bandDensity: {x: 12, y: 200}
   bandColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 1, a: 1}
   bandTransparency: 1
-  indexPointRadius: 2
   TeardropCamera: {fileID: 233922658}
   teardropPlaneOrigin: {fileID: 392526123}
-  teardropPointTransparency: 1
-  teardropPointRadius: 2
+  pointRenderer: {fileID: 1912177840}
 --- !u!4 &1912177839
 Transform:
   m_ObjectHideFlags: 0
@@ -4846,6 +4845,22 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1912177840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912177837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1572713e1e3aaf44590868b368ff0531, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _pointTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  _pointSize: 0.001
+  _pointShader: {fileID: 4800000, guid: a8aeb1b1d6c294e1fa3d34d5e8f8365a, type: 3}
+  _diskShader: {fileID: 4800000, guid: d108d1edce83544abbb1e71c700be798, type: 3}
 --- !u!1 &1986949555
 GameObject:
   m_ObjectHideFlags: 0

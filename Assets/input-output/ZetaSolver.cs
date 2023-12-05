@@ -10,6 +10,8 @@ using System.Linq;
 using System.Diagnostics;
 using Unity.Editor.Tasks;
 using UnityEngine.UI;
+using Color = UnityEngine.Color;
+using System.Drawing;
 
 public class ZetaSolver : MonoBehaviour
 {
@@ -30,61 +32,69 @@ public class ZetaSolver : MonoBehaviour
         Color.magenta,
     };
     [Range(0, 1)] public float bandTransparency = 1;
-    // public float pointRadiusScalar = 300;
-    [Range(0, 4)] public float indexPointRadius = 2.0f;
-    private struct IndexPoint
-    {
-        public IndexPoint(Vector2 pPos, Color pColor)
-        {
-            pos = pPos;
-            color = pColor;
-        }
-        public Vector2 pos;
-        public Color color;
-    }
-    private List<IndexPoint> _indexPoints;
+    // // public float pointRadiusScalar = 300;
+    // [Range(0, 4)] public float indexPointRadius = 2.0f;
+    // private struct IndexPoint
+    // {
+    //     public IndexPoint(Vector2 pPos, Color pColor)
+    //     {
+    //         pos = pPos;
+    //         color = pColor;
+    //     }
+    //     public Vector2 pos;
+    //     public Color color;
+    // }
+    // private List<IndexPoint> _indexPoints;
 
     [Header("TeardropPlane")]
     public Camera TeardropCamera;
     public Transform teardropPlaneOrigin;
-    [Range(0, 1)] public float teardropPointTransparency = 1;
-    // public float dotRadiusScalar = 300;
-    [Range(0, 4)] public float teardropPointRadius = 2.0f;
-    private struct TeardropPoint
-    {
-        public TeardropPoint(Vector2 pPos, IndexPoint pPair)
-        {
-            pos = pPos;
-            pair = pPair;
-        }
-        public Vector2 pos;
-        public IndexPoint pair;
+    // [Range(0, 1)] public float teardropPointTransparency = 1;
+    // // public float dotRadiusScalar = 300;
+    // [Range(0, 4)] public float teardropPointRadius = 2.0f;
+    // private struct TeardropPoint
+    // {
+    //     public TeardropPoint(Vector2 pPos, IndexPoint pPair)
+    //     {
+    //         pos = pPos;
+    //         pair = pPair;
+    //     }
+    //     public Vector2 pos;
+    //     public IndexPoint pair;
 
-        public Color GetColor()
-        {
-            return pair.color;
-        }
-    }
-    private List<TeardropPoint> _teardropPoints;
+    //     public Color GetColor()
+    //     {
+    //         return pair.color;
+    //     }
+    // }
+    // private List<TeardropPoint> _teardropPoints;
+
+    [Header("Point Cloud")]
+    public ZetaSolverPointRenderer pointRenderer;
+    private ZetaSolverPointData _pointData;
+    private List<Vector2> _indexPoints;
+    private List<Vector3> _teardropPoints;
+    private List<Color32> _pointColors;
+
     #endregion
 
     // Job struct to perform the calculations
     private struct CalculateZetaPoints : IJobParallelFor
     {
         [ReadOnly]
-        public NativeArray<IndexPoint> IndexPoints;
+        public NativeArray<Vector2> IndexPoints;
 
         [WriteOnly]
-        public NativeArray<TeardropPoint> TeardropPoints;
+        public NativeArray<Vector3> TeardropPoints;
 
         public void Execute(int index)
         {
-            IndexPoint indexPoint = IndexPoints[index];
+            var indexPoint = IndexPoints[index];
 
-            Complex s = new Complex(indexPoint.pos.x, Zeta.IndexToImag(indexPoint.pos.y));
+            Complex s = new Complex(indexPoint.x, Zeta.IndexToImag(indexPoint.y));
             Vector2 teardropPos = Zeta.TearDrop(0, 1, s).ToVector2();
 
-            TeardropPoints[index] = new TeardropPoint(teardropPos, indexPoint);
+            TeardropPoints[index] = new Vector3(teardropPos.x, teardropPos.y, indexPoint.y);
         }
     }
 
@@ -92,29 +102,26 @@ public class ZetaSolver : MonoBehaviour
     {
         CreateIndexPlanePoints();
         CreateTeardropPoints();
+
+        _pointData = new ZetaSolverPointData();
+        pointRenderer.sourceData = _pointData;
+
+        UpdatePointData();
     }
 
     public void OnValidate() {
         CreateIndexPlanePoints();
         CreateTeardropPoints();
-    }
 
-    public void OnDrawShapes(Camera cam)
-    {
-        if(bandTransparency > 0.1f)
-        {
-            DrawIndexPlanePoints();
-        }
-
-        if(teardropPointTransparency > 0.1f)
-        {
-            DrawTeardropPlanePoints();
-        }
+        // DrawIndexPlanePoints();
+        // DrawTeardropPlanePoints();
+        UpdatePointData();
     }
 
     private void CreateIndexPlanePoints()
     {
-        _indexPoints = new List<IndexPoint>();
+        _indexPoints = new List<Vector2>();
+        _pointColors = new List<Color32>();
         
         for(int band = 0; band < numOfBands; band++)
         {
@@ -132,37 +139,27 @@ public class ZetaSolver : MonoBehaviour
                     var offset = new Vector(indexPlaneOrigin.position.x + indexPlaneOffset.x, indexPlaneOrigin.position.y + indexPlaneOffset.y);
                     offset += new Vector(bandSize.x * band, 0);
                     var pt = new Vector(x, y) + offset;
-                    _indexPoints.Add(new IndexPoint(pt, drawColor));
+                    _indexPoints.Add(pt);
+                    _pointColors.Add(drawColor);
                 }
             }
         }
     }
 
+    // uses the job system to calculate zeta for every point
     private void CreateTeardropPoints()
     {
-        // _teardropPoints = new List<TeardropPoint>();
-
-        // foreach(IndexPoint point in _indexPoints)
-        // {
-        //     Complex s = new Complex(point.pos.x, Zeta.IndexToImag(point.pos.y));
-        //     // var offset = new Vector(teardropPlaneOrigin.position.x, teardropPlaneOrigin.position.y);
-        //     var pt = Zeta.TearDrop(0, 1, s).ToVector();
-        //     _teardropPoints.Add(new TeardropPoint(pt, point));
-        // }
-
-
-        // Job Attempt
-        _teardropPoints = new List<TeardropPoint>(_indexPoints.Count);
+        _teardropPoints = new List<Vector3>(_indexPoints.Count);
 
         // Convert indexPoints list to native array for job processing
-        NativeArray<IndexPoint> inputPointsArray = new NativeArray<IndexPoint>(_indexPoints.Count, Allocator.TempJob);
+        NativeArray<Vector2> inputPointsArray = new NativeArray<Vector2>(_indexPoints.Count, Allocator.TempJob);
         for(int i = 0; i < _indexPoints.Count; i++)
         {
             inputPointsArray[i] = _indexPoints[i];
         }
 
         // Create a native array for the teardropPoints
-        NativeArray<TeardropPoint> teardropPointsArray = new NativeArray<TeardropPoint>(_indexPoints.Count, Allocator.TempJob);
+        NativeArray<Vector3> teardropPointsArray = new NativeArray<Vector3>(_indexPoints.Count, Allocator.TempJob);
 
         // Create a job and set its data
         CalculateZetaPoints pointJob = new CalculateZetaPoints
@@ -179,38 +176,21 @@ public class ZetaSolver : MonoBehaviour
 
         // Convert the native array back to a managed array
         _teardropPoints = teardropPointsArray.ToList();
+        for(int i = 0; i < _teardropPoints.Count - 1; i++)
+        {
+            _teardropPoints[i] += new Vector3(teardropPlaneOrigin.transform.position.x, 0, 0);
+        }
 
         // Dispose of the native arrays
         inputPointsArray.Dispose();
         teardropPointsArray.Dispose();
     }
 
-    private void DrawIndexPlanePoints()
+    private void UpdatePointData()
     {
-        using (Draw.StyleScope)
+        if(_pointData != null) 
         {
-            Draw.Matrix = indexPlaneOrigin.localToWorldMatrix;
-            foreach(IndexPoint pt in _indexPoints)
-            {
-                Draw.Disc(pt.pos, indexPointRadius / 1000, pt.color);
-            }
-        }
-    }
-
-    private void DrawTeardropPlanePoints()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Matrix = teardropPlaneOrigin.localToWorldMatrix;
-            foreach(TeardropPoint pt in _teardropPoints)
-            {
-                Color drawColor = pt.GetColor();
-                drawColor.a = teardropPointTransparency;
-
-                // setting the Z pos the the pair points y position
-                var outPos = new Vector3(pt.pos.x, pt.pos.y, pt.pair.pos.y);
-                Draw.Disc(outPos, teardropPointRadius / 1000, drawColor);
-            }
+            _pointData.Initialize(_indexPoints, _teardropPoints, _pointColors);
         }
     }
 }
