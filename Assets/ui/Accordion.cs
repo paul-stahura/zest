@@ -60,7 +60,7 @@ public class Accordion : MonoBehaviour
             while(rect.sizeDelta.y < _exstendedHeight)
             {
                 rect.sizeDelta = Vector2.Lerp(rect.sizeDelta, targetSize, animSpeed);
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
 
             rect.sizeDelta = targetSize;
@@ -77,7 +77,7 @@ public class Accordion : MonoBehaviour
             while(rect.sizeDelta.y > _collapsedHight)
             {
                 rect.sizeDelta = Vector2.Lerp(rect.sizeDelta, targetSize, animSpeed);
-                yield return null;
+                yield return new WaitForFixedUpdate();
             }
 
             rect.sizeDelta = targetSize;
