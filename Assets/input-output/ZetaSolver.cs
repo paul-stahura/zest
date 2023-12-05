@@ -206,7 +206,10 @@ public class ZetaSolver : MonoBehaviour
             {
                 Color drawColor = pt.GetColor();
                 drawColor.a = teardropPointTransparency;
-                Draw.Disc(pt.pos, teardropPointRadius / 1000, drawColor);
+
+                // setting the Z pos the the pair points y position
+                var outPos = new Vector3(pt.pos.x, pt.pos.y, pt.pair.pos.y);
+                Draw.Disc(outPos, teardropPointRadius / 1000, drawColor);
             }
         }
     }
