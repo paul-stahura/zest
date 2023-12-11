@@ -37,7 +37,7 @@ public class ZTrace : MonoBehaviour
 
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
-    protected List<float> outputPtsZDepth = new List<float>();
+    protected List<Vector3> outputPtsZDepth = new List<Vector3>();
 
     public delegate Complex ZetaFunction(Complex z);
     ZetaFunction ZetaFn = Zeta.EulerMaclauren;
@@ -112,15 +112,8 @@ public class ZTrace : MonoBehaviour
 
             for (int i = 1; i < outputPts.Count; i++)
             {
-                // scale the line in the z direction
-                Vector3 startPt = outputPts[i - 1].ToVector2();
-                startPt = new Vector3(startPt.x, startPt.y, outputPtsZDepth[i - 1]);
-
-                Vector3 endPt = outputPts[i].ToVector2();
-                endPt = new Vector3(endPt.x, endPt.y, outputPtsZDepth[i]);
-
                 // Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
-                Draw.Line(startPt, endPt, color);
+                Draw.Line(outputPtsZDepth[i - 1], outputPtsZDepth[i], color);
             }
         }
     }
@@ -226,7 +219,7 @@ public class ZTrace : MonoBehaviour
             return;
 
         outputPts.Clear();
-        outputPtsZDepth = new List<float>();
+        outputPtsZDepth = new List<Vector3>();
         // var from = inputPts[0];
         var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
@@ -239,8 +232,12 @@ public class ZTrace : MonoBehaviour
             {
                 var c = Vector.Lerp(from, to, j);
                 // outputPts.Add(Zeta.EulerMaclauren(c));
+
+                Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
+                Vector3 pt = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
+
                 outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
-                outputPtsZDepth.Add((float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
+                outputPtsZDepth.Add(pt);
             }
             from = to;
         }
