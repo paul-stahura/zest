@@ -112,9 +112,7 @@ public class ZetaSolver : MonoBehaviour
     public void OnValidate() {
         CreateIndexPlanePoints();
         CreateTeardropPoints();
-
-        // DrawIndexPlanePoints();
-        // DrawTeardropPlanePoints();
+        
         UpdatePointData();
     }
 
@@ -128,8 +126,10 @@ public class ZetaSolver : MonoBehaviour
             Color drawColor = bandColors[band % 4];
             drawColor.a = bandTransparency;
 
+            // to avoid negatives and deviding by zero
             if(bandDensity.x <= 0) bandDensity.x = 0.001f;
             if(bandDensity.y <= 0) bandDensity.y = 0.001f;
+
             double xIncrement = bandSize.x / bandDensity.x;
             double yIncrement = bandSize.y / bandDensity.y;
             for(double x = 0; x < bandSize.x; x += xIncrement)

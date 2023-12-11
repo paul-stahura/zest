@@ -37,6 +37,7 @@ public class ZTrace : MonoBehaviour
 
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
+    protected List<float> outputPtsZDepth = new List<float>();
 
     public delegate Complex ZetaFunction(Complex z);
     ZetaFunction ZetaFn = Zeta.EulerMaclauren;
@@ -111,7 +112,15 @@ public class ZTrace : MonoBehaviour
 
             for (int i = 1; i < outputPts.Count; i++)
             {
-                Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
+                // scale the line in the z direction
+                Vector3 startPt = outputPts[i - 1].ToVector2();
+                startPt = new Vector3(startPt.x, startPt.y, outputPtsZDepth[i - 1]);
+
+                Vector3 endPt = outputPts[i].ToVector2();
+                endPt = new Vector3(endPt.x, endPt.y, outputPtsZDepth[i]);
+
+                // Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
+                Draw.Line(startPt, endPt, color);
             }
         }
     }
@@ -217,6 +226,7 @@ public class ZTrace : MonoBehaviour
             return;
 
         outputPts.Clear();
+        outputPtsZDepth = new List<float>();
         // var from = inputPts[0];
         var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
@@ -230,6 +240,7 @@ public class ZTrace : MonoBehaviour
                 var c = Vector.Lerp(from, to, j);
                 // outputPts.Add(Zeta.EulerMaclauren(c));
                 outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
+                outputPtsZDepth.Add((float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
             }
             from = to;
         }
@@ -250,20 +261,30 @@ public class ZTrace : MonoBehaviour
 
             // var from = inputPts[0];
             var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
+            Vector3 DiscPos = new Vector3();
+            
             for (var i = 1; i < inputPts.Count; i++)
             {
                 // to = inputPts[i];
                 to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
 
+                DiscPos = Zeta.EulerMaclauren(from).ToVector2();
+                // add z depth to disc pos
+                DiscPos = new Vector3(DiscPos.x, DiscPos.y, (float)inputPts[i - 1].y);
+
                 // draw the dragged point without alpha
                 if (inputPts.IndexOf(from) == dragging)
-                    Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+                    Draw.Disc(DiscPos, radius, discColor);
 
-                Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+                Draw.Disc(DiscPos, radius, discColor);
                 from = to;
             }
 
-            Draw.Disc(Zeta.EulerMaclauren(to).ToVector2(), radius, discColor);
+            DiscPos = Zeta.EulerMaclauren(to).ToVector2();
+            // add z depth to disc pos
+            DiscPos = new Vector3(DiscPos.x, DiscPos.y, (float)inputPts[inputPts.Count - 1].y);
+
+            Draw.Disc(DiscPos, radius, discColor);
         }
     }
 
