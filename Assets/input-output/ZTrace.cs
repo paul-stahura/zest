@@ -35,6 +35,9 @@ public class ZTrace : MonoBehaviour
     float radius;
     public float radiusScalar = 50;
 
+    public delegate void TeardropPoints(List<Vector3> tPoints);
+    public static event TeardropPoints OnTeardopPointsUpdated;
+
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
     protected List<Vector3> outputPtsZDepth = new List<Vector3>();
@@ -315,6 +318,8 @@ public class ZTrace : MonoBehaviour
         dragging = -1;
         _leanDrag.enabled = true;
         calculate();
+
+        OnTeardopPointsUpdated(outputPtsZDepth);
     }
 
     // returns a camera with the mouse in it's viewport

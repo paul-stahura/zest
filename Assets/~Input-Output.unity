@@ -4815,12 +4815,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 223594a0a1f99024caea8e6283fa4e1c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointsPerSegment: 100
+  highlightTransparency: 1
   indexCamera: {fileID: 758547731}
   indexPlaneOrigin: {fileID: 1877475310}
-  indexPlaneOffset: {x: 0, y: 0}
+  indexPlaneOffset: {x: 0.25, y: 0}
   numOfBands: 4
-  bandSize: {x: 0.25, y: 1}
-  bandDensity: {x: 12, y: 200}
+  bandSize: {x: 0.125, y: 1}
+  bandDensity: {x: 100, y: 720}
   bandColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}
@@ -4860,7 +4862,6 @@ MonoBehaviour:
   _pointTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   _pointSize: 0.001
   _pointShader: {fileID: 4800000, guid: a8aeb1b1d6c294e1fa3d34d5e8f8365a, type: 3}
-  _diskShader: {fileID: 4800000, guid: d108d1edce83544abbb1e71c700be798, type: 3}
 --- !u!1 &1986949555
 GameObject:
   m_ObjectHideFlags: 0

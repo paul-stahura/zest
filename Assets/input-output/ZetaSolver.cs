@@ -1,21 +1,20 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Shapes;
 using Complex = System.Numerics.Complex;
 using UnityEngine;
 using Unity.Jobs;
 using Unity.Collections;
 using System.Linq;
-using System.Diagnostics;
-using Unity.Editor.Tasks;
-using UnityEngine.UI;
 using Color = UnityEngine.Color;
-using System.Drawing;
 
 public class ZetaSolver : MonoBehaviour
 {
     #region Variables
+    [Header("Teardrop Input Aproximation")]
+    public float pointsPerSegment = 1/10;
+    [Range(0, 1)] public float highlightTransparency = 1;
+    private List<int> _closestPointIndexies;
+
     [Header("IndexPlane")]
     public Camera indexCamera;
     public Transform indexPlaneOrigin;
@@ -100,6 +99,8 @@ public class ZetaSolver : MonoBehaviour
 
     public void Start()
     {
+        ZTrace.OnTeardopPointsUpdated += CalculateInputLine;
+        
         CreateIndexPlanePoints();
         CreateTeardropPoints();
 
@@ -112,7 +113,7 @@ public class ZetaSolver : MonoBehaviour
     public void OnValidate() {
         CreateIndexPlanePoints();
         CreateTeardropPoints();
-        
+
         UpdatePointData();
     }
 
@@ -191,6 +192,35 @@ public class ZetaSolver : MonoBehaviour
         if(_pointData != null) 
         {
             _pointData.Initialize(_indexPoints, _teardropPoints, _pointColors);
+            _closestPointIndexies = new List<int>();
+        }
+    }
+
+    private void CalculateInputLine(List<Vector3> tDrop)
+    {
+        // reset highlighted Points
+        if(_closestPointIndexies != null && _closestPointIndexies.Count > 0)
+        {
+            for(int i = 0; i < _closestPointIndexies.Count; i++)
+            {
+                int pairIndex = _pointData.GetPointPairIndex(_closestPointIndexies[i]);
+                Color defaultColor = _pointColors[pairIndex];
+                _pointData.SetPointColor(_closestPointIndexies[i], defaultColor);
+                _pointData.SetPointColor(pairIndex, defaultColor);
+            }
+        }
+
+        _closestPointIndexies = new List<int>();
+        // find closest points
+        for(int i = 0; i < tDrop.Count; i++)
+        {
+            _closestPointIndexies.Add(_pointData.GetClosestTearDropPointIndex(tDrop[i] + teardropPlaneOrigin.transform.position));
+        }
+
+        // Highlight closest points
+        if(_closestPointIndexies.Count > 0)
+        {
+            _pointData.HighlightPoints(_closestPointIndexies, Color.white);
         }
     }
 }

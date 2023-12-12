@@ -3,6 +3,8 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using System;
+using System.Linq;
 
 /// A container class optimized for compute buffer.
 public sealed class ZetaSolverPointData
@@ -63,12 +65,52 @@ public sealed class ZetaSolverPointData
 
     #endregion
 
+    public Vector3 GetPoint(int index)
+    {
+        return _pointData[index].position;
+    }
+
+    public int GetPointPairIndex(int index)
+    {
+        index += teardropPointIndex;
+        if(index >= teardropPointIndex * 2)
+        {
+            index -= teardropPointIndex * 2;
+        }
+        return index;
+    }
+
+    public void SetPointColor(int index, Color color)
+    {
+        _pointData[index].color = EncodeColor(color);
+    }
+
+    public int GetClosestTearDropPointIndex(Vector3 pt)
+    {
+        int closestPtIndex = -1;
+        float closestPtDist = float.MaxValue;
+        for(int i = teardropPointIndex; i < teardropPointIndex * 2; i++)
+        {
+            float dist = Vector3.Distance(pt, _pointData[i].position);
+            // Debug.Log("PT: " + pt + ". Other: " + _pointData[i].position);
+            if(dist < closestPtDist)
+            {
+                closestPtIndex = i;
+                closestPtDist = dist;
+                // Debug.Log("Closer: " + closestPtIndex + ".  DIST: " + closestPtDist);
+            }
+        }
+        // Debug.Log("Close Index: " + closestPtIndex);
+        return closestPtIndex;
+    }
+
     #region Editor functions
 
 #if UNITY_EDITOR
 
     static uint EncodeColor(Color c)
     {
+        // float kMaxBrightness = (1 - c.a) * 32;
         const float kMaxBrightness = 16;
 
         var y = Mathf.Max(Mathf.Max(c.r, c.g), c.b);
@@ -122,12 +164,43 @@ public sealed class ZetaSolverPointData
         buffer.SetData(_pointData);
     }
 
+    public void HighlightPoints(List<int> pointIndices, Color highlightColor)
+    {
+        for(int i = teardropPointIndex; i < teardropPointIndex * 2; i++)
+        {
+            if(pointIndices.Contains(i))
+            {
+                SetPointColor(i, highlightColor);
+                SetPointColor(GetPointPairIndex(i), highlightColor);
+            }
+            else
+            {
+                SetPointColor(GetPointPairIndex(i), Color.black);
+            }
+        }
+
+        // for(int i = 0; i < pointIndices.Count; i++)
+        // {
+        //     SetPointColor(pointIndices[i], highlightColor);
+        //     SetPointColor(GetPointPairIndex(pointIndices[i]), highlightColor);
+        // }
+
+        var buffer = computeBuffer;
+        buffer.SetData(_pointData);
+    }
+
+    public void UpdateBuffer()
+    {
+        var buffer = computeBuffer;
+        buffer.SetData(_pointData);
+    }
+
     public void Reset()
     {
         for (var i = 0; i < _pointData.Length; i++)
         {
-            _pointData[i].position = Vector3.zero;
-            _pointData[i].color = 0;
+            _pointData[i].position = new Vector3(-1, -1, 0);
+            _pointData[i].color = EncodeColor(Color.black);
         }
 
         var buffer = computeBuffer;
