@@ -333,6 +333,22 @@ public class Zeta
         return new Complex(Zx(imag), Zy(imag));
     }
 
+    // https://www.desmos.com/calculator/xyhvjwzk2q
+    public static Complex EtaFormula(Complex s)
+    {
+        double Ex = 0;
+        double Ey = 0;
+        int iterations = 100000;
+        double a = s.Real;
+        double b = s.Imaginary;
+        for(int n = 1; n < iterations; n++) {
+            Ex += Math.Pow(-1, n+1) * (Math.Cos(-b * Math.Log(n)) / Math.Pow(n, a));
+            Ey += Math.Pow(-1, n+1) * (Math.Sin(-b * Math.Log(n)) / Math.Pow(n, a));
+        }
+        
+        return new Complex(Ex, Ey);
+    }
+
     [MoonSharpUserData]
     public class Spiral
     {
@@ -346,7 +362,7 @@ public class Zeta
 
         public int extendSpiralCount = 0;
 
-        public Spiral(Complex s, bool useReimannSiegel)
+        public Spiral(Complex s, SpiralFormulas formula)
         {
             this.input = s;
             this.middleIndex = (int)Zeta.ImagToIndex(input.Imaginary);
@@ -362,10 +378,32 @@ public class Zeta
             for (var i = 0; i < spirals.Length; i++)
                 this.spirals[i] = new Vector();
 
-            Update(s, useReimannSiegel);
+            Update(s, formula);
         }
 
-        public void Update(Complex s, bool useReimannSiegel)
+        public void Update(Complex s, SpiralFormulas formula)
+        {
+            switch (formula)
+            {
+                case SpiralFormulas.ReimannSiegel:
+                    UpdateReimannSiegel(s);
+                    break;
+
+                case SpiralFormulas.EulerMaclauren:
+                    UpdateEulerMaclauren(s);
+                    break;
+
+                case SpiralFormulas.EtaFormula:
+                    UpdateEtaFormula(s);
+                    break;
+
+                default:
+                    this.zeta = Zeta.ReimannSiegel(input);
+                    break;
+            }
+        }
+
+        public void UpdateReimannSiegel(Complex s)
         {
             this.input = s;
             var nl = (int)(input.Imaginary / Math.PI + 1);
@@ -374,10 +412,7 @@ public class Zeta
             this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
             this.middleIndex = (int)mi;
 
-            if (useReimannSiegel)
-                this.zeta = Zeta.ReimannSiegel(input);
-            else
-                this.zeta = Zeta.EulerMaclauren(input);
+            this.zeta = Zeta.ReimannSiegel(input);
 
             this.joints = new Vector[numLinks];
 
@@ -391,6 +426,80 @@ public class Zeta
             {
                 var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
                 var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
+                var end = new Vector(start.x + x, start.y + y);
+                this.joints[i] = end;
+
+                if (i == this.middleIndex + 1)
+                {
+                    this.middlePoint = start + (end - start) / 2;
+                }
+
+                start = end;
+            }
+
+            findSpirals();
+        }
+
+        public void UpdateEulerMaclauren(Complex s)
+        {
+            this.input = s;
+            var nl = (int)(input.Imaginary / Math.PI + 1);
+
+            var mi = Zeta.ImagToIndex(input.Imaginary);
+            this.numLinks = (int)SpiralMiddleIndex(mi, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
+            this.middleIndex = (int)mi;
+
+            this.zeta = Zeta.EulerMaclauren(input);
+
+            this.joints = new Vector[numLinks];
+
+            var start = new Vector();
+            this.joints[0] = start;
+
+            var imag = this.input.Imaginary;
+            var real = this.input.Real;
+
+            for (int i = 1; i < numLinks; i++)
+            {
+                var x = Math.Cos(imag * Math.Log(i)) / Math.Pow(i, real);
+                var y = -Math.Sin(imag * Math.Log(i)) / Math.Pow(i, real);
+                var end = new Vector(start.x + x, start.y + y);
+                this.joints[i] = end;
+
+                if (i == this.middleIndex + 1)
+                {
+                    this.middlePoint = start + (end - start) / 2;
+                }
+
+                start = end;
+            }
+
+            findSpirals();
+        }
+
+        public void UpdateEtaFormula(Complex s)
+        {
+            this.input = s;
+            var nl = (int)(input.Imaginary / Math.PI + 1);
+
+            var mi = Zeta.ImagToIndex(input.Imaginary);
+            this.numLinks = ((int)SpiralMiddleIndex(mi, 0) + 2) * 2 + extendSpiralCount; // need to an extra for proper final link tracking
+            this.middleIndex = (int)mi;
+
+            this.zeta = Zeta.EtaFormula(input);
+
+            this.joints = new Vector[numLinks];
+
+            var start = new Vector();
+            this.joints[0] = start;
+
+            var imag = this.input.Imaginary;
+            var real = this.input.Real;
+
+            for (int i = 1; i < numLinks; i++)
+            {
+                var x = Math.Pow(-1, i+1) * (Math.Cos(-imag * Math.Log(i)) / Math.Pow(i, real));
+                var y = Math.Pow(-1, i+1) * (Math.Sin(-imag * Math.Log(i)) / Math.Pow(i, real));
                 var end = new Vector(start.x + x, start.y + y);
                 this.joints[i] = end;
 

@@ -3,10 +3,19 @@ using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using UnityEngine.SceneManagement;
 
 using Shapes;
 using System.Runtime.CompilerServices;
+using Unity.VersionControl.Git;
+
+public enum SpiralFormulas
+{
+    ReimannSiegel = 0,
+    EulerMaclauren = 1,
+    EtaFormula = 2
+}
 
 public class App : ImmediateModeShapeDrawer
 {
@@ -30,13 +39,17 @@ public class App : ImmediateModeShapeDrawer
     [Header("Real Part Control")]
     public Slider realPartSlider;
     public FineTuneSlider realPartFineTune;
-    public Toggle useReimannSiegel;
-
+    public TMP_Dropdown spiralFormula;
 
     public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1);
+    readonly double IMAG_WHEN_INDEX_AT_ZERO = 0.7463958;
+    readonly double IMAG_WHEN_INDEX_AT_2ND_ZERO = 0.300802;
+    readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0);
 
     public ZetaSpiral zetaSpiral;
+    public ZetaSpiral secondSpiral;
+
 
     public Slider extendSpiralCount;
 
@@ -63,10 +76,10 @@ public class App : ImmediateModeShapeDrawer
         set
         {
             // If the imaginary value being set would result in an index 
-            // less than 2, ignore it
+            // less than 0, ignore it
             //
             // Sets the all internal imaginary state with no animation
-            if (value != _imag && value >= IMAG_WITH_2_LINKS) // value is a 'magic' variable that contains the NEW value coming to be set
+            if (value != _imag && value >= IMAG_WHEN_INDEX_AT_2ND_ZERO) // value is a 'magic' variable that contains the NEW value coming to be set
             {
                 _imag = value;
 
@@ -82,9 +95,9 @@ public class App : ImmediateModeShapeDrawer
                 indexRealPart.value = realPart;
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 else
-                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
 
                 ImagChanged?.Invoke(value); // announce to everyone that it has changed
             }
@@ -103,11 +116,11 @@ public class App : ImmediateModeShapeDrawer
                 realPartSlider.value = (float)_real;
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral = new Zeta.Spiral(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 else
                 {
                     spiral.extendSpiralCount = (int)extendSpiralCount.value;
-                    spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+                    spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
                 }
 
                 RealChanged?.Invoke(value);
@@ -211,25 +224,27 @@ public class App : ImmediateModeShapeDrawer
         #region Real Part Slider
         realPartSlider.onValueChanged.AddListener(value =>
         {
-            if (useReimannSiegel.isOn && value != .5f)
-                useReimannSiegel.isOn = false;
+            if (spiralFormula.value != (int)SpiralFormulas.EulerMaclauren && value != .5f)
+                spiralFormula.value = (int)SpiralFormulas.EulerMaclauren;
 
             Real = value;
         });
 
-        useReimannSiegel.onValueChanged.AddListener(value =>
+        spiralFormula.onValueChanged.AddListener(value =>
         {
-            if (value == true)
+            if (spiralFormula.value != (int)SpiralFormulas.EulerMaclauren)
             {
                 realPartFineTune.reset();
                 realPartSlider.value = .5f;
             }
+
+            spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
         });
 
         extendSpiralCount.onValueChanged.AddListener(value =>
         {
             spiral.extendSpiralCount = (int)extendSpiralCount.value;
-            spiral.Update(new Complex(_real, _imag), useReimannSiegel.isOn);
+            spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
         });
         #endregion
     }
