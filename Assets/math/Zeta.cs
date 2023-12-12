@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Complex = System.Numerics.Complex;
 using MoonSharp.Interpreter;
-using MoonSharp.VsCodeDebugger.SDK;
+using System.Drawing.Drawing2D;
 
 public class Zeta
 {
@@ -79,6 +79,54 @@ public class Zeta
         }
 
         return result;
+    }
+
+    public static Complex TearDrop(double floor, double ceil, Complex s)
+    {
+        // TODO: reverse
+        Complex opoint = Sprialr(s);
+
+        Vector J(double t, Complex s)
+        {
+            Complex z = Complex.Zero;
+            for (int k = 1; k < t; k++)
+            {
+                z += Complex.Pow(k, -s);
+            }
+            return z.ToVector();
+        }
+
+        Vector j0 = J(floor + 1, s);
+        Vector j1 = J(ceil + 1, s);
+        double dopoint = Vector.Distance(j0, opoint.ToVector());
+        double aopoint = Math.Atan2(j1.y - j0.y, j1.x - j0.x) - Math.Atan2(opoint.Imaginary - j0.y, opoint.Real - j0.x);
+        Complex tDrop = new Complex(Math.Cos(aopoint) * dopoint, -Math.Sin(aopoint) * dopoint);
+        tDrop *= Math.Sqrt(ceil);
+        return tDrop;
+    }
+
+    public static Complex Sprialr(Complex s)
+    {
+        double V(double t)
+        {
+            var fewerTerms = false;
+
+            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
+            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
+        }
+
+        Complex em = EulerMaclauren(s);
+        Vector emReverse = em.ToVector();
+        emReverse = new Vector(emReverse.y, emReverse.x);
+
+        var result = em;
+        // result = RotateAround(new Vector(0, 0), emReverse, -2 * V(s.Imaginary) + (Math.PI / 2)) + em;
+        return result;
+    }
+
+    public static Vector RotateAround(Vector pivot, Vector point, double rad)
+    {
+        return new Vector ((point.x - pivot.x) * Math.Cos(rad) - (point.y - pivot.y) * Math.Sin(rad) + pivot.x, (point.x - pivot.x) * Math.Sin(rad) + (point.y - pivot.y) * Math.Cos(rad) + pivot.y);
     }
 
     public static Complex EulerMaclauren(Complex s)

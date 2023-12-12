@@ -18,6 +18,8 @@ public class ZTrace : MonoBehaviour
     public FloatInput toReal;
     public FloatInput toImag;
     public Button reset;
+    public Button approximate;
+
     public int pointsPerSegment = 10;
     public int controlPoints = 10;
     public Color color = Color.magenta;
@@ -35,8 +37,12 @@ public class ZTrace : MonoBehaviour
     float radius;
     public float radiusScalar = 50;
 
+    public delegate void TeardropPoints(List<Vector3> tPoints);
+    public static event TeardropPoints OnTeardopPointsUpdated;
+
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
+    protected List<Vector3> outputPtsZDepth = new List<Vector3>();
 
     public delegate Complex ZetaFunction(Complex z);
     ZetaFunction ZetaFn = Zeta.EulerMaclauren;
@@ -60,7 +66,15 @@ public class ZTrace : MonoBehaviour
             fromReal.Value = .5f;
             toReal.Value = .5f;
 
+            fromImag.Value = 0.002f;
+            toImag.Value = 1f;
+
             resetControlPoints();
+        });
+
+        approximate.onClick.AddListener(() =>
+        {
+            OnTeardopPointsUpdated(outputPtsZDepth);
         });
 
         fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
@@ -70,7 +84,8 @@ public class ZTrace : MonoBehaviour
 
         reset.onClick.Invoke();
 
-        calculate();
+        // resetControlPoints();
+        // calculate();
     }
 
     void resetControlPoints()
@@ -107,7 +122,8 @@ public class ZTrace : MonoBehaviour
 
             for (int i = 1; i < outputPts.Count; i++)
             {
-                Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
+                // Draw.Line(outputPts[i - 1].ToVector2(), outputPts[i].ToVector2(), color);
+                Draw.Line(outputPtsZDepth[i - 1], outputPtsZDepth[i], color);
             }
         }
     }
@@ -213,16 +229,27 @@ public class ZTrace : MonoBehaviour
             return;
 
         outputPts.Clear();
-        var from = inputPts[0];
+        outputPtsZDepth = new List<Vector3>();
+        // var from = inputPts[0];
+        var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
         {
-            var to = inputPts[i];
+            // var to = inputPts[i];
+            var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
             double inc = 1d / pointsPerSegment;
             Debug.Assert(inc > 0);
             for (double j = 0; j <= 1; j += inc)
             {
                 var c = Vector.Lerp(from, to, j);
-                outputPts.Add(Zeta.EulerMaclauren(c));
+                // outputPts.Add(Zeta.EulerMaclauren(c));
+
+                // Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
+                Complex complex = Zeta.TearDrop(0, 1, c);
+                Vector3 pt = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
+
+                // outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
+                outputPts.Add(Zeta.TearDrop(0, 1, c));
+                outputPtsZDepth.Add(pt);
             }
             from = to;
         }
@@ -241,20 +268,32 @@ public class ZTrace : MonoBehaviour
             var discColor = color;
             discColor.a = discColor.a * .5f;
 
-            var from = inputPts[0];
+            // var from = inputPts[0];
+            var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
+            Vector3 DiscPos = new Vector3();
+            
             for (var i = 1; i < inputPts.Count; i++)
             {
-                to = inputPts[i];
+                // to = inputPts[i];
+                to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
+
+                DiscPos = Zeta.EulerMaclauren(from).ToVector2();
+                // add z depth to disc pos
+                DiscPos = new Vector3(DiscPos.x, DiscPos.y, (float)inputPts[i - 1].y);
 
                 // draw the dragged point without alpha
                 if (inputPts.IndexOf(from) == dragging)
-                    Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+                    Draw.Disc(DiscPos, radius, discColor);
 
-                Draw.Disc(Zeta.EulerMaclauren(from).ToVector2(), radius, discColor);
+                Draw.Disc(DiscPos, radius, discColor);
                 from = to;
             }
 
-            Draw.Disc(Zeta.EulerMaclauren(to).ToVector2(), radius, discColor);
+            DiscPos = Zeta.EulerMaclauren(to).ToVector2();
+            // add z depth to disc pos
+            DiscPos = new Vector3(DiscPos.x, DiscPos.y, (float)inputPts[inputPts.Count - 1].y);
+
+            Draw.Disc(DiscPos, radius, discColor);
         }
     }
 
@@ -288,6 +327,8 @@ public class ZTrace : MonoBehaviour
         dragging = -1;
         _leanDrag.enabled = true;
         calculate();
+
+        // OnTeardopPointsUpdated(outputPtsZDepth);
     }
 
     // returns a camera with the mouse in it's viewport
