@@ -18,6 +18,8 @@ public class ZTrace : MonoBehaviour
     public FloatInput toReal;
     public FloatInput toImag;
     public Button reset;
+    public Button approximate;
+
     public int pointsPerSegment = 10;
     public int controlPoints = 10;
     public Color color = Color.magenta;
@@ -68,6 +70,11 @@ public class ZTrace : MonoBehaviour
             toImag.Value = 1f;
 
             resetControlPoints();
+        });
+
+        approximate.onClick.AddListener(() =>
+        {
+            OnTeardopPointsUpdated(outputPtsZDepth);
         });
 
         fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
@@ -321,7 +328,7 @@ public class ZTrace : MonoBehaviour
         _leanDrag.enabled = true;
         calculate();
 
-        OnTeardopPointsUpdated(outputPtsZDepth);
+        // OnTeardopPointsUpdated(outputPtsZDepth);
     }
 
     // returns a camera with the mouse in it's viewport

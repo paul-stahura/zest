@@ -233,7 +233,7 @@ public class ZetaSolver : MonoBehaviour
         {
             Color color = highlightColor;
             color.a *= highlightTransparency;
-            _pointData.HighlightPoints(_closestPointIndexies, color);
+            _pointData.HighlightPoints(_closestPointIndexies, color, false, false);
         }
 
         DrawApproximateInputLine();

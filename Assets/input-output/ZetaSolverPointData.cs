@@ -110,8 +110,8 @@ public sealed class ZetaSolverPointData
 
     static uint EncodeColor(Color c)
     {
-        // float kMaxBrightness = (1 - c.a) * 32;
-        const float kMaxBrightness = 16;
+        float kMaxBrightness = (1 - c.a) * 32;
+        // const float kMaxBrightness = 16;
 
         var y = Mathf.Max(Mathf.Max(c.r, c.g), c.b);
         y = Mathf.Clamp(Mathf.Ceil(y * 255 / kMaxBrightness), 1, 255);
@@ -164,7 +164,7 @@ public sealed class ZetaSolverPointData
         buffer.SetData(_pointData);
     }
 
-    public void HighlightPoints(List<int> pointIndices, Color highlightColor)
+    public void HighlightPoints(List<int> pointIndices, Color highlightColor, bool blackoutIndexPlane, bool blackoutTeardropPlane)
     {
         for(int i = teardropPointIndex; i < teardropPointIndex * 2; i++)
         {
@@ -175,7 +175,8 @@ public sealed class ZetaSolverPointData
             }
             else
             {
-                SetPointColor(GetPointPairIndex(i), Color.black);
+                if(blackoutIndexPlane) SetPointColor(i, Color.black);
+                if(blackoutTeardropPlane) SetPointColor(GetPointPairIndex(i), Color.black);
             }
         }
 

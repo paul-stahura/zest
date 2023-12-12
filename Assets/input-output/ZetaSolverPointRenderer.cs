@@ -43,14 +43,14 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
     #region Internal resources
 
     public Shader _pointShader = null;
-    // public Shader _diskShader = null;
+    public Shader _diskShader = null;
 
     #endregion
 
     #region Private objects
 
     Material _pointMaterial;
-    // Material _diskMaterial;
+    Material _diskMaterial;
 
     #endregion
 
@@ -68,12 +68,12 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
             if (Application.isPlaying)
             {
                 Destroy(_pointMaterial);
-                // Destroy(_diskMaterial);
+                Destroy(_diskMaterial);
             }
             else
             {
                 DestroyImmediate(_pointMaterial);
-                // DestroyImmediate(_diskMaterial);
+                DestroyImmediate(_diskMaterial);
             }
         }
     }
@@ -97,9 +97,9 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
             _pointMaterial.hideFlags = HideFlags.DontSave;
             _pointMaterial.EnableKeyword("_COMPUTE_BUFFER");
 
-            // _diskMaterial = new Material(_diskShader);
-            // _diskMaterial.hideFlags = HideFlags.DontSave;
-            // _diskMaterial.EnableKeyword("_COMPUTE_BUFFER");
+            _diskMaterial = new Material(_diskShader);
+            _diskMaterial.hideFlags = HideFlags.DontSave;
+            _diskMaterial.EnableKeyword("_COMPUTE_BUFFER");
         }
 
         // Use the external buffer if given any.
@@ -120,17 +120,11 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
         }
         else
         {
-            // _diskMaterial.SetPass(0);
-            // _diskMaterial.SetColor("_Tint", _pointTint);
-            // _diskMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
-            // _diskMaterial.SetBuffer("_PointBuffer", pointBuffer);
-            // _diskMaterial.SetFloat("_PointSize", pointSize);
-
-            _pointMaterial.SetPass(0);
-            _pointMaterial.SetColor("_Tint", _pointTint);
-            _pointMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
-            _pointMaterial.SetBuffer("_PointBuffer", pointBuffer);
-            _pointMaterial.SetFloat("_PointSize", pointSize);
+            _diskMaterial.SetPass(0);
+            _diskMaterial.SetColor("_Tint", _pointTint);
+            _diskMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
+            _diskMaterial.SetBuffer("_PointBuffer", pointBuffer);
+            _diskMaterial.SetFloat("_PointSize", pointSize);
 #if UNITY_2019_1_OR_NEWER
             Graphics.DrawProceduralNow(MeshTopology.Points, pointBuffer.count, 1);
 #else
