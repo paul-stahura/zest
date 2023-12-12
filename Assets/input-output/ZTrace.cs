@@ -64,7 +64,7 @@ public class ZTrace : MonoBehaviour
             fromReal.Value = .5f;
             toReal.Value = .5f;
 
-            fromImag.Value = 0f;
+            fromImag.Value = 0.002f;
             toImag.Value = 1f;
 
             resetControlPoints();
@@ -236,10 +236,12 @@ public class ZTrace : MonoBehaviour
                 var c = Vector.Lerp(from, to, j);
                 // outputPts.Add(Zeta.EulerMaclauren(c));
 
-                Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
+                // Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
+                Complex complex = Zeta.TearDrop(0, 1, c);
                 Vector3 pt = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
 
-                outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
+                // outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
+                outputPts.Add(Zeta.TearDrop(0, 1, c));
                 outputPtsZDepth.Add(pt);
             }
             from = to;

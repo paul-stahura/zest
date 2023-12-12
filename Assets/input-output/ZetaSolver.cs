@@ -6,12 +6,15 @@ using Unity.Jobs;
 using Unity.Collections;
 using System.Linq;
 using Color = UnityEngine.Color;
+using Shapes;
+using UnityEditor.UIElements;
+using TMPro;
 
 public class ZetaSolver : MonoBehaviour
 {
     #region Variables
     [Header("Teardrop Input Aproximation")]
-    public float pointsPerSegment = 1/10;
+    public Color highlightColor = Color.white;
     [Range(0, 1)] public float highlightTransparency = 1;
     private List<int> _closestPointIndexies;
 
@@ -117,6 +120,14 @@ public class ZetaSolver : MonoBehaviour
         UpdatePointData();
     }
 
+    public void OnDrawShapes()
+    {
+        if(_closestPointIndexies != null)
+        {
+            DrawApproximateInputLine();
+        }
+    }
+
     private void CreateIndexPlanePoints()
     {
         _indexPoints = new List<Vector2>();
@@ -220,7 +231,34 @@ public class ZetaSolver : MonoBehaviour
         // Highlight closest points
         if(_closestPointIndexies.Count > 0)
         {
-            _pointData.HighlightPoints(_closestPointIndexies, Color.white);
+            Color color = highlightColor;
+            color.a *= highlightTransparency;
+            _pointData.HighlightPoints(_closestPointIndexies, color);
+        }
+
+        DrawApproximateInputLine();
+    }
+
+    private void DrawApproximateInputLine()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Matrix = indexPlaneOrigin.localToWorldMatrix;
+
+            Color color = highlightColor;
+            color.a *= highlightTransparency;
+            Draw.Thickness = 1f;
+
+            for(int i = 1; i < _closestPointIndexies.Count; i++)
+            {
+                var from = _pointData.GetPoint(_closestPointIndexies[i - 1]);
+                var to = _pointData.GetPoint(_closestPointIndexies[i]);
+                Draw.Line(from, to, color);
+                
+                from = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i - 1]));
+                to = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i]));
+                Draw.Line(from, to, color);
+            }
         }
     }
 }
