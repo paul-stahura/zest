@@ -103,6 +103,8 @@ public class ZetaSolver : MonoBehaviour
     public void Start()
     {
         ZTrace.OnTeardopPointsUpdated += CalculateInputLine;
+        TdropFamily.OnTeardopPointsUpdated += CalculateInputLine;
+
         
         CreateIndexPlanePoints();
         CreateTeardropPoints();
