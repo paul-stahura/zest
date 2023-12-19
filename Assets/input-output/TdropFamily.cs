@@ -15,13 +15,13 @@ public class TdropFamily : MonoBehaviour
     [SerializeField] private Color _tDropColor = Color.cyan;
     
     [SerializeField] private Transform _teardropOrigin;
-    [SerializeField] private Button _approximate;
+    [SerializeField] private Button _approximateButton;
 
     private List<Vector3> infinityDropPts;
 
     void Start()
     {
-        _approximate.onClick.AddListener(() =>
+        _approximateButton.onClick.AddListener(() =>
         {
             OnTeardopPointsUpdated(infinityDropPts);
         });
