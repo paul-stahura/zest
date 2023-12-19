@@ -3848,7 +3848,7 @@ MonoBehaviour:
   indexPlaneOrigin: {fileID: 1877475310}
   indexPlaneOffset: {x: -0.05, y: 0}
   numOfBands: 6
-  bandSize: {x: 0.125, y: 1.001}
+  bandSize: {x: 0.125, y: 1.002}
   bandDensity: {x: 50, y: 500}
   bandColors:
   - {r: 1, g: 0, b: 0, a: 1}
