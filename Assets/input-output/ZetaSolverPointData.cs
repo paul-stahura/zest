@@ -91,7 +91,16 @@ public sealed class ZetaSolverPointData
         float closestPtDist = float.MaxValue;
         for(int i = teardropPointIndex; i < teardropPointIndex * 2; i++)
         {
-            float dist = Vector3.Distance(pt, _pointData[i].position);
+            // float dist = Vector3.Distance(pt, _pointData[i].position);
+            Vector3 other = _pointData[i].position;
+            float dist = float.MaxValue;
+            // only check points that are close within the z
+            if(Math.Abs(other.z - pt.z) < 0.1)
+            {
+                // for distance only check XY pos
+                dist = Vector2.Distance(pt, other);
+            }
+
             // Debug.Log("PT: " + pt + ". Other: " + _pointData[i].position);
             if(dist < closestPtDist)
             {

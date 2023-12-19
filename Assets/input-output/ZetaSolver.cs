@@ -9,6 +9,8 @@ using Color = UnityEngine.Color;
 using Shapes;
 using UnityEditor.UIElements;
 using TMPro;
+using UnityEngine.UI;
+using System.IO;
 
 public class ZetaSolver : MonoBehaviour
 {
@@ -78,6 +80,10 @@ public class ZetaSolver : MonoBehaviour
     private List<Vector3> _teardropPoints;
     private List<Color32> _pointColors;
 
+    [Header("IO")]
+    [SerializeField] private TextAsset _outputFile;
+    [SerializeField] private Button _writeToFileButton;
+
     #endregion
 
     // Job struct to perform the calculations
@@ -103,6 +109,18 @@ public class ZetaSolver : MonoBehaviour
     public void Start()
     {
         ZTrace.OnTeardopPointsUpdated += CalculateInputLine;
+        TdropFamily.OnTeardopPointsUpdated += CalculateInputLine;
+
+        _writeToFileButton.onClick.AddListener(() =>
+        {
+            var ptList = new List<Vector2>();
+            for(int i = 0; i < _closestPointIndexies.Count; i++)
+            {
+                ptList.Add(_pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i])));
+            }
+            writePointsToFile(ptList);
+        });
+
         
         CreateIndexPlanePoints();
         CreateTeardropPoints();
@@ -260,5 +278,34 @@ public class ZetaSolver : MonoBehaviour
                 Draw.Line(from, to, color);
             }
         }
+    }
+
+    private void writePointsToFile(List<Vector2> ptList)
+    {
+
+        string fileName = "ZetaSolverClosestPoints";
+        if(_outputFile != null)
+        {
+            fileName = _outputFile.name;
+        }
+
+        // Combine the path to the "Resources" folder with the file name
+        string filePath = Path.Combine("Assets/Resources", fileName);
+
+        // Create or overwrite the file
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            foreach (Vector2 pt in ptList)
+            {
+                // Write each Vector2 point to a new line in the file
+                writer.WriteLine($"{pt.x},{pt.y}");
+            }
+        }
+
+        // Refresh the Unity editor to reflect changes
+        UnityEditor.AssetDatabase.Refresh();
+
+        // Log a message to indicate that the TextAsset is created
+        Debug.Log($"Points saved to '{fileName}'");
     }
 }
