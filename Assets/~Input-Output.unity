@@ -3066,6 +3066,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pointsPerTdrop: 1000
   _drawTdropAtInfinity: 1
+  _tdropStaringIndex: 0
+  _numOfTdrops: 1
   _tDropColor: {r: 0, g: 1, b: 1, a: 1}
   _teardropOrigin: {fileID: 392526123}
   _approximateButton: {fileID: 273927091}

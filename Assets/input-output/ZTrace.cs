@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 using Complex = System.Numerics.Complex;
+using System.Security.Cryptography.X509Certificates;
 
 public class ZTrace : MonoBehaviour
 {
@@ -230,26 +231,25 @@ public class ZTrace : MonoBehaviour
 
         outputPts.Clear();
         outputPtsZDepth = new List<Vector3>();
-        // var from = inputPts[0];
-        var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
+        var from = inputPts[0];
+        // var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
         {
-            // var to = inputPts[i];
-            var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
+            var to = inputPts[i];
+            // var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
             double inc = 1d / pointsPerSegment;
             Debug.Assert(inc > 0);
             for (double j = 0; j <= 1; j += inc)
             {
-                var c = Vector.Lerp(from, to, j);
-                // outputPts.Add(Zeta.EulerMaclauren(c));
+                var input = Vector.Lerp(from, to, j);
+                var index = input.y;
+                var s = new Complex(input.x, Zeta.IndexToImag(input.y));
+                
+                Complex complex = Zeta.EulerMaclauren(s);
+                Vector3 output = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
 
-                // Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
-                Complex complex = Zeta.TearDrop(0, 1, c);
-                Vector3 pt = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
-
-                // outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
-                outputPts.Add(Zeta.TearDrop(0, 1, c));
-                outputPtsZDepth.Add(pt);
+                outputPts.Add(complex);
+                outputPtsZDepth.Add(output);
             }
             from = to;
         }

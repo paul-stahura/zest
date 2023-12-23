@@ -100,7 +100,7 @@ public class ZetaSolver : MonoBehaviour
             var indexPoint = IndexPoints[index];
 
             Complex s = new Complex(indexPoint.x, Zeta.IndexToImag(indexPoint.y));
-            Vector2 teardropPos = Zeta.TearDrop(0, 1, s).ToVector2();
+            Vector2 teardropPos = Zeta.EulerMaclauren(s).ToVector2();
 
             TeardropPoints[index] = new Vector3(teardropPos.x, teardropPos.y, indexPoint.y);
         }
