@@ -3066,9 +3066,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pointsPerTdrop: 1000
   _drawTdropAtInfinity: 1
+  _infinityTdropColor: {r: 0, g: 0.015138149, b: 1, a: 1}
   _tdropStaringIndex: 0
   _numOfTdrops: 1
-  _tDropColor: {r: 0, g: 1, b: 1, a: 1}
+  _tdropColor: {r: 0, g: 1, b: 1, a: 1}
   _teardropOrigin: {fileID: 392526123}
   _approximateButton: {fileID: 273927091}
 --- !u!1 &1514099359
@@ -4066,7 +4067,7 @@ MonoBehaviour:
   indexPlaneOffset: {x: -0.05, y: 0}
   numOfBands: 6
   bandSize: {x: 0.125, y: 1.002}
-  bandDensity: {x: 50, y: 500}
+  bandDensity: {x: 5, y: 50}
   bandColors:
   - {r: 1, g: 0, b: 0, a: 1}
   - {r: 0, g: 1, b: 0, a: 1}

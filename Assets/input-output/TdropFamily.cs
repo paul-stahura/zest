@@ -11,12 +11,12 @@ public class TdropFamily : MonoBehaviour
     public delegate void TeardropPoints(List<Vector3> tPoints);
     public static event TeardropPoints OnTeardopPointsUpdated;
 
-    [Range(0, int.MaxValue)]
     [SerializeField] private int _pointsPerTdrop = 1000;
     [SerializeField] private bool _drawTdropAtInfinity = true;
+    [SerializeField] private Color _infinityTdropColor = new Color(1, 0, 0.6f, 1);
     [SerializeField] private int _tdropStaringIndex = 0;
     [SerializeField] private int _numOfTdrops = 1;
-    [SerializeField] private Color _tDropColor = Color.cyan;
+    [SerializeField] private Color _tdropColor = Color.cyan;
     
     [SerializeField] private Transform _teardropOrigin;
     [SerializeField] private Button _approximateButton;
@@ -114,7 +114,7 @@ public class TdropFamily : MonoBehaviour
             
             for (int i = 1; i < _infinityTdropPts.Count; i++)
             {
-                Draw.Line(_infinityTdropPts[i - 1], _infinityTdropPts[i], _tDropColor);
+                Draw.Line(_infinityTdropPts[i - 1], _infinityTdropPts[i], _infinityTdropColor);
             }
         }
     }
@@ -123,18 +123,16 @@ public class TdropFamily : MonoBehaviour
     {
         _familyTdropPts.Clear();
         
-        for(int i = _tdropStaringIndex; i < _numOfTdrops; i++)
+        for(int i = _tdropStaringIndex; i < (_tdropStaringIndex + _numOfTdrops); i++)
         {
-            double inc = 1d / _pointsPerTdrop;
+            double inc = 1d / (_pointsPerTdrop - 1);
             Debug.Assert(inc > 0);
-            for (double t = 0; t < 1; t += inc)
+            for (int j = 0; j < _pointsPerTdrop; j++)
             {
+                double t = j * inc;
                 _familyTdropPts.Add(FamilyTdrop(i, t));
             }
-
-            _familyTdropPts.Add(FamilyTdrop(i, 1));
         }
-        
     }
 
     private Vector3 FamilyTdrop(int tdropNum, double t)
@@ -158,7 +156,7 @@ public class TdropFamily : MonoBehaviour
             {
                 for (int i = 1 + t * _pointsPerTdrop; i < t * _pointsPerTdrop + _pointsPerTdrop; i++)
                 {
-                    Draw.Line(_familyTdropPts[i - 1], _familyTdropPts[i], _tDropColor);
+                    Draw.Line(_familyTdropPts[i - 1], _familyTdropPts[i], _tdropColor);
                 }
             }
         }
