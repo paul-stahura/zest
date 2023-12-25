@@ -38,8 +38,8 @@ public class ZTrace : MonoBehaviour
     float radius;
     public float radiusScalar = 50;
 
-    public delegate void TeardropPoints(List<Vector3> tPoints);
-    public static event TeardropPoints OnTeardopPointsUpdated;
+    public delegate void ZetaPoints(List<Vector3> tPoints);
+    public static event ZetaPoints OnPointsUpdated;
 
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
@@ -75,7 +75,7 @@ public class ZTrace : MonoBehaviour
 
         approximate.onClick.AddListener(() =>
         {
-            OnTeardopPointsUpdated(outputPtsZDepth);
+            OnPointsUpdated(outputPtsZDepth);
         });
 
         fromImag.onValueChanged.AddListener((float _) => resetControlPoints());

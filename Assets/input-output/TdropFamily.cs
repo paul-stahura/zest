@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Shapes;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,8 +9,8 @@ using Complex = System.Numerics.Complex;
 
 public class TdropFamily : MonoBehaviour
 {
-    public delegate void TeardropPoints(List<Vector3> tPoints);
-    public static event TeardropPoints OnTeardopPointsUpdated;
+    public delegate void TeardropPoints(List<Vector3> tdropInfinity, List<List<Vector3>> tdropPoints);
+    public static event TeardropPoints OnTeardropPointsUpdated;
 
     [SerializeField] private int _pointsPerTdrop = 1000;
     [SerializeField] private bool _drawTdropAtInfinity = true;
@@ -22,14 +23,15 @@ public class TdropFamily : MonoBehaviour
     [SerializeField] private Button _approximateButton;
 
     private List<Vector3> _infinityTdropPts;
-    private List<Vector3> _familyTdropPts;
+    private List<List<Vector3>> _familyTdropPts;
 
 
     void Start()
     {
         _approximateButton.onClick.AddListener(() =>
         {
-            OnTeardopPointsUpdated(_infinityTdropPts);
+            calculateTdrops();
+            OnTeardropPointsUpdated(_infinityTdropPts, _familyTdropPts);
         });
 
         calculateTdrops();
@@ -55,7 +57,7 @@ public class TdropFamily : MonoBehaviour
         _infinityTdropPts = new();
         _familyTdropPts = new();
 
-        calculateInfinityTdropPts();
+        if(_drawTdropAtInfinity) calculateInfinityTdropPts();
 
         calculateFamilyTdropPts();
     }
@@ -125,12 +127,15 @@ public class TdropFamily : MonoBehaviour
         
         for(int i = _tdropStaringIndex; i < (_tdropStaringIndex + _numOfTdrops); i++)
         {
+            _familyTdropPts.Add(new());
+
             double inc = 1d / (_pointsPerTdrop - 1);
             Debug.Assert(inc > 0);
             for (int j = 0; j < _pointsPerTdrop; j++)
             {
                 double t = j * inc;
-                _familyTdropPts.Add(FamilyTdrop(i, t));
+                if(i == 0 && j == 0) t = inc / 2;
+                _familyTdropPts[_familyTdropPts.Count - 1].Add(FamilyTdrop(i, t));
             }
         }
     }
@@ -145,18 +150,16 @@ public class TdropFamily : MonoBehaviour
 
     private void drawFamilyTdrops()
     {
-        if(_familyTdropPts.Count < _pointsPerTdrop) return;
-
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1;
             Draw.Matrix = _teardropOrigin.localToWorldMatrix;
             
-            for(int t = 0; t < _numOfTdrops; t++)
+            for(int i = 0; i < _familyTdropPts.Count; i++)
             {
-                for (int i = 1 + t * _pointsPerTdrop; i < t * _pointsPerTdrop + _pointsPerTdrop; i++)
+                for (int j = 1; j < _familyTdropPts[i].Count; j++)
                 {
-                    Draw.Line(_familyTdropPts[i - 1], _familyTdropPts[i], _tdropColor);
+                    Draw.Line(_familyTdropPts[i][j - 1], _familyTdropPts[i][j], _tdropColor);
                 }
             }
         }

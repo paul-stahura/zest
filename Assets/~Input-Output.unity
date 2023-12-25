@@ -4061,6 +4061,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlightColor: {r: 1, g: 1, b: 1, a: 1}
+  _highlightIndexPlane: 1
+  _highlightTdropPlane: 1
   highlightTransparency: 1
   indexCamera: {fileID: 758547731}
   indexPlaneOrigin: {fileID: 1877475310}
