@@ -62,24 +62,28 @@ public class TdropFamily : MonoBehaviour
         inputPointsPer?.onValueChanged.AddListener((float value) =>
         {
             _pointsPerTdrop = (int)value;
+            calculateTdrops();
         });
 
         inputInfinityTdropToggle = GameObject.Find("InputInfinityTdropToggle")?.GetComponent<Toggle>();
         inputInfinityTdropToggle?.onValueChanged.AddListener((bool value) =>
         {
             _drawTdropAtInfinity = value;
+            calculateTdrops();
         });
 
         inputStartIndex = GameObject.Find("InputStartIndex")?.GetComponent<FloatInput>();
         inputStartIndex?.onValueChanged.AddListener((float value) =>
         {
             _tdropStaringIndex = (int)value;
+            calculateTdrops();
         });
 
         inputNumOfTdrops = GameObject.Find("InputNumOfTdrops")?.GetComponent<FloatInput>();
         inputNumOfTdrops?.onValueChanged.AddListener((float value) =>
         {
             _numOfTdrops = (int)value;
+            calculateTdrops();
         });
 
         inputApproximateTdropButton = GameObject.Find("inputApproximateTdropButton")?.GetComponent<Button>();
