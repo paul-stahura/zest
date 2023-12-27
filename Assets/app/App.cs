@@ -45,6 +45,7 @@ public class App : ImmediateModeShapeDrawer
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1);
     readonly double IMAG_WHEN_INDEX_AT_ZERO = 0.7463958;
     readonly double IMAG_WHEN_INDEX_AT_2ND_ZERO = 0.300802;
+    readonly double IMAG_TDROP_ZERO = 0.3640107;
     readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0);
 
     public ZetaSpiral zetaSpiral;
@@ -79,7 +80,7 @@ public class App : ImmediateModeShapeDrawer
             // less than 0, ignore it
             //
             // Sets the all internal imaginary state with no animation
-            if (value != _imag && value >= IMAG_WHEN_INDEX_AT_2ND_ZERO) // value is a 'magic' variable that contains the NEW value coming to be set
+            if (value != _imag && value >= IMAG_TDROP_ZERO) // value is a 'magic' variable that contains the NEW value coming to be set
             {
                 _imag = value;
 

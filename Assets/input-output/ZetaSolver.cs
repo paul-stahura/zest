@@ -14,13 +14,28 @@ using System.IO;
 
 public class ZetaSolver : MonoBehaviour
 {
+    #region UI
+    [Header("UI")]
+    public FloatInput inputXOffset;
+    public FloatInput inputNumBands;
+    public FloatInput inputSizeX;
+    public FloatInput inputSizeY;
+    public FloatInput inputDensityX;
+    public FloatInput inputDensityY;
+    public Button resetInputButton;
+    public Button recalculateInputButton;
+    #endregion
+
     #region Variables
     [Header("Teardrop Input Aproximation")]
     public Color highlightColor = Color.white;
+    [SerializeField] private bool _highlightIndexPlane = true;
+    [SerializeField] private bool _highlightTdropPlane = true;
     [Range(0, 1)] public float highlightTransparency = 1;
-    private List<int> _closestPointIndexies;
+    private List<List<int>> _closestPointIndexies;
 
     [Header("IndexPlane")]
+    [SerializeField] private bool _recalculatePointsBtn = false;
     public Camera indexCamera;
     public Transform indexPlaneOrigin;
     public Vector2 indexPlaneOffset = new Vector2(0, 0);
@@ -36,42 +51,10 @@ public class ZetaSolver : MonoBehaviour
         Color.magenta,
     };
     [Range(0, 1)] public float bandTransparency = 1;
-    // // public float pointRadiusScalar = 300;
-    // [Range(0, 4)] public float indexPointRadius = 2.0f;
-    // private struct IndexPoint
-    // {
-    //     public IndexPoint(Vector2 pPos, Color pColor)
-    //     {
-    //         pos = pPos;
-    //         color = pColor;
-    //     }
-    //     public Vector2 pos;
-    //     public Color color;
-    // }
-    // private List<IndexPoint> _indexPoints;
 
     [Header("TeardropPlane")]
     public Camera TeardropCamera;
     public Transform teardropPlaneOrigin;
-    // [Range(0, 1)] public float teardropPointTransparency = 1;
-    // // public float dotRadiusScalar = 300;
-    // [Range(0, 4)] public float teardropPointRadius = 2.0f;
-    // private struct TeardropPoint
-    // {
-    //     public TeardropPoint(Vector2 pPos, IndexPoint pPair)
-    //     {
-    //         pos = pPos;
-    //         pair = pPair;
-    //     }
-    //     public Vector2 pos;
-    //     public IndexPoint pair;
-
-    //     public Color GetColor()
-    //     {
-    //         return pair.color;
-    //     }
-    // }
-    // private List<TeardropPoint> _teardropPoints;
 
     [Header("Point Cloud")]
     public ZetaSolverPointRenderer pointRenderer;
@@ -100,7 +83,7 @@ public class ZetaSolver : MonoBehaviour
             var indexPoint = IndexPoints[index];
 
             Complex s = new Complex(indexPoint.x, Zeta.IndexToImag(indexPoint.y));
-            Vector2 teardropPos = Zeta.TearDrop(0, 1, s).ToVector2();
+            Vector2 teardropPos = Zeta.EulerMaclauren(s).ToVector2();
 
             TeardropPoints[index] = new Vector3(teardropPos.x, teardropPos.y, indexPoint.y);
         }
@@ -108,15 +91,20 @@ public class ZetaSolver : MonoBehaviour
 
     public void Start()
     {
-        ZTrace.OnTeardopPointsUpdated += CalculateInputLine;
-        TdropFamily.OnTeardopPointsUpdated += CalculateInputLine;
+        ZTrace.OnPointsUpdated += HandleOnPointsUpdated;
+        TdropFamily.OnTeardropPointsUpdated += CalculateTdropInputLines;
+
+        initInput();
 
         _writeToFileButton.onClick.AddListener(() =>
         {
             var ptList = new List<Vector2>();
             for(int i = 0; i < _closestPointIndexies.Count; i++)
             {
-                ptList.Add(_pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i])));
+                for (int j = 0; j < _closestPointIndexies[i].Count; j++)
+                {
+                    ptList.Add(_pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i][j])));
+                }
             }
             writePointsToFile(ptList);
         });
@@ -131,7 +119,79 @@ public class ZetaSolver : MonoBehaviour
         UpdatePointData();
     }
 
+    public void initInput()
+    {
+        inputXOffset = GameObject.Find("InputXoffset")?.GetComponent<FloatInput>();
+        inputXOffset?.onValueChanged.AddListener((float value) => 
+        {
+            indexPlaneOffset.x = value;
+        });
+
+        inputNumBands = GameObject.Find("InputNumBands")?.GetComponent<FloatInput>();
+        inputNumBands?.onValueChanged.AddListener((float value) => 
+        {
+            numOfBands = (int)value;
+        });
+        
+        inputSizeX = GameObject.Find("InputSizeX")?.GetComponent<FloatInput>();
+        inputSizeX?.onValueChanged.AddListener((float value) =>
+        {
+            bandSize.x = value;
+        });
+
+        inputSizeY = GameObject.Find("InputSizeY")?.GetComponent<FloatInput>();
+        inputSizeY?.onValueChanged.AddListener((float value) =>
+        {
+            bandSize.y = value;
+        });
+        
+        inputDensityX = GameObject.Find("InputDensityX")?.GetComponent<FloatInput>();
+        inputDensityX?.onValueChanged.AddListener((float value) =>
+        {
+            bandDensity.x = value;
+        });
+
+        inputDensityY = GameObject.Find("InputDensityY")?.GetComponent<FloatInput>();
+        inputDensityY?.onValueChanged.AddListener((float value) =>
+        {
+            bandDensity.y = value;
+        });
+
+        resetInputButton = GameObject.Find("ResetInputButton")?.GetComponent<Button>();
+        resetInputButton?.onClick.AddListener(() =>
+        {
+            ResetBands();
+        });
+
+        recalculateInputButton = GameObject.Find("RecalculateInputButton")?.GetComponent<Button>();
+        recalculateInputButton?.onClick.AddListener(() =>
+        {
+            RecalculatePoints();
+        });
+    }
+
+    public void ResetBands()
+    {
+        inputXOffset.Value = indexPlaneOffset.x = -0.05f;
+        inputNumBands.Value = numOfBands = 6;
+        inputSizeX.Value = bandSize.x = 0.125f;
+        inputSizeY.Value = bandSize.y = 1.002f;
+        inputDensityX.Value = bandDensity.x = 50;
+        inputDensityY.Value = bandDensity.y = 700;
+
+        RecalculatePoints();
+    }
+
     public void OnValidate() {
+        if(_recalculatePointsBtn)
+        {
+            RecalculatePoints();
+            _recalculatePointsBtn = false;
+        }
+    }
+
+    public void RecalculatePoints()
+    {
         CreateIndexPlanePoints();
         CreateTeardropPoints();
 
@@ -221,38 +281,53 @@ public class ZetaSolver : MonoBehaviour
         if(_pointData != null) 
         {
             _pointData.Initialize(_indexPoints, _teardropPoints, _pointColors);
-            _closestPointIndexies = new List<int>();
+            _closestPointIndexies = new List<List<int>>();
         }
     }
 
-    private void CalculateInputLine(List<Vector3> tDrop)
+    private void HandleOnPointsUpdated(List<Vector3> pts)
     {
-        // reset highlighted Points
-        if(_closestPointIndexies != null && _closestPointIndexies.Count > 0)
+        CalculateInputLine(pts);
+    }
+
+    private void CalculateInputLine(List<Vector3> pts, bool addLine = false)
+    {
+        if(!addLine)
         {
-            for(int i = 0; i < _closestPointIndexies.Count; i++)
-            {
-                int pairIndex = _pointData.GetPointPairIndex(_closestPointIndexies[i]);
-                Color defaultColor = _pointColors[pairIndex];
-                _pointData.SetPointColor(_closestPointIndexies[i], defaultColor);
-                _pointData.SetPointColor(pairIndex, defaultColor);
-            }
+            // // reset highlighted Points
+            // if(_closestPointIndexies != null && _closestPointIndexies.Count > 0)
+            // {
+            //     for(int i = 0; i < _closestPointIndexies.Count; i++)
+            //     {
+            //         for (int j = 0; j < _closestPointIndexies[i].Count; j++)
+            //         {
+            //             int pairIndex = _pointData.GetPointPairIndex(_closestPointIndexies[i][j]);
+            //             Color defaultColor = _pointColors[pairIndex];
+            //             _pointData.SetPointColor(_closestPointIndexies[i][j], defaultColor);
+            //             _pointData.SetPointColor(pairIndex, defaultColor);
+            //         }
+            //     }
+            // }
+
+            _closestPointIndexies.Clear();
         }
 
-        _closestPointIndexies = new List<int>();
+        int lineIndex = _closestPointIndexies.Count;
+        _closestPointIndexies.Add(new());
+
         // find closest points
-        for(int i = 0; i < tDrop.Count; i++)
+        for(int i = 0; i < pts.Count; i++)
         {
-            _closestPointIndexies.Add(_pointData.GetClosestTearDropPointIndex(tDrop[i] + teardropPlaneOrigin.transform.position));
+            _closestPointIndexies[lineIndex].Add(_pointData.GetClosestTearDropPointIndex(pts[i] + teardropPlaneOrigin.transform.position));
         }
 
-        // Highlight closest points
-        if(_closestPointIndexies.Count > 0)
-        {
-            Color color = highlightColor;
-            color.a *= highlightTransparency;
-            _pointData.HighlightPoints(_closestPointIndexies, color, false, false);
-        }
+        // // Highlight closest points
+        // if(_closestPointIndexies.Count > 0)
+        // {
+        //     Color color = highlightColor;
+        //     color.a *= highlightTransparency;
+        //     _pointData.HighlightPoints(_closestPointIndexies[lineIndex], color, false, false);
+        // }
 
         DrawApproximateInputLine();
     }
@@ -267,16 +342,38 @@ public class ZetaSolver : MonoBehaviour
             color.a *= highlightTransparency;
             Draw.Thickness = 1f;
 
-            for(int i = 1; i < _closestPointIndexies.Count; i++)
+            for(int i = 0; i < _closestPointIndexies.Count; i++)
             {
-                var from = _pointData.GetPoint(_closestPointIndexies[i - 1]);
-                var to = _pointData.GetPoint(_closestPointIndexies[i]);
-                Draw.Line(from, to, color);
-                
-                from = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i - 1]));
-                to = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i]));
-                Draw.Line(from, to, color);
+                for (int j = 1; j < _closestPointIndexies[i].Count; j++)
+                {
+                    Vector3 from;
+                    Vector3 to;
+
+                    if(_highlightTdropPlane)
+                    {
+                        from = _pointData.GetPoint(_closestPointIndexies[i][j - 1]);
+                        to = _pointData.GetPoint(_closestPointIndexies[i][j]);
+                        Draw.Line(from, to, color);
+                    }
+                    
+                    if(_highlightIndexPlane)
+                    {
+                        from = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i][j - 1]));
+                        to = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i][j]));
+                        Draw.Line(from, to, color);
+                    }
+                }
             }
+        }
+    }
+
+    private void CalculateTdropInputLines(List<Vector3> tdropInfinity, List<List<Vector3>> tdropFamily)
+    {
+        CalculateInputLine(tdropInfinity);
+
+        for (int i = 0; i < tdropFamily.Count; i++)
+        {
+            CalculateInputLine(tdropFamily[i], true);
         }
     }
 

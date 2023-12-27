@@ -81,27 +81,60 @@ public class Zeta
         return result;
     }
 
-    public static Complex TearDrop(double floor, double ceil, Complex s)
+    // returns a point on a tear drop at a given index, index starts at 1
+    public static Vector TearDrop(int index, double imaginary)
     {
-        Complex opoint = Sprialr(s);
+        Complex Pow(int a, Complex b)
+        {
+            var cx = Math.Pow(a*a, b.Real / 2);
+            var cy = b.Imaginary * Math.Log(a*a) / 2;
 
-        Vector J(double t, Complex s)
+            return new Complex(cx * Math.Cos(cy), cx * Math.Sin(cy));
+        }
+
+        Vector J(int n, Complex s)
         {
             Complex z = Complex.Zero;
-            for (int k = 1; k < t; k++)
+            for (int k = 1; k < n; k++)
             {
-                z += Complex.Pow(k, -s);
+                z += Pow(k, -s);
             }
             return z.ToVector();
         }
 
-        Vector j0 = J(floor + 1, s);
-        Vector j1 = J(ceil + 1, s);
-        double dopoint = Vector.Distance(j0, opoint.ToVector());
-        double aopoint = Math.Atan2(j1.y - j0.y, j1.x - j0.x) - Math.Atan2(opoint.Imaginary - j0.y, opoint.Real - j0.x);
-        Complex tDrop = new Complex(Math.Cos(aopoint) * dopoint, -Math.Sin(aopoint) * dopoint);
-        tDrop *= Math.Sqrt(ceil);
+        Vector opoint = Opoint(index, imaginary);
+
+        var s = new Complex(0.5, imaginary);
+        Vector j0 = J(index, s);
+        Vector j1 = J(index + 1, s);
+        double dopoint = Vector.Distance(j0, opoint);
+        double aopoint = Math.Atan2(j1.y - j0.y, j1.x - j0.x) - Math.Atan2(opoint.y - j0.y, opoint.x - j0.x);
+
+        Vector tDrop = new Vector(Math.Cos(aopoint) * dopoint, -Math.Sin(aopoint) * dopoint) * Math.Sqrt(index);
         return tDrop;
+    }
+
+    public static Vector Opoint(int n, double imaginary)
+    {
+        double V(double t)
+        {
+            var fewerTerms = false;
+
+            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
+            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
+        }
+
+        Vector sRev = new Vector(0.0, 0.0);
+        for (int i = 1; i < n; i++)
+        {
+            var fx = Math.Cos(imaginary * Math.Log(i)) / Math.Pow(i, 0.5);
+            var gy = -Math.Sin(imaginary * Math.Log(i)) / Math.Pow(i, 0.5);
+            // x and y flipped for reverse spiral
+            sRev += new Vector(gy, fx);
+        }
+
+        Complex em = EulerMaclauren(new Complex(0.5, imaginary));
+        return RotateAround(new Vector(0, 0), sRev, -2.0 * V(imaginary) + (Math.PI / 2.0)) + em.ToVector();
     }
 
     public static Vector RotateAround(Vector pivot, Vector point, double rad)
@@ -551,27 +584,5 @@ public class Zeta
                 this.spirals[i] = zeta + joint - norm * 2 * dot; // reflect from about a normal (z2)
             }
         }
-    }
-
-    public static Complex Sprialr(Complex s)
-    {
-        double V(double t)
-        {
-            var fewerTerms = false;
-
-            var result = t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8;  // fewer terms      
-            return fewerTerms ? result : result + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
-        }
-
-        float n = 1;
-        Vector rev = new Vector(-Math.Sin(s.Imaginary * Math.Log(n)) / Math.Pow(n, s.Real), Math.Cos(s.Imaginary * Math.Log(n)) / Math.Pow(n, s.Real));
-
-        Complex em = EulerMaclauren(s);
-        var Srev = RotateAround(new Vector(0, 0), rev, -2.0 * V(s.Imaginary) + (Math.PI / 2.0)) + em;
-
-        var result = em;
-        // TODO
-        // var result = Srev;
-        return result;
     }
 }

@@ -5,18 +5,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 using Complex = System.Numerics.Complex;
+using System.Security.Cryptography.X509Certificates;
+using UnityEditor.PackageManager.Requests;
 
 public class ZTrace : MonoBehaviour
 {
     public Camera inputCamera;
     public Transform inputOrigin;
     public FloatInput fromReal;
+    private float _fromReal;
     public FloatInput fromImag;
+    private float _fromImag;
 
     public Camera outputCamera;
     public Transform outputOrigin;
     public FloatInput toReal;
+    private float _toReal;
     public FloatInput toImag;
+    private float _toImag;
     public Button reset;
     public Button approximate;
 
@@ -37,8 +43,8 @@ public class ZTrace : MonoBehaviour
     float radius;
     public float radiusScalar = 50;
 
-    public delegate void TeardropPoints(List<Vector3> tPoints);
-    public static event TeardropPoints OnTeardopPointsUpdated;
+    public delegate void ZetaPoints(List<Vector3> tPoints);
+    public static event ZetaPoints OnPointsUpdated;
 
     protected List<Vector> inputPts = new List<Vector>();
     protected List<Complex> outputPts = new List<Complex>();
@@ -61,28 +67,43 @@ public class ZTrace : MonoBehaviour
         //         ZetaFn = Zeta.EulerMaclauren;
         // });
 
-        reset.onClick.AddListener(() =>
-        {
-            fromReal.Value = .5f;
-            toReal.Value = .5f;
-
-            fromImag.Value = 0.002f;
-            toImag.Value = 1f;
-
-            resetControlPoints();
-        });
-
         approximate.onClick.AddListener(() =>
         {
-            OnTeardopPointsUpdated(outputPtsZDepth);
+            OnPointsUpdated(outputPtsZDepth);
         });
 
-        fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
-        toImag.onValueChanged.AddListener((float _) => resetControlPoints());
-        fromReal.onValueChanged.AddListener((float _) => resetControlPoints());
-        toReal.onValueChanged.AddListener((float _) => resetControlPoints());
 
-        reset.onClick.Invoke();
+        if(reset != null) 
+        {
+            reset.onClick.AddListener(() =>
+            {
+                fromReal.Value = .5f;
+                toReal.Value = .5f;
+
+                fromImag.Value = 0.002f;
+                toImag.Value = 1f;
+
+                resetControlPoints();
+            });
+
+            fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
+            toImag.onValueChanged.AddListener((float _) => resetControlPoints());
+            fromReal.onValueChanged.AddListener((float _) => resetControlPoints());
+            toReal.onValueChanged.AddListener((float _) => resetControlPoints());
+
+            reset.onClick.Invoke();
+        }
+        else
+        {
+            _fromReal = .5f;
+            _toReal = .5f;
+
+            _fromImag = 0.002f;
+            _toImag = 1f;
+
+            resetControlPoints();
+        }
+        
 
         // resetControlPoints();
         // calculate();
@@ -95,7 +116,7 @@ public class ZTrace : MonoBehaviour
         var inc = 1f / controlPoints;
         for (double i = 0; i <= 1; i += .1)
         {
-            var pt = new Vector(.5, fromImag.Value).Lerp(new Vector(.5, toImag.Value), i);
+            var pt = new Vector(.5, _fromImag).Lerp(new Vector(.5, _toImag), i);
             inputPts.Add(pt);
         }
 
@@ -130,7 +151,7 @@ public class ZTrace : MonoBehaviour
 
     protected void drawInput(Camera cam)
     {
-        if (fromReal != .5 || toReal != .5)
+        if (_fromReal != .5 || _toReal != .5)
             ZetaFn = Zeta.EulerMaclauren;
 
         var wasDragging = dragging > -1;
@@ -230,26 +251,25 @@ public class ZTrace : MonoBehaviour
 
         outputPts.Clear();
         outputPtsZDepth = new List<Vector3>();
-        // var from = inputPts[0];
-        var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
+        var from = inputPts[0];
+        // var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
         for (var i = 1; i < inputPts.Count; i++)
         {
-            // var to = inputPts[i];
-            var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
+            var to = inputPts[i];
+            // var to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
             double inc = 1d / pointsPerSegment;
             Debug.Assert(inc > 0);
             for (double j = 0; j <= 1; j += inc)
             {
-                var c = Vector.Lerp(from, to, j);
-                // outputPts.Add(Zeta.EulerMaclauren(c));
+                var input = Vector.Lerp(from, to, j);
+                var index = input.y;
+                var s = new Complex(input.x, Zeta.IndexToImag(input.y));
+                
+                Complex complex = Zeta.EulerMaclauren(s);
+                Vector3 output = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
 
-                // Complex complex = Zeta.TearDrop(fromImag.Value, toImag.Value, c);
-                Complex complex = Zeta.TearDrop(0, 1, c);
-                Vector3 pt = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
-
-                // outputPts.Add(Zeta.TearDrop(fromImag.Value, toImag.Value, c));
-                outputPts.Add(Zeta.TearDrop(0, 1, c));
-                outputPtsZDepth.Add(pt);
+                outputPts.Add(complex);
+                outputPtsZDepth.Add(output);
             }
             from = to;
         }
@@ -304,13 +324,13 @@ public class ZTrace : MonoBehaviour
         dragging = inputPts.IndexOf(pt);
         if (dragging == 0)
         {
-            fromReal.Value = mousePos.x;
-            fromImag.Value = mousePos.y;
+            _fromReal = mousePos.x;
+            _fromImag = mousePos.y;
         }
         else if (dragging == inputPts.Count - 1)
         {
-            toReal.Value = mousePos.x;
-            toImag.Value = mousePos.y;
+            _toReal = mousePos.x;
+            _toImag = mousePos.y;
         }
 
         _leanDrag.enabled = false;
