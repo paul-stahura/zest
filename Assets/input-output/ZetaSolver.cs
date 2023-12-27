@@ -313,7 +313,6 @@ public class ZetaSolver : MonoBehaviour
         }
 
         int lineIndex = _closestPointIndexies.Count;
-        Debug.Log(lineIndex);
         _closestPointIndexies.Add(new());
 
         // find closest points
