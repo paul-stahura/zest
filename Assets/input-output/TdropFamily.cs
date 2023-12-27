@@ -12,7 +12,16 @@ public class TdropFamily : MonoBehaviour
     public delegate void TeardropPoints(List<Vector3> tdropInfinity, List<List<Vector3>> tdropPoints);
     public static event TeardropPoints OnTeardropPointsUpdated;
 
-    [SerializeField] private int _pointsPerTdrop = 1000;
+    [Header("UI")]
+    public FloatInput inputPointsPer;
+    public Toggle inputInfinityTdropToggle;
+    public FloatInput inputStartIndex;
+    public FloatInput inputNumOfTdrops;
+    public Button inputApproximateTdropButton;
+ 
+
+    [Header("Tdrop settings")]
+    [SerializeField] private int _pointsPerTdrop = 250;
     [SerializeField] private bool _drawTdropAtInfinity = true;
     [SerializeField] private Color _infinityTdropColor = new Color(1, 0, 0.6f, 1);
     [SerializeField] private int _tdropStaringIndex = 0;
@@ -20,7 +29,6 @@ public class TdropFamily : MonoBehaviour
     [SerializeField] private Color _tdropColor = Color.cyan;
     
     [SerializeField] private Transform _teardropOrigin;
-    [SerializeField] private Button _approximateButton;
 
     private List<Vector3> _infinityTdropPts;
     private List<List<Vector3>> _familyTdropPts;
@@ -28,11 +36,7 @@ public class TdropFamily : MonoBehaviour
 
     void Start()
     {
-        _approximateButton.onClick.AddListener(() =>
-        {
-            calculateTdrops();
-            OnTeardropPointsUpdated(_infinityTdropPts, _familyTdropPts);
-        });
+        InitUI();
 
         calculateTdrops();
     }
@@ -50,6 +54,40 @@ public class TdropFamily : MonoBehaviour
         }
 
         drawFamilyTdrops();
+    }
+
+    private void InitUI()
+    {
+        inputPointsPer = GameObject.Find("InputPointsPer")?.GetComponent<FloatInput>();
+        inputPointsPer?.onValueChanged.AddListener((float value) =>
+        {
+            _pointsPerTdrop = (int)value;
+        });
+
+        inputInfinityTdropToggle = GameObject.Find("InputInfinityTdropToggle")?.GetComponent<Toggle>();
+        inputInfinityTdropToggle?.onValueChanged.AddListener((bool value) =>
+        {
+            _drawTdropAtInfinity = value;
+        });
+
+        inputStartIndex = GameObject.Find("InputStartIndex")?.GetComponent<FloatInput>();
+        inputStartIndex?.onValueChanged.AddListener((float value) =>
+        {
+            _tdropStaringIndex = (int)value;
+        });
+
+        inputNumOfTdrops = GameObject.Find("InputNumOfTdrops")?.GetComponent<FloatInput>();
+        inputNumOfTdrops?.onValueChanged.AddListener((float value) =>
+        {
+            _numOfTdrops = (int)value;
+        });
+
+        inputApproximateTdropButton = GameObject.Find("inputApproximateTdropButton")?.GetComponent<Button>();
+        inputApproximateTdropButton?.onClick.AddListener(() =>
+        {
+            calculateTdrops();
+            OnTeardropPointsUpdated(_infinityTdropPts, _familyTdropPts);
+        });
     }
 
     private void calculateTdrops()

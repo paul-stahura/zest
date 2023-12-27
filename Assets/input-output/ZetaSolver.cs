@@ -14,6 +14,18 @@ using System.IO;
 
 public class ZetaSolver : MonoBehaviour
 {
+    #region UI
+    [Header("UI")]
+    public FloatInput inputXOffset;
+    public FloatInput inputNumBands;
+    public FloatInput inputSizeX;
+    public FloatInput inputSizeY;
+    public FloatInput inputDensityX;
+    public FloatInput inputDensityY;
+    public Button resetInputButton;
+    public Button recalculateInputButton;
+    #endregion
+
     #region Variables
     [Header("Teardrop Input Aproximation")]
     public Color highlightColor = Color.white;
@@ -82,6 +94,8 @@ public class ZetaSolver : MonoBehaviour
         ZTrace.OnPointsUpdated += HandleOnPointsUpdated;
         TdropFamily.OnTeardropPointsUpdated += CalculateTdropInputLines;
 
+        initInput();
+
         _writeToFileButton.onClick.AddListener(() =>
         {
             var ptList = new List<Vector2>();
@@ -105,15 +119,83 @@ public class ZetaSolver : MonoBehaviour
         UpdatePointData();
     }
 
+    public void initInput()
+    {
+        inputXOffset = GameObject.Find("InputXoffset")?.GetComponent<FloatInput>();
+        inputXOffset?.onValueChanged.AddListener((float value) => 
+        {
+            indexPlaneOffset.x = value;
+        });
+
+        inputNumBands = GameObject.Find("InputNumBands")?.GetComponent<FloatInput>();
+        inputNumBands?.onValueChanged.AddListener((float value) => 
+        {
+            numOfBands = (int)value;
+        });
+        
+        inputSizeX = GameObject.Find("InputSizeX")?.GetComponent<FloatInput>();
+        inputSizeX?.onValueChanged.AddListener((float value) =>
+        {
+            bandSize.x = value;
+        });
+
+        inputSizeY = GameObject.Find("InputSizeY")?.GetComponent<FloatInput>();
+        inputSizeY?.onValueChanged.AddListener((float value) =>
+        {
+            bandSize.y = value;
+        });
+        
+        inputDensityX = GameObject.Find("InputDensityX")?.GetComponent<FloatInput>();
+        inputDensityX?.onValueChanged.AddListener((float value) =>
+        {
+            bandDensity.x = value;
+        });
+
+        inputDensityY = GameObject.Find("InputDensityY")?.GetComponent<FloatInput>();
+        inputDensityY?.onValueChanged.AddListener((float value) =>
+        {
+            bandDensity.y = value;
+        });
+
+        resetInputButton = GameObject.Find("ResetInputButton")?.GetComponent<Button>();
+        resetInputButton?.onClick.AddListener(() =>
+        {
+            ResetBands();
+        });
+
+        recalculateInputButton = GameObject.Find("RecalculateInputButton")?.GetComponent<Button>();
+        recalculateInputButton?.onClick.AddListener(() =>
+        {
+            RecalculatePoints();
+        });
+    }
+
+    public void ResetBands()
+    {
+        inputXOffset.Value = indexPlaneOffset.x = -0.05f;
+        inputNumBands.Value = numOfBands = 6;
+        inputSizeX.Value = bandSize.x = 0.125f;
+        inputSizeY.Value = bandSize.y = 1.002f;
+        inputDensityX.Value = bandDensity.x = 50;
+        inputDensityY.Value = bandDensity.y = 700;
+
+        RecalculatePoints();
+    }
+
     public void OnValidate() {
         if(_recalculatePointsBtn)
         {
-            CreateIndexPlanePoints();
-            CreateTeardropPoints();
-
-            UpdatePointData();
+            RecalculatePoints();
             _recalculatePointsBtn = false;
         }
+    }
+
+    public void RecalculatePoints()
+    {
+        CreateIndexPlanePoints();
+        CreateTeardropPoints();
+
+        UpdatePointData();
     }
 
     public void OnDrawShapes()

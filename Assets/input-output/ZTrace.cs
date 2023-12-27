@@ -6,18 +6,23 @@ using UnityEngine.UI;
 using Shapes;
 using Complex = System.Numerics.Complex;
 using System.Security.Cryptography.X509Certificates;
+using UnityEditor.PackageManager.Requests;
 
 public class ZTrace : MonoBehaviour
 {
     public Camera inputCamera;
     public Transform inputOrigin;
     public FloatInput fromReal;
+    private float _fromReal;
     public FloatInput fromImag;
+    private float _fromImag;
 
     public Camera outputCamera;
     public Transform outputOrigin;
     public FloatInput toReal;
+    private float _toReal;
     public FloatInput toImag;
+    private float _toImag;
     public Button reset;
     public Button approximate;
 
@@ -62,28 +67,43 @@ public class ZTrace : MonoBehaviour
         //         ZetaFn = Zeta.EulerMaclauren;
         // });
 
-        reset.onClick.AddListener(() =>
-        {
-            fromReal.Value = .5f;
-            toReal.Value = .5f;
-
-            fromImag.Value = 0.002f;
-            toImag.Value = 1f;
-
-            resetControlPoints();
-        });
-
         approximate.onClick.AddListener(() =>
         {
             OnPointsUpdated(outputPtsZDepth);
         });
 
-        fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
-        toImag.onValueChanged.AddListener((float _) => resetControlPoints());
-        fromReal.onValueChanged.AddListener((float _) => resetControlPoints());
-        toReal.onValueChanged.AddListener((float _) => resetControlPoints());
 
-        reset.onClick.Invoke();
+        if(reset != null) 
+        {
+            reset.onClick.AddListener(() =>
+            {
+                fromReal.Value = .5f;
+                toReal.Value = .5f;
+
+                fromImag.Value = 0.002f;
+                toImag.Value = 1f;
+
+                resetControlPoints();
+            });
+
+            fromImag.onValueChanged.AddListener((float _) => resetControlPoints());
+            toImag.onValueChanged.AddListener((float _) => resetControlPoints());
+            fromReal.onValueChanged.AddListener((float _) => resetControlPoints());
+            toReal.onValueChanged.AddListener((float _) => resetControlPoints());
+
+            reset.onClick.Invoke();
+        }
+        else
+        {
+            _fromReal = .5f;
+            _toReal = .5f;
+
+            _fromImag = 0.002f;
+            _toImag = 1f;
+
+            resetControlPoints();
+        }
+        
 
         // resetControlPoints();
         // calculate();
@@ -96,7 +116,7 @@ public class ZTrace : MonoBehaviour
         var inc = 1f / controlPoints;
         for (double i = 0; i <= 1; i += .1)
         {
-            var pt = new Vector(.5, fromImag.Value).Lerp(new Vector(.5, toImag.Value), i);
+            var pt = new Vector(.5, _fromImag).Lerp(new Vector(.5, _toImag), i);
             inputPts.Add(pt);
         }
 
@@ -131,7 +151,7 @@ public class ZTrace : MonoBehaviour
 
     protected void drawInput(Camera cam)
     {
-        if (fromReal != .5 || toReal != .5)
+        if (_fromReal != .5 || _toReal != .5)
             ZetaFn = Zeta.EulerMaclauren;
 
         var wasDragging = dragging > -1;
@@ -304,13 +324,13 @@ public class ZTrace : MonoBehaviour
         dragging = inputPts.IndexOf(pt);
         if (dragging == 0)
         {
-            fromReal.Value = mousePos.x;
-            fromImag.Value = mousePos.y;
+            _fromReal = mousePos.x;
+            _fromImag = mousePos.y;
         }
         else if (dragging == inputPts.Count - 1)
         {
-            toReal.Value = mousePos.x;
-            toImag.Value = mousePos.y;
+            _toReal = mousePos.x;
+            _toImag = mousePos.y;
         }
 
         _leanDrag.enabled = false;
