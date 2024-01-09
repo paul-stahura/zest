@@ -68,7 +68,7 @@ Varyings Vertex(Attributes input)
 }
 
 // Geometry phase
-[maxvertexcount(5)]
+[maxvertexcount(6)]
 void Geometry(point Varyings input[1], inout TriangleStream<Varyings> outStream)
 {
     // Copy the basic information.
@@ -86,6 +86,9 @@ void Geometry(point Varyings input[1], inout TriangleStream<Varyings> outStream)
     outStream.Append(o);
 
     o.position.y -= 2 * halfExtent.y;  // Top-right
+    outStream.Append(o);
+    
+    // Top-right
     outStream.Append(o);
 
     o.position.x -= 2 * halfExtent.x;  // Top-left
