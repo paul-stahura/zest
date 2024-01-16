@@ -43,14 +43,14 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
     #region Internal resources
 
     public Shader _pointShader = null;
-    public Shader _diskShader = null;
+    public Shader _shapeShader = null;
 
     #endregion
 
     #region Private objects
 
     Material _pointMaterial;
-    Material _diskMaterial;
+    Material _shapeMaterial;
 
     #endregion
 
@@ -68,12 +68,12 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
             if (Application.isPlaying)
             {
                 Destroy(_pointMaterial);
-                Destroy(_diskMaterial);
+                Destroy(_shapeMaterial);
             }
             else
             {
                 DestroyImmediate(_pointMaterial);
-                DestroyImmediate(_diskMaterial);
+                DestroyImmediate(_shapeMaterial);
             }
         }
     }
@@ -85,6 +85,12 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
 
         // Check the camera condition.
         var camera = Camera.current;
+        // Camera[] cams = new Camera[2];
+        // Camera.GetAllCameras(cams);
+        
+        // if(camera.name == cams[0].name) camera = cams[1];
+        // else camera = cams[0];
+        
         if ((camera.cullingMask & (1 << gameObject.layer)) == 0) return;
         if (camera.name == "Preview Scene Camera") return;
 
@@ -97,9 +103,9 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
             _pointMaterial.hideFlags = HideFlags.DontSave;
             _pointMaterial.EnableKeyword("_COMPUTE_BUFFER");
 
-            _diskMaterial = new Material(_diskShader);
-            _diskMaterial.hideFlags = HideFlags.DontSave;
-            _diskMaterial.EnableKeyword("_COMPUTE_BUFFER");
+            _shapeMaterial = new Material(_shapeShader);
+            _shapeMaterial.hideFlags = HideFlags.DontSave;
+            _shapeMaterial.EnableKeyword("_COMPUTE_BUFFER");
         }
 
         // Use the external buffer if given any.
@@ -120,11 +126,12 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
         }
         else
         {
-            _diskMaterial.SetPass(0);
-            _diskMaterial.SetColor("_Tint", _pointTint);
-            _diskMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
-            _diskMaterial.SetBuffer("_PointBuffer", pointBuffer);
-            _diskMaterial.SetFloat("_PointSize", pointSize);
+            _shapeMaterial.SetPass(0);
+            _shapeMaterial.SetColor("_Tint", _pointTint);
+            _shapeMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
+            _shapeMaterial.SetBuffer("_PointBuffer", pointBuffer);
+            // _shapeMaterial.SetFloat("_PointSize", camera.orthographicSize * pointSize);
+            _shapeMaterial.SetFloat("_PointSize", pointSize);
 #if UNITY_2019_1_OR_NEWER
             Graphics.DrawProceduralNow(MeshTopology.Points, pointBuffer.count, 1);
 #else

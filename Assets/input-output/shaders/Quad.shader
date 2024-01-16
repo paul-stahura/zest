@@ -1,7 +1,7 @@
 // Pcx - Point cloud importer & renderer for Unity
 // https://github.com/keijiro/Pcx
 
-Shader "Point Cloud/Disk"
+Shader "Point Cloud/Quad"
 {
     Properties
     {
