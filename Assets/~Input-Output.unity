@@ -6765,7 +6765,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pointTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  _pointSize: 0.0006
+  _pointSize: 0
   _pointShader: {fileID: 4800000, guid: a8aeb1b1d6c294e1fa3d34d5e8f8365a, type: 3}
   _shapeShader: {fileID: 4800000, guid: afa3b240d08176c4d94be3837284aaeb, type: 3}
 --- !u!1 &1963166727

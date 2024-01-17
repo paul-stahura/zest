@@ -1,6 +1,7 @@
 // Pcx - Point cloud importer & renderer for Unity
 // https://github.com/keijiro/Pcx
 
+using SRF;
 using UnityEngine;
 
 /// A renderer class that renders a point cloud contained by PointCloudData.
@@ -56,9 +57,15 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
 
     #region MonoBehaviour implementation
 
+    void Start()
+    {
+        CreateQuads();
+    }
+
     void OnValidate()
     {
         _pointSize = Mathf.Max(0, _pointSize);
+        CreateQuads();
     }
 
     void OnDestroy()
@@ -75,6 +82,35 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
                 DestroyImmediate(_pointMaterial);
                 DestroyImmediate(_shapeMaterial);
             }
+        }
+    }
+
+    void CreateQuads()
+    {
+        transform.DestroyChildren();
+
+        if(_sourceData != null && _pointSize > 0)
+        {
+            Vector3[] points = new Vector3[sourceData.pointCount];
+            for(int i = 0; i < _sourceData.pointCount; i++)
+            {
+                points[i] = _sourceData.GetPoint(i);
+            }
+
+            if(_shapeMaterial == null)
+            {
+                _shapeMaterial = new Material(_shapeShader);
+                _shapeMaterial.hideFlags = HideFlags.DontSave;
+                _shapeMaterial.EnableKeyword("_COMPUTE_BUFFER");
+            }
+
+            _shapeMaterial.SetPass(0);
+            _shapeMaterial.SetColor("_Tint", _pointTint);
+            _shapeMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
+            _shapeMaterial.SetBuffer("_PointBuffer", _sourceData.computeBuffer);
+            _shapeMaterial.SetFloat("_PointSize", pointSize);
+
+            MeshUtils.QuadsFromPoints(this.transform, points, _shapeMaterial, _pointSize);
         }
     }
 
@@ -126,17 +162,17 @@ public sealed class ZetaSolverPointRenderer : MonoBehaviour
         }
         else
         {
-            _shapeMaterial.SetPass(0);
-            _shapeMaterial.SetColor("_Tint", _pointTint);
-            _shapeMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
-            _shapeMaterial.SetBuffer("_PointBuffer", pointBuffer);
-            // _shapeMaterial.SetFloat("_PointSize", camera.orthographicSize * pointSize);
-            _shapeMaterial.SetFloat("_PointSize", pointSize);
-#if UNITY_2019_1_OR_NEWER
-            Graphics.DrawProceduralNow(MeshTopology.Points, pointBuffer.count, 1);
-#else
-                Graphics.DrawProcedural(MeshTopology.Points, pointBuffer.count, 1);
-#endif
+//             _shapeMaterial.SetPass(0);
+//             _shapeMaterial.SetColor("_Tint", _pointTint);
+//             _shapeMaterial.SetMatrix("_Transform", transform.localToWorldMatrix);
+//             _shapeMaterial.SetBuffer("_PointBuffer", pointBuffer);
+//             // _shapeMaterial.SetFloat("_PointSize", camera.orthographicSize * pointSize);
+//             _shapeMaterial.SetFloat("_PointSize", pointSize);
+// #if UNITY_2019_1_OR_NEWER
+//             Graphics.DrawProceduralNow(MeshTopology.Points, pointBuffer.count, 1);
+// #else
+//                 Graphics.DrawProcedural(MeshTopology.Points, pointBuffer.count, 1);
+// #endif
         }
     }
 
