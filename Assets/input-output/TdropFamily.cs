@@ -108,10 +108,13 @@ public class TdropFamily : MonoBehaviour
     {
         _infinityTdropPts.Clear();
 
+        double t = 0;
         double inc = 1d / _pointsPerTdrop;
         Debug.Assert(inc > 0);
-        for (double t = 0; t < 1; t += inc)
+        for (int i = 0; i < _pointsPerTdrop - 1; i++)
         {
+            t += inc;
+
             // Tdrop is undefined at 0.25 and 0.75, so we skip these values
             if(Mathf.Approximately((float)t, 0.25f) || Mathf.Approximately((float)t, 0.75f)) {
                 t += inc;
