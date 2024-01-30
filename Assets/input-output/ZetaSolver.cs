@@ -7,8 +7,6 @@ using Unity.Collections;
 using System.Linq;
 using Color = UnityEngine.Color;
 using Shapes;
-using UnityEditor.UIElements;
-using TMPro;
 using UnityEngine.UI;
 using System.IO;
 
@@ -99,14 +97,20 @@ public class ZetaSolver : MonoBehaviour
         _writeToFileButton.onClick.AddListener(() =>
         {
             var ptList = new List<Vector2>();
+            List<List<Vector2>> pointsList = new List<List<Vector2>>();
             for(int i = 0; i < _closestPointIndexies.Count; i++)
             {
+                pointsList.Add(new List<Vector2>());
                 for (int j = 0; j < _closestPointIndexies[i].Count; j++)
                 {
-                    ptList.Add(_pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i][j])));
+                    Vector2 pt = _pointData.GetPoint(_pointData.GetPointPairIndex(_closestPointIndexies[i][j]));
+                    ptList.Add(pt);
+                    // flip xy
+                    pointsList[i].Add(new Vector2(pt.y, pt.x));
                 }
             }
-            writePointsToFile(ptList);
+            writePointTable(pointsList);
+            // writePointsToFile(ptList);
         });
 
         
@@ -377,6 +381,122 @@ public class ZetaSolver : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// takes a list of lines and creates a table with a shared x axis
+    /// </summary>
+    /// <param name="pointsList"></param>
+    private void writePointTable(List<List<Vector2>> pointsList)
+    {
+        // create a list of all the x points
+        List<float> xList = new List<float>();
+        foreach(List<Vector2> ptList in pointsList)
+        {   
+            foreach(Vector2 pt in ptList)
+            {
+                if(!xList.Contains(pt.x))
+                {
+                    xList.Add(pt.x);
+                }
+            }
+        }
+
+        // sort low to high
+        xList.Sort();
+
+        // create lists of y points
+        List<List<float>> yLists = new List<List<float>>();
+        for(int i = 0; i < pointsList.Count; i++)
+        {
+            yLists.Add(new List<float>());
+            for(int j = 0; j < xList.Count; j++)
+            {
+                for(int k = 0; k < pointsList[i].Count; k++)
+                {
+                    Vector2 pt = pointsList[i][k];
+                    // if same value, add to ylist
+                    if(pt.x == xList[j])
+                    {
+                        yLists[i].Add(pt.y);
+                        break;
+                    }
+                    else if(xList[j] < pt.x)
+                    {
+                        if(k == 0)
+                        {
+                            // use later points for this approximation
+                            yLists[i].Add(getPointOnLine(pt, pointsList[i][k + 10], xList[j]).y);
+                            break;
+                        }
+                        else
+                        {
+                            // use points before and after
+                            yLists[i].Add(getPointOnLine(pointsList[i][k - 1], pt, xList[j]).y);
+                            break;
+                        }
+                    }
+                    // if more, and no more points, project
+                    else if(k == pointsList[i].Count - 1)
+                    {
+                        // use prev points for this approximation
+                        yLists[i].Add(getPointOnLine(pointsList[i][k - 10], pt, xList[j]).y);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // write table
+        string fileName = "ZetaSolverClosestPoints";
+        if(_outputFile != null)
+        {
+            fileName = _outputFile.name;
+        }
+
+        // Combine the path to the "Resources" folder with the file name
+        string filePath = Path.Combine("Assets/Resources", fileName);
+
+        // Create or overwrite the file
+        using (StreamWriter writer = new StreamWriter(filePath))
+        {
+            // header
+            writer.Write($"x");
+            for(int i = 0; i < yLists.Count; i++)
+            {
+                writer.Write($", y{i}");
+            }
+            writer.WriteLine("");
+
+            // points
+            for(int i = 0; i < xList.Count; i++)
+            {
+                writer.Write($"{xList[i]}");
+                for(int j = 0; j < yLists.Count; j++)
+                {
+                    writer.Write($", {yLists[j][i]}");
+                }
+                writer.WriteLine("");
+            }
+        }
+
+        // Refresh the Unity editor to reflect changes
+        UnityEditor.AssetDatabase.Refresh();
+
+        // Log a message to indicate that the TextAsset is created
+        Debug.Log($"Points saved to '{fileName}'");
+    }
+
+    private Vector2 getPointOnLine(Vector2 a, Vector2 b, float xValue)
+    {
+        if(b.x - a.x == 0) return new Vector2(xValue, xValue);
+        if(b.y - a.y == 0) return new Vector2(xValue, a.y);
+
+        // y = mx + b
+        float slope = (b.y - a.y) / (b.x - a.x);
+        float intersept = a.y - slope * a.x;
+
+        return new Vector2(xValue, slope * xValue + intersept);
+    }
+
     private void writePointsToFile(List<Vector2> ptList)
     {
 
@@ -397,6 +517,16 @@ public class ZetaSolver : MonoBehaviour
                 // Write each Vector2 point to a new line in the file
                 writer.WriteLine($"{pt.x},{pt.y}");
             }
+
+            // int ptsPer = ptList.Count / _closestPointIndexies.Count;
+            // for(int i = 0; i < ptList.Count; i++)
+            // {
+            //     if(i % ptsPer == 0)
+            //     {
+            //         writer.WriteLine($"Tdrop #{i}");
+            //     }
+            //     writer.WriteLine($"{ptList[i].x},{ptList[i].y}");
+            // }
         }
 
         // Refresh the Unity editor to reflect changes
