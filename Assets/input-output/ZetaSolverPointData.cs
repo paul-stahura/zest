@@ -60,7 +60,7 @@ public sealed class ZetaSolverPointData
         public uint color;
     }
 
-    [SerializeField] Point[] _pointData = new Point[2240000];
+    [SerializeField] Point[] _pointData = new Point[2240000 * 2];
     private int teardropPointIndex;
 
     #endregion

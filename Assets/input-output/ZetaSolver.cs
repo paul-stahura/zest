@@ -15,6 +15,7 @@ public class ZetaSolver : MonoBehaviour
     #region UI
     [Header("UI")]
     public FloatInput inputXOffset;
+    public FloatInput inputYOffset;
     public FloatInput inputNumBands;
     public FloatInput inputSizeX;
     public FloatInput inputSizeY;
@@ -131,6 +132,12 @@ public class ZetaSolver : MonoBehaviour
             indexPlaneOffset.x = value;
         });
 
+        inputYOffset = GameObject.Find("InputYoffset")?.GetComponent<FloatInput>();
+        inputYOffset?.onValueChanged.AddListener((float value) => 
+        {
+            indexPlaneOffset.y = value;
+        });
+
         inputNumBands = GameObject.Find("InputNumBands")?.GetComponent<FloatInput>();
         inputNumBands?.onValueChanged.AddListener((float value) => 
         {
@@ -177,6 +184,7 @@ public class ZetaSolver : MonoBehaviour
     public void ResetBands()
     {
         inputXOffset.Value = indexPlaneOffset.x = -0.05f;
+        inputYOffset.Value = indexPlaneOffset.x = 0;
         inputNumBands.Value = numOfBands = 6;
         inputSizeX.Value = bandSize.x = 0.125f;
         inputSizeY.Value = bandSize.y = 1.002f;
@@ -395,6 +403,8 @@ public class ZetaSolver : MonoBehaviour
             {
                 if(!xList.Contains(pt.x))
                 {
+
+                    // if(pt.x > )
                     xList.Add(pt.x);
                 }
             }
@@ -424,7 +434,7 @@ public class ZetaSolver : MonoBehaviour
                         if(k == 0)
                         {
                             // use later points for this approximation
-                            yLists[i].Add(getPointOnLine(pt, pointsList[i][k + 10], xList[j]).y);
+                            yLists[i].Add(getPointOnLine(pt, pointsList[i][k + 5], xList[j]).y);
                             break;
                         }
                         else
@@ -438,7 +448,7 @@ public class ZetaSolver : MonoBehaviour
                     else if(k == pointsList[i].Count - 1)
                     {
                         // use prev points for this approximation
-                        yLists[i].Add(getPointOnLine(pointsList[i][k - 10], pt, xList[j]).y);
+                        yLists[i].Add(getPointOnLine(pointsList[i][k - 5], pt, xList[j]).y);
                         break;
                     }
                 }
@@ -466,13 +476,32 @@ public class ZetaSolver : MonoBehaviour
             }
             writer.WriteLine("");
 
+            bool lastPointflag = false;
+
             // points
-            for(int i = 0; i < xList.Count; i++)
+            // write every nth point
+            int n = 4;
+            for(int i = 0; i < xList.Count; i += n)
             {
+                if(i == xList.Count - 1)
+                {
+                    lastPointflag = true;
+                }
+
                 writer.Write($"{xList[i]}");
                 for(int j = 0; j < yLists.Count; j++)
                 {
                     writer.Write($", {yLists[j][i]}");
+                }
+                writer.WriteLine("");
+            }
+
+            if(!lastPointflag)
+            {
+                writer.Write($"{xList[xList.Count - 1]}");
+                for(int j = 0; j < yLists.Count; j++)
+                {
+                    writer.Write($", {yLists[j][xList.Count - 1]}");
                 }
                 writer.WriteLine("");
             }
