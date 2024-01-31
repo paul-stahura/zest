@@ -480,7 +480,7 @@ public class ZetaSolver : MonoBehaviour
 
             // points
             // write every nth point
-            int n = 4;
+            int n = 1;
             for(int i = 0; i < xList.Count; i += n)
             {
                 if(i == xList.Count - 1)
