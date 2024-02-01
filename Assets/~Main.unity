@@ -18377,9 +18377,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   app: {fileID: 338235377}
+  _pointsPerTdrop: 250
   TeardropTransparency: {fileID: 1914141423}
   TeardropColorA: {r: 1, g: 0, b: 0, a: 1}
   TeardropColorB: {r: 0, g: 1, b: 0, a: 1}
+  TeardropColorInf: {r: 0, g: 1, b: 1, a: 1}
 --- !u!1 &1487443958
 GameObject:
   m_ObjectHideFlags: 0

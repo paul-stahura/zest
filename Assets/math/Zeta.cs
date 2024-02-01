@@ -81,8 +81,13 @@ public class Zeta
         return result;
     }
 
-    // returns a point on a tear drop at a given index, index starts at 1
-    public static Vector TearDrop(int index, double imaginary)
+    /// <summary>
+    /// returns a point on a tear drop at a given index, index starts at 1
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="imaginary"></param>
+    /// <returns></returns>
+    public static Vector TearDrop(int index, double imaginary, bool second = false)
     {
         Complex Pow(int a, Complex b)
         {
@@ -94,6 +99,11 @@ public class Zeta
 
         Vector J(int n, Complex s)
         {
+            // if(second)
+            // {
+            //     n += 1;
+            // }
+
             Complex z = Complex.Zero;
             for (int k = 1; k < n; k++)
             {
@@ -102,7 +112,10 @@ public class Zeta
             return z.ToVector();
         }
 
-        Vector opoint = Opoint(index, imaginary);
+        
+
+        // Vector opoint = Opoint(index, imaginary);
+        Vector opoint = Opoint(index + (second ? 1 : 0), imaginary);
 
         var s = new Complex(0.5, imaginary);
         Vector j0 = J(index, s);
@@ -134,6 +147,10 @@ public class Zeta
         }
 
         Complex em = EulerMaclauren(new Complex(0.5, imaginary));
+        // I think I could be using this instead, but the V seams to do the trick
+        // Complex emAngle = EulerMaclauren(new Complex(0.5, Zeta.IndexToImag(n)));
+        // return RotateAround(new Vector(0, 0), sRev, -Math.Atan2(emAngle.Imaginary, emAngle.Real)) + em.ToVector();
+        // 
         return RotateAround(new Vector(0, 0), sRev, -2.0 * V(imaginary) + (Math.PI / 2.0)) + em.ToVector();
     }
 
