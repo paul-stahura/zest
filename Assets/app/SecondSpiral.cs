@@ -57,25 +57,6 @@ public class SecondSpiral : MonoBehaviour
                 default:
                     break;
             }
-            if(spiralFormula.value == (int)SpiralFormulas.EtaFormula)
-            {
-                if(spiral.input.Real != 0.5)
-                {
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.EulerMaclauren);
-                }
-                else
-                {
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
-                }
-            }
-            else if(spiralFormula.value == (int)SpiralFormulas.Zet)
-            {
-                s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
-            }
-            else
-            {
-
-            }
         }
     }
 
