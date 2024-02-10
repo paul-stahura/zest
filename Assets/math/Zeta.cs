@@ -84,6 +84,32 @@ public class Zeta
     }
 
     /// <summary>
+    /// returns a point on the infinity Tdrop
+    /// set TdropA to false for TdropB
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="TdropA"></param>
+    /// <returns></returns>
+    public static Vector InfinityTdrop(double index, bool TdropA)
+    {
+        double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
+        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
+        Vector tDropa(double t) => a(t) * psi(t);
+        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);
+
+        return TdropA ? tDropa(index) : tDropb(index);
+    }
+
+    public static double LinkRad(Spiral s, int idx)
+    {
+        Vector3 start = s.joints[idx];
+        Vector3 end = s.joints[idx + 1];
+
+        var temp = end - start;
+        return Mathf.Atan2(temp.y, temp.x);
+    }
+
+    /// <summary>
     /// returns a point on a tear drop at a given index, index starts at 1
     /// </summary>
     /// <param name="index"></param>
@@ -113,8 +139,6 @@ public class Zeta
             }
             return z.ToVector();
         }
-
-        
 
         // Vector opoint = Opoint(index, imaginary);
         Vector opoint = Opoint(index + (second ? 1 : 0), imaginary);

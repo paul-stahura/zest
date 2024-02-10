@@ -35,11 +35,6 @@ public class MiddleLinkTeardrop : MonoBehaviour
         {
             return;
         }
-
-        double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
-        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-        Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
-        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
         
         Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
 
@@ -51,8 +46,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
             
             double i = 0;
             double inc = 1d/200;
-            var startA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-            var startB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
+            var startA = trackDrop(Zeta.InfinityTdrop(i, true), spiral.joints[spiral.middleIndex + 1]);
+            var startB = trackDrop(Zeta.InfinityTdrop(i, false), spiral.joints[spiral.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
                 // Tdrop is undefined at 0.25 and 0.75, so we skip these values
@@ -60,8 +55,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
                     i += inc;
                 }
 
-                var endA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-                var endB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
+                var endA = trackDrop(Zeta.InfinityTdrop(i, true), spiral.joints[spiral.middleIndex + 1]);
+                var endB = trackDrop(Zeta.InfinityTdrop(i, false), spiral.joints[spiral.middleIndex]);
 
                 Draw.Line(startA, endA);
                 startA = endA;
@@ -85,12 +80,12 @@ public class MiddleLinkTeardrop : MonoBehaviour
             var orth = Mathf.Min(1f, cam.orthographicSize);
             var size = 50.0f;
 
-            TdropDotA = trackDrop(tDropa(index), spiral.joints[spiral.middleIndex + 1]);
+            TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), spiral.joints[spiral.middleIndex + 1]);
             Draw.Ring(TdropDotA, orth / size / 2);
             ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
 
             index = 1 - index;
-            TdropDotB = trackDrop(tDropb(index), spiral.joints[spiral.middleIndex]);
+            TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), spiral.joints[spiral.middleIndex]);
             Draw.Ring(TdropDotB, orth / size / 2);
             ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
         }
