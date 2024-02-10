@@ -9,7 +9,8 @@ public class ClockPoints : MonoBehaviour
     [SerializeField] private int nPts = 200;
     [SerializeField] private int nFamily = 4;
 
-    [SerializeField] private Color lineColor = Color.white;
+    [SerializeField] private Color LineColorA = Color.red;
+    [SerializeField] private Color LineColorB = Color.green;
     [SerializeField] [Range(0, 1)] private float lineTransparency = 0.5f;
     [SerializeField] private bool CreatePoints = false;
     [SerializeField] private TextAsset _outputFile;
@@ -43,7 +44,8 @@ public class ClockPoints : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            lineColor.a = lineTransparency;
+            LineColorA.a = lineTransparency;
+            LineColorB.a = lineTransparency;
             Draw.Thickness = 1 + lineTransparency;
 
             for(int i = 0; i < _ptTable.Length; i++)
@@ -53,7 +55,7 @@ public class ClockPoints : MonoBehaviour
                 {
                     Vector end = _ptTable[i][k];
 
-                    Draw.Color = lineColor;
+                    Draw.Color = i % 2 == 0 ? LineColorA : LineColorB;
                     Draw.Line(start, end);
                     start = end;
                 }
