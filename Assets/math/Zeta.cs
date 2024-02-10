@@ -5,6 +5,8 @@ using UnityEngine;
 using Complex = System.Numerics.Complex;
 using MoonSharp.Interpreter;
 using System.Drawing.Drawing2D;
+using UnityEditor;
+using SRDebugger.UI.Controls.Data;
 
 public class Zeta
 {
@@ -379,6 +381,34 @@ public class Zeta
         return new Complex(Ex, Ey);
     }
 
+    public static Vector ZetFormula(double r, double t)
+    {
+        //https://www.desmos.com/calculator/blmlbsd2xb
+        Vector Z1 (double x, double y)
+        {
+            double zx = -Math.Pow(2.0, 1.0 - x) * Math.Cos(y * Math.Log(2.0)) + 1.0;
+            double zy = -Math.Pow(2.0, 1.0 - x) * Math.Sin(y * Math.Log(2.0));
+            double den = Math.Pow(2.0, 2.0*(1.0-x)) + (2.0 * (-Math.Pow(2.0, 1.0 - x) * Math.Cos(y * Math.Log(2.0)) + 1.0)) - 1.0;
+            return new Vector(zx, zy) / den;
+        }
+
+        Vector Z2 (double x, double y)
+        {
+            Vector sum = new Vector (0.0, 0.0);
+            int k = 400;
+            for(int n = 1; n <= k; n++)
+            {
+                Vector pt = new Vector(Math.Cos(y * Math.Log(n)), -Math.Sin(y * Math.Log(n)));
+                sum += pt * (Math.Pow(-1, n - 1) / Math.Pow(n, x));
+            }
+            return sum;
+        }
+
+        Vector z1 = Z1(r, t);
+        Vector z2 = Z2(r, t);
+        return new Vector(z1.x * z2.x - z1.y * z2.y, z1.x * z2.y + z1.y * z2.x);
+    }
+
     [MoonSharpUserData]
     public class Spiral
     {
@@ -425,6 +455,10 @@ public class Zeta
 
                 case SpiralFormulas.EtaFormula:
                     UpdateEtaFormula(s);
+                    break;
+
+                case SpiralFormulas.Zet:
+                    UpdateZetFormula(s);
                     break;
 
                 default:
@@ -539,6 +573,30 @@ public class Zeta
                 }
 
                 start = end;
+            }
+
+            findSpirals();
+        }
+
+        private void UpdateZetFormula(Complex s)
+        {
+            this.input = s;
+            var imag = this.input.Imaginary;
+            var real = this.input.Real;
+
+            var mi = Zeta.ImagToIndex(imag);
+            // this.numLinks = ((int)SpiralMiddleIndex(mi, 0) + 2) * 2 + extendSpiralCount; // need to an extra for proper final link tracking
+            this.numLinks = (int)Math.Ceiling(imag) * 5;
+            this.middleIndex = (int)mi;
+
+            this.zeta = Zeta.ZetFormula(real, imag);
+
+            this.joints = new Vector[numLinks];
+            for (int i = 0; i < numLinks; i++)
+            {
+                double curvedPosition = Math.Pow(i / (double)(numLinks - 1), 2);
+                double t = imag * curvedPosition;
+                this.joints[i] = ZetFormula(real, t);
             }
 
             findSpirals();

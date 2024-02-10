@@ -14,7 +14,8 @@ public enum SpiralFormulas
 {
     ReimannSiegel = 0,
     EulerMaclauren = 1,
-    EtaFormula = 2
+    EtaFormula = 2,
+    Zet = 3
 }
 
 public class App : ImmediateModeShapeDrawer
