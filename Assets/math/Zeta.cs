@@ -457,7 +457,7 @@ public class Zeta
                     UpdateEtaFormula(s);
                     break;
 
-                case SpiralFormulas.Zet:
+                case SpiralFormulas.ZetFormula:
                     UpdateZetFormula(s);
                     break;
 

@@ -11,6 +11,7 @@ public class SecondSpiral : MonoBehaviour
 
     public Color ReimannColor = Color.cyan;
     public Color EtaColor = Color.magenta;
+    public Color ZetColor = Color.blue;
     private Color firstSpiralColor;
     
     public void Start()
@@ -28,11 +29,21 @@ public class SecondSpiral : MonoBehaviour
                 case (int)SpiralFormulas.ReimannSiegel:
                     s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
                     DrawSpiral(cam, EtaColor, s);
+                    if(spiral.input.Imaginary < 40.9)
+                    {
+                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        DrawSpiral(cam, ZetColor, s);
+                    }
                     break;
 
                 case (int)SpiralFormulas.EulerMaclauren:
                     s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
                     DrawSpiral(cam, EtaColor, s);
+                    if(spiral.input.Imaginary < 40.9)
+                    {
+                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        DrawSpiral(cam, ZetColor, s);
+                    }
                     break;
 
                 case (int)SpiralFormulas.EtaFormula:
@@ -45,9 +56,15 @@ public class SecondSpiral : MonoBehaviour
                         s = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
                     }
                     DrawSpiral(cam, ReimannColor, s);
+
+                    if(spiral.input.Imaginary < 40.9)
+                    {
+                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        DrawSpiral(cam, ZetColor, s);
+                    }
                     break;
 
-                case (int)SpiralFormulas.Zet:
+                case (int)SpiralFormulas.ZetFormula:
                     s = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
                     DrawSpiral(cam, ReimannColor, s);
                     s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
