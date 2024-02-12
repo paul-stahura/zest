@@ -2,50 +2,101 @@ using System;
 using System.IO;
 using Shapes;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ClockPoints : MonoBehaviour
 {
+    [Header("Input")]
     [SerializeField] private App app;
+    [SerializeField] private FloatInput nPtsInput;
+    [SerializeField] private FloatInput nFamilyInput;
+    [SerializeField] private Slider clockTransparencySlider;
+    [SerializeField] private Button createPointsButton;
+    [SerializeField] private Button writePointsButton;
+
+    [Header("Settings")]
     [SerializeField] private int nPts = 200;
     [SerializeField] private int nFamily = 4;
-
     [SerializeField] private Color LineColorA = Color.red;
     [SerializeField] private Color LineColorB = Color.green;
+    [SerializeField] private Color LineColorInf = Color.cyan;
     [SerializeField] [Range(0, 1)] private float lineTransparency = 0.5f;
-    [SerializeField] private bool CreatePoints = false;
+    [SerializeField] private bool createPoints = false;
     [SerializeField] private TextAsset _outputFile;
-    [SerializeField] private bool WritePoints = false;
+    [SerializeField] private bool writePoints = false;
 
     
     private Vector[][] _ptTable;
 
     public void Awake()
     {
-        CreatePointTable();
-        app.DrawSprial += DrawPoints;
+        InitInput();
     }
 
     public void Update()
     {
-        if(CreatePoints)
+        if(createPoints)
         {
             CreatePointTable();
-            CreatePoints = false;
+            createPoints = false;
         }
 
-        if(WritePoints)
+        if(writePoints)
         {
             WritePointTable(_ptTable);
-            WritePoints = false;
+            writePoints = false;
         }
+    }
+
+    private void InitInput()
+    {
+        app = GameObject.Find("App")?.GetComponent<App>();
+        app.DrawSprial += DrawPoints;
+
+        nPtsInput = GameObject.Find("NumClockPts")?.GetComponent<FloatInput>();
+        nPtsInput.Value = nPts;
+        nPtsInput?.onValueChanged.AddListener((float value) =>
+        {
+            nPts = (int)value;
+        });
+
+        nFamilyInput = GameObject.Find("ClockFamily")?.GetComponent<FloatInput>();
+        nFamilyInput.Value = nFamily;
+        nFamilyInput?.onValueChanged.AddListener((float value) =>
+        {
+            nFamily = (int)value;
+        });
+
+        clockTransparencySlider = GameObject.Find("ClockTransparencySlider")?.GetComponent<Slider>();
+        clockTransparencySlider.value = lineTransparency;
+        clockTransparencySlider?.onValueChanged.AddListener((float value) =>
+        {
+            lineTransparency = value;
+        });
+
+        createPointsButton = GameObject.Find("CreateClockPts")?.GetComponent<Button>();
+        createPointsButton?.onClick.AddListener(() =>
+        {
+            CreatePointTable();
+        });
+
+        writePointsButton = GameObject.Find("WriteClockPts")?.GetComponent<Button>();
+        writePointsButton?.onClick.AddListener(() =>
+        {
+            WritePointTable(_ptTable);
+        });
+
     }
 
     private void DrawPoints(Camera cam, Zeta.Spiral s)
     {
+        if(_ptTable == null) return;
+
         using (Draw.StyleScope)
         {
             LineColorA.a = lineTransparency;
             LineColorB.a = lineTransparency;
+            LineColorInf.a = lineTransparency;
             Draw.Thickness = 1 + lineTransparency;
 
             for(int i = 0; i < _ptTable.Length; i++)
@@ -56,8 +107,15 @@ public class ClockPoints : MonoBehaviour
                     Vector end = _ptTable[i][k];
 
                     Draw.Color = i % 2 == 0 ? LineColorA : LineColorB;
+                    if(i == 2 || i == 3) Draw.Color = LineColorInf;
                     Draw.Line(start, end);
                     start = end;
+                }
+
+                // complete infinity loop
+                if(i == 2 || i == 3) 
+                {
+                    Draw.Line(start, _ptTable[i][0]);
                 }
             }
         }
