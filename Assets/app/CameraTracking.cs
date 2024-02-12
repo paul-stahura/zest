@@ -61,6 +61,7 @@ public class CameraTracking : MonoBehaviour
 
         app.DrawSprial += drawShapes;
         app.SceneChange += savePlayerPrefs;
+        middleLinkTeardrop.InfinityTdropPoints += TrackTdrop;
     }
 
     void savePlayerPrefs() {
@@ -117,7 +118,10 @@ public class CameraTracking : MonoBehaviour
             var i = (int)spiral.SpiralMiddleIndex(mi, joint);
             trackLink(cam, i, spiral, false);
         }
+    }
 
+    private void TrackTdrop(Camera cam, Zeta.Spiral spiral)
+    {
         if(trackTdropA.isOn)
         {
             setCamera(cam, middleLinkTeardrop.TdropDotA, RotationOfLink(spiral, spiral.middleIndex));

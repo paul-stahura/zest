@@ -9,44 +9,45 @@ public class MiddleLinkTeardrop : MonoBehaviour
 {
     public App app;
     
+    [SerializeField] private int _pointsPerTdrop = 250;
     public Slider TeardropTransparency;
     public Color TeardropColorA = Color.red;
     public Color TeardropColorB = Color.green;
+    public Color TeardropColorInf = Color.cyan;
 
     public Vector TdropDotA { get; private set; }
     public Vector TdropDotB { get; private set; }
+
+    public event Action<Camera, Zeta.Spiral> InfinityTdropPoints;
+
+    private List<Vector> _exactTdropA;
+    private List<Vector> _exactTdropB;
     
-    // Start is called before the first frame update
     public void Start()
     {
-        app.DrawSprial += drawTeardrop;
+        app.DrawSprial += DrawTeardrop;
+        app.DrawSprial += DrawExactTeardrop;
     }
 
-    private void drawTeardrop(Camera cam, Zeta.Spiral spiral)
+    private void DrawTeardrop(Camera cam, Zeta.Spiral spiral)
     {
         if(TeardropTransparency.value < 0.05f)
         {
             return;
         }
-
-        double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
-        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-        Vector tDropa(double t) => a(t) * psi(t);// + new Vector(1.0, 0.0);
-        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);// + new Vector(1.0, 0.0);
         
         Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(spiral, spiral.middleIndex)) / Math.Sqrt(spiral.middleIndex+1) + link; 
 
         using (Draw.StyleScope)
         {
-            TeardropColorA.a = TeardropTransparency.value;
-            TeardropColorB.a = TeardropTransparency.value;
-            Draw.Color = TeardropColorA;
+            TeardropColorInf.a = TeardropTransparency.value / 4;
+            Draw.Color = TeardropColorInf;
             Draw.Thickness = 1 + TeardropTransparency.value;
             
             double i = 0;
             double inc = 1d/200;
-            var startA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-            var startB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
+            var startA = trackDrop(Zeta.InfinityTdrop(i, true), spiral.joints[spiral.middleIndex + 1]);
+            var startB = trackDrop(Zeta.InfinityTdrop(i, false), spiral.joints[spiral.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
                 // Tdrop is undefined at 0.25 and 0.75, so we skip these values
@@ -54,14 +55,12 @@ public class MiddleLinkTeardrop : MonoBehaviour
                     i += inc;
                 }
 
-                var endA = trackDrop(tDropa(i), spiral.joints[spiral.middleIndex + 1]);
-                var endB = trackDrop(tDropb(i), spiral.joints[spiral.middleIndex]);
+                var endA = trackDrop(Zeta.InfinityTdrop(i, true), spiral.joints[spiral.middleIndex + 1]);
+                var endB = trackDrop(Zeta.InfinityTdrop(i, false), spiral.joints[spiral.middleIndex]);
 
-                Draw.Color = TeardropColorA;
                 Draw.Line(startA, endA);
                 startA = endA;
 
-                Draw.Color = TeardropColorB;
                 Draw.Line(startB, endB);
                 startB = endB;
             }
@@ -81,14 +80,56 @@ public class MiddleLinkTeardrop : MonoBehaviour
             var orth = Mathf.Min(1f, cam.orthographicSize);
             var size = 50.0f;
 
-            TdropDotA = trackDrop(tDropa(index), spiral.joints[spiral.middleIndex + 1]);
+            TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), spiral.joints[spiral.middleIndex + 1]);
             Draw.Ring(TdropDotA, orth / size / 2);
             ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
 
             index = 1 - index;
-            TdropDotB = trackDrop(tDropb(index), spiral.joints[spiral.middleIndex]);
+            TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), spiral.joints[spiral.middleIndex]);
             Draw.Ring(TdropDotB, orth / size / 2);
             ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
+        }
+
+        InfinityTdropPoints.Invoke(cam, spiral);
+    }
+
+    private void DrawExactTeardrop(Camera cam, Zeta.Spiral s)
+    {
+        _exactTdropA = new();
+        _exactTdropB = new();
+        int index = (int)Math.Floor(Zeta.ImagToIndex(s.input.Imaginary));
+        double inc = 1d / (_pointsPerTdrop - 1);
+        Debug.Assert(inc > 0);
+        for (int i = 0; i < _pointsPerTdrop; i++)
+        {
+            double t = i * inc;
+            _exactTdropA.Add(Zeta.TearDrop(index + 1, Zeta.IndexToImag(index + t)));
+            _exactTdropB.Add(Zeta.TearDrop(index + 1, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
+        }
+
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
+
+        using (Draw.StyleScope)
+        {
+            TeardropColorA.a = TeardropTransparency.value;
+            TeardropColorB.a = TeardropTransparency.value;
+            Draw.Thickness = 1 + TeardropTransparency.value;
+            
+            var startA = trackDrop(_exactTdropA[0], s.joints[s.middleIndex]);
+            var startB = trackDrop(_exactTdropB[0], s.joints[s.middleIndex]);
+            for (int i = 1; i < _exactTdropA.Count; i++)
+            {
+                var endA = trackDrop(_exactTdropA[i], s.joints[s.middleIndex]);
+                var endB = trackDrop(_exactTdropB[i], s.joints[s.middleIndex]);
+
+                Draw.Color = TeardropColorA;
+                Draw.Line(startA, endA);
+                startA = endA;
+
+                Draw.Color = TeardropColorB;
+                Draw.Line(startB, endB);
+                startB = endB;
+            }
         }
     }
 
