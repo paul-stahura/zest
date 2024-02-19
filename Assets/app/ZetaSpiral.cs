@@ -6,6 +6,7 @@ using Complex = System.Numerics.Complex;
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
+using System.Linq;
 
 
 public partial class ZetaSpiral : MonoBehaviour
@@ -218,8 +219,10 @@ public partial class ZetaSpiral : MonoBehaviour
         bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue && CameraTracking.trackingIndex > -1;
         if (limitVisibleLinks)
         {
-            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
+            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value, 0, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
             endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 1, CameraTracking.trackingIndex + (int)visibleLinks.value + 1, spiral.numLinks);
+
+            if(endIndex >= spiral.joints.Count()) endIndex = spiral.joints.Count() - 1;
         }
 
         var zeta = spiral.zeta.ToVector();
@@ -239,19 +242,19 @@ public partial class ZetaSpiral : MonoBehaviour
 
             if (i == middleLink - 1)
             {
-                color = new Color(.6f, 1f, .2f, 1f);
+                color = new Color(.6f, 1f, .2f, 1f); // green ish
                 color.a = transparency.value;
                 Draw.Thickness = 4;
             }
             else if (i == middleLink)
             {
-                color = new Color(1, .5f, .5f, 1f); // orange
+                color = new Color(1, .5f, .5f, 1f); // orange ish
                 color.a = transparency.value;
                 Draw.Thickness = 4;
             }
             else if (i == middleLink + 1)
             {
-                color = new Color(1, 0, .5f, 1f);
+                color = new Color(1, 0, .5f, 1f); // red ish
                 color.a = transparency.value;
                 Draw.Thickness = 4;
             }
