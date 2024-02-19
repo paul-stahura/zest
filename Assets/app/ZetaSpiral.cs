@@ -228,12 +228,37 @@ public partial class ZetaSpiral : MonoBehaviour
         // Copy zeta vector and normalize it.
         var norm = zeta.Normalized();
 
+        var middleLink = spiral.middleIndex;
 
         var from = zeta + spiral.joints[endIndex].Reflect(norm);
         for (int i = endIndex - 1; i >= startIndex; i--)
         {
+            var color = reverseSpiralColor;
+            color.a = transparency.value;
+            Draw.Thickness = 1 + transparency.value;
+
+            if (i == middleLink - 1)
+            {
+                color = new Color(.6f, 1f, .2f, 1f);
+                color.a = transparency.value;
+                Draw.Thickness = 4;
+            }
+            else if (i == middleLink)
+            {
+                color = new Color(1, .5f, .5f, 1f); // orange
+                color.a = transparency.value;
+                Draw.Thickness = 4;
+            }
+            else if (i == middleLink + 1)
+            {
+                color = new Color(1, 0, .5f, 1f);
+                color.a = transparency.value;
+                Draw.Thickness = 4;
+            }
+
             var to = zeta + spiral.joints[i].Reflect(norm);
 
+            Draw.Color = color;
             Draw.Line(from, to);
             from = to;
         }
