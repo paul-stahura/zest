@@ -188,7 +188,7 @@ public partial class ZetaSpiral : MonoBehaviour
     {
         var pt = sprial.zeta.ToVector2();
 
-        var color = Color.cyan;
+        var color = spiralColor + new Color(-0.5f, 0, 0);
         color.a = targetTransparency.value;
 
         Draw.Color = color;
