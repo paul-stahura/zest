@@ -78,14 +78,14 @@ public class CameraTracking : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        // default to not tracking any link index
+        trackingIndex = -1;
+
         if (trackMiddle.isOn)
         {
             trackLink(cam, spiral.middleIndex, spiral);
             return;
         }
-
-        // default to not tracking any link index
-        trackingIndex = -1;
 
         if (trackSpiralCenter.isOn)
         {
@@ -93,6 +93,8 @@ public class CameraTracking : MonoBehaviour
 
             var pt = spiral.spirals[(int)spiralNumber.value];
             setCamera(cam, pt, rot);
+
+            trackingIndex = (int)spiralNumber.value;
         }
 
         if (trackSpiralLink.isOn)
@@ -131,6 +133,7 @@ public class CameraTracking : MonoBehaviour
         {
             setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
         }
+        trackingIndex = spiral.middleIndex;
     }
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)
