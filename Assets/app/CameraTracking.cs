@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
+using System.Linq;
 public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
@@ -78,21 +79,27 @@ public class CameraTracking : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
+        spiralNumber.maxValue = spiral.spirals.Count() - 1;
+
+        // default to not tracking any link index
+        trackingIndex = -1;
+
         if (trackMiddle.isOn)
         {
             trackLink(cam, spiral.middleIndex, spiral);
             return;
         }
 
-        // default to not tracking any link index
-        trackingIndex = -1;
-
         if (trackSpiralCenter.isOn)
         {
             var rot = Quaternion.AngleAxis(0, Vector3.forward);
 
+            
+
             var pt = spiral.spirals[(int)spiralNumber.value];
             setCamera(cam, pt, rot);
+
+            trackingIndex = (int)spiralNumber.value;
         }
 
         if (trackSpiralLink.isOn)
@@ -131,6 +138,7 @@ public class CameraTracking : MonoBehaviour
         {
             setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
         }
+        trackingIndex = spiral.middleIndex;
     }
 
     void trackLink(Camera cam, int idx, Zeta.Spiral spiral, bool trackCenter=true)

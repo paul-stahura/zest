@@ -1,3 +1,4 @@
+using Shapes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,7 +13,6 @@ public class SecondSpiral : MonoBehaviour
     public Color ReimannColor = Color.cyan;
     public Color EtaColor = Color.magenta;
     public Color ZetColor = Color.blue;
-    private Color firstSpiralColor;
     
     public void Start()
     {
@@ -79,9 +79,9 @@ public class SecondSpiral : MonoBehaviour
 
     private void DrawSpiral(Camera cam, Color color, Zeta.Spiral s)
     {
-        firstSpiralColor = zetaSpiral.spiralColor;
+        var tempColor = zetaSpiral.spiralColor;
         zetaSpiral.spiralColor = color;
         zetaSpiral.DrawShapes(cam, s);
-        zetaSpiral.spiralColor = firstSpiralColor;
+        zetaSpiral.spiralColor = tempColor;
     }
 }
