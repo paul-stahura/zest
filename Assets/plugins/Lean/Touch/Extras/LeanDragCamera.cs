@@ -38,6 +38,9 @@ namespace Lean.Touch
 		[SerializeField]
 		public Vector3 remainingDelta;
 
+		public Vector3 worldDelta;
+		public Vector2 localDelta;
+
 		/// <summary>This method moves the current GameObject to the center point of all selected objects.</summary>
 		[ContextMenu("Move To Selection")]
 		public virtual void MoveToSelection()
@@ -106,13 +109,14 @@ namespace Lean.Touch
 			var screenPoint     = LeanGesture.GetScreenCenter(fingers);
 
 			// Get the world delta of them after conversion
-			var worldDelta = ScreenDepth.ConvertDelta(lastScreenPoint, screenPoint, gameObject);
+			localDelta = (screenPoint - lastScreenPoint) * Sensitivity;
+			worldDelta = ScreenDepth.ConvertDelta(lastScreenPoint, screenPoint, gameObject) * Sensitivity;
 
 			// Store the current position
 			var oldPosition = transform.localPosition;
 
 			// Pan the camera based on the world delta
-			transform.position -= worldDelta * Sensitivity;
+			transform.position -= worldDelta;
 
 			// Add to remainingDelta
 			remainingDelta += transform.localPosition - oldPosition;
@@ -122,6 +126,7 @@ namespace Lean.Touch
 
 			// Dampen remainingDelta
 			var newRemainingDelta = Vector3.Lerp(remainingDelta, Vector3.zero, factor);
+
 
 			// Shift this position by the change in delta
 			transform.localPosition = oldPosition + remainingDelta - newRemainingDelta;
