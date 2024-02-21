@@ -7,6 +7,8 @@ public class CameraTracking : MonoBehaviour
 {
     public Toggle trackOrigin;
     public Toggle trackMiddle;
+    public Toggle trackBisectorPt;
+    private bool _bisectorCamUp = true;
     public Toggle trackTdropA;
     public Toggle trackTdropB;
     public Toggle trackSpiralCenter;
@@ -41,6 +43,11 @@ public class CameraTracking : MonoBehaviour
         savePlayerPrefs();
     }
 
+    public void Awake()
+    {
+        trackBisectorPt = GameObject.Find("Track Bisector")?.GetComponent<Toggle>();
+    }
+
     public void Start()
     {
         #region Camera Tracking
@@ -50,8 +57,8 @@ public class CameraTracking : MonoBehaviour
                 resetCamera(Camera.main);
         });
         trackOrigin.isOn = PlayerPrefs.GetInt("TrackOrigin") != 0 ? true : false;
-
         trackMiddle.isOn = PlayerPrefs.GetInt("TrackMiddle") != 0 ? true : false;
+        trackBisectorPt.isOn = PlayerPrefs.GetInt("TrackBisector") != 0 ? true : false;
         trackSpiralCenter.isOn = PlayerPrefs.GetInt("TrackSpiralCenter") != 0 ? true : false;
         trackSpiralLink.isOn = PlayerPrefs.GetInt("TrackSpiralLink") != 0 ? true : false;
         trackJointIMinusN.isOn = PlayerPrefs.GetInt("TrackJointI-N") != 0 ? true : false;
@@ -68,6 +75,7 @@ public class CameraTracking : MonoBehaviour
     void savePlayerPrefs() {
         PlayerPrefs.SetInt("TrackOrigin", trackOrigin.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackMiddle", trackMiddle.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("TrackBisector", trackBisectorPt.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackSpiralCenter", trackSpiralCenter.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackSpiralLink", trackSpiralLink.isOn ? 1 : 0);
         PlayerPrefs.SetInt("TrackJointI-N", trackJointIMinusN.isOn ? 1 : 0);
@@ -88,6 +96,36 @@ public class CameraTracking : MonoBehaviour
         {
             trackLink(cam, spiral.middleIndex, spiral);
             return;
+        }
+
+        if(trackBisectorPt.isOn)
+        {
+            Vector2 pt = BisectingLines.BisectPoint(spiral);
+
+            Vector3 start = Vector2.zero;
+            Vector3 end = spiral.zeta.ToVector();
+
+            var temp = _bisectorCamUp ? end - start : start - end;
+
+            var angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;
+            var rot =  Quaternion.AngleAxis(angle, Vector3.forward);
+
+            Transform newRot = transform;
+            newRot.rotation = rot;
+
+            // keep us upright
+            if(Vector3.Dot(cam.transform.up, newRot.up) < 0)
+            {
+                _bisectorCamUp = !_bisectorCamUp;
+                temp = _bisectorCamUp ? end - start : start - end;
+
+                angle = Mathf.Atan2(temp.y, temp.x) * Mathf.Rad2Deg;
+                rot =  Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+
+            setCamera(cam, pt, rot);
+
+            trackingIndex = spiral.middleIndex;
         }
 
         if (trackSpiralCenter.isOn)
