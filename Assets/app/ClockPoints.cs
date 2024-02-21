@@ -152,8 +152,8 @@ public class ClockPoints : MonoBehaviour
             _ptTable[3][i] = Zeta.InfinityTdrop(index - nFamily, false);
 
             double imag = Zeta.IndexToImag(index);
-            _ptTable[4][i] = Zeta.TearDrop(nFamily + 1, imag);
-            _ptTable[5][i] = Zeta.TearDrop(nFamily + 1, imag, true);
+            _ptTable[4][i] = Zeta.TearDrop(nFamily + 1, 0.5, imag);
+            _ptTable[5][i] = Zeta.TearDrop(nFamily + 1, 0.5, imag, true);
         }
     }
 

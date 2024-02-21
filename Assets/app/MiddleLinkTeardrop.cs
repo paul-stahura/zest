@@ -150,8 +150,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
         for (int i = 0; i < _pointsPerTdrop; i++)
         {
             double t = i * inc;
-            _exactTdropA.Add(Zeta.TearDrop(index + 1, Zeta.IndexToImag(index + t)));
-            _exactTdropB.Add(Zeta.TearDrop(index + 1, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
+            _exactTdropA.Add(Zeta.TearDrop(index + 1, s.input.Real, Zeta.IndexToImag(index + t)) - new Vector(1, 0));
+            _exactTdropB.Add(Zeta.TearDrop(index + 1, s.input.Real, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
         }
 
         Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
@@ -162,11 +162,11 @@ public class MiddleLinkTeardrop : MonoBehaviour
             TeardropColorB.a = TeardropTransparency.value;
             Draw.Thickness = 1 + TeardropTransparency.value;
             
-            var startA = trackDrop(_exactTdropA[0], s.joints[s.middleIndex]);
+            var startA = trackDrop(_exactTdropA[0], s.joints[s.middleIndex + 1]);
             var startB = trackDrop(_exactTdropB[0], s.joints[s.middleIndex]);
             for (int i = 1; i < _exactTdropA.Count; i++)
             {
-                var endA = trackDrop(_exactTdropA[i], s.joints[s.middleIndex]);
+                var endA = trackDrop(_exactTdropA[i], s.joints[s.middleIndex + 1]);
                 var endB = trackDrop(_exactTdropB[i], s.joints[s.middleIndex]);
 
                 Draw.Color = TeardropColorA;
@@ -196,11 +196,11 @@ public class MiddleLinkTeardrop : MonoBehaviour
                 var z = s.zeta.ToVector();
                 var norm = z.Normalized();
                 
-                var startInverseA = trackInverseDrop(_exactTdropA[0].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
+                var startInverseA = trackInverseDrop(_exactTdropA[0].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
                 var startInverseB = trackInverseDrop(_exactTdropB[0].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
                 for (int i = 1; i < _exactTdropA.Count; i++)
                 {
-                    var endInverseA = trackInverseDrop(_exactTdropA[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
+                    var endInverseA = trackInverseDrop(_exactTdropA[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
                     var endInverseB = trackInverseDrop(_exactTdropB[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
 
                     Draw.Color = colorR;
