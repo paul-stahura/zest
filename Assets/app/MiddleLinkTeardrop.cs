@@ -31,6 +31,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
         _inverseTdropsToggle?.onValueChanged.AddListener((bool v) => {
             _drawInverseTdrops = v;
         });
+
+        TdropDotA = new Vector(0, 0);
+        TdropDotB = new Vector(0, 0);
     }
     
     public void Start()
@@ -135,6 +138,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
             TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
             Draw.Ring(TdropDotB, orth / size / 2);
             ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
+
+            Draw.Line(TdropDotA, TdropDotB);
         }
 
         InfinityTdropPoints.Invoke(cam, s);

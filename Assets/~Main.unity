@@ -14192,6 +14192,8 @@ MonoBehaviour:
   Damping: -1
   Inertia: 0
   remainingDelta: {x: 0, y: 0, z: 0}
+  worldDelta: {x: 0, y: 0, z: 0}
+  localDelta: {x: 0, y: 0}
 --- !u!114 &963194232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20381,6 +20383,7 @@ GameObject:
   - component: {fileID: 1486109718}
   - component: {fileID: 1486109720}
   - component: {fileID: 1486109721}
+  - component: {fileID: 1486109722}
   m_Layer: 0
   m_Name: ZetaSpiral
   m_TagString: Untagged
@@ -20437,6 +20440,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44ed4dc670ca24eb7b69adc23899d2c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _cameraDrag: {fileID: 0}
   trackOrigin: {fileID: 1287062697}
   trackMiddle: {fileID: 49055167}
   trackBisectorPt: {fileID: 0}
@@ -20451,6 +20455,7 @@ MonoBehaviour:
   linkHighlightTransparency: {fileID: 1914141423}
   linkHighlight: {r: 1, g: 1, b: 0, a: 0.11372549}
   thickness: 4
+  _cameraTackingOffset: {x: 0, y: 0}
 --- !u!114 &1486109721
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20471,6 +20476,18 @@ MonoBehaviour:
   TeardropColorA: {r: 1, g: 0, b: 0, a: 1}
   TeardropColorB: {r: 0, g: 1, b: 0, a: 1}
   TeardropColorInf: {r: 0, g: 1, b: 1, a: 1}
+--- !u!114 &1486109722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486109717}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e91023691b67934a854f716daa14fc1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1487443958
 GameObject:
   m_ObjectHideFlags: 0
