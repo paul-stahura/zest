@@ -22,7 +22,6 @@ public class ClockPoints : MonoBehaviour
     [SerializeField] private Color LineColorInf = Color.cyan;
     [SerializeField] [Range(0, 1)] private float lineTransparency = 0.5f;
     [SerializeField] private bool createPoints = false;
-    [SerializeField] private TextAsset _outputFile;
     [SerializeField] private bool writePoints = false;
 
     
@@ -160,21 +159,16 @@ public class ClockPoints : MonoBehaviour
     public void WritePointTable(Vector[][] table)
     {
         // write table
-        string fileName = "ClockArmPoints";
-        if(_outputFile != null)
-        {
-            fileName = _outputFile.name;
-        }
+        string fileName = "ClockArmPoints.csv";
 
         // Combine the path to the "Resources" folder with the file name
-        string filePath = Path.Combine("Assets/Resources", fileName);
+        string filePath = Path.Combine(Application.dataPath + "/StreamingAssets", fileName);
 
         // Create or overwrite the file
-        using (StreamWriter writer = new StreamWriter(filePath))
+        using (StreamWriter writer = new StreamWriter(filePath, false))
         {
             // header
-            writer.Write($"index, ArmR.x, ArmR.y, ArmG.x, ArmG.y, InfA.x, InfA.y, InfB.x, InfB.y, TdropA.x, TdropA.y, TdropB.x, TdropB.y");
-            writer.WriteLine("");
+            writer.WriteLine($"index, Ar.x, Ar.y, Ag.x, Ag.y, InfA.x, InfA.y, InfB.x, InfB.y, Tr.x, Tr.y, Tg.x, Tg.y");
 
             // points
             for(int i = 0; i < table[0].Length; i++)
@@ -191,8 +185,7 @@ public class ClockPoints : MonoBehaviour
         // Refresh the Unity editor to reflect changes
         UnityEditor.AssetDatabase.Refresh();
 
-        // Log a message to indicate that the TextAsset is created
-        Debug.Log($"Points saved to '{fileName}'");
+        Application.OpenURL(Application.dataPath + "/StreamingAssets");
     }
 
     private Vector GetRedArm(double t)
