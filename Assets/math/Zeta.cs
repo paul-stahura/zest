@@ -115,7 +115,7 @@ public class Zeta
     /// <param name="index"></param>
     /// <param name="imaginary"></param>
     /// <returns></returns>
-    public static Vector TearDrop(int index, double imaginary, bool second = false)
+    public static Vector TearDrop(int index, double real, double imaginary, bool second = false)
     {
         Complex Pow(int a, Complex b)
         {
@@ -141,9 +141,9 @@ public class Zeta
         }
 
         // Vector opoint = Opoint(index, imaginary);
-        Vector opoint = Opoint(index + (second ? 1 : 0), imaginary);
+        Vector opoint = Opoint(index + (second ? 1 : 0), real, imaginary);
 
-        var s = new Complex(0.5, imaginary);
+        var s = new Complex(real, imaginary);
         Vector j0 = J(index, s);
         Vector j1 = J(index + 1, s);
         double dopoint = Vector.Distance(j0, opoint);
@@ -153,7 +153,7 @@ public class Zeta
         return tDrop;
     }
 
-    public static Vector Opoint(int n, double imaginary)
+    public static Vector Opoint(int n, double real, double imaginary)
     {
         double V(double t)
         {
@@ -166,13 +166,13 @@ public class Zeta
         Vector sRev = new Vector(0.0, 0.0);
         for (int i = 1; i < n; i++)
         {
-            var fx = Math.Cos(imaginary * Math.Log(i)) / Math.Pow(i, 0.5);
-            var gy = -Math.Sin(imaginary * Math.Log(i)) / Math.Pow(i, 0.5);
+            var fx = Math.Cos(imaginary * Math.Log(i)) / Math.Pow(i, real);
+            var gy = -Math.Sin(imaginary * Math.Log(i)) / Math.Pow(i, real);
             // x and y flipped for reverse spiral
             sRev += new Vector(gy, fx);
         }
 
-        Complex em = EulerMaclauren(new Complex(0.5, imaginary));
+        Complex em = EulerMaclauren(new Complex(real, imaginary));
         // I think I could be using this instead, but the V seams to do the trick
         // Complex emAngle = EulerMaclauren(new Complex(0.5, Zeta.IndexToImag(n)));
         // return RotateAround(new Vector(0, 0), sRev, -Math.Atan2(emAngle.Imaginary, emAngle.Real)) + em.ToVector();

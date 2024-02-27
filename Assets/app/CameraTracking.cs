@@ -3,8 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 using System.Linq;
+using Lean.Touch;
 public class CameraTracking : MonoBehaviour
 {
+    [SerializeField] private LeanDragCamera _cameraDrag;
     public Toggle trackOrigin;
     public Toggle trackMiddle;
     public Toggle trackBisectorPt;
@@ -31,6 +33,7 @@ public class CameraTracking : MonoBehaviour
     public float thickness;
 
     private MiddleLinkTeardrop middleLinkTeardrop;
+    [SerializeField] private Vector2 _cameraTackingOffset;
 
     /// <summary>
     /// This is the index of the link the camera is tracking. If the camera is
@@ -46,6 +49,32 @@ public class CameraTracking : MonoBehaviour
     public void Awake()
     {
         trackBisectorPt = GameObject.Find("Track Bisector")?.GetComponent<Toggle>();
+        _cameraDrag = Camera.main.GetComponent<LeanDragCamera>();
+
+        trackOrigin.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackMiddle.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackBisectorPt.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackTdropA.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackTdropB.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackSpiralCenter.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackSpiralLink.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
+        trackJointIMinusN.onValueChanged.AddListener((bool v) => {
+            ResetCameraOffset();
+        });
     }
 
     public void Start()
@@ -70,6 +99,12 @@ public class CameraTracking : MonoBehaviour
         app.DrawSprial += drawShapes;
         app.SceneChange += savePlayerPrefs;
         middleLinkTeardrop.InfinityTdropPoints += TrackTdrop;
+    }
+
+    public void Update()
+    {
+        var windowSize = new Vector2(Screen.width, Screen.height).normalized;
+        _cameraTackingOffset += _cameraDrag.localDelta * windowSize * -0.0025f;
     }
 
     void savePlayerPrefs() {
@@ -143,7 +178,7 @@ public class CameraTracking : MonoBehaviour
         if (trackSpiralLink.isOn)
         {
             spiralNumber.minValue = 0;
-            spiralNumber.maxValue = spiral.middleIndex;
+            spiralNumber.maxValue = spiral.middleIndex + 2;
 
             var mi = Zeta.ImagToIndex(app.Imag);
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
@@ -155,7 +190,7 @@ public class CameraTracking : MonoBehaviour
         {
             var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
 
-            spiralNumber.minValue = 0;
+            spiralNumber.minValue = -2;
             spiralNumber.maxValue = (int)mi; // cannot be greater than middle index or you get a negative joint value below
 
             // 2/11/2023 "changes to code" email
@@ -220,8 +255,9 @@ public class CameraTracking : MonoBehaviour
         var OFFSET = Vector2.zero;
         if (verticalUI.gameObject.activeInHierarchy)
             OFFSET = new Vector2(1f - verticalUI.position.x / Screen.width, 0);
-            
+        
         var aspect = (float)Screen.width / (float)Screen.height;
+        OFFSET += _cameraTackingOffset;
         var canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
 
         // Make Camera z opposite when tracking is enabled.
@@ -230,6 +266,11 @@ public class CameraTracking : MonoBehaviour
 
         cam.transform.rotation = rot;
         cam.transform.position = transform.position + pos;
+    }
+
+    private void ResetCameraOffset()
+    {
+        _cameraTackingOffset = Vector2.zero;
     }
 
     void resetCamera(Camera cam)

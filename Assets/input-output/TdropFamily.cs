@@ -187,7 +187,7 @@ public class TdropFamily : MonoBehaviour
 
     private Vector3 FamilyTdrop(int tdropNum, double t)
     {
-        Complex complex = Zeta.TearDrop(tdropNum + 1, Zeta.IndexToImag(tdropNum + t));
+        Complex complex = Zeta.TearDrop(tdropNum + 1, 0.5, Zeta.IndexToImag(tdropNum + t));
         Vector3 output = new Vector3((float)complex.Real, (float)complex.Imaginary, Mathf.Lerp(0, 1, (float)t));
 
         return output;
