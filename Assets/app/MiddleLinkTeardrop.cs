@@ -34,12 +34,24 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         TdropDotA = new Vector(0, 0);
         TdropDotB = new Vector(0, 0);
+
+        TeardropTransparency.value = PlayerPrefs.GetFloat("MiddleLinkTeardropTransparency");
     }
     
     public void Start()
     {
         app.DrawSprial += DrawTeardrop;
         app.DrawSprial += DrawExactTeardrop;
+    }
+
+    void OnApplicationQuit()
+    {
+        savePlayerPrefs();
+    }
+
+    private void savePlayerPrefs()
+    {
+        PlayerPrefs.SetFloat("MiddleLinkTeardropTransparency", TeardropTransparency.value);
     }
 
     private void DrawTeardrop(Camera cam, Zeta.Spiral s)

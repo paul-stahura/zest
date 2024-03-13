@@ -249,6 +249,8 @@ public class App : ImmediateModeShapeDrawer
             spiral.Update(new Complex(_real, _imag), (SpiralFormulas)spiralFormula.value);
         });
         #endregion
+
+        spiralFormula.value = PlayerPrefs.GetInt("AppSpiralFormula");
     }
 
     float t = 0f;
@@ -326,6 +328,7 @@ public class App : ImmediateModeShapeDrawer
 
     private void UpdateActiveSceneOnStart(string startScene) {
         PlayerPrefs.SetString("ActiveSceneOnStart", startScene);
+        PlayerPrefs.SetInt("AppSpiralFormula", spiralFormula.value);
 
         PlayerPrefs.Save();
         SceneChange.Invoke();
