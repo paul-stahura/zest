@@ -54,7 +54,21 @@ public class BisectorPoint : MonoBehaviour
         Vector zeta = s.zeta.ToVector();
         Vector origin = s.joints[0];
         Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-        Vector bp = s.joints[s.middleIndex] + (middleLink * Math.Pow(0.5d, 1 - s.input.Real) / 2);
+
+        // take bisector point at real 0.5 and scale it by y=x^1-real
+        Zeta.Spiral s5 = new Zeta.Spiral(new Complex(0.5f, s.input.Imaginary), SpiralFormulas.EulerMaclauren);
+        Vector2 bp5 = BisectingLines.BisectPoint(s5);
+        Vector ml5 = s5.joints[s5.middleIndex + 1] - s5.joints[s5.middleIndex];
+        bp5 = bp5 - s5.joints[s5.middleIndex];
+
+        double bpInput = bp5.magnitude / ml5.Length;
+
+        // scale the middle link by the formula
+        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.input.Real));
+        // Debug.Log("input: "+ bpInput);
+        // Debug.Log("out: "+ a5.Length / middleLink.Length);
+
+        Vector bp = s.joints[s.middleIndex] + a5;
 
         using(Draw.StyleScope)
         {

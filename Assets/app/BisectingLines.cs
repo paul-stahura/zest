@@ -56,7 +56,7 @@ public class BisectingLines : MonoBehaviour
     }
 
 
-    public static Vector2 BisectPoint(Zeta.Spiral spiral)
+    public static Vector BisectPoint(Zeta.Spiral spiral)
     {
         var idx = spiral.middleIndex;
         var M1 = spiral.joints[idx];
@@ -72,6 +72,6 @@ public class BisectingLines : MonoBehaviour
 
         var y = slope1 * (x - pt.x / 2) + pt.y / 2;
 
-        return new Vector2((float)x, (float)y);
+        return new Vector(x, y);
     }
 }
