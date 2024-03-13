@@ -94,7 +94,7 @@ public class ZetaCircles : MonoBehaviour
         {
             Draw.Color = zetaColor; // Color.green;
             Draw.Thickness = thickness;
-            Vector3 bipt = BisectingLines.BisectPoint(spiral);
+            Vector3 bipt = BisectingLines.CrotchPoint(spiral);
             ShapesUtils.DrawCross(bipt, .1f, 1);
             var radius = bipt.magnitude;
             Draw.Ring(bipt, radius, thickness);

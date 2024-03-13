@@ -39,7 +39,7 @@ public class BisectingLines : MonoBehaviour
 
             var zetaPt = spiral.zeta.ToVector2();
 
-            var bipt = BisectPoint(spiral);
+            var bipt = CrotchPoint(spiral);
             Draw.Line(Vector2.zero, zetaPt);
             Draw.Line(Vector2.zero, bipt);
             Draw.Line(bipt, zetaPt);
@@ -56,7 +56,7 @@ public class BisectingLines : MonoBehaviour
     }
 
 
-    public static Vector BisectPoint(Zeta.Spiral spiral)
+    public static Vector CrotchPoint(Zeta.Spiral spiral)
     {
         var idx = spiral.middleIndex;
         var M1 = spiral.joints[idx];

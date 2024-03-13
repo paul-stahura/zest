@@ -3,6 +3,7 @@ using System.Drawing.Text;
 using System.IO.Compression;
 using System.Numerics;
 using Shapes;
+using SRF.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -53,22 +54,7 @@ public class BisectorPoint : MonoBehaviour
     {
         Vector zeta = s.zeta.ToVector();
         Vector origin = s.joints[0];
-        Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-
-        // take bisector point at real 0.5 and scale it by y=x^1-real
-        Zeta.Spiral s5 = new Zeta.Spiral(new Complex(0.5f, s.input.Imaginary), SpiralFormulas.EulerMaclauren);
-        Vector2 bp5 = BisectingLines.BisectPoint(s5);
-        Vector ml5 = s5.joints[s5.middleIndex + 1] - s5.joints[s5.middleIndex];
-        bp5 = bp5 - s5.joints[s5.middleIndex];
-
-        double bpInput = bp5.magnitude / ml5.Length;
-
-        // scale the middle link by the formula
-        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.input.Real));
-        // Debug.Log("input: "+ bpInput);
-        // Debug.Log("out: "+ a5.Length / middleLink.Length);
-
-        Vector bp = s.joints[s.middleIndex] + a5;
+        Vector bp = GetScaledBisectorPoint(s);
 
         using(Draw.StyleScope)
         {
@@ -89,11 +75,37 @@ public class BisectorPoint : MonoBehaviour
         }
     }
 
+    private Vector GetScaledBisectorPoint(Zeta.Spiral s)
+    {
+        // take bisector point at real 0.5 and scale it by y=x^1-real
+        Zeta.Spiral s5 = new Zeta.Spiral(new Complex(0.5f, s.input.Imaginary), SpiralFormulas.EulerMaclauren);
+        Vector2 bp5 = BisectingLines.CrotchPoint(s5);
+        Vector ml5 = s5.joints[s5.middleIndex + 1] - s5.joints[s5.middleIndex];
+        bp5 = bp5 - s5.joints[s5.middleIndex];
+
+        double bpInput = bp5.magnitude / ml5.Length;
+
+        // scale the middle link by the formula
+        Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
+        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.input.Real));
+        // Debug.Log("input: "+ bpInput);
+        // Debug.Log("out: "+ a5.Length / middleLink.Length);
+
+        Vector bp = s.joints[s.middleIndex] + a5;
+
+        return bp;
+    }
+
     private Complex SeekNextEqualLength(Complex input, bool reverse = false)
     {
-        double inc = 0.01;
-        double magnitudeThreashold = 0.01;
-        int maxDepth = 5000;
+        if(input.Real == 0.5f)
+        {
+            _infoText.text = $"Real 0.5";
+            return input;
+        }
+
+        double inc = 0.001;
+        int maxDepth = 100000;
         int depth = 0;
 
         if(reverse)
@@ -101,12 +113,13 @@ public class BisectorPoint : MonoBehaviour
             inc *= -1;
         }
 
-        _infoText.text = $"Find Next: Searching...";
+        _infoText.text = $"Searching...";
 
         Zeta.Spiral s = new Zeta.Spiral(input, SpiralFormulas.EulerMaclauren);
-        Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-        Vector bp = s.joints[s.middleIndex] + (middleLink * Math.Pow(0.5d, 1 - s.input.Real) / 2);
-        Vector2 lastDist = BisectingLines.BisectPoint(s) - bp;
+        Vector bp = GetScaledBisectorPoint(s);
+        
+        bool dir = Vector3.Dot(BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex], s.joints[s.middleIndex +1] - s.joints[s.middleIndex]) > 0;
+        double lastPos = (BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex]).Length * (dir ? 1d : -1d);
         double lastIndex = Zeta.ImagToIndex(s.input.Imaginary);
 
         while(depth < maxDepth)
@@ -117,34 +130,34 @@ public class BisectorPoint : MonoBehaviour
             input = new Complex(input.Real, input.Imaginary + inc);
 
             s = new Zeta.Spiral(input, SpiralFormulas.EulerMaclauren);
-            middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-            bp = s.joints[s.middleIndex] + (middleLink * Math.Pow(0.5d, 1 - s.input.Real) / 2);
-            Vector2 newDist = BisectingLines.BisectPoint(s) - bp;
-            
-            bool dirChanged = Vector3.Cross(lastDist.normalized, newDist.normalized).z > 0;
-            if(reverse) dirChanged = !dirChanged;
+            bp = GetScaledBisectorPoint(s);
 
-            // check if we changed directions and that it was close to the bisector point
-            if(dirChanged && Math.Abs(newDist.magnitude - lastDist.magnitude) < magnitudeThreashold)
+            Vector ml = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
+            double bpPos = (bp - s.joints[s.middleIndex]).Length;
+            dir = Vector3.Dot(BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex], s.joints[s.middleIndex +1] - s.joints[s.middleIndex]) > 0;
+            double newPos = (BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex]).Length * (dir ? 1d : -1d);
+            bool changedDir = (bpPos < lastPos && bpPos > newPos) || (bpPos > lastPos && bpPos < newPos);
+            bool jumped = Math.Abs(newPos - lastPos) > (s.joints[s.middleIndex + 1] - s.joints[s.middleIndex]).Length / 2;
+            if(changedDir && !jumped)
             {
                 if(Math.Floor(lastIndex) != Math.Floor(Zeta.ImagToIndex(s.input.Imaginary)))
                 {
-                    _infoText.text = $"Find Next: NEW INDEX";
+                    _infoText.text = $"NEW INDEX";
                 }
                 else
                 {
-                    _infoText.text = $"Found: {input.Imaginary.ToString("F2")}";
+                    _infoText.text = $"Found: {input.Imaginary}";
                 }
                 return input;
             }
             
             depth += 1;
 
-            lastDist = newDist;
+            lastPos = newPos;
             lastIndex = Zeta.ImagToIndex(s.input.Imaginary);
         }
 
-        _infoText.text = $"Find Next: MAX DEPTH";
+        _infoText.text = $"MAX DEPTH";
 
         return input;
     }
