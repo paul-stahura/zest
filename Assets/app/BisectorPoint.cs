@@ -66,6 +66,19 @@ public class BisectorPoint : MonoBehaviour
             Draw.Line(bp, origin);
             Draw.Line(bp, zeta);
 
+            color.a -= 0.3f;
+            if(color.a > 0.1f)
+            {
+                Draw.Color = color;
+                Draw.Ring(bp, .005f);
+                ShapesUtils.DrawCross45(bp, .05f);
+
+                var crotch = BisectingLines.CrotchPoint(s);
+                Draw.Color = new Color(1, 0.5697687f, 0, color.a);
+                Draw.Ring(crotch, .005f);
+                ShapesUtils.DrawCross45(crotch, .05f);
+            }
+
             Vector a = bp;
             Vector b = zeta - bp;
             _bpLengthDiff.text = Math.Abs(a.Length - b.Length).ToString();
