@@ -37,7 +37,7 @@ public class RealPartSlider : MonoBehaviour
                 
 
             if (_display != null)
-                _display.text = Value.ToString("0.000");
+                _display.text = Value.ToString("0.000000");
         });
         // _slider.value = PlayerPrefs.GetFloat(gameObject.name + "-Value", _slider.value);
 
