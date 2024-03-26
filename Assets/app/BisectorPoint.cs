@@ -15,7 +15,7 @@ public class BisectorPoint : MonoBehaviour
     [SerializeField] private bool _prevButton = false;
     [SerializeField] private App _app;
     [SerializeField] private Color _lineColor = Color.cyan;
-    private Slider _bisectorPointTransparency;
+    private Toggle _bisectorPointToggle;
     private Text _bpLengthDiff;
     private Text _bpAngle;
 
@@ -27,7 +27,7 @@ public class BisectorPoint : MonoBehaviour
     void Awake()
     {
         _app = GameObject.Find("App")?.GetComponent<App>();
-        _bisectorPointTransparency = GameObject.Find("BisectorPointTransparencySlider")?.GetComponent<Slider>();
+        _bisectorPointToggle = GameObject.Find("BisectorPointToggle")?.GetComponent<Toggle>();
         _bpLengthDiff = GameObject.Find("BisectorLineLengthDiff")?.GetComponent<Text>();
         _bpAngle = GameObject.Find("BisectorLineAngle")?.GetComponent<Text>();
         
@@ -50,8 +50,15 @@ public class BisectorPoint : MonoBehaviour
         _app.DrawSprial += DrawBisectorPoints;
     }
 
+    void OnDestroy()
+    {
+        _app.DrawSprial -= DrawBisectorPoints;
+    }
+
     private void DrawBisectorPoints(Camera cam, Zeta.Spiral s)
     {
+        if(!_bisectorPointToggle.isOn) return;
+
         Vector zeta = s.zeta.ToVector();
         Vector origin = s.joints[0];
         Vector bp = GetScaledBisectorPoint(s);
@@ -59,7 +66,7 @@ public class BisectorPoint : MonoBehaviour
         using(Draw.StyleScope)
         {
             var color = _lineColor;
-            color.a = _bisectorPointTransparency.value;
+            color.a = 0.5f;
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
