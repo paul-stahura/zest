@@ -34,6 +34,7 @@ public class CameraTracking : MonoBehaviour
 
     private MiddleLinkTeardrop middleLinkTeardrop;
     [SerializeField] private Vector2 _cameraTackingOffset;
+    [SerializeField] private Vector2 _cameraZoomOffset;
 
     /// <summary>
     /// This is the index of the link the camera is tracking. If the camera is
@@ -52,28 +53,28 @@ public class CameraTracking : MonoBehaviour
         _cameraDrag = Camera.main.GetComponent<LeanDragCamera>();
 
         trackOrigin.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackMiddle.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackBisectorPt.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackTdropA.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackTdropB.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackSpiralCenter.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackSpiralLink.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
         trackJointIMinusN.onValueChanged.AddListener((bool v) => {
-            ResetCameraOffset();
+            ResetCameraOffsets();
         });
     }
 
@@ -104,7 +105,12 @@ public class CameraTracking : MonoBehaviour
     public void Update()
     {
         var windowSize = new Vector2(Screen.width, Screen.height).normalized;
-        _cameraTackingOffset += _cameraDrag.localDelta * windowSize * -0.0025f;
+       _cameraTackingOffset += _cameraDrag.localDelta * windowSize * -0.0025f;
+    }
+
+    public void AddCameraZoomOffset(Vector2 offset)
+    {
+        _cameraZoomOffset += offset;
     }
 
     void savePlayerPrefs() {
@@ -126,6 +132,11 @@ public class CameraTracking : MonoBehaviour
 
         // default to not tracking any link index
         trackingIndex = -1;
+
+        if(trackOrigin.isOn)
+        {
+            setCamera(cam, Vector3.zero, Quaternion.identity);
+        }
 
         if (trackMiddle.isOn)
         {
@@ -257,7 +268,7 @@ public class CameraTracking : MonoBehaviour
             OFFSET = new Vector2(1f - verticalUI.position.x / Screen.width, 0);
         
         var aspect = (float)Screen.width / (float)Screen.height;
-        OFFSET += _cameraTackingOffset;
+        OFFSET += _cameraTackingOffset + _cameraZoomOffset;
         var canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
 
         // Make Camera z opposite when tracking is enabled.
@@ -268,9 +279,10 @@ public class CameraTracking : MonoBehaviour
         cam.transform.position = transform.position + pos;
     }
 
-    private void ResetCameraOffset()
+    private void ResetCameraOffsets()
     {
         _cameraTackingOffset = Vector2.zero;
+        _cameraZoomOffset = Vector2.zero;
     }
 
     void resetCamera(Camera cam)
