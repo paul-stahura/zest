@@ -31,11 +31,19 @@ public class SegmentMarks : MonoBehaviour
         DrawTickMarks(s.middleIndex - 1, s);
         DrawTickMarks(s.middleIndex, s);
         DrawTickMarks(s.middleIndex + 1, s);
+
+        DrawTickMarks(0, s);
+        DrawTickMarks(1, s);
+        DrawTickMarks(s.zeta.ToVector(), new Vector(0, 0), s);
     }
 
     private void DrawTickMarks(int linkIndex, Zeta.Spiral s)
     {
-        Vector link = s.joints[linkIndex + 1] - s.joints[linkIndex];
+        DrawTickMarks(s.joints[linkIndex + 1] - s.joints[linkIndex], s.joints[linkIndex], s);
+    }
+
+    private void DrawTickMarks(Vector link, Vector linkPt, Zeta.Spiral s)
+    {
         _pts = new List<Vector2>();
 
         double segmentLength = 1d / _segmentCount;
@@ -44,7 +52,7 @@ public class SegmentMarks : MonoBehaviour
         {
             double pt = segmentLength * (i + 1);
             Vector segmentPoint = link * Math.Pow(pt, 1d -s.input.Real);
-            _pts.Add(s.joints[linkIndex] + segmentPoint);
+            _pts.Add(linkPt + segmentPoint);
         }
         
 
