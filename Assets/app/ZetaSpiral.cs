@@ -192,7 +192,7 @@ public partial class ZetaSpiral : MonoBehaviour
     void drawZetaTarget(Zeta.Spiral sprial)
     {
         var pt = sprial.zeta.ToVector2();
-        targetLabel.text = $"({pt.x}, {pt.y})";
+        targetLabel.text = $"({sprial.zeta.Real.ToString("n8")}, {sprial.zeta.Imaginary.ToString("n8")})";
 
         var color = spiralColor + new Color(-0.5f, 0, 0);
         color.a = targetTransparency.value;
