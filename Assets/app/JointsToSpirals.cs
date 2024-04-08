@@ -7,7 +7,7 @@ using Shapes;
 public class JointsToSpirals : MonoBehaviour
 {
     public App app;
-    public Color color = Color.blue;
+    public Color color = new Color(0, 0.27f, 0, 0.29f);
     public Color dotColor = Color.magenta;
 
 

@@ -15929,7 +15929,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   app: {fileID: 338235377}
-  color: {r: 0, g: 0.38835526, b: 1, a: 0.5019608}
+  color: {r: 1, g: 0.27, b: 0, a: 0.2901961}
   dotColor: {r: 1, g: 0, b: 1, a: 1}
   thickness: 2
   transparency: {fileID: 1638181150}
