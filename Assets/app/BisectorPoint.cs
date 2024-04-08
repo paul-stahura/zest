@@ -101,7 +101,7 @@ public class BisectorPoint : MonoBehaviour
         }
     }
 
-    public Vector GetScaledBisectorPoint(Zeta.Spiral s)
+    public static Vector GetScaledBisectorPoint(Zeta.Spiral s)
     {
         // take bisector point at real 0.5 and scale it by y=x^1-real
         Zeta.Spiral s5 = new Zeta.Spiral(new Complex(0.5f, s.input.Imaginary), SpiralFormulas.EulerMaclauren);

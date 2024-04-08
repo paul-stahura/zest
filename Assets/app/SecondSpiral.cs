@@ -13,7 +13,6 @@ public class SecondSpiral : MonoBehaviour
     public Toggle cbp;
     public TMP_Dropdown spiralFormula;
     public ZetaSpiral zetaSpiral;
-    [SerializeField] private BisectorPoint bisectorPoint;
 
     public Color ReimannColor = Color.cyan;
     public Color EtaColor = Color.magenta;
@@ -23,7 +22,6 @@ public class SecondSpiral : MonoBehaviour
     {
         drawRealFan = GameObject.Find("DrawFanSpiralsToggle")?.GetComponent<Toggle>();
         cbp = GameObject.Find("CenterBisectorPointToggle")?.GetComponent<Toggle>();
-        bisectorPoint = GameObject.Find("Bisector Point")?.GetComponent<BisectorPoint>();
     }
 
     public void Start()
@@ -35,7 +33,7 @@ public class SecondSpiral : MonoBehaviour
     {
         if(drawRealFan.isOn)
         {
-            var centerBP = bisectorPoint.GetScaledBisectorPoint(spiral);
+            var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral);
             DrawFanSpiral(cam, 0, spiral.input.Imaginary, centerBP);
             DrawFanSpiral(cam, 0.25, spiral.input.Imaginary, centerBP);
             DrawFanSpiral(cam, 0.5, spiral.input.Imaginary, centerBP);
@@ -108,7 +106,7 @@ public class SecondSpiral : MonoBehaviour
         var offset = new Vector(0,0);
         if(cbp.isOn)
         {
-            offset = centerBP - bisectorPoint.GetScaledBisectorPoint(s);
+            offset = centerBP - BisectorPoint.GetScaledBisectorPoint(s);
         }
         DrawSpiral(cam, Color.white, s, offset);
     }
