@@ -7,13 +7,14 @@ using Shapes;
 public class JointsToSpirals : MonoBehaviour
 {
     public App app;
-    public Color color = Color.blue;
+    public Color color = new Color(0, 0.27f, 0, 0.29f);
     public Color dotColor = Color.magenta;
 
 
     public float thickness = 1;
 
     public Slider transparency;
+    public Slider middleLinkTransparency;
     public Slider lineCount;
     public Text lineLengthTxt;
 
@@ -22,9 +23,15 @@ public class JointsToSpirals : MonoBehaviour
         savePlayerPrefs();
     }
 
+    void Awake()
+    {
+        middleLinkTransparency = GameObject.Find("MiddleLinkJointTransparency")?.GetComponent<Slider>();
+    }
+
     void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", color.a);
+        middleLinkTransparency.value = PlayerPrefs.GetFloat(name + "-middleLinkTransparency", color.a);
         lineCount.value = PlayerPrefs.GetFloat(name + "-LineCount", 1f);
 
         app.DrawSprial += drawShapes;
@@ -37,13 +44,13 @@ public class JointsToSpirals : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            drawJointsToSpirals(cam, s);
+            drawJointsToSpirals(cam, s, true);
         }
 
         using (Draw.StyleScope)
         {
-            drawCenterPoints(cam, s);
-            drawConnectingLines(cam, s);
+            drawCenterPoints(cam, s, (int)lineCount.value, transparency.value, true, (int)lineCount.maxValue);
+            DrawMiddleLink(cam, s);
         }
 
         using (Draw.StyleScope)
@@ -55,22 +62,23 @@ public class JointsToSpirals : MonoBehaviour
     private void savePlayerPrefs()
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
+        PlayerPrefs.SetFloat(name + "-middleLinkTransparency", middleLinkTransparency.value);
         PlayerPrefs.SetFloat(name + "-LineCount", lineCount.value);
 
         PlayerPrefs.Save();
     }
 
 
-    void drawJointsToSpirals(Camera cam, Zeta.Spiral spiral)
+    void drawJointsToSpirals(Camera cam, Zeta.Spiral spiral, bool reverse = false)
     {
         Draw.Thickness = thickness;
         color.a = SRMath.Ease(0, .75f, transparency.value, SRMath.EaseType.ExpoEaseIn);
         Draw.Color = color;
 
-        var start = spiral.spirals.Length - (int)lineCount.value;
+        var start = reverse ? 0 : spiral.spirals.Length - (int)lineCount.value;
+        var end = spiral.spirals.Length - (reverse ? (lineCount.maxValue - (int)lineCount.value) : 0);
 
-        // draw a line from each of the first links at the same slope as zeta
-        for (var i = start; i < spiral.spirals.Length; i++)
+        for (var i = start; i < end; i++)
         {
             var from = spiral.joints[i];
             var to = spiral.spirals[i]; // reflect from about a normal (z2)
@@ -110,15 +118,16 @@ public class JointsToSpirals : MonoBehaviour
     /// </summary>
     /// <param name="cam"></param>
     /// <param name="spiral"></param>
-    void drawCenterPoints(Camera cam, Zeta.Spiral spiral)
+    void drawCenterPoints(Camera cam, Zeta.Spiral spiral, int numPoints, float alpha, bool reverse = false, float maxNumPoints = 0)
     {
-        dotColor.a = SRMath.Ease(0, 1, transparency.value, SRMath.EaseType.ExpoEaseOut);
+        dotColor.a = SRMath.Ease(0, 1, alpha, SRMath.EaseType.ExpoEaseOut);
         Draw.Color = dotColor;
         Draw.Thickness = 1;
 
-        var start = spiral.spirals.Length - (int)lineCount.value;
+        var start = reverse ? 0 : spiral.spirals.Length - numPoints;
+        var end = spiral.spirals.Length - (reverse ? (maxNumPoints - numPoints) : 0);
 
-        for (var i = start; i < spiral.spirals.Length; i++)
+        for (var i = start; i < end; i++)
         {
             var pt = spiral.spirals[i];
 
@@ -176,21 +185,23 @@ public class JointsToSpirals : MonoBehaviour
 
     // If the middle two spiral centers are visible, draw a line between them
     // and calculate the length of the line
-    void drawConnectingLines(Camera cam, Zeta.Spiral spiral)
+    void DrawMiddleLink(Camera cam, Zeta.Spiral spiral)
     {
-        if (lineCount.value < 2)
-            return;
+        // if (lineCount.value < 2)
+        //     return;
 
         var pt1 = spiral.spirals[spiral.middleIndex + 1];
         var pt2 = spiral.spirals[spiral.middleIndex];
 
         var c = Color.yellow;
-        c.a = SRMath.Ease(0, 1, transparency.value, SRMath.EaseType.ExpoEaseOut);
+        c.a = SRMath.Ease(0, 1, middleLinkTransparency.value, SRMath.EaseType.ExpoEaseOut);
         Draw.Color = c;
         Draw.Thickness = 1;
         Draw.Line(pt1, pt2);
 
         lineLengthTxt.text = "Line Length: " + ((pt2 - pt1).Length * Math.Sqrt(spiral.middleIndex+1)).ToString("0.000");
+
+        drawCenterPoints(cam, spiral, 2, middleLinkTransparency.value);
     }
 
     public float size = 50f;

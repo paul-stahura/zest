@@ -16,6 +16,7 @@ public partial class ZetaSpiral : MonoBehaviour
     public Slider transparency;
     public Slider visibleLinks;
     public Slider targetTransparency;
+    public Text targetLabel;
     public Color spiralColor = Color.white;
 
     [Header("Reverse Spiral")]
@@ -48,6 +49,9 @@ public partial class ZetaSpiral : MonoBehaviour
         visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
         showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
+
+        targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
+
         app.DrawSprial += DrawShapes;
         app.SceneChange += savePlayerPrefs;
     }
@@ -188,6 +192,7 @@ public partial class ZetaSpiral : MonoBehaviour
     void drawZetaTarget(Zeta.Spiral sprial)
     {
         var pt = sprial.zeta.ToVector2();
+        targetLabel.text = $"({sprial.zeta.Real.ToString("n8")}, {sprial.zeta.Imaginary.ToString("n8")})";
 
         var color = spiralColor + new Color(-0.5f, 0, 0);
         color.a = targetTransparency.value;
