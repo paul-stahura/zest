@@ -6171,7 +6171,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   app: {fileID: 338235377}
   transparency: {fileID: 1902568538}
-  color: {r: 1, g: 0.56976867, b: 0, a: 0.5019608}
+  color: {r: 1, g: 0.57, b: 0, a: 0.5019608}
   thickness: 1
 --- !u!4 &338247104
 Transform:

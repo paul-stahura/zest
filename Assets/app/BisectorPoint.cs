@@ -73,6 +73,12 @@ public class BisectorPoint : MonoBehaviour
             Draw.Line(bp, origin);
             Draw.Line(bp, zeta);
 
+            // Draw dashed bisecting line. Extend it past a little bit
+            var z = zeta.Normalized() * bp.Dot(zeta.Normalized());
+            var dir = (z - bp).Normalized() * .5f;
+            Draw.UseDashes = true;
+            Draw.Line(z + dir, bp - dir);
+
             color.a -= 0.3f;
             if(color.a > 0.1f)
             {

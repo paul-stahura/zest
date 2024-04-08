@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
+using UnityEngine.Experimental.AI;
 
 public class BisectingLines : MonoBehaviour
 {
     public App app;
     public Slider transparency;
-    [SerializeField] public Color color = Color.cyan;
+    [SerializeField] public Color color = new Color(1, 0.56f, 0, 0.5f);
     public float thickness = 1f;
 
     void OnApplicationQuit()
