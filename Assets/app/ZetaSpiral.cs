@@ -88,7 +88,20 @@ public partial class ZetaSpiral : MonoBehaviour
         }
     }
 
-    void drawSpiral(Zeta.Spiral spiral)
+    public void DrawOffsetSpiral(Camera cam, Zeta.Spiral spiral, Vector offset)
+    {
+        for(int i = 0; i < spiral.joints.Length; i++)
+        {
+            spiral.joints[i] += offset;
+        }
+
+        using (Draw.StyleScope)
+        {
+            drawSpiral(spiral, true);
+        }
+    }
+
+    void drawSpiral(Zeta.Spiral spiral, bool fanSpiral = false)
     {
         if (spiral.joints[0] == null)
             return;
@@ -167,6 +180,11 @@ public partial class ZetaSpiral : MonoBehaviour
                     return;
             }
 
+            if(fanSpiral)
+            {
+                color.a -= 0.1f;
+                if(color.a < 0) color.a = 0;
+            }
             Draw.Line(start, end, color);
             start = end;
         }
