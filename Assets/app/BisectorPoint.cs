@@ -60,6 +60,7 @@ public class BisectorPoint : MonoBehaviour
         if(!_bisectorPointToggle.isOn) return;
 
         Vector zeta = s.zeta.ToVector();
+        Vector zeta2 = s.zeta.ToVector() / 2.0;
         Vector origin = s.joints[0];
         Vector bp = GetScaledBisectorPoint(s);
 
@@ -73,11 +74,15 @@ public class BisectorPoint : MonoBehaviour
             Draw.Line(bp, origin);
             Draw.Line(bp, zeta);
 
-            // Draw dashed bisecting line. Extend it past a little bit
-            var z = zeta.Normalized() * bp.Dot(zeta.Normalized());
-            var dir = (z - bp).Normalized() * .5f;
+            // dashed bisecting line
+            Vector a1 = (origin - bp).Normalized();
+            Vector b1 = (zeta - bp).Normalized();
+            double angle1 = Math.Acos(a1.Dot(b1)) / 2.0;
+            double cross = Vector3.Cross(a1, b1).normalized.z;
+            Vector unitVector = RotateVector(a1, angle1 * cross).Normalized();
             Draw.UseDashes = true;
-            Draw.Line(z + dir, bp - dir);
+            Draw.Line(bp - unitVector*0.5, bp + (unitVector * (bp - zeta2).Length) + unitVector*0.5);
+
 
             color.a -= 0.3f;
             if(color.a > 0.1f)
@@ -99,6 +104,13 @@ public class BisectorPoint : MonoBehaviour
             double angle = Vector2.Dot((Vector2)a.Normalized(), (Vector2)b.Normalized());
             _bpAngle.text = angle.ToString();
         }
+    }
+
+    private Vector RotateVector(Vector vector, double angleRadians)
+    {
+        double newX = (vector.x * Math.Cos(angleRadians)) - (vector.y * Math.Sin(angleRadians));
+        double newY = (vector.x * Math.Sin(angleRadians)) + (vector.y * Math.Cos(angleRadians));
+        return new Vector(newX, newY);
     }
 
     public static Vector GetScaledBisectorPoint(Zeta.Spiral s)
