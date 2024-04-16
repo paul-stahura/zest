@@ -12,7 +12,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
     [SerializeField] private Toggle _inverseTdropsToggle;
     [SerializeField] private bool _drawInverseTdrops = false;
     [SerializeField] private int _pointsPerTdrop = 250;
-    public Slider TeardropTransparency;
+    public Slider RGTeardropTransparency;
+    public Slider INFTeardropTransparency;
     public Color TeardropColorA = Color.red;
     public Color TeardropColorB = Color.green;
     public Color TeardropColorInf = Color.cyan;
@@ -35,12 +36,15 @@ public class MiddleLinkTeardrop : MonoBehaviour
         TdropDotA = new Vector(0, 0);
         TdropDotB = new Vector(0, 0);
 
-        TeardropTransparency.value = PlayerPrefs.GetFloat("MiddleLinkTeardropTransparency");
+        RGTeardropTransparency = GameObject.Find("RG Transparency Slider")?.GetComponent<Slider>();
+        INFTeardropTransparency = GameObject.Find("INF Transparency Slider")?.GetComponent<Slider>();
+        RGTeardropTransparency.value = PlayerPrefs.GetFloat("RGTeardropTransparency");
+        INFTeardropTransparency.value = PlayerPrefs.GetFloat("INFTeardropTransparency");
     }
     
     public void Start()
     {
-        app.DrawSprial += DrawTeardrop;
+        app.DrawSprial += DrawINFTeardrop;
         app.DrawSprial += DrawExactTeardrop;
     }
 
@@ -51,12 +55,13 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     private void savePlayerPrefs()
     {
-        PlayerPrefs.SetFloat("MiddleLinkTeardropTransparency", TeardropTransparency.value);
+        PlayerPrefs.SetFloat("RGTeardropTransparency", RGTeardropTransparency.value);
+        PlayerPrefs.SetFloat("INFTeardropTransparency", INFTeardropTransparency.value);
     }
 
-    private void DrawTeardrop(Camera cam, Zeta.Spiral s)
+    private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
     {
-        if(TeardropTransparency.value < 0.05f)
+        if(INFTeardropTransparency.value < 0.01f)
         {
             return;
         }
@@ -65,9 +70,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            TeardropColorInf.a = TeardropTransparency.value / 4;
+            TeardropColorInf.a = INFTeardropTransparency.value / 4;
             Draw.Color = TeardropColorInf;
-            Draw.Thickness = 1 + TeardropTransparency.value;
+            Draw.Thickness = 1 + INFTeardropTransparency.value;
             
             double i = 0;
             double inc = 1d/200;
@@ -98,9 +103,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
             using (Draw.StyleScope)
             {
                 var color = new Color(0, .6f, 1, 1);
-                color.a = TeardropTransparency.value / 4;
+                color.a = INFTeardropTransparency.value / 4;
                 Draw.Color = color;
-                Draw.Thickness = 1 + TeardropTransparency.value;
+                Draw.Thickness = 1 + INFTeardropTransparency.value;
 
                 var z = s.zeta.ToVector();
                 var norm = z.Normalized();
@@ -132,9 +137,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
         using (Draw.StyleScope)
         {
             Color dotColor = Color.cyan;
-            dotColor.a = TeardropTransparency.value;
+            dotColor.a = INFTeardropTransparency.value;
             Draw.Color = dotColor;
-            Draw.Thickness = 1 + TeardropTransparency.value;
+            Draw.Thickness = 1 + INFTeardropTransparency.value;
 
             var index = Zeta.ImagToIndex(s.input.ToVector().y);
             index -= Math.Floor(index);
@@ -159,6 +164,11 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     private void DrawExactTeardrop(Camera cam, Zeta.Spiral s)
     {
+        if(RGTeardropTransparency.value < 0.01f)
+        {
+            return;
+        }
+
         _exactTdropA = new();
         _exactTdropB = new();
         int index = (int)Math.Floor(Zeta.ImagToIndex(s.input.Imaginary));
@@ -175,9 +185,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         using (Draw.StyleScope)
         {
-            TeardropColorA.a = TeardropTransparency.value;
-            TeardropColorB.a = TeardropTransparency.value;
-            Draw.Thickness = 1 + TeardropTransparency.value;
+            TeardropColorA.a = RGTeardropTransparency.value;
+            TeardropColorB.a = RGTeardropTransparency.value;
+            Draw.Thickness = 1 + RGTeardropTransparency.value;
             
             var startA = trackDrop(_exactTdropA[0], s.joints[s.middleIndex + 1]);
             var startB = trackDrop(_exactTdropB[0], s.joints[s.middleIndex]);
@@ -202,13 +212,13 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
             using (Draw.StyleScope)
             {
-                Draw.Thickness = 1 + TeardropTransparency.value;
+                Draw.Thickness = 1 + RGTeardropTransparency.value;
 
                 var colorR = new Color(1, 0, .5f, 1f); // red ish
-                colorR.a = TeardropTransparency.value;
+                colorR.a = RGTeardropTransparency.value;
 
                 var colorG = new Color(.6f, 1f, .2f, 1f); // green ish
-                colorG.a = TeardropTransparency.value;
+                colorG.a = RGTeardropTransparency.value;
                 
                 var z = s.zeta.ToVector();
                 var norm = z.Normalized();
