@@ -76,6 +76,38 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
     {
+        // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
+        var index = Zeta.ImagToIndex(s.input.ToVector().y);
+        index -= Math.Floor(index);
+        var orth = Mathf.Min(1f, cam.orthographicSize);
+        var size = 50.0f;
+
+        TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
+
+        index = 1 - index;
+        TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
+
+        InfinityTdropPoints.Invoke(cam, s);
+
+        if(_drawINFLink)
+        {
+            using (Draw.StyleScope)
+            {
+                Color dotColor = Color.cyan;
+                dotColor.a = 0.5f;
+                Draw.Color = dotColor;
+                Draw.Thickness = 1 + 0.5f;
+
+                Draw.Ring(TdropDotA, orth / size / 2);
+                ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
+
+                Draw.Ring(TdropDotB, orth / size / 2);
+                ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
+
+                Draw.Line(TdropDotA, TdropDotB);
+            }
+        }
+
         if(INFTeardropTransparency.value < 0.01f)
         {
             return;
@@ -147,37 +179,6 @@ public class MiddleLinkTeardrop : MonoBehaviour
                 }
             }
         }
-
-        // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
-        if(_drawINFLink)
-        {
-            using (Draw.StyleScope)
-            {
-                Color dotColor = Color.cyan;
-                dotColor.a = INFTeardropTransparency.value;
-                Draw.Color = dotColor;
-                Draw.Thickness = 1 + INFTeardropTransparency.value;
-
-                var index = Zeta.ImagToIndex(s.input.ToVector().y);
-                index -= Math.Floor(index);
-
-                var orth = Mathf.Min(1f, cam.orthographicSize);
-                var size = 50.0f;
-
-                TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
-                Draw.Ring(TdropDotA, orth / size / 2);
-                ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
-
-                index = 1 - index;
-                TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
-                Draw.Ring(TdropDotB, orth / size / 2);
-                ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
-
-                Draw.Line(TdropDotA, TdropDotB);
-            }
-        }
-
-        InfinityTdropPoints.Invoke(cam, s);
     }
 
     private void DrawExactTeardrop(Camera cam, Zeta.Spiral s)
