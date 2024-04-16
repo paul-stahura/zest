@@ -1894,6 +1894,86 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 71610370}
   m_CullTransparentMesh: 0
+--- !u!1 &72941233
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 72941234}
+  - component: {fileID: 72941236}
+  - component: {fileID: 72941235}
+  m_Layer: 5
+  m_Name: Label (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &72941234
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72941233}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 924137161}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -0.000091552734, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &72941235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72941233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 14
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 1
+    m_MaxSize: 40
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 2nd
+--- !u!222 &72941236
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72941233}
+  m_CullTransparentMesh: 1
 --- !u!1 &74870049
 GameObject:
   m_ObjectHideFlags: 0
@@ -7485,6 +7565,7 @@ GameObject:
   - component: {fileID: 386941463}
   - component: {fileID: 386941465}
   - component: {fileID: 386941464}
+  - component: {fileID: 386941466}
   m_Layer: 5
   m_Name: Horizontal Group (1)
   m_TagString: Untagged
@@ -7551,6 +7632,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 386941462}
   m_CullTransparentMesh: 1
+--- !u!114 &386941466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 386941462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: toggle between tracking the center, link, or joint of a spiral. the
+    slider navigates between the range of available points.
 --- !u!1 &390378485
 GameObject:
   m_ObjectHideFlags: 0
@@ -14572,6 +14667,7 @@ GameObject:
   m_Component:
   - component: {fileID: 785812215}
   - component: {fileID: 785812216}
+  - component: {fileID: 785812217}
   m_Layer: 5
   m_Name: GramPoints
   m_TagString: Untagged
@@ -14629,6 +14725,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &785812217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785812214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: instances of when zeta.y = 0
 --- !u!1 &787073036
 GameObject:
   m_ObjectHideFlags: 0
@@ -14639,6 +14748,7 @@ GameObject:
   m_Component:
   - component: {fileID: 787073037}
   - component: {fileID: 787073038}
+  - component: {fileID: 787073039}
   m_Layer: 5
   m_Name: Transparency Slider
   m_TagString: Untagged
@@ -14720,6 +14830,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &787073039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 787073036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Change Spiral Transparency
 --- !u!1 &792169918
 GameObject:
   m_ObjectHideFlags: 0
@@ -15192,6 +15315,7 @@ GameObject:
   m_Component:
   - component: {fileID: 819916916}
   - component: {fileID: 819916917}
+  - component: {fileID: 819916918}
   m_Layer: 5
   m_Name: A
   m_TagString: Untagged
@@ -15268,6 +15392,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &819916918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 819916915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Snap camera to infinity link red point
 --- !u!1 &820887537
 GameObject:
   m_ObjectHideFlags: 0
@@ -17892,13 +18029,14 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1809813033}
+  - {fileID: 72941234}
   m_Father: {fileID: 1420668647}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 10, y: -13}
-  m_SizeDelta: {x: 20, y: 20}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -0.000061035156, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &924137162
 MonoBehaviour:
@@ -18417,6 +18555,7 @@ GameObject:
   m_Component:
   - component: {fileID: 956633191}
   - component: {fileID: 956633192}
+  - component: {fileID: 956633193}
   m_Layer: 5
   m_Name: B
   m_TagString: Untagged
@@ -18493,6 +18632,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &956633193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 956633190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Snap camera to infinity link green point
 --- !u!1 &958965270
 GameObject:
   m_ObjectHideFlags: 0
@@ -19044,6 +19196,7 @@ GameObject:
   m_Component:
   - component: {fileID: 988684344}
   - component: {fileID: 988684345}
+  - component: {fileID: 988684346}
   m_Layer: 5
   m_Name: Line Count Slider
   m_TagString: Untagged
@@ -19125,6 +19278,20 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &988684346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 988684343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: number of spiral to reverse spiral links to show. (Make sure JointsTransparency
+    is not zero)
 --- !u!1 &990957833
 GameObject:
   m_ObjectHideFlags: 0
@@ -19262,6 +19429,7 @@ GameObject:
   m_Component:
   - component: {fileID: 992400582}
   - component: {fileID: 992400583}
+  - component: {fileID: 992400584}
   m_Layer: 5
   m_Name: InverseTdropsToggle
   m_TagString: Untagged
@@ -19338,6 +19506,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &992400584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 992400581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: show inverse spiral teardrops at same transparency as R, G, and INF
 --- !u!1 &997923502
 GameObject:
   m_ObjectHideFlags: 0
@@ -22086,6 +22267,7 @@ GameObject:
   - component: {fileID: 1173146371}
   - component: {fileID: 1173146373}
   - component: {fileID: 1173146372}
+  - component: {fileID: 1173146374}
   m_Layer: 5
   m_Name: SegmentMarks Group
   m_TagString: Untagged
@@ -22149,6 +22331,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1173146370}
   m_CullTransparentMesh: 1
+--- !u!114 &1173146374
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1173146370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: scaled segment marks. change number of segment marks to display
 --- !u!1 &1180300840
 GameObject:
   m_ObjectHideFlags: 0
@@ -23563,6 +23758,7 @@ GameObject:
   - component: {fileID: 1262090215}
   - component: {fileID: 1262090217}
   - component: {fileID: 1262090216}
+  - component: {fileID: 1262090218}
   m_Layer: 5
   m_Name: Transparency
   m_TagString: Untagged
@@ -23630,6 +23826,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1262090214}
   m_CullTransparentMesh: 1
+--- !u!114 &1262090218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262090214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Change teardrop transparency
 --- !u!1 &1265382118
 GameObject:
   m_ObjectHideFlags: 0
@@ -26159,6 +26368,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1420668647}
   - component: {fileID: 1420668648}
+  - component: {fileID: 1420668649}
   m_Layer: 5
   m_Name: Show Reverse Spiral Checkbox
   m_TagString: Untagged
@@ -26186,7 +26396,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 24.8791, y: 25}
+  m_SizeDelta: {x: 32.0718, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1420668648
 MonoBehaviour:
@@ -26236,6 +26446,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1420668649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420668646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle Reverse Spiral
 --- !u!1 &1423235514
 GameObject:
   m_ObjectHideFlags: 0
@@ -29478,6 +29701,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1591194601}
   - component: {fileID: 1591194602}
+  - component: {fileID: 1591194603}
   m_Layer: 5
   m_Name: Transparency Slider
   m_TagString: Untagged
@@ -29559,6 +29783,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1591194603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591194600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Zeta Transparency
 --- !u!1 &1592228247
 GameObject:
   m_ObjectHideFlags: 0
@@ -30498,6 +30735,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1638181149}
   - component: {fileID: 1638181150}
+  - component: {fileID: 1638181151}
   m_Layer: 5
   m_Name: Transparency Slider
   m_TagString: Untagged
@@ -30579,6 +30817,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1638181151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1638181148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: shows spiral to reverse spiral joints
 --- !u!1 &1648403834
 GameObject:
   m_ObjectHideFlags: 0
@@ -33863,6 +34114,7 @@ GameObject:
   - component: {fileID: 1784845677}
   - component: {fileID: 1784845676}
   - component: {fileID: 1784845675}
+  - component: {fileID: 1784845678}
   m_Layer: 5
   m_Name: Dropdown
   m_TagString: Untagged
@@ -33993,6 +34245,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784845673}
   m_CullTransparentMesh: 1
+--- !u!114 &1784845678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784845673}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Change between spiral formulas. Most functions work best under Euler
 --- !u!1 &1789433390
 GameObject:
   m_ObjectHideFlags: 0
@@ -34291,10 +34556,10 @@ RectTransform:
   m_Father: {fileID: 924137161}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 20}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -0.000091552734, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1809813034
 MonoBehaviour:
@@ -34309,15 +34574,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.6273585, g: 0.7098314, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 485f3bf8e01fab741915ba1f20bc5a8f, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -35989,6 +36254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1902568537}
   - component: {fileID: 1902568538}
+  - component: {fileID: 1902568539}
   m_Layer: 5
   m_Name: Transparency Slider
   m_TagString: Untagged
@@ -36070,6 +36336,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1902568539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1902568536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Symmetrical bisector transparency
 --- !u!1 &1914011164
 GameObject:
   m_ObjectHideFlags: 0
@@ -37835,6 +38114,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1983997916}
   - component: {fileID: 1983997917}
+  - component: {fileID: 1983997918}
   m_Layer: 5
   m_Name: MiddleLinkJointTransparency
   m_TagString: Untagged
@@ -37916,6 +38196,19 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1983997918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1983997915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: middle link transparency
 --- !u!1 &1984711474
 GameObject:
   m_ObjectHideFlags: 0
@@ -38039,6 +38332,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1999433045}
   - component: {fileID: 1999433046}
+  - component: {fileID: 1999433047}
   m_Layer: 5
   m_Name: INFLinkToggle
   m_TagString: Untagged
@@ -38115,6 +38409,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1999433047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1999433044}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle middle link at infinity
 --- !u!1 &2001456643
 GameObject:
   m_ObjectHideFlags: 0
@@ -40842,6 +41149,7 @@ GameObject:
   - component: {fileID: 2109237856}
   - component: {fileID: 2109237858}
   - component: {fileID: 2109237857}
+  - component: {fileID: 2109237859}
   m_Layer: 5
   m_Name: BisectorDiff
   m_TagString: Untagged
@@ -40906,6 +41214,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2109237855}
   m_CullTransparentMesh: 1
+--- !u!114 &2109237859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109237855}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle cyan/scaled bisector. click prev and next to navigate to the
+    next indext where the orange and cyan bisector points are eaqual
 --- !u!1 &2117007164
 GameObject:
   m_ObjectHideFlags: 0
