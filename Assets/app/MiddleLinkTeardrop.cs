@@ -11,9 +11,12 @@ public class MiddleLinkTeardrop : MonoBehaviour
     
     [SerializeField] private Toggle _inverseTdropsToggle;
     [SerializeField] private bool _drawInverseTdrops = false;
+    [SerializeField] private bool _drawINFLink = false;
     [SerializeField] private int _pointsPerTdrop = 250;
     public Slider RGTeardropTransparency;
     public Slider INFTeardropTransparency;
+    public Toggle INFLinkToggle;
+
     public Color TeardropColorA = Color.red;
     public Color TeardropColorB = Color.green;
     public Color TeardropColorInf = Color.cyan;
@@ -33,13 +36,23 @@ public class MiddleLinkTeardrop : MonoBehaviour
             _drawInverseTdrops = v;
         });
 
+        INFLinkToggle = GameObject.Find("INFLinkToggle")?.GetComponent<Toggle>();
+        INFLinkToggle?.onValueChanged.AddListener((bool v) => {
+            _drawINFLink = v;
+        });
+
         TdropDotA = new Vector(0, 0);
         TdropDotB = new Vector(0, 0);
 
         RGTeardropTransparency = GameObject.Find("RG Transparency Slider")?.GetComponent<Slider>();
         INFTeardropTransparency = GameObject.Find("INF Transparency Slider")?.GetComponent<Slider>();
+
+        // player prefs
         RGTeardropTransparency.value = PlayerPrefs.GetFloat("RGTeardropTransparency");
         INFTeardropTransparency.value = PlayerPrefs.GetFloat("INFTeardropTransparency");
+
+        INFLinkToggle.isOn = PlayerPrefs.GetInt("INFLinkToggle") == 1;
+        _inverseTdropsToggle.isOn = PlayerPrefs.GetInt("InverseTdropToggle") == 1;
     }
     
     public void Start()
@@ -57,6 +70,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
     {
         PlayerPrefs.SetFloat("RGTeardropTransparency", RGTeardropTransparency.value);
         PlayerPrefs.SetFloat("INFTeardropTransparency", INFTeardropTransparency.value);
+        PlayerPrefs.SetInt("INFLinkToggle", INFLinkToggle.isOn ? 1 : 0);
+        PlayerPrefs.SetInt("InverseTdropToggle", _inverseTdropsToggle.isOn ? 1 : 0);
     }
 
     private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
@@ -134,29 +149,32 @@ public class MiddleLinkTeardrop : MonoBehaviour
         }
 
         // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
-        using (Draw.StyleScope)
+        if(_drawINFLink)
         {
-            Color dotColor = Color.cyan;
-            dotColor.a = INFTeardropTransparency.value;
-            Draw.Color = dotColor;
-            Draw.Thickness = 1 + INFTeardropTransparency.value;
+            using (Draw.StyleScope)
+            {
+                Color dotColor = Color.cyan;
+                dotColor.a = INFTeardropTransparency.value;
+                Draw.Color = dotColor;
+                Draw.Thickness = 1 + INFTeardropTransparency.value;
 
-            var index = Zeta.ImagToIndex(s.input.ToVector().y);
-            index -= Math.Floor(index);
+                var index = Zeta.ImagToIndex(s.input.ToVector().y);
+                index -= Math.Floor(index);
 
-            var orth = Mathf.Min(1f, cam.orthographicSize);
-            var size = 50.0f;
+                var orth = Mathf.Min(1f, cam.orthographicSize);
+                var size = 50.0f;
 
-            TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
-            Draw.Ring(TdropDotA, orth / size / 2);
-            ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
+                TdropDotA = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
+                Draw.Ring(TdropDotA, orth / size / 2);
+                ShapesUtils.DrawCross(TdropDotA, orth / size, .5f);
 
-            index = 1 - index;
-            TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
-            Draw.Ring(TdropDotB, orth / size / 2);
-            ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
+                index = 1 - index;
+                TdropDotB = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
+                Draw.Ring(TdropDotB, orth / size / 2);
+                ShapesUtils.DrawCross(TdropDotB, orth / size, .5f);
 
-            Draw.Line(TdropDotA, TdropDotB);
+                Draw.Line(TdropDotA, TdropDotB);
+            }
         }
 
         InfinityTdropPoints.Invoke(cam, s);
