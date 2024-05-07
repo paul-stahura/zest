@@ -108,9 +108,13 @@ public class CameraTracking : MonoBehaviour
        _cameraTackingOffset += _cameraDrag.localDelta * windowSize * -0.0025f;
     }
 
-    public void AddCameraZoomOffset(Vector2 offset)
+    public void AddCameraZoomOffset(Vector2 offset, float orthoScalar)
     {
         _cameraZoomOffset += offset;
+
+        // since the offset scales with the camera zoom we need to make sure it stays in the same place 
+        // when we are in the middle of zooming
+        _cameraTackingOffset /= orthoScalar;
     }
 
     void savePlayerPrefs() {
@@ -268,15 +272,24 @@ public class CameraTracking : MonoBehaviour
             OFFSET = new Vector2(1f - verticalUI.position.x / Screen.width, 0);
         
         var aspect = (float)Screen.width / (float)Screen.height;
-        OFFSET += _cameraTackingOffset + _cameraZoomOffset;
-        var canvasOffset = rot * (OFFSET * new Vector3(cam.orthographicSize, cam.orthographicSize * aspect));
+        OFFSET += _cameraTackingOffset;
+        
+        // scale the offset by the camera zoom
+        OFFSET *= new Vector3(cam.orthographicSize, cam.orthographicSize * aspect);
 
+        // apply mouse offset for zoom
+        OFFSET += _cameraZoomOffset;
+
+        // rotate offset to the desired camera pos
+        var canvasOffset = rot * OFFSET;
+        
         // Make Camera z opposite when tracking is enabled.
         pos = new Vector3(pos.x + canvasOffset.x, pos.y + canvasOffset.y, cam.transform.position.z);
 
-
         cam.transform.rotation = rot;
         cam.transform.position = transform.position + pos;
+
+        // cam.transform.Translate(_cameraZoomOffset, Space.World);
     }
 
     private void ResetCameraOffsets()

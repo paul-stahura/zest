@@ -90,6 +90,8 @@ public class ZoomToMouse : MonoBehaviour
         var worldCenter = _camera.ScreenToWorldPoint(screenCenter);
         var worldMouse = _camera.ScreenToWorldPoint(mouse);
 
+        var prevOrtho = _camera.orthographicSize;
+
         // As we zoom in or out, move the camera enough to keep the
         // world mouse the same 
 
@@ -116,18 +118,18 @@ public class ZoomToMouse : MonoBehaviour
 
         var newWorldMouse = _camera.ScreenToWorldPoint(mouse);
 
-        var diff = worldMouse - newWorldMouse;
+        var mouseDiff = worldMouse - newWorldMouse;
 
-        if(diff.magnitude > 0)
+        if(mouseDiff.magnitude > 0)
         {
             if(_camTracking != null)
             {
-                Debug.Log(diff);
-                _camTracking.AddCameraZoomOffset(diff);
+                var orthoScalar = _camera.orthographicSize / prevOrtho;
+                _camTracking.AddCameraZoomOffset(mouseDiff, orthoScalar);
             }
             else
             {
-                transform.Translate(diff, Space.World);
+                transform.Translate(mouseDiff, Space.World);
             }
         }
     }
