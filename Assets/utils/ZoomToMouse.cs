@@ -9,6 +9,8 @@ using System;
 /// </summary>
 public class ZoomToMouse : MonoBehaviour
 {
+    [SerializeField] private CameraTracking _camTracking;
+
     const float MAXIMUM_ZOOM = 0.00005f;
     const float DEFAULT_ZOOM = 690f;
     const float MINIMUM_ZOOM = 2400f;
@@ -22,6 +24,10 @@ public class ZoomToMouse : MonoBehaviour
     // warning CS0649: Field '___' is never assigned to, and will always have its default value null
 #pragma warning restore 649
 
+    void Awake()
+    {
+        _camTracking = GameObject.Find("ZetaSpiral").GetComponent<CameraTracking>();
+    }
 
     void Start()
     {
@@ -84,6 +90,8 @@ public class ZoomToMouse : MonoBehaviour
         var worldCenter = _camera.ScreenToWorldPoint(screenCenter);
         var worldMouse = _camera.ScreenToWorldPoint(mouse);
 
+        var prevOrtho = _camera.orthographicSize;
+
         // As we zoom in or out, move the camera enough to keep the
         // world mouse the same 
 
@@ -110,8 +118,20 @@ public class ZoomToMouse : MonoBehaviour
 
         var newWorldMouse = _camera.ScreenToWorldPoint(mouse);
 
-        var diff = worldMouse - newWorldMouse;
-        transform.Translate(diff, Space.World);
+        var mouseDiff = worldMouse - newWorldMouse;
+
+        if(mouseDiff.magnitude > 0)
+        {
+            if(_camTracking != null)
+            {
+                var orthoScalar = _camera.orthographicSize / prevOrtho;
+                _camTracking.AddCameraZoomOffset(mouseDiff, orthoScalar);
+            }
+            else
+            {
+                transform.Translate(mouseDiff, Space.World);
+            }
+        }
     }
 
     public float ZoomLevel
