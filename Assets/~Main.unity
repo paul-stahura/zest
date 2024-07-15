@@ -18794,6 +18794,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb0ac8ef2eaf9a344a85cf71aab3f70c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camTracking: {fileID: 0}
   _sensitivity: 10
   _camera: {fileID: 963194227}
   _allowZoom: 1
@@ -20552,10 +20553,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 134912090}
   m_HandleRect: {fileID: 1650614818}
   m_Direction: 0
-  m_MinValue: 1
+  m_MinValue: 0
   m_MaxValue: 30
   m_WholeNumbers: 1
-  m_Value: 3
+  m_Value: 5
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -22626,9 +22627,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 765330095}
   m_Direction: 0
   m_MinValue: 0
-  m_MaxValue: 0.1
+  m_MaxValue: 0.999999
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: 0.381345
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -27450,6 +27451,7 @@ MonoBehaviour:
   linkHighlight: {r: 1, g: 1, b: 0, a: 0.11372549}
   thickness: 4
   _cameraTackingOffset: {x: 0, y: 0}
+  _cameraZoomOffset: {x: 0, y: 0}
 --- !u!114 &1486109721
 MonoBehaviour:
   m_ObjectHideFlags: 0

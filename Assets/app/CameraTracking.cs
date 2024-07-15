@@ -202,7 +202,9 @@ public class CameraTracking : MonoBehaviour
             spiralNumber.minValue = 0;
             spiralNumber.maxValue = spiral.middleIndex + 2;
 
-            var mi = Zeta.ImagToIndex(app.Imag);
+            // var mi = Zeta.ImagToIndex(app.Imag);
+            var mi = app.indexIntPart.value + app.indexRealPart.value;
+
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             trackLink(cam, i, spiral);
