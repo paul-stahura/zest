@@ -190,7 +190,7 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         _exactTdropA = new();
         _exactTdropB = new();
-        int index = (int)Math.Floor(Zeta.ImagToIndex(s.imaginary));
+        int index = (int)Math.Floor(s.index);
         double inc = 1d / (_pointsPerTdrop - 1);
         Debug.Assert(inc > 0);
         for (int i = 0; i < _pointsPerTdrop; i++)
