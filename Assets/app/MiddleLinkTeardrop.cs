@@ -77,7 +77,7 @@ public class MiddleLinkTeardrop : MonoBehaviour
     private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
     {
         // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
-        var index = Zeta.ImagToIndex(s.input.ToVector().y);
+        var index = s.index;
         index -= Math.Floor(index);
         var orth = Mathf.Min(1f, cam.orthographicSize);
         var size = 50.0f;
@@ -190,14 +190,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         _exactTdropA = new();
         _exactTdropB = new();
-        int index = (int)Math.Floor(Zeta.ImagToIndex(s.input.Imaginary));
+        int index = (int)Math.Floor(Zeta.ImagToIndex(s.imaginary));
         double inc = 1d / (_pointsPerTdrop - 1);
         Debug.Assert(inc > 0);
         for (int i = 0; i < _pointsPerTdrop; i++)
         {
             double t = i * inc;
-            _exactTdropA.Add(Zeta.TearDrop(index + 1, s.input.Real, Zeta.IndexToImag(index + t)) - new Vector(1, 0));
-            _exactTdropB.Add(Zeta.TearDrop(index + 1, s.input.Real, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
+            _exactTdropA.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t)) - new Vector(1, 0));
+            _exactTdropB.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
         }
 
         Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 

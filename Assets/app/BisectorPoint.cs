@@ -36,15 +36,13 @@ public class BisectorPoint : MonoBehaviour
         _infoText = GameObject.Find("FindBisectorText")?.GetComponent<Text>();
 
         _seekNextButton.onClick.AddListener(() => {
-            Complex next = SeekNextEqualLength(new Complex(_app.Real, _app._imag));
-            _app.Real = next.Real;
-            _app.Imag = next.Imaginary;
+            double next = SeekNextEqualLength(_app.Real, _app.Index);
+            _app.Index = next;
         });
 
         _seekPrevButton.onClick.AddListener(() => {
-            Complex next = SeekNextEqualLength(new Complex(_app.Real, _app._imag), true);
-            _app.Real = next.Real;
-            _app.Imag = next.Imaginary;
+            double next = SeekNextEqualLength(_app.Real, _app._index, true);
+            _app.Index = next;
         });
 
         _app.DrawSprial += DrawBisectorPoints;
@@ -116,7 +114,7 @@ public class BisectorPoint : MonoBehaviour
     public static Vector GetScaledBisectorPoint(Zeta.Spiral s)
     {
         // take bisector point at real 0.5 and scale it by y=x^1-real
-        Zeta.Spiral s5 = new Zeta.Spiral(new Complex(0.5f, s.input.Imaginary), SpiralFormulas.EulerMaclauren);
+        Zeta.Spiral s5 = new Zeta.Spiral(0.5f, s.index, SpiralFormulas.EulerMaclauren);
         Vector2 bp5 = BisectingLines.CrotchPoint(s5);
         Vector ml5 = s5.joints[s5.middleIndex + 1] - s5.joints[s5.middleIndex];
         bp5 = bp5 - s5.joints[s5.middleIndex];
@@ -125,7 +123,7 @@ public class BisectorPoint : MonoBehaviour
 
         // scale the middle link by the formula
         Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.input.Real));
+        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
         // Debug.Log("input: "+ bpInput);
         // Debug.Log("out: "+ a5.Length / middleLink.Length);
 
@@ -134,12 +132,12 @@ public class BisectorPoint : MonoBehaviour
         return bp;
     }
 
-    private Complex SeekNextEqualLength(Complex input, bool reverse = false)
+    private double SeekNextEqualLength(double real, double index, bool reverse = false)
     {
-        if(input.Real == 0.5f)
+        if(real == 0.5f)
         {
             _infoText.text = $"Real 0.5";
-            return input;
+            return real;
         }
 
         double inc = 0.001;
@@ -153,21 +151,19 @@ public class BisectorPoint : MonoBehaviour
 
         _infoText.text = $"Searching...";
 
-        Zeta.Spiral s = new Zeta.Spiral(input, SpiralFormulas.EulerMaclauren);
+        Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren);
         Vector bp = GetScaledBisectorPoint(s);
         
         bool dir = Vector3.Dot(BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex], s.joints[s.middleIndex +1] - s.joints[s.middleIndex]) > 0;
         double lastPos = (BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex]).Length * (dir ? 1d : -1d);
-        double lastIndex = Zeta.ImagToIndex(s.input.Imaginary);
+        double lastIndex = s.index;
 
         while(depth < maxDepth)
         {
             // int searchPersentage = depth / maxDepth * 100;
             // _infoText.text = $"Find Next: Searching... {searchPersentage}%";
 
-            input = new Complex(input.Real, input.Imaginary + inc);
-
-            s = new Zeta.Spiral(input, SpiralFormulas.EulerMaclauren);
+            s = new Zeta.Spiral(real, index + inc, SpiralFormulas.EulerMaclauren);
             bp = GetScaledBisectorPoint(s);
 
             Vector ml = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
@@ -178,25 +174,25 @@ public class BisectorPoint : MonoBehaviour
             bool jumped = Math.Abs(newPos - lastPos) > (s.joints[s.middleIndex + 1] - s.joints[s.middleIndex]).Length / 2;
             if(changedDir && !jumped)
             {
-                if(Math.Floor(lastIndex) != Math.Floor(Zeta.ImagToIndex(s.input.Imaginary)))
+                if(Math.Floor(lastIndex) != Math.Floor(s.index))
                 {
                     _infoText.text = $"NEW INDEX";
                 }
                 else
                 {
-                    _infoText.text = $"Found: {input.Imaginary}";
+                    _infoText.text = $"Found: {s.index}";
                 }
-                return input;
+                return s.index;
             }
             
             depth += 1;
 
             lastPos = newPos;
-            lastIndex = Zeta.ImagToIndex(s.input.Imaginary);
+            lastIndex = s.index;
         }
 
         _infoText.text = $"MAX DEPTH";
 
-        return input;
+        return s.index;
     }
 }

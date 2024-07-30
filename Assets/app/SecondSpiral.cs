@@ -1,6 +1,7 @@
 using System.Numerics;
 using Shapes;
 using TMPro;
+using Unity.VersionControl.Git;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,11 +35,11 @@ public class SecondSpiral : MonoBehaviour
         if(drawRealFan.isOn)
         {
             var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral);
-            DrawFanSpiral(cam, 0, spiral.input.Imaginary, centerBP);
-            DrawFanSpiral(cam, 0.25, spiral.input.Imaginary, centerBP);
-            DrawFanSpiral(cam, 0.5, spiral.input.Imaginary, centerBP);
-            DrawFanSpiral(cam, 0.75, spiral.input.Imaginary, centerBP);
-            DrawFanSpiral(cam, 1, spiral.input.Imaginary, centerBP);
+            DrawFanSpiral(cam, 0, spiral.index, centerBP);
+            DrawFanSpiral(cam, 0.25, spiral.index, centerBP);
+            DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
+            DrawFanSpiral(cam, 0.75, spiral.index, centerBP);
+            DrawFanSpiral(cam, 1, spiral.index, centerBP);
         }
 
         if(drawSecondSpiral.isOn)
@@ -49,47 +50,47 @@ public class SecondSpiral : MonoBehaviour
             switch(spiralFormula.value)
             {
                 case (int)SpiralFormulas.ReimannSiegel:
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
                     DrawSpiral(cam, EtaColor, s, offset);
-                    if(spiral.input.Imaginary < 40.9)
+                    if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
 
                 case (int)SpiralFormulas.EulerMaclauren:
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
                     DrawSpiral(cam, EtaColor, s, offset);
-                    if(spiral.input.Imaginary < 40.9)
+                    if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
 
                 case (int)SpiralFormulas.EtaFormula:
-                    if(spiral.input.Real != 0.5)
+                    if(spiral.real != 0.5)
                     {
-                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.EulerMaclauren);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EulerMaclauren);
                     }
                     else 
                     {
-                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel);
                     }
                     DrawSpiral(cam, ReimannColor, s, offset);
 
-                    if(spiral.input.Imaginary < 40.9)
+                    if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.input, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
 
                 case (int)SpiralFormulas.ZetFormula:
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.ReimannSiegel);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel);
                     DrawSpiral(cam, ReimannColor, s, offset);
-                    s = new Zeta.Spiral(spiral.input, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
                     DrawSpiral(cam, EtaColor, s, offset);
                     break;
 
@@ -99,10 +100,10 @@ public class SecondSpiral : MonoBehaviour
         }
     }
 
-    private void DrawFanSpiral(Camera cam, double real, double imaginary, Vector centerBP)
+    private void DrawFanSpiral(Camera cam, double real, double index, Vector centerBP)
     {
         Zeta.Spiral s;
-        s = new Zeta.Spiral(new Complex(real, imaginary), (SpiralFormulas)spiralFormula.value);
+        s = new Zeta.Spiral(real, index, (SpiralFormulas)spiralFormula.value);
         var offset = new Vector(0,0);
         if(cbp.isOn)
         {

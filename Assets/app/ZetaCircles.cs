@@ -147,13 +147,13 @@ public class ZetaCircles : MonoBehaviour
 
         var diff = (pos1 - pos2).Length;
         difference = (float)diff;
-        app.Imag += .01 * diff;
+        app.Index += .01 * diff;
 
         if (difference == 0)
         {
-            Debug.Log(app.Imag);
-            intersectionZeros.Add(app.Imag);
-            app.Imag += 0.04;
+            Debug.Log(app.Index);
+            intersectionZeros.Add(app.Index);
+            app.Index += 0.04;
         }
     }
 

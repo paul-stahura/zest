@@ -39,11 +39,11 @@ public partial class EulersProduct : MonoBehaviour
             };
         app.RealChanged += r => {
             if (transparency.value > 0)
-            points = Zeta.EulersProduct(new Complex(r, app.Imag), (int)iterations.value);
+            points = Zeta.EulersProduct(new Complex(r, app.GetImag()), (int)iterations.value);
         };
         iterations.onValueChanged.AddListener(v =>
         {
-            points = Zeta.EulersProduct(new Complex(app.Real, app.Imag), (int)iterations.value);
+            points = Zeta.EulersProduct(new Complex(app.Real, app.GetImag()), (int)iterations.value);
             iterLabel.text = $"Iterations: {v}";
         });
         iterations.onValueChanged.Invoke(iterations.value);

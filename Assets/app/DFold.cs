@@ -42,7 +42,7 @@ public class DFold : MonoBehaviour
     double stop1(Zeta.Spiral spiral)
     {
 
-        var idx = Zeta.ImagToIndex(app.Imag);
+        var idx = app.Index;
 
         double _s()
         {
@@ -64,7 +64,7 @@ public class DFold : MonoBehaviour
 
     double startPt()
     {
-        var idx = Zeta.ImagToIndex(app.Imag);
+        var idx = app.Index;
         return (
             (2 * idx + 1) * (Math.Sqrt(idx + 1) - Math.Sqrt(idx))
         ) /
