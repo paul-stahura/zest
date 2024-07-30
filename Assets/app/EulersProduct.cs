@@ -33,7 +33,7 @@ public partial class EulersProduct : MonoBehaviour
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .2f);
         iterations.value = PlayerPrefs.GetFloat(name + "-Iterations", 20f);
 
-        app.ImagChanged += i => {
+        app.IndexChanged += i => {
             if (transparency.value > 0)
                 points = Zeta.EulersProduct(new Complex(app.Real, i), (int)iterations.value);
             };

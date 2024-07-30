@@ -67,7 +67,7 @@ public class App : ImmediateModeShapeDrawer
     public Zeta.Spiral spiral;
 
     // This is where code interested in 'subscribing' to changes to the imag variable is done
-    public event Action<double> ImagChanged;
+    public event Action<double> IndexChanged;
     public event Action<double> RealChanged;
     public event Action<Camera, Zeta.Spiral> DrawSprial;
     public event Action SceneChange;
@@ -83,14 +83,14 @@ public class App : ImmediateModeShapeDrawer
             {
                 _index = value;
 
-                middleIndexDisplay.Value = (float)value;
+                UpdateIndexSliders((float)value);
 
                 if (spiral == null)
                     spiral = new Zeta.Spiral(_real, _index, (SpiralFormulas)spiralFormula.value);
                 else
                     spiral.Update(_real, _index, (SpiralFormulas)spiralFormula.value);
 
-                ImagChanged?.Invoke(value); // announce to everyone that it has changed
+                IndexChanged?.Invoke(value); // announce to everyone that it has changed
             }
         }
     }
@@ -183,7 +183,6 @@ public class App : ImmediateModeShapeDrawer
         // When you input a middle index value, this updates the imaginary number
         middleIndexDisplay.onValueChanged.AddListener(value =>
         {
-            UpdateIndexSliders(value);
             Index = value;
         });
 
@@ -197,8 +196,6 @@ public class App : ImmediateModeShapeDrawer
         mgr = indexRealPart.GetComponent<SliderChangeMgr>();
         mgr.onValueChanged.AddListener(value =>
         {
-            // var idx = (int)Zeta.ImagToIndex(_imag);
-            // var imag = Zeta.IndexToImag(idx + value);
             Index = indexIntPart.value + value;
         });
 
@@ -327,6 +324,7 @@ public class App : ImmediateModeShapeDrawer
     private void UpdateIndexSliders(float index)
     {
         middleIndexDisplay.Value = index;
+        imagDisplay.Value = (float)Zeta.IndexToImag(Index);
         indexIntPart.value = Mathf.FloorToInt(index);
         var realPart = (float)Math.Round(index - Mathf.FloorToInt(index), 6);
         if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)

@@ -33,7 +33,7 @@ public class LuaExperiments : MonoBehaviour
             script.DoFile(file);
         }
 
-        app.ImagChanged += updateGlobals;
+        app.IndexChanged += updateGlobals;
 
         StartCoroutine(lateStart());
     }
