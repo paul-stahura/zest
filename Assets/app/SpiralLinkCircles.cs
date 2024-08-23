@@ -50,7 +50,8 @@ public class SpiralLinkCircles : MonoBehaviour
     {
         using (Draw.StyleScope)
         {
-            var mi = Zeta.ImagToIndex(app.Imag);
+            // var mi = Zeta.ImagToIndex(app.Imag);
+            var mi = app.indexIntPart.value + app.indexRealPart.value;
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             // Highlight the spiral middle link

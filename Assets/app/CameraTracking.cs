@@ -202,7 +202,9 @@ public class CameraTracking : MonoBehaviour
             spiralNumber.minValue = 0;
             spiralNumber.maxValue = spiral.middleIndex + 2;
 
-            var mi = Zeta.ImagToIndex(app.Imag);
+            // var mi = Zeta.ImagToIndex(app.Imag);
+            var mi = app.indexIntPart.value + app.indexRealPart.value;
+
             var i = (int)spiral.SpiralMiddleIndex(mi, spiralNumber.value);
 
             trackLink(cam, i, spiral);
@@ -210,7 +212,7 @@ public class CameraTracking : MonoBehaviour
 
         if (trackJointIMinusN.isOn)
         {
-            var mi = Zeta.ImagToIndex(spiral.input.Imaginary);
+            var mi = spiral.index;
 
             spiralNumber.minValue = -2;
             spiralNumber.maxValue = (int)mi; // cannot be greater than middle index or you get a negative joint value below

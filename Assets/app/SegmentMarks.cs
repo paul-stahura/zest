@@ -51,7 +51,7 @@ public class SegmentMarks : MonoBehaviour
         for(int i = 0; i < _segmentCount; i++)
         {
             double pt = segmentLength * (i + 1);
-            Vector segmentPoint = link * Math.Pow(pt, 1d -s.input.Real);
+            Vector segmentPoint = link * Math.Pow(pt, 1d -s.real);
             _pts.Add(linkPt + segmentPoint);
         }
         

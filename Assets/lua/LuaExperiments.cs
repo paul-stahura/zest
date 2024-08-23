@@ -33,7 +33,7 @@ public class LuaExperiments : MonoBehaviour
             script.DoFile(file);
         }
 
-        app.ImagChanged += updateGlobals;
+        app.IndexChanged += updateGlobals;
 
         StartCoroutine(lateStart());
     }
@@ -51,8 +51,8 @@ public class LuaExperiments : MonoBehaviour
         {
             var script = s.Value;
 
-            script.Globals["imag"] = app.Imag;
-            script.Globals["index"] = Zeta.ImagToIndex(app.Imag);
+            script.Globals["imag"] = app.GetImag();
+            script.Globals["index"] = app.Index;
 
             var spiral = UserData.Create(app.spiral);
             script.Globals.Set("spiral", spiral);
@@ -68,8 +68,8 @@ public class LuaExperiments : MonoBehaviour
         {
             var script = s.Value;
 
-            script.Globals["imag"] = app.Imag;
-            script.Globals["index"] = Zeta.ImagToIndex(app.Imag);
+            script.Globals["imag"] = app.GetImag();
+            script.Globals["index"] = app.Index;
 
             DynValue obj = UserData.Create(app.spiral);
             script.Globals.Set("spiral", obj);
