@@ -28,6 +28,7 @@ public class App : ImmediateModeShapeDrawer
     // Input box for the middle index
     public FloatInput middleIndexDisplay;
     public double _index;
+    public Toggle useNewImagToggle;
     public Slider indexIntPart;
     public Slider indexRealPart;
     public FineTuneSlider fineTuneReal;
@@ -45,11 +46,11 @@ public class App : ImmediateModeShapeDrawer
     public TMP_Dropdown spiralFormula;
 
     // public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
-    readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1);
+    readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1, true);
     readonly double IMAG_WHEN_INDEX_AT_ZERO = 0.7463958;
     readonly double IMAG_WHEN_INDEX_AT_2ND_ZERO = 0.300802;
     readonly double IMAG_TDROP_ZERO = 0.3640107;
-    readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0);
+    readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0, true);
 
     public ZetaSpiral zetaSpiral;
     public ZetaSpiral secondSpiral;
@@ -79,16 +80,16 @@ public class App : ImmediateModeShapeDrawer
         get => _index;
         set
         {
-            if (value != _index && Zeta.IndexToImag(value) >= IMAG_TDROP_ZERO)
+            if (value != _index && Zeta.IndexToImag(value, useNewImagToggle.isOn) >= IMAG_TDROP_ZERO)
             {
                 _index = value;
 
                 UpdateIndexSliders((float)value);
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(_real, _index, (SpiralFormulas)spiralFormula.value);
+                    spiral = new Zeta.Spiral(_real, _index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
                 else
-                    spiral.Update(_real, _index, (SpiralFormulas)spiralFormula.value);
+                    spiral.Update(_real, _index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
 
                 IndexChanged?.Invoke(value); // announce to everyone that it has changed
             }
@@ -97,7 +98,7 @@ public class App : ImmediateModeShapeDrawer
 
     public double GetImag()
     {
-        return Zeta.IndexToImag(_index);
+        return Zeta.IndexToImag(_index, useNewImagToggle.isOn);
     }
 
     public double _real = 0.5;
@@ -112,11 +113,11 @@ public class App : ImmediateModeShapeDrawer
                 realPartSlider.value = (float)_real;
 
                 if (spiral == null)
-                    spiral = new Zeta.Spiral(_real, Index, (SpiralFormulas)spiralFormula.value);
+                    spiral = new Zeta.Spiral(_real, Index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
                 else
                 {
                     spiral.extendSpiralCount = (int)extendSpiralCount.value;
-                    spiral.Update(_real, Index, (SpiralFormulas)spiralFormula.value);
+                    spiral.Update(_real, Index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
                 }
 
                 RealChanged?.Invoke(value);
@@ -165,6 +166,15 @@ public class App : ImmediateModeShapeDrawer
             SceneManager.LoadScene(sceneOnStart);
             return;
         }
+
+        useNewImagToggle = GameObject.Find("ToggleNewImag").GetComponent<Toggle>();
+        useNewImagToggle.onValueChanged.AddListener(value =>
+        {
+            if(spiral != null)
+            {
+                spiral = new Zeta.Spiral(_real, Index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
+            }
+        });
 
         // Imag = imagDisplay.Value; // init with index instead of Imag
         Index = indexIntPart.value + indexRealPart.value;
@@ -225,13 +235,13 @@ public class App : ImmediateModeShapeDrawer
                 realPartSlider.value = .5f;
             }
 
-            spiral.Update(spiral.real, spiral.index, (SpiralFormulas)spiralFormula.value);
+            spiral.Update(spiral.real, spiral.index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
         });
 
         extendSpiralCount.onValueChanged.AddListener(value =>
         {
             spiral.extendSpiralCount = (int)extendSpiralCount.value;
-            spiral.Update(spiral.real, spiral.index, (SpiralFormulas)spiralFormula.value);
+            spiral.Update(spiral.real, spiral.index, (SpiralFormulas)spiralFormula.value, useNewImagToggle.isOn);
         });
         #endregion
 
@@ -324,7 +334,7 @@ public class App : ImmediateModeShapeDrawer
     private void UpdateIndexSliders(float index)
     {
         middleIndexDisplay.Value = index;
-        imagDisplay.Value = (float)Zeta.IndexToImag(Index);
+        imagDisplay.Value = (float)Zeta.IndexToImag(Index, useNewImagToggle.isOn);
         indexIntPart.value = Mathf.FloorToInt(index);
         var realPart = (float)Math.Round(index - Mathf.FloorToInt(index), 6);
         if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)

@@ -196,8 +196,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
         for (int i = 0; i < _pointsPerTdrop; i++)
         {
             double t = i * inc;
-            _exactTdropA.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t)) - new Vector(1, 0));
-            _exactTdropB.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
+            _exactTdropA.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn)) - new Vector(1, 0));
+            _exactTdropB.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn), true));// * Math.Cos(Math.PI) + new Vector(1, 0));
         }
 
         Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
