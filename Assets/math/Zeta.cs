@@ -7,6 +7,7 @@ using MoonSharp.Interpreter;
 using System.Drawing.Drawing2D;
 using UnityEditor;
 using SRDebugger.UI.Controls.Data;
+using UnityEngine.UI;
 
 public class Zeta
 {
@@ -297,7 +298,7 @@ public class Zeta
         return i;
     }
 
-    public static double IndexToImag(double index)  // n is the index of the link in question.  
+    public static double IndexToImag(double index, bool useNew)  // n is the index of the link in question.  
     {
         //. This is from Zzrob
         // "Einstein" becasue it is exact
@@ -305,7 +306,20 @@ public class Zeta
         // TODO: denominator lookup
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
         var n = index;
-        return (n * 2 + 1) * Math.PI / (Math.Log(n + 1) - Math.Log(n));
+
+        if(useNew)
+        {
+            // new
+            // 2pi*(t^2+t+1/6)
+            return 2.0 * Math.PI * ((n*n) + n + (1.0/6.0));
+        }
+        else
+        {
+            // ( π (2 n + 1))/( log(n + 1) - log(n))
+            return (n * 2.0 + 1.0) * Math.PI / (Math.Log(n + 1.0) - Math.Log(n));
+        }
+
+        
 
 
 
@@ -439,7 +453,8 @@ public class Zeta
         public double real = 0.5;
         public double index = 1;
         public int middleIndex => (int)index;
-        public double imaginary => IndexToImag(index);
+        private bool _useNewImag = true;
+        public double imaginary => IndexToImag(index, _useNewImag);
         public Vector middlePoint;
         public int numLinks;
         public Vector[] joints;
@@ -448,8 +463,10 @@ public class Zeta
 
         public int extendSpiralCount = 0;
 
-        public Spiral(double real, double index, SpiralFormulas formula)
+        public Spiral(double real, double index, SpiralFormulas formula, bool useNewImag)
         {
+            _useNewImag = useNewImag;
+
             this.numLinks = (int)(imaginary / Math.PI + 1);
 
             this.joints = new Vector[numLinks];
@@ -462,36 +479,36 @@ public class Zeta
             for (var i = 0; i < spirals.Length; i++)
                 this.spirals[i] = new Vector();
 
-            Update(real, index, formula);
+            Update(real, index, formula, useNewImag);
         }
 
-        public void Update(double realValue, double indexValue, SpiralFormulas formula)
+        public void Update(double realValue, double indexValue, SpiralFormulas formula, bool useNewImag)
         {
             switch (formula)
             {
                 case SpiralFormulas.ReimannSiegel:
-                    UpdateReimannSiegel(realValue, indexValue);
+                    UpdateReimannSiegel(realValue, indexValue, useNewImag);
                     break;
 
                 case SpiralFormulas.EulerMaclauren:
-                    UpdateEulerMaclauren(realValue, indexValue);
+                    UpdateEulerMaclauren(realValue, indexValue, useNewImag);
                     break;
 
                 case SpiralFormulas.EtaFormula:
-                    UpdateEtaFormula(realValue, indexValue);
+                    UpdateEtaFormula(realValue, indexValue, useNewImag);
                     break;
 
                 case SpiralFormulas.ZetFormula:
-                    UpdateZetFormula(realValue, indexValue);
+                    UpdateZetFormula(realValue, indexValue, useNewImag);
                     break;
 
                 default:
-                    this.zeta = Zeta.ReimannSiegel(new Complex(realValue, Zeta.IndexToImag(indexValue)));
+                    this.zeta = Zeta.ReimannSiegel(new Complex(realValue, Zeta.IndexToImag(indexValue, useNewImag)));
                     break;
             }
         }
 
-        public void UpdateReimannSiegel(double realValue, double indexValue)
+        public void UpdateReimannSiegel(double realValue, double indexValue, bool useNewImag)
         {
             this.real = realValue;
             this.index = indexValue;
@@ -499,7 +516,7 @@ public class Zeta
 
             this.numLinks = (int)SpiralMiddleIndex(this.index, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
 
-            this.zeta = Zeta.ReimannSiegel(new Complex(this.real, Zeta.IndexToImag(index)));
+            this.zeta = Zeta.ReimannSiegel(new Complex(this.real, Zeta.IndexToImag(index, useNewImag)));
 
             this.joints = new Vector[numLinks];
 
@@ -525,7 +542,7 @@ public class Zeta
             findSpirals();
         }
 
-        public void UpdateEulerMaclauren(double realValue, double indexValue)
+        public void UpdateEulerMaclauren(double realValue, double indexValue, bool useNewImag)
         {
             this.real = realValue;
             this.index = indexValue;
@@ -533,7 +550,7 @@ public class Zeta
 
             this.numLinks = (int)SpiralMiddleIndex(index, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
 
-            this.zeta = Zeta.EulerMaclauren(new Complex(real, Zeta.IndexToImag(index)));
+            this.zeta = Zeta.EulerMaclauren(new Complex(real, Zeta.IndexToImag(index, useNewImag)));
 
             this.joints = new Vector[numLinks];
 
@@ -559,7 +576,7 @@ public class Zeta
             findSpirals();
         }
 
-        public void UpdateEtaFormula(double realValue, double indexValue)
+        public void UpdateEtaFormula(double realValue, double indexValue, bool useNewImag)
         {
             this.real = realValue;
             this.index = indexValue;
@@ -567,7 +584,7 @@ public class Zeta
 
             this.numLinks = ((int)SpiralMiddleIndex(index, 0) + 2) * 2 + extendSpiralCount; // need to an extra for proper final link tracking
 
-            this.zeta = Zeta.EtaFormula(new Complex(real, Zeta.IndexToImag(index)));
+            this.zeta = Zeta.EtaFormula(new Complex(real, Zeta.IndexToImag(index, useNewImag)));
 
             this.joints = new Vector[numLinks];
 
@@ -592,7 +609,7 @@ public class Zeta
             findSpirals();
         }
 
-        private void UpdateZetFormula(double realValue, double indexValue)
+        private void UpdateZetFormula(double realValue, double indexValue, bool useNewImag)
         {
             this.real = realValue;
             this.index = indexValue;

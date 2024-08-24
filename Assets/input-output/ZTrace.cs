@@ -263,7 +263,7 @@ public class ZTrace : MonoBehaviour
             {
                 var input = Vector.Lerp(from, to, j);
                 var index = input.y;
-                var s = new Complex(input.x, Zeta.IndexToImag(input.y));
+                var s = new Complex(input.x, Zeta.IndexToImag(input.y, true));
                 
                 Complex complex = Zeta.EulerMaclauren(s);
                 Vector3 output = new Vector3((float)complex.Real, (float)complex.Imaginary, (float)Vector.Lerp(inputPts[i - 1], inputPts[i], j).y);
@@ -289,13 +289,13 @@ public class ZTrace : MonoBehaviour
             discColor.a = discColor.a * .5f;
 
             // var from = inputPts[0];
-            var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y));
+            var from = new Vector(inputPts[0].x, Zeta.IndexToImag(inputPts[0].y, true));
             Vector3 DiscPos = new Vector3();
             
             for (var i = 1; i < inputPts.Count; i++)
             {
                 // to = inputPts[i];
-                to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y));
+                to = new Vector(inputPts[i].x, Zeta.IndexToImag(inputPts[i].y, true));
 
                 DiscPos = Zeta.EulerMaclauren(from).ToVector2();
                 // add z depth to disc pos

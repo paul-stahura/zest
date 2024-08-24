@@ -33,9 +33,13 @@ public class TdropFamily : MonoBehaviour
     private List<Vector3> _infinityTdropPts;
     private List<List<Vector3>> _familyTdropPts;
 
+    private App app;
+
 
     void Start()
     {
+        app = GameObject.Find("App")?.GetComponent<App>();
+
         InitUI();
 
         calculateTdrops();
@@ -187,7 +191,7 @@ public class TdropFamily : MonoBehaviour
 
     private Vector3 FamilyTdrop(int tdropNum, double t)
     {
-        Complex complex = Zeta.TearDrop(tdropNum + 1, 0.5, Zeta.IndexToImag(tdropNum + t));
+        Complex complex = Zeta.TearDrop(tdropNum + 1, 0.5, Zeta.IndexToImag(tdropNum + t, app.useNewImagToggle.isOn));
         Vector3 output = new Vector3((float)complex.Real, (float)complex.Imaginary, Mathf.Lerp(0, 1, (float)t));
 
         return output;

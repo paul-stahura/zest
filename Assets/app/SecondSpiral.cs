@@ -34,7 +34,7 @@ public class SecondSpiral : MonoBehaviour
     {
         if(drawRealFan.isOn)
         {
-            var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral);
+            var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral, app.useNewImagToggle.isOn);
             DrawFanSpiral(cam, 0, spiral.index, centerBP);
             DrawFanSpiral(cam, 0.25, spiral.index, centerBP);
             DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
@@ -50,21 +50,21 @@ public class SecondSpiral : MonoBehaviour
             switch(spiralFormula.value)
             {
                 case (int)SpiralFormulas.ReimannSiegel:
-                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula, app.useNewImagToggle.isOn);
                     DrawSpiral(cam, EtaColor, s, offset);
                     if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula, app.useNewImagToggle.isOn);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
 
                 case (int)SpiralFormulas.EulerMaclauren:
-                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula, app.useNewImagToggle.isOn);
                     DrawSpiral(cam, EtaColor, s, offset);
                     if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula, app.useNewImagToggle.isOn);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
@@ -72,25 +72,25 @@ public class SecondSpiral : MonoBehaviour
                 case (int)SpiralFormulas.EtaFormula:
                     if(spiral.real != 0.5)
                     {
-                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EulerMaclauren);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EulerMaclauren, app.useNewImagToggle.isOn);
                     }
                     else 
                     {
-                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel, app.useNewImagToggle.isOn);
                     }
                     DrawSpiral(cam, ReimannColor, s, offset);
 
                     if(spiral.imaginary < 40.9)
                     {
-                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula);
+                        s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ZetFormula, app.useNewImagToggle.isOn);
                         DrawSpiral(cam, ZetColor, s, offset);
                     }
                     break;
 
                 case (int)SpiralFormulas.ZetFormula:
-                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.ReimannSiegel, app.useNewImagToggle.isOn);
                     DrawSpiral(cam, ReimannColor, s, offset);
-                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula);
+                    s = new Zeta.Spiral(spiral.real, spiral.index, SpiralFormulas.EtaFormula, app.useNewImagToggle.isOn);
                     DrawSpiral(cam, EtaColor, s, offset);
                     break;
 
@@ -103,11 +103,11 @@ public class SecondSpiral : MonoBehaviour
     private void DrawFanSpiral(Camera cam, double real, double index, Vector centerBP)
     {
         Zeta.Spiral s;
-        s = new Zeta.Spiral(real, index, (SpiralFormulas)spiralFormula.value);
+        s = new Zeta.Spiral(real, index, (SpiralFormulas)spiralFormula.value, app.useNewImagToggle.isOn);
         var offset = new Vector(0,0);
         if(cbp.isOn)
         {
-            offset = centerBP - BisectorPoint.GetScaledBisectorPoint(s);
+            offset = centerBP - BisectorPoint.GetScaledBisectorPoint(s, app.useNewImagToggle.isOn);
         }
         DrawSpiral(cam, Color.white, s, offset);
     }

@@ -60,7 +60,7 @@ public class BisectorPoint : MonoBehaviour
         Vector zeta = s.zeta.ToVector();
         Vector zeta2 = s.zeta.ToVector() / 2.0;
         Vector origin = s.joints[0];
-        Vector bp = GetScaledBisectorPoint(s);
+        Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
 
         using(Draw.StyleScope)
         {
@@ -111,10 +111,10 @@ public class BisectorPoint : MonoBehaviour
         return new Vector(newX, newY);
     }
 
-    public static Vector GetScaledBisectorPoint(Zeta.Spiral s)
+    public static Vector GetScaledBisectorPoint(Zeta.Spiral s, bool useNewImag)
     {
         // take bisector point at real 0.5 and scale it by y=x^1-real
-        Zeta.Spiral s5 = new Zeta.Spiral(0.5f, s.index, SpiralFormulas.EulerMaclauren);
+        Zeta.Spiral s5 = new Zeta.Spiral(0.5f, s.index, SpiralFormulas.EulerMaclauren, useNewImag);
         Vector2 bp5 = BisectingLines.CrotchPoint(s5);
         Vector ml5 = s5.joints[s5.middleIndex + 1] - s5.joints[s5.middleIndex];
         bp5 = bp5 - s5.joints[s5.middleIndex];
@@ -151,8 +151,8 @@ public class BisectorPoint : MonoBehaviour
 
         _infoText.text = $"Searching...";
 
-        Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren);
-        Vector bp = GetScaledBisectorPoint(s);
+        Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, _app.useNewImagToggle.isOn);
+        Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
         
         bool dir = Vector3.Dot(BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex], s.joints[s.middleIndex +1] - s.joints[s.middleIndex]) > 0;
         double lastPos = (BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex]).Length * (dir ? 1d : -1d);
@@ -163,8 +163,8 @@ public class BisectorPoint : MonoBehaviour
             // int searchPersentage = depth / maxDepth * 100;
             // _infoText.text = $"Find Next: Searching... {searchPersentage}%";
 
-            s = new Zeta.Spiral(real, index + inc, SpiralFormulas.EulerMaclauren);
-            bp = GetScaledBisectorPoint(s);
+            s = new Zeta.Spiral(real, index + inc, SpiralFormulas.EulerMaclauren, _app.useNewImagToggle.isOn);
+            bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
 
             Vector ml = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
             double bpPos = (bp - s.joints[s.middleIndex]).Length;

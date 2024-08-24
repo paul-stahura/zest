@@ -157,7 +157,7 @@ public class CameraTracking : MonoBehaviour
 
         if(trackBisectorPt.isOn || trackScaledBisectorPt.isOn)
         {
-            Vector2 pt = trackBisectorPt.isOn ? BisectingLines.CrotchPoint(spiral) : BisectorPoint.GetScaledBisectorPoint(spiral);
+            Vector2 pt = trackBisectorPt.isOn ? BisectingLines.CrotchPoint(spiral) : BisectorPoint.GetScaledBisectorPoint(spiral, app.useNewImagToggle.isOn);
 
             Vector3 start = Vector2.zero;
             Vector3 end = spiral.zeta.ToVector();
