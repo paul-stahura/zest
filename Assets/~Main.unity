@@ -9794,6 +9794,7 @@ GameObject:
   m_Component:
   - component: {fileID: 497538942}
   - component: {fileID: 497538943}
+  - component: {fileID: 497538944}
   m_Layer: 5
   m_Name: ToggleNewImag
   m_TagString: Untagged
@@ -9870,6 +9871,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &497538944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497538941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 'new formula: 2.0 * math.pi * ((n*n) + n + (1.0/6.0))'
 --- !u!1 &497816000
 GameObject:
   m_ObjectHideFlags: 0
