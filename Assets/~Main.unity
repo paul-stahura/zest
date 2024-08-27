@@ -1963,7 +1963,7 @@ MonoBehaviour:
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 2nd
 --- !u!222 &72941236
@@ -4230,7 +4230,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 264769356}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4507,7 +4507,7 @@ RectTransform:
   - {fileID: 377263849}
   - {fileID: 1609120644}
   m_Father: {fileID: 264769356}
-  m_RootOrder: 1
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -5353,11 +5353,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 999186772}
-  - {fileID: 208021762}
-  - {fileID: 497538942}
   - {fileID: 187827896}
   - {fileID: 472822036}
+  - {fileID: 497538942}
+  - {fileID: 999186772}
+  - {fileID: 208021762}
   m_Father: {fileID: 767680317}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -9463,7 +9463,7 @@ RectTransform:
   - {fileID: 2123632061}
   - {fileID: 1512771990}
   m_Father: {fileID: 264769356}
-  m_RootOrder: 4
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -9795,6 +9795,7 @@ GameObject:
   - component: {fileID: 497538942}
   - component: {fileID: 497538943}
   - component: {fileID: 497538944}
+  - component: {fileID: 497538945}
   m_Layer: 5
   m_Name: ToggleNewImag
   m_TagString: Untagged
@@ -9870,7 +9871,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!114 &497538944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9884,6 +9885,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: 'new formula: 2.0 * math.pi * ((n*n) + n + (1.0/6.0))'
+--- !u!114 &497538945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 497538941}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e455ec85d784d64084168d2572e3d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _label: {fileID: 446562684}
+  _onText: ln Imag
+  _offText: Poly Imag
 --- !u!1 &497816000
 GameObject:
   m_ObjectHideFlags: 0
@@ -18292,7 +18308,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 133.9271, y: 24.687}
+  m_SizeDelta: {x: 120.0227, y: 24.687}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &916487640
 MonoBehaviour:
@@ -19971,7 +19987,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 264769356}
-  m_RootOrder: 0
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -26708,6 +26724,7 @@ GameObject:
   - component: {fileID: 1420668647}
   - component: {fileID: 1420668648}
   - component: {fileID: 1420668649}
+  - component: {fileID: 1420668650}
   m_Layer: 5
   m_Name: Show Reverse Spiral Checkbox
   m_TagString: Untagged
@@ -26735,7 +26752,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 32.0718, y: 20}
+  m_SizeDelta: {x: 53, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1420668648
 MonoBehaviour:
@@ -26798,6 +26815,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: Toggle Reverse Spiral
+--- !u!114 &1420668650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1420668646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e455ec85d784d64084168d2572e3d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _label: {fileID: 72941235}
+  _onText: fwd rv
+  _offText: fwd
 --- !u!1 &1423235514
 GameObject:
   m_ObjectHideFlags: 0
