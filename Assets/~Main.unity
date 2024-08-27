@@ -9898,8 +9898,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _label: {fileID: 446562684}
-  _onText: ln Imag
-  _offText: Poly Imag
+  _onText: Poly Imag
+  _offText: ln() Imag
 --- !u!1 &497816000
 GameObject:
   m_ObjectHideFlags: 0
