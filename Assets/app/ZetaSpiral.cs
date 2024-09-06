@@ -15,6 +15,7 @@ public partial class ZetaSpiral : MonoBehaviour
     public App app;
     public Slider transparency;
     public Slider visibleLinks;
+    public Toggle toggleVisibleLinksFrom;
     public Slider targetTransparency;
     public Text targetLabel;
     public Color spiralColor = Color.white;
@@ -46,11 +47,13 @@ public partial class ZetaSpiral : MonoBehaviour
     public void Start()
     {
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
-        visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
+        // visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
+        visibleLinks.value = visibleLinks.maxValue;
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
         showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
 
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
+        toggleVisibleLinksFrom = GameObject.Find("ToggleShowLinksFrom")?.GetComponent<Toggle>();
 
         app.DrawSprial += DrawShapes;
         app.SceneChange += savePlayerPrefs;
@@ -59,7 +62,7 @@ public partial class ZetaSpiral : MonoBehaviour
     void savePlayerPrefs() 
     {
         PlayerPrefs.SetFloat(name + "-Transparency", transparency.value);
-        PlayerPrefs.SetFloat(name + "-VisableLinks", visibleLinks.value);
+        // PlayerPrefs.SetFloat(name + "-VisableLinks", visibleLinks.value);
         PlayerPrefs.SetFloat(name + "-ZetaTargetTransparency", targetTransparency.value);
         PlayerPrefs.SetInt(name + "-ShowReverseSpiral", showReverseSpiral.isOn ? 1 : 0);
         PlayerPrefs.Save();
@@ -121,8 +124,18 @@ public partial class ZetaSpiral : MonoBehaviour
 
         if (limitVisibleLinks)
         {
-            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value + 1, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
-            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, spiral.numLinks);
+            AdjustVisibleLinkMax(spiral.middleIndex);
+
+            if(toggleVisibleLinksFrom.isOn)
+            {   
+                startIndex = 1;
+                endIndex = (int)Mathf.Clamp((int)visibleLinks.value + 2, (int)visibleLinks.value + 2, spiral.numLinks);
+            }
+            else
+            {
+                startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value + 1, 1, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
+                endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 2, CameraTracking.trackingIndex + (int)visibleLinks.value + 2, spiral.numLinks);
+            }
         }
 
         var start = spiral.joints[startIndex - 1].ToVector2();
@@ -191,6 +204,14 @@ public partial class ZetaSpiral : MonoBehaviour
 
     }
 
+    private void AdjustVisibleLinkMax(int middleIndex)
+    {
+        int adjust = (middleIndex + 2) - (int)visibleLinks.maxValue;
+        int newValue = (int)visibleLinks.value + adjust;
+        visibleLinks.maxValue += adjust;
+        visibleLinks.value = newValue;
+    }
+
     void drawOutline(Zeta.Spiral spiral)
     {
         if (!onlyDrawOutline.isOn)
@@ -242,8 +263,18 @@ public partial class ZetaSpiral : MonoBehaviour
         bool limitVisibleLinks = visibleLinks.value < visibleLinks.maxValue && CameraTracking.trackingIndex > -1;
         if (limitVisibleLinks)
         {
-            startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value, 0, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
-            endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 1, CameraTracking.trackingIndex + (int)visibleLinks.value + 1, spiral.numLinks);
+            AdjustVisibleLinkMax(spiral.middleIndex);
+
+            if(toggleVisibleLinksFrom.isOn)
+            {   
+                startIndex = 0;
+                endIndex = (int)Mathf.Clamp((int)visibleLinks.value + 1, (int)visibleLinks.value + 1, spiral.numLinks);
+            }
+            else
+            {
+                startIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex - (int)visibleLinks.value, 0, CameraTracking.trackingIndex - (int)visibleLinks.value + 1);
+                endIndex = (int)Mathf.Clamp(CameraTracking.trackingIndex + (int)visibleLinks.value + 1, CameraTracking.trackingIndex + (int)visibleLinks.value + 1, spiral.numLinks);
+            }
 
             if(endIndex >= spiral.joints.Count()) endIndex = spiral.joints.Count() - 1;
         }
