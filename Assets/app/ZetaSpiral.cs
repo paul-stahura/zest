@@ -17,6 +17,8 @@ public partial class ZetaSpiral : MonoBehaviour
     public Slider visibleLinks;
     public Toggle toggleVisibleLinksFrom;
     public Slider targetTransparency;
+    public Toggle _toggleColorLinks;
+
     public Text targetLabel;
     public Color spiralColor = Color.white;
 
@@ -50,6 +52,7 @@ public partial class ZetaSpiral : MonoBehaviour
         // visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
         visibleLinks.value = visibleLinks.maxValue;
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
+        _toggleColorLinks = GameObject.Find("ToggleColorLinks")?.GetComponent<Toggle>();
         showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
 
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
@@ -145,29 +148,32 @@ public partial class ZetaSpiral : MonoBehaviour
             color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
-            if (i == middleLink - 1)
+            if(!_toggleColorLinks.isOn)
             {
-                color = Color.green;
-                color.a = transparency.value;
-                Draw.Thickness = 4;
+                if (i == middleLink - 1)
+                {
+                    color = Color.green;
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink)
+                {
+                    color = new Color(1, .5f, 0, 1f); // orange
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink + 1)
+                {
+                    color = Color.red;
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                // else if (i == sprial.numLinks - 1)
+                // {
+                //     color = Color.red;
+                //     Draw.Thickness = 2;
+                // }
             }
-            else if (i == middleLink)
-            {
-                color = new Color(1, .5f, 0, 1f); // orange
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink + 1)
-            {
-                color = Color.red;
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            // else if (i == sprial.numLinks - 1)
-            // {
-            //     color = Color.red;
-            //     Draw.Thickness = 2;
-            // }
 
 
             var end = spiral.joints[i];
@@ -294,23 +300,26 @@ public partial class ZetaSpiral : MonoBehaviour
             color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
-            if (i == middleLink - 1)
+            if(!_toggleColorLinks.isOn)
             {
-                color = new Color(.6f, 1f, .2f, 1f); // green ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink)
-            {
-                color = new Color(1, .5f, .5f, 1f); // orange ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink + 1)
-            {
-                color = new Color(1, 0, .5f, 1f); // red ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
+                if (i == middleLink - 1)
+                {
+                    color = new Color(.6f, 1f, .2f, 1f); // green ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink)
+                {
+                    color = new Color(1, .5f, .5f, 1f); // orange ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink + 1)
+                {
+                    color = new Color(1, 0, .5f, 1f); // red ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
             }
 
             var to = zeta + spiral.joints[i].Reflect(norm);

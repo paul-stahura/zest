@@ -16,34 +16,34 @@ public class BisectorPoint : MonoBehaviour
     [SerializeField] private App _app;
     [SerializeField] private Color _lineColor = Color.cyan;
     private Toggle _bisectorPointToggle;
-    private Text _bpLengthDiff;
-    private Text _bpAngle;
+    // private Text _bpLengthDiff;
+    // private Text _bpAngle;
 
-    private Button _seekNextButton;
-    private Button _seekPrevButton;
-    private Text _infoText;
+    // private Button _seekNextButton;
+    // private Button _seekPrevButton;
+    // private Text _infoText;
     
 
     void Awake()
     {
         _app = GameObject.Find("App")?.GetComponent<App>();
         _bisectorPointToggle = GameObject.Find("BisectorPointToggle")?.GetComponent<Toggle>();
-        _bpLengthDiff = GameObject.Find("BisectorLineLengthDiff")?.GetComponent<Text>();
-        _bpAngle = GameObject.Find("BisectorLineAngle")?.GetComponent<Text>();
+        // _bpLengthDiff = GameObject.Find("BisectorLineLengthDiff")?.GetComponent<Text>();
+        // _bpAngle = GameObject.Find("BisectorLineAngle")?.GetComponent<Text>();
         
-        _seekNextButton = GameObject.Find("FindNextBisectorButton")?.GetComponent<Button>();
-        _seekPrevButton = GameObject.Find("FindPrevBisectorButton")?.GetComponent<Button>();
-        _infoText = GameObject.Find("FindBisectorText")?.GetComponent<Text>();
+        // _seekNextButton = GameObject.Find("FindNextBisectorButton")?.GetComponent<Button>();
+        // _seekPrevButton = GameObject.Find("FindPrevBisectorButton")?.GetComponent<Button>();
+        // _infoText = GameObject.Find("FindBisectorText")?.GetComponent<Text>();
 
-        _seekNextButton.onClick.AddListener(() => {
-            double next = SeekNextEqualLength(_app.Real, _app.Index);
-            _app.Index = next;
-        });
+        // _seekNextButton.onClick.AddListener(() => {
+        //     double next = SeekNextEqualLength(_app.Real, _app.Index);
+        //     _app.Index = next;
+        // });
 
-        _seekPrevButton.onClick.AddListener(() => {
-            double next = SeekNextEqualLength(_app.Real, _app._index, true);
-            _app.Index = next;
-        });
+        // _seekPrevButton.onClick.AddListener(() => {
+        //     double next = SeekNextEqualLength(_app.Real, _app._index, true);
+        //     _app.Index = next;
+        // });
 
         _app.DrawSprial += DrawBisectorPoints;
     }
@@ -97,10 +97,10 @@ public class BisectorPoint : MonoBehaviour
 
             Vector a = bp;
             Vector b = zeta - bp;
-            _bpLengthDiff.text = Math.Abs(a.Length - b.Length).ToString();
+            // _bpLengthDiff.text = Math.Abs(a.Length - b.Length).ToString();
 
             double angle = Vector2.Dot((Vector2)a.Normalized(), (Vector2)b.Normalized());
-            _bpAngle.text = angle.ToString();
+            // _bpAngle.text = angle.ToString();
         }
     }
 
@@ -136,11 +136,11 @@ public class BisectorPoint : MonoBehaviour
         return bp;
     }
 
-    private double SeekNextEqualLength(double real, double index, bool reverse = false)
+    private double SeekNextEqualLength(double real, double index, Text infoText, bool reverse = false)
     {
         if(real == 0.5f)
         {
-            _infoText.text = $"Real 0.5";
+            infoText.text = $"Real 0.5";
             return real;
         }
 
@@ -153,7 +153,7 @@ public class BisectorPoint : MonoBehaviour
             inc *= -1;
         }
 
-        _infoText.text = $"Searching...";
+        infoText.text = $"Searching...";
 
         Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, _app.useNewImagToggle.isOn);
         Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
@@ -180,11 +180,11 @@ public class BisectorPoint : MonoBehaviour
             {
                 if(Math.Floor(lastIndex) != Math.Floor(s.index))
                 {
-                    _infoText.text = $"NEW INDEX";
+                    infoText.text = $"NEW INDEX";
                 }
                 else
                 {
-                    _infoText.text = $"Found: {s.index}";
+                    infoText.text = $"Found: {s.index}";
                 }
                 return s.index;
             }
@@ -195,7 +195,7 @@ public class BisectorPoint : MonoBehaviour
             lastIndex = s.index;
         }
 
-        _infoText.text = $"MAX DEPTH";
+        infoText.text = $"MAX DEPTH";
 
         return s.index;
     }
