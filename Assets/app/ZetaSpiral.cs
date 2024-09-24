@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 using System.Linq;
+using TMPro;
 
 
 public partial class ZetaSpiral : MonoBehaviour
@@ -17,12 +18,18 @@ public partial class ZetaSpiral : MonoBehaviour
     public Slider visibleLinks;
     public Toggle toggleVisibleLinksFrom;
     public Slider targetTransparency;
+    public Toggle _toggleZetaRealPoints;
+    public Toggle _toggleColorLinks;
+
+    public TMP_Dropdown _spiralFormula;
+
     public Text targetLabel;
     public Color spiralColor = Color.white;
 
     [Header("Reverse Spiral")]
     public Toggle showReverseSpiral;
     public Color reverseSpiralColor;
+
 
 
 
@@ -46,10 +53,14 @@ public partial class ZetaSpiral : MonoBehaviour
     }
     public void Start()
     {
+        _spiralFormula = GameObject.Find("SpiralFormulaDropdown")?.GetComponent<TMP_Dropdown>();
+
         transparency.value = PlayerPrefs.GetFloat(name + "-Transparency", .7f);
         // visibleLinks.value = PlayerPrefs.GetFloat(name + "-VisableLinks", 5f);
         visibleLinks.value = visibleLinks.maxValue;
         targetTransparency.value = PlayerPrefs.GetFloat(name + "-ZetaTargetTransparency", 1f);
+        _toggleZetaRealPoints = GameObject.Find("ToggleZetaRealPoints")?.GetComponent<Toggle>();
+        _toggleColorLinks = GameObject.Find("ToggleColorLinks")?.GetComponent<Toggle>();
         showReverseSpiral.isOn = PlayerPrefs.GetInt(name + "-ShowReverseSpiral", 1) == 1;
 
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
@@ -145,29 +156,32 @@ public partial class ZetaSpiral : MonoBehaviour
             color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
-            if (i == middleLink - 1)
+            if(!_toggleColorLinks.isOn)
             {
-                color = Color.green;
-                color.a = transparency.value;
-                Draw.Thickness = 4;
+                if (i == middleLink - 1)
+                {
+                    color = Color.green;
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink)
+                {
+                    color = new Color(1, .5f, 0, 1f); // orange
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink + 1)
+                {
+                    color = Color.red;
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                // else if (i == sprial.numLinks - 1)
+                // {
+                //     color = Color.red;
+                //     Draw.Thickness = 2;
+                // }
             }
-            else if (i == middleLink)
-            {
-                color = new Color(1, .5f, 0, 1f); // orange
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink + 1)
-            {
-                color = Color.red;
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            // else if (i == sprial.numLinks - 1)
-            // {
-            //     color = Color.red;
-            //     Draw.Thickness = 2;
-            // }
 
 
             var end = spiral.joints[i];
@@ -228,10 +242,10 @@ public partial class ZetaSpiral : MonoBehaviour
 
 
 
-    void drawZetaTarget(Zeta.Spiral sprial)
+    void drawZetaTarget(Zeta.Spiral s)
     {
-        var pt = sprial.zeta.ToVector2();
-        targetLabel.text = $"({sprial.zeta.Real.ToString("n8")}, {sprial.zeta.Imaginary.ToString("n8")})";
+        var pt = s.zeta.ToVector2();
+        targetLabel.text = $"({s.zeta.Real.ToString("n8")}, {s.zeta.Imaginary.ToString("n8")})";
 
         var color = spiralColor + new Color(-0.5f, 0, 0);
         color.a = targetTransparency.value;
@@ -242,6 +256,23 @@ public partial class ZetaSpiral : MonoBehaviour
 
         Draw.Ring(pt, 1f);
 
+        if(_toggleZetaRealPoints.isOn)
+        {
+            int ptCount = 100;
+            Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+            pt = rspiral.zeta.ToVector2();
+            for(int i = 1; i <= ptCount; i++)
+            {
+                float r = (float)i/ptCount;
+                rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                Vector2 nextTarget = rspiral.zeta.ToVector2();
+                Draw.Line(pt, nextTarget);
+                pt = nextTarget;
+            }
+
+            // Draw.Line(new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2(), pt);
+            // Draw.Line(pt, new Zeta.Spiral(1, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2());
+        }
     }
 
 
@@ -294,23 +325,26 @@ public partial class ZetaSpiral : MonoBehaviour
             color.a = transparency.value;
             Draw.Thickness = 1 + transparency.value;
 
-            if (i == middleLink - 1)
+            if(!_toggleColorLinks.isOn)
             {
-                color = new Color(.6f, 1f, .2f, 1f); // green ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink)
-            {
-                color = new Color(1, .5f, .5f, 1f); // orange ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
-            }
-            else if (i == middleLink + 1)
-            {
-                color = new Color(1, 0, .5f, 1f); // red ish
-                color.a = transparency.value;
-                Draw.Thickness = 4;
+                if (i == middleLink - 1)
+                {
+                    color = new Color(.6f, 1f, .2f, 1f); // green ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink)
+                {
+                    color = new Color(1, .5f, .5f, 1f); // orange ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
+                else if (i == middleLink + 1)
+                {
+                    color = new Color(1, 0, .5f, 1f); // red ish
+                    color.a = transparency.value;
+                    Draw.Thickness = 4;
+                }
             }
 
             var to = zeta + spiral.joints[i].Reflect(norm);
