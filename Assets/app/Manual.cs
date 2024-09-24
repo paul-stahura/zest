@@ -16,6 +16,8 @@ public class Manual : MonoBehaviour
 
         _manualPanel.SetActive(showManual);
         OnUpdateDescription += ChangeDescription;
+
+        ChangeDescription("");
     }
 
     void OnDestroy() 
@@ -38,6 +40,11 @@ public class Manual : MonoBehaviour
 
     public void ChangeDescription(string text)
     {
+        if(text == "")
+        {
+            text = " M to hide";
+        }
+
         _description.text = text;
     }
 
