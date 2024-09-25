@@ -380,7 +380,7 @@ public class Zeta
             double T(double t) => Math.Sqrt(t / (2 * Math.PI)) - v(t);
             double phi(double t) => Math.Cos(2 * Math.PI * (t * t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
             double c0(double t) => phi(T(t));
-            double c2(double t) => 0;
+            double c1(double t) => -PsiThirdDerivative(T(t)) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(t/(2*Math.PI), -0.5);
 
             var a = new double[v(t)];
             for (var k = 0; k < a.Length; k++)
@@ -388,8 +388,9 @@ public class Zeta
 
             var b = Math.Pow(-1, v(t) - 1) * Math.Pow(2 * Math.PI / t, .25) * (
                     c0(t) +
-                    Math.Sqrt(2 * Math.PI / t) *
-                    c2(t)
+                    // Math.Sqrt(2 * Math.PI / t) *
+                    // c2(t)
+                    c1(t)
                 );
 
             return 2 * a.Sum() + b;
@@ -401,6 +402,26 @@ public class Zeta
         var imag = s.Imaginary;
 
         return new Complex(Zx(imag), Zy(imag));
+    }
+
+    public static double PsiThirdDerivative(double imag)
+    {
+        // Constants
+        double pi = Math.PI;
+
+        // Terms in the formula
+        double term1 = Math.Pow(pi, 3) * Math.Pow(4 * imag - 2, 3) * Math.Sin(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Cos(2 * pi * imag);
+        double term2 = -6 * Math.Pow(pi, 3) * Math.Pow(4 * imag - 2, 2) * Math.Sin(2 * pi * imag) * Math.Cos(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Pow(Math.Cos(2 * pi * imag), 2);
+        double term3 = -24 * Math.Pow(pi, 3) * (4 * imag - 2) * Math.Pow(Math.Sin(2 * pi * imag), 2) * Math.Sin(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Pow(Math.Cos(2 * pi * imag), 3);
+        double term4 = -12 * Math.Pow(pi, 3) * (4 * imag - 2) * Math.Sin(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Cos(2 * pi * imag);
+        double term5 = -4 * Math.Pow(pi, 2) * (4 * imag - 2) * Math.Cos(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Cos(2 * pi * imag);
+        double term6 = -Math.Pow(pi, 2) * (32 * imag - 16) * Math.Cos(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Cos(2 * pi * imag);
+        double term7 = 48 * Math.Pow(pi, 3) * Math.Pow(Math.Sin(2 * pi * imag), 3) * Math.Cos(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Pow(Math.Cos(2 * pi * imag), 4);
+        double term8 = -24 * Math.Pow(pi, 2) * Math.Sin(2 * pi * imag) * Math.Sin(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Pow(Math.Cos(2 * pi * imag), 2);
+        double term9 = 40 * Math.Pow(pi, 3) * Math.Sin(2 * pi * imag) * Math.Cos(pi * (2 * imag * imag - 2 * imag - 1.0 / 8)) / Math.Pow(Math.Cos(2 * pi * imag), 2);
+
+        // Return the sum of all terms
+        return term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8 + term9;
     }
 
     // https://www.desmos.com/calculator/xyhvjwzk2q

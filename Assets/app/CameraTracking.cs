@@ -100,7 +100,7 @@ public class CameraTracking : MonoBehaviour
         trackJointIMinusN.isOn = PlayerPrefs.GetInt("TrackJointI-N") != 0 ? true : false;
         spiralNumber.value = PlayerPrefs.GetInt("TrackSpiralNum");
         
-        middleLinkTeardrop = GetComponent<MiddleLinkTeardrop>();
+        middleLinkTeardrop = GameObject.Find("YinYang")?.GetComponent<MiddleLinkTeardrop>();
         #endregion
 
         app.DrawSprial += drawShapes;

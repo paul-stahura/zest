@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using Shapes;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,7 +28,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
     public event Action<Camera, Zeta.Spiral> InfinityTdropPoints;
 
     private List<Vector> _exactTdropA;
+    private List<Vector> _YangPoints;
     private List<Vector> _exactTdropB;
+    private List<Vector> _YinPoints;
 
     public void Awake()
     {
@@ -59,6 +62,7 @@ public class MiddleLinkTeardrop : MonoBehaviour
     {
         app.DrawSprial += DrawINFTeardrop;
         app.DrawSprial += DrawExactTeardrop;
+        app.DrawSprial += DrawYinYang;
     }
 
     void OnApplicationQuit()
@@ -180,6 +184,146 @@ public class MiddleLinkTeardrop : MonoBehaviour
             }
         }
     }
+
+    private void DrawYinYang(Camera cam, Zeta.Spiral s)
+    {
+        _YinPoints = new();
+        _YangPoints = new();
+
+        int index = (int)Math.Floor(s.index);
+        double inc = 1d / (_pointsPerTdrop - 1);
+        Debug.Assert(inc > 0);
+        for (int i = 0; i < _pointsPerTdrop; i++)
+        {
+            double t = i * inc;
+            _YinPoints.Add(Yin(index + t) + new Vector(0.5, 0));
+            _YangPoints.Add(Yang(index + t) - new Vector(0.5, 0));
+        }
+
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
+
+        using (Draw.StyleScope)
+        {
+            TeardropColorA.a = RGTeardropTransparency.value;
+            TeardropColorB.a = RGTeardropTransparency.value;
+            Draw.Thickness = 1 + RGTeardropTransparency.value;
+            
+            var startA = trackDrop(_YangPoints[0], s.joints[s.middleIndex + 1]);
+            var startB = trackDrop(_YinPoints[0], s.joints[s.middleIndex]);
+            for (int i = 1; i < _YinPoints.Count; i++)
+            {
+                var endA = trackDrop(_YangPoints[i], s.joints[s.middleIndex + 1]);
+                var endB = trackDrop(_YinPoints[i], s.joints[s.middleIndex]);
+
+                Draw.Color = Color.magenta;//TeardropColorA;
+                Draw.Line(startA, endA);
+                startA = endA;
+
+                Draw.Color = Color.cyan;//TeardropColorB;
+                Draw.Line(startB, endB);
+                startB = endB;
+            }
+        }
+
+        // test calculations
+        // double index = s.index;
+        // Debug.Log(index);
+        // Debug.Log(Yin(s.index));
+        // Debug.Log(Yang(s.index));
+        // Debug.Log(Dyangl(index));
+        // Debug.Log(Dyinl(index));
+        // Debug.Log(Beta(index));
+        // Debug.Log(Square(index));
+        // double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+        // Debug.Log(P(imag));
+        // Debug.Log(C1(imag));
+        // Debug.Log(Zeta.PsiThirdDerivative(imag));
+
+        if(_drawInverseTdrops)
+        {
+            Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+
+            using (Draw.StyleScope)
+            {
+                Draw.Thickness = 1 + RGTeardropTransparency.value;
+
+                var colorR = new Color(1, 0, .5f, 1f); // red ish
+                colorR.a = RGTeardropTransparency.value;
+
+                var colorG = new Color(.6f, 1f, .2f, 1f); // green ish
+                colorG.a = RGTeardropTransparency.value;
+                
+                var z = s.zeta.ToVector();
+                var norm = z.Normalized();
+                
+                var startInverseA = trackInverseDrop(_YangPoints[0].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                var startInverseB = trackInverseDrop(_YinPoints[0].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
+                for (int i = 1; i < _YinPoints.Count; i++)
+                {
+                    var endInverseA = trackInverseDrop(_YangPoints[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                    var endInverseB = trackInverseDrop(_YinPoints[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
+
+                    Draw.Color = colorR;
+                    Draw.Line(startInverseA, endInverseA);
+                    startInverseA = endInverseA;
+
+                    Draw.Color = colorG;
+                    Draw.Line(startInverseB, endInverseB);
+                    startInverseB = endInverseB;
+                }
+            }
+        }
+    }
+
+    private Vector Yang(double index)
+    {
+        Vector pt = new Vector(Math.Cos(Beta(index)), Math.Sin(Beta(index)));
+        return pt * Dyangl(index) + new Vector(0.5, 0);
+    }
+
+    private double Dyangl(double index)
+    {
+        return -2*Math.Cos(Beta(index)) - Dyinl(index);
+    }
+
+    private Vector Yin(double index)
+    {
+        Vector pt = new Vector(-Math.Cos(Beta(index)), -Math.Sin(Beta(index)));
+        return pt * Dyinl(index) - new Vector(0.5, 0);
+    }
+
+    private double Dyinl(double index)
+    {
+        double psi(double t) => Math.Cos(2.0 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2.0 * Math.PI * t);
+        double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+        return (-Square(index) * 2.0*Math.Cos(Beta(index))) + (Math.Pow(-1.0, Square(index)) * Math.Sqrt(Math.Ceiling(index)) * Math.Pow(imag / (2.0*Math.PI), -0.25) * (psi(P(imag)) + C1(imag)));
+    }
+
+    private double Beta(double index)
+    {
+        int i = (int)Math.Ceiling(index);
+        double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+        double Theta(double t) => t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
+        
+        return Math.Log(i) * imag - Theta(imag) - Math.PI*(i*i - 1.0);
+    }
+
+    private int Square(double index)
+    {
+        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, app.useNewImagToggle.isOn)/(2*Math.PI))) - Math.Floor(index));
+    }
+
+    private double P(double imag)
+    {
+        double Psqrt = Math.Sqrt(imag / (2*Math.PI));
+        return Psqrt - Math.Floor(Psqrt);
+    }
+
+    private double C1(double imag)
+    {
+        return -Zeta.PsiThirdDerivative(P(imag)) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(imag/(2*Math.PI), -0.5);
+    }
+
 
     private void DrawExactTeardrop(Camera cam, Zeta.Spiral s)
     {
