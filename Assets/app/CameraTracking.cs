@@ -12,8 +12,8 @@ public class CameraTracking : MonoBehaviour
     public Toggle trackBisectorPt;
     public Toggle trackScaledBisectorPt;
     private bool _bisectorCamUp = true;
-    public Toggle trackTdropA;
-    public Toggle trackTdropB;
+    public Toggle trackTdropR;
+    public Toggle trackTdropG;
     public Toggle trackSpiralCenter;
     public Toggle trackSpiralLink;
     public Toggle trackJointIMinusN;
@@ -52,6 +52,10 @@ public class CameraTracking : MonoBehaviour
     {
         trackBisectorPt = GameObject.Find("Track Bisector")?.GetComponent<Toggle>();
         trackScaledBisectorPt = GameObject.Find("Track Scaled Bisector")?.GetComponent<Toggle>();
+
+        trackTdropR = GameObject.Find("CamTrackR")?.GetComponent<Toggle>();
+        trackTdropG = GameObject.Find("CamTrackG")?.GetComponent<Toggle>();
+
         _cameraDrag = Camera.main.GetComponent<LeanDragCamera>();
 
         trackOrigin.onValueChanged.AddListener((bool v) => {
@@ -66,10 +70,10 @@ public class CameraTracking : MonoBehaviour
         trackScaledBisectorPt.onValueChanged.AddListener((bool v) => {
             ResetCameraOffsets();
         });
-        trackTdropA.onValueChanged.AddListener((bool v) => {
+        trackTdropG.onValueChanged.AddListener((bool v) => {
             ResetCameraOffsets();
         });
-        trackTdropB.onValueChanged.AddListener((bool v) => {
+        trackTdropR.onValueChanged.AddListener((bool v) => {
             ResetCameraOffsets();
         });
         trackSpiralCenter.onValueChanged.AddListener((bool v) => {
@@ -226,14 +230,14 @@ public class CameraTracking : MonoBehaviour
 
     private void TrackTdrop(Camera cam, Zeta.Spiral spiral)
     {
-        if(trackTdropA.isOn)
+        if(trackTdropG.isOn)
         {
-            setCamera(cam, middleLinkTeardrop.TdropDotA, RotationOfLink(spiral, spiral.middleIndex));
+            setCamera(cam, middleLinkTeardrop.TdropDotG, RotationOfLink(spiral, spiral.middleIndex));
         }
 
-        if(trackTdropB.isOn)
+        if(trackTdropR.isOn)
         {
-            setCamera(cam, middleLinkTeardrop.TdropDotB, RotationOfLink(spiral, spiral.middleIndex));
+            setCamera(cam, middleLinkTeardrop.TdropDotR, RotationOfLink(spiral, spiral.middleIndex));
         }
         trackingIndex = spiral.middleIndex;
     }

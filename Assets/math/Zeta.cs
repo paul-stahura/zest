@@ -86,19 +86,20 @@ public class Zeta
 
     /// <summary>
     /// returns a point on the infinity Tdrop
-    /// set TdropA to false for TdropB
     /// </summary>
     /// <param name="index"></param>
-    /// <param name="TdropA"></param>
+    /// <param name="TdropG"></param>
     /// <returns></returns>
-    public static Vector InfinityTdrop(double index, bool TdropA)
+    public static Vector InfinityTdrop(double index, bool TdropR)
     {
         double psi(double t) => Math.Cos(2 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2 * Math.PI * t);
-        Vector a(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
-        Vector tDropa(double t) => a(t) * psi(t);
-        Vector tDropb(double t) => tDropa(t) * Math.Cos(Math.PI);
+        Vector r(double t) => new Vector(Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), -Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
+        Vector g(double t) => new Vector(-Math.Cos(2*Math.PI * (t*t - 1.0/16.0)), Math.Sin(2*Math.PI * (t*t - 1.0/16.0)));
 
-        return TdropA ? tDropa(index) : tDropb(index);
+        Vector tDropR(double t) => r(t) * psi(t);
+        Vector tDropG(double t) => g(t) * psi(t);
+
+        return TdropR ? tDropR(index) : tDropG(index);
     }
 
     public static double LinkRad(Spiral s, int idx)
