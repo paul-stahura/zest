@@ -122,11 +122,23 @@ public class BisectorPoint : MonoBehaviour
 
         // scale the middle link by the formula
         Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-        // first guess
-        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
-
-        // new
-        // Vector a5 = middleLink * Math.Pow(bpInput, 1.5d -s.real);
+        Vector a5 = middleLink;
+        string method = "No Scale";
+        switch(method)
+        {
+            case "First Guess":
+                a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
+                break;
+            case "Shrink":
+                a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
+                break;
+            case "No Scale":
+                a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
+                break;
+            case "One Half":
+                a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
+                return s5.joints[s5.middleIndex] + a5;
+        }
 
         // Debug.Log("input: "+ bpInput);
         // Debug.Log("out: "+ a5.Length / middleLink.Length);

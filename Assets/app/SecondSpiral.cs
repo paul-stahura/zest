@@ -9,6 +9,7 @@ public class SecondSpiral : MonoBehaviour
 {
     public App app;
     public Toggle drawSecondSpiral;
+    public Toggle drawRealOneHalf;
     public Toggle drawRealFan;
     //cbp - Center on Bisector Point
     public Toggle cbp;
@@ -21,6 +22,7 @@ public class SecondSpiral : MonoBehaviour
     
     void Awake()
     {
+        drawRealOneHalf = GameObject.Find("DrawRealOneHalfToggle")?.GetComponent<Toggle>();
         drawRealFan = GameObject.Find("DrawFanSpiralsToggle")?.GetComponent<Toggle>();
         cbp = GameObject.Find("CenterBisectorPointToggle")?.GetComponent<Toggle>();
     }
@@ -40,6 +42,12 @@ public class SecondSpiral : MonoBehaviour
             DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
             DrawFanSpiral(cam, 0.75, spiral.index, centerBP);
             DrawFanSpiral(cam, 1, spiral.index, centerBP);
+        }
+
+        if(drawRealOneHalf.isOn)
+        {
+            var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral, app.useNewImagToggle.isOn);
+            DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
         }
 
         if(drawSecondSpiral.isOn)
