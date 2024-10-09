@@ -84,18 +84,18 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
     {
-        // Draws two dots/circles at the current location of teardrop R and G given the Zeta index
+        // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
         var index = s.index;
         index -= Math.Floor(index);
         var orth = Mathf.Min(1f, cam.orthographicSize);
         var size = 50.0f;
+        
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
 
-        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
-
-        TdropDotR = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex]);
+        TdropDotR = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
 
         index = 1 - index;
-        TdropDotG = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex + 1]);
+        TdropDotG = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
 
         InfinityTdropPoints.Invoke(cam, s);
 
@@ -122,7 +122,7 @@ public class MiddleLinkTeardrop : MonoBehaviour
         {
             return;
         }
-        
+
         using (Draw.StyleScope)
         {
             TeardropColorInf.a = INFTeardropTransparency.value / 4;
@@ -131,8 +131,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
             
             double i = 0;
             double inc = 1d/200;
-            var startR = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex]);
-            var startG = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex + 1]);
+            var startA = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex + 1]);
+            var startB = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex]);
             for (i = inc; i <= 1+inc; i += inc)
             {
                 // Tdrop is undefined at 0.25 and 0.75, so we skip these values
@@ -140,14 +140,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
                     i += inc;
                 }
 
-                var endR = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex]);
-                var endG = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex + 1]);
+                var endA = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex + 1]);
+                var endB = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex]);
 
-                Draw.Line(startR, endR);
-                startR = endR;
+                Draw.Line(startA, endA);
+                startA = endA;
 
-                Draw.Line(startG, endG);
-                startG = endG;
+                Draw.Line(startB, endB);
+                startB = endB;
             }
         }
 
@@ -167,8 +167,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
                 
                 double i = 0;
                 double inc = 1d/200;
-                var startInverseR = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-                var startInverseG = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                var startInverseA = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                var startInverseB = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
                 for (i = inc; i <= 1+inc; i += inc)
                 {
                     // Tdrop is undefined at 0.25 and 0.75, so we skip these values
@@ -176,14 +176,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
                         i += inc;
                     }
 
-                    var endInverseR = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-                    var endInverseG = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                    var endInverseA = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
+                    var endInverseB = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
 
-                    Draw.Line(startInverseR, endInverseR);
-                    startInverseR = endInverseR;
+                    Draw.Line(startInverseA, endInverseA);
+                    startInverseA = endInverseA;
 
-                    Draw.Line(startInverseG, endInverseG);
-                    startInverseG = endInverseG;
+                    Draw.Line(startInverseB, endInverseB);
+                    startInverseB = endInverseB;
                 }
             }
         }
