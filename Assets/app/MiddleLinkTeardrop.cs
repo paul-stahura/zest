@@ -200,6 +200,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
         for (int i = 0; i < _pointsPerTdrop; i++)
         {
             double t = i * inc;
+            if(t < 0.0001) 
+            {
+                t = 0.0001;
+            }
+            else if(t > 0.9999) {
+                t = 0.9999;
+            }
+
             _YinPoints.Add(Yin(index + t) + new Vector(0.5, 0));
             _YangPoints.Add(Yang(index + t) - new Vector(0.5, 0));
         }
