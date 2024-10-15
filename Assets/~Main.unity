@@ -5703,7 +5703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Distance from fold
+  description: Old Bisector
 --- !u!114 &262569613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20736,7 +20736,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Change teardrop transparency
+  description: Prev G R Tdrop
 --- !u!114 &976333857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25432,7 +25432,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Distance from fold
+  description: Biscetor Point At 1/2
 --- !u!1 &1242638499
 GameObject:
   m_ObjectHideFlags: 0
@@ -25803,7 +25803,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Change teardrop transparency
+  description: Yin Yang Transparency
 --- !u!1 &1265382118
 GameObject:
   m_ObjectHideFlags: 0
@@ -39071,7 +39071,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Symmetrical bisector transparency
+  description: Bisector transparency
 --- !u!1 &1914011164
 GameObject:
   m_ObjectHideFlags: 0
