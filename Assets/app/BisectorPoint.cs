@@ -12,10 +12,13 @@ using Vector3 = UnityEngine.Vector3;
 
 public class BisectorPoint : MonoBehaviour
 {
-    [SerializeField] private bool _prevButton = false;
+    // [SerializeField] private bool _prevButton = false;
     [SerializeField] private App _app;
+    [SerializeField] private Color _lineColorR = Color.red;
+    [SerializeField] private Color _lineColorG = Color.green;
     [SerializeField] private Color _lineColor = Color.cyan;
     private Toggle _bisectorPointToggle;
+    private Slider _transparencySilider;
     // private Text _bpLengthDiff;
     // private Text _bpAngle;
 
@@ -28,6 +31,7 @@ public class BisectorPoint : MonoBehaviour
     {
         _app = GameObject.Find("App")?.GetComponent<App>();
         _bisectorPointToggle = GameObject.Find("BisectorPointToggle")?.GetComponent<Toggle>();
+        _transparencySilider = GameObject.Find("BisectorTransparencySlider")?.GetComponent<Slider>();
         // _bpLengthDiff = GameObject.Find("BisectorLineLengthDiff")?.GetComponent<Text>();
         // _bpAngle = GameObject.Find("BisectorLineAngle")?.GetComponent<Text>();
         
@@ -55,7 +59,8 @@ public class BisectorPoint : MonoBehaviour
 
     private void DrawBisectorPoints(Camera cam, Zeta.Spiral s)
     {
-        if(!_bisectorPointToggle.isOn) return;
+        if (!_bisectorPointToggle.isOn || _transparencySilider.value == 0)
+            return;
 
         Vector zeta = s.zeta.ToVector();
         Vector zeta2 = s.zeta.ToVector() / 2.0;
@@ -64,13 +69,21 @@ public class BisectorPoint : MonoBehaviour
 
         using(Draw.StyleScope)
         {
-            var color = _lineColor;
-            color.a = 0.5f;
+            var color = _lineColorR;
+            color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
             Draw.Line(bp, origin);
+
+            color = _lineColorG;
+            color.a = _transparencySilider.value;
+            Draw.Color = color;
             Draw.Line(bp, zeta);
+
+            color = _lineColor;
+            color.a = _transparencySilider.value;
+            Draw.Color = color;
 
             // dashed bisecting line
             Vector a1 = (origin - bp).Normalized();
@@ -122,11 +135,23 @@ public class BisectorPoint : MonoBehaviour
 
         // scale the middle link by the formula
         Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
-        // first guess
-        Vector a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
-
-        // new
-        // Vector a5 = middleLink * Math.Pow(bpInput, 1.5d -s.real);
+        Vector a5 = middleLink;
+        string method = "One Half";
+        switch(method)
+        {
+            case "First Guess":
+                a5 = middleLink * Math.Pow(bpInput, 2d*(1d -s.real));
+                break;
+            case "Shrink":
+                a5 = middleLink * Math.Pow(bpInput, 1.5d -s.real);
+                break;
+            case "No Scale":
+                a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
+                break;
+            case "One Half":
+                a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
+                return s5.joints[s5.middleIndex] + a5;
+        }
 
         // Debug.Log("input: "+ bpInput);
         // Debug.Log("out: "+ a5.Length / middleLink.Length);

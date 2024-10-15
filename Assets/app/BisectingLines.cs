@@ -7,6 +7,7 @@ public class BisectingLines : MonoBehaviour
 {
     public App app;
     public Slider transparency;
+    private Toggle _bisectorPointToggle;
     [SerializeField] public Color color = new Color(1, 0.56f, 0, 0.5f);
     public float thickness = 1f;
 
@@ -14,6 +15,12 @@ public class BisectingLines : MonoBehaviour
     {
         savePlayerPrefs();
     }
+
+    void Awake()
+    {
+        _bisectorPointToggle = GameObject.Find("OldBisectorPointToggle")?.GetComponent<Toggle>();
+    }
+
     void Start()
     {
         transparency.onValueChanged.AddListener(value => color = new Color(color.r, color.g, color.b, value));
@@ -30,7 +37,7 @@ public class BisectingLines : MonoBehaviour
 
     void drawShapes(Camera cam, Zeta.Spiral spiral)
     {
-        if (transparency.value == 0)
+        if (!_bisectorPointToggle.isOn || transparency.value == 0)
             return;
 
         using (Draw.StyleScope)

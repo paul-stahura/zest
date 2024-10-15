@@ -132,7 +132,7 @@ public partial class ZetaSpiral : MonoBehaviour
 
         var startIndex = 1;
         var endIndex = spiral.numLinks;
-
+        
         if (limitVisibleLinks)
         {
             AdjustVisibleLinkMax(spiral.middleIndex);
@@ -251,10 +251,10 @@ public partial class ZetaSpiral : MonoBehaviour
         color.a = targetTransparency.value;
 
         Draw.Color = color;
-        Draw.Ring(pt, .08f);
+        // Draw.Ring(pt, .08f);
         ShapesUtils.DrawCross(pt, .1f);
 
-        Draw.Ring(pt, 1f);
+        // Draw.Ring(pt, 1f);
 
         if(_toggleZetaRealPoints.isOn)
         {
