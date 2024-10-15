@@ -146,7 +146,7 @@ public class CameraTracking : MonoBehaviour
         spiralNumber.maxValue = spiral.spirals.Count() - 1;
 
         // default to not tracking any link index
-        trackingIndex = -1;
+        // trackingIndex = -1;
 
         if(trackOrigin.isOn)
         {

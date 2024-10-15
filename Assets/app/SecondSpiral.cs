@@ -13,6 +13,9 @@ public class SecondSpiral : MonoBehaviour
     public Toggle drawRealFan;
     //cbp - Center on Bisector Point
     public Toggle cbp;
+    public Slider bisectorTransparencySlider;
+    public Slider targetTransparencySlider;
+    public Toggle bisectorToggle;
     public TMP_Dropdown spiralFormula;
     public ZetaSpiral zetaSpiral;
 
@@ -22,9 +25,14 @@ public class SecondSpiral : MonoBehaviour
     
     void Awake()
     {
+        zetaSpiral = GameObject.Find("ZetaSpiral")?.GetComponent<ZetaSpiral>();
+
         drawRealOneHalf = GameObject.Find("DrawRealOneHalfToggle")?.GetComponent<Toggle>();
         drawRealFan = GameObject.Find("DrawFanSpiralsToggle")?.GetComponent<Toggle>();
         cbp = GameObject.Find("CenterBisectorPointToggle")?.GetComponent<Toggle>();
+        bisectorTransparencySlider = GameObject.Find("BisectorTransparencySlider")?.GetComponent<Slider>();
+        targetTransparencySlider = GameObject.Find("TargetTransparencySlider")?.GetComponent<Slider>();
+        bisectorToggle = GameObject.Find("BisectorPointToggle")?.GetComponent<Toggle>();
     }
 
     public void Start()
@@ -126,5 +134,38 @@ public class SecondSpiral : MonoBehaviour
         zetaSpiral.spiralColor = color;
         zetaSpiral.DrawOffsetSpiral(cam, s, offset);
         zetaSpiral.spiralColor = tempColor;
+
+        Vector bp = BisectorPoint.GetScaledBisectorPoint(s, app.useNewImagToggle.isOn);
+
+        if(bisectorToggle.isOn && bisectorTransparencySlider.value != 0)
+        {
+            using(Draw.StyleScope)
+            {
+                color = Color.cyan;
+                color.a = bisectorTransparencySlider.value;
+                Draw.Color = color;
+                Draw.Thickness = 1 + color.a;
+
+                Draw.Line(s.zeta.ToVector2(), bp);
+            }
+        }
+
+        if(targetTransparencySlider.value > 0)
+        {
+            color = Color.cyan;
+            color.a = targetTransparencySlider.value;
+            Draw.Color = color;
+            Draw.Thickness = 1 + color.a;
+
+            ShapesUtils.DrawCross(s.zeta.ToVector2(), .1f);
+            
+            color.a = targetTransparencySlider.value - 0.5f;
+            if(color.a < 0.05f) color.a = 0.05f;
+            Draw.Color = color;
+            Draw.Thickness = 1;
+
+            Vector origin = new Vector(0,0);
+            Draw.Ring(bp, UnityEngine.Vector3.Distance(bp, origin));
+        }
     }
 }
