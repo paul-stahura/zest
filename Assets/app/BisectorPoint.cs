@@ -3,6 +3,7 @@ using System.Drawing.Text;
 using System.IO.Compression;
 using System.Numerics;
 using Shapes;
+using SRF;
 using SRF.UI;
 using TMPro;
 using UnityEngine;
@@ -80,6 +81,16 @@ public class BisectorPoint : MonoBehaviour
             color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Line(bp, zeta);
+
+            // check same length
+            var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
+            color = Color.magenta;
+            color.a = _transparencySilider.value;
+            Draw.Color = color;
+            var similarityLineCenter = zeta / 2;
+            var offset = (zeta).Normalized() * sameLength / 2;
+            Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
+
 
             color = _lineColor;
             color.a = _transparencySilider.value;
