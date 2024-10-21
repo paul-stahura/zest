@@ -82,16 +82,6 @@ public class BisectorPoint : MonoBehaviour
             Draw.Color = color;
             Draw.Line(bp, zeta);
 
-            // check same length
-            var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
-            color = Color.magenta;
-            color.a = _transparencySilider.value;
-            Draw.Color = color;
-            var similarityLineCenter = zeta / 2;
-            var offset = (zeta).Normalized() * sameLength / 2;
-            Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
-
-
             color = _lineColor;
             color.a = _transparencySilider.value;
             Draw.Color = color;
@@ -125,6 +115,17 @@ public class BisectorPoint : MonoBehaviour
 
             double angle = Vector2.Dot((Vector2)a.Normalized(), (Vector2)b.Normalized());
             // _bpAngle.text = angle.ToString();
+
+
+            // check same length
+            var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
+            color = Color.magenta;
+            color.a = _transparencySilider.value;
+            Draw.Color = color;
+            Draw.UseDashes = false;
+            var similarityLineCenter = zeta / 2;
+            var offset = (zeta).Normalized() * sameLength / 2;
+            Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
         }
     }
 
