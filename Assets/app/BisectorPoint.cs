@@ -19,6 +19,7 @@ public class BisectorPoint : MonoBehaviour
     [SerializeField] private Color _lineColorG = Color.green;
     [SerializeField] private Color _lineColor = Color.cyan;
     private Toggle _bisectorPointToggle;
+    private Toggle _legLengthToggle;
     private Slider _transparencySilider;
     // private Text _bpLengthDiff;
     // private Text _bpAngle;
@@ -32,6 +33,7 @@ public class BisectorPoint : MonoBehaviour
     {
         _app = GameObject.Find("App")?.GetComponent<App>();
         _bisectorPointToggle = GameObject.Find("BisectorPointToggle")?.GetComponent<Toggle>();
+        _legLengthToggle = GameObject.Find("LegLengthToggle")?.GetComponent<Toggle>();
         _transparencySilider = GameObject.Find("BisectorTransparencySlider")?.GetComponent<Slider>();
         // _bpLengthDiff = GameObject.Find("BisectorLineLengthDiff")?.GetComponent<Text>();
         // _bpAngle = GameObject.Find("BisectorLineAngle")?.GetComponent<Text>();
@@ -118,14 +120,18 @@ public class BisectorPoint : MonoBehaviour
 
 
             // check same length
-            var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
-            color = Color.magenta;
-            color.a = _transparencySilider.value;
-            Draw.Color = color;
-            Draw.UseDashes = false;
-            var similarityLineCenter = zeta / 2;
-            var offset = (zeta).Normalized() * sameLength / 2;
-            Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
+
+            if (_legLengthToggle.isOn)
+            {
+                var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
+                color = Color.magenta;
+                color.a = _transparencySilider.value;
+                Draw.Color = color;
+                Draw.UseDashes = false;
+                var similarityLineCenter = zeta / 2;
+                var offset = (zeta).Normalized() * sameLength / 2;
+                Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
+            }
         }
     }
 
