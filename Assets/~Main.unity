@@ -7037,7 +7037,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Biscetor Point At 1/2
+  description: Leg Length Indicator
 --- !u!114 &334676933
 MonoBehaviour:
   m_ObjectHideFlags: 0
