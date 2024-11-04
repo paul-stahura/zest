@@ -258,6 +258,9 @@ public partial class ZetaSpiral : MonoBehaviour
 
         if(_toggleZetaRealPoints.isOn)
         {
+            Draw.Thickness = 1;
+            Draw.Color = color;
+
             int ptCount = 100;
             Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
             pt = rspiral.zeta.ToVector2();
