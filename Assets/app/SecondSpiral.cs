@@ -154,18 +154,17 @@ public class SecondSpiral : MonoBehaviour
         {
             color = Color.cyan;
             color.a = targetTransparencySlider.value;
-            Draw.Color = color;
-            Draw.Thickness = 1 + color.a;
-
-            ShapesUtils.DrawCross(s.zeta.ToVector2(), .1f);
             
-            color.a = targetTransparencySlider.value - 0.5f;
-            if(color.a < 0.05f) color.a = 0.05f;
             Draw.Color = color;
             Draw.Thickness = 1;
-
             Vector origin = new Vector(0,0);
             Draw.Ring(bp, UnityEngine.Vector3.Distance(bp, origin));
+
+            color.a = targetTransparencySlider.value - 0.5f;
+            color.a = color.a < 0 ? 0 : color.a;
+            Draw.Color = color;
+            Draw.Thickness = 1 + color.a;
+            ShapesUtils.DrawCross(s.zeta.ToVector2(), .1f);
         }
     }
 }

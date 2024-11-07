@@ -15,8 +15,8 @@ public class BisectorPoint : MonoBehaviour
 {
     // [SerializeField] private bool _prevButton = false;
     [SerializeField] private App _app;
-    [SerializeField] private Color _lineColorR = Color.red;
-    [SerializeField] private Color _lineColorG = Color.green;
+    [SerializeField] private Color _lineColorG = Color.red;
+    [SerializeField] private Color _lineColorR = Color.green;
     [SerializeField] private Color _lineColor = Color.cyan;
     private Toggle _bisectorPointToggle;
     private Toggle _legLengthToggle;
@@ -72,14 +72,14 @@ public class BisectorPoint : MonoBehaviour
 
         using(Draw.StyleScope)
         {
-            var color = _lineColorR;
+            var color = _lineColorG;
             color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
             Draw.Line(bp, origin);
 
-            color = _lineColorG;
+            color = _lineColorR;
             color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Line(bp, zeta);

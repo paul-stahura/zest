@@ -252,29 +252,53 @@ public partial class ZetaSpiral : MonoBehaviour
 
         Draw.Color = color;
         // Draw.Ring(pt, .08f);
-        ShapesUtils.DrawCross(pt, .1f);
+        using (Draw.StyleScope)
+        {
+            var zColor = color;
+            zColor.a -= 0.5f;
+            zColor.a = zColor.a < 0 ? 0 : zColor.a;
+            Draw.Color = zColor;
+            Draw.Thickness = 1;
+            // ShapesUtils.DrawCross(pt, .1f);
+            // -Z
+            var r = .05f;
+            Draw.Line(pt + new Vector2(-r/2, 0), pt + new Vector2(r/2, 0)); // -
+            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, r));    // /
+            Draw.Line(pt + new Vector2(-r, r), pt + new Vector2(r, r));     // `
+            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r,-r));    // _
+
+            // +O
+            r = .1f;
+            ShapesUtils.DrawCross(Vector2.zero, r);
+            Draw.Ring(Vector2.zero, r/2);
+        }
 
         // Draw.Ring(pt, 1f);
 
         if(_toggleZetaRealPoints.isOn)
         {
-            Draw.Thickness = 1;
-            Draw.Color = color;
-
-            int ptCount = 100;
-            Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
-            pt = rspiral.zeta.ToVector2();
-            for(int i = 1; i <= ptCount; i++)
+            using(Draw.StyleScope)
             {
-                float r = (float)i/ptCount;
-                rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
-                Vector2 nextTarget = rspiral.zeta.ToVector2();
-                Draw.Line(pt, nextTarget);
-                pt = nextTarget;
-            }
+                var pathColor = Color.magenta;
+                pathColor.a = targetTransparency.value;
+                Draw.Thickness = 1;
+                Draw.Color = pathColor;
 
-            // Draw.Line(new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2(), pt);
-            // Draw.Line(pt, new Zeta.Spiral(1, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2());
+                int ptCount = 100;
+                Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                pt = rspiral.zeta.ToVector2();
+                for(int i = 1; i <= ptCount; i++)
+                {
+                    float r = (float)i/ptCount;
+                    rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                    Vector2 nextTarget = rspiral.zeta.ToVector2();
+                    Draw.Line(pt, nextTarget);
+                    pt = nextTarget;
+                }
+
+                // Draw.Line(new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2(), pt);
+                // Draw.Line(pt, new Zeta.Spiral(1, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2());
+            }
         }
     }
 
