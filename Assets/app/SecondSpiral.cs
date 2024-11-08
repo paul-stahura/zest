@@ -1,7 +1,8 @@
 using System.Numerics;
 using Shapes;
 using TMPro;
-using Unity.VersionControl.Git;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -157,8 +158,9 @@ public class SecondSpiral : MonoBehaviour
             
             Draw.Color = color;
             Draw.Thickness = 1;
-            Vector origin = new Vector(0,0);
-            Draw.Ring(bp, UnityEngine.Vector3.Distance(bp, origin));
+            // !!! the leg lengths at 1/2 are not always equal with the Bp formula
+            // Draw.Ring(bp, UnityEngine.Vector3.Distance(bp, s.zeta.ToVector2()));
+            Draw.Ring(bp, Vector3.Distance(Vector2.zero, bp));
 
             color.a = targetTransparencySlider.value - 0.5f;
             color.a = color.a < 0 ? 0 : color.a;
