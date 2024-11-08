@@ -98,11 +98,6 @@ public class BisectorPoint : MonoBehaviour
                 Draw.Color = color;
                 Draw.Ring(bp, .005f);
                 ShapesUtils.DrawCross45(bp, .05f);
-
-                var crotch = BisectingLines.CrotchPoint(s);
-                Draw.Color = new Color(1, 0.5697687f, 0, color.a);
-                Draw.Ring(crotch, .005f);
-                ShapesUtils.DrawCross45(crotch, .05f);
             }
 
             Vector a = bp;

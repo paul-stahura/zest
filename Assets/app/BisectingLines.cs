@@ -48,11 +48,10 @@ public class BisectingLines : MonoBehaviour
             var zetaPt = spiral.zeta.ToVector2();
 
             var bipt = CrotchPoint(spiral);
+
             Draw.Line(Vector2.zero, zetaPt);
             Draw.Line(Vector2.zero, bipt);
             Draw.Line(bipt, zetaPt);
-
-
 
             // Draw dashed bisecting line. Extend it past a little bit
             var z2 = (zetaPt / 2);
@@ -60,6 +59,9 @@ public class BisectingLines : MonoBehaviour
             Draw.Thickness = thickness * 2;
             Draw.UseDashes = true;
             Draw.Line(z2 + dir, bipt - dir);
+
+            Draw.Ring(bipt, .005f);
+            ShapesUtils.DrawCross45(bipt, .05f);
         }
     }
 
