@@ -1,11 +1,5 @@
 using System;
-using System.Drawing.Text;
-using System.IO.Compression;
-using System.Numerics;
 using Shapes;
-using SRF;
-using SRF.UI;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Vector2 = UnityEngine.Vector2;
@@ -15,8 +9,8 @@ public class BisectorPoint : MonoBehaviour
 {
     // [SerializeField] private bool _prevButton = false;
     [SerializeField] private App _app;
-    [SerializeField] private Color _lineColorR = Color.red;
-    [SerializeField] private Color _lineColorG = Color.green;
+    [SerializeField] private Color _lineColorG = Color.red;
+    [SerializeField] private Color _lineColorR = Color.green;
     [SerializeField] private Color _lineColor = Color.cyan;
     private Toggle _bisectorPointToggle;
     private Toggle _legLengthToggle;
@@ -72,14 +66,14 @@ public class BisectorPoint : MonoBehaviour
 
         using(Draw.StyleScope)
         {
-            var color = _lineColorR;
+            var color = _lineColorG;
             color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
             Draw.Line(bp, origin);
 
-            color = _lineColorG;
+            color = _lineColorR;
             color.a = _transparencySilider.value;
             Draw.Color = color;
             Draw.Line(bp, zeta);
@@ -123,14 +117,20 @@ public class BisectorPoint : MonoBehaviour
 
             if (_legLengthToggle.isOn)
             {
-                var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
-                color = Color.magenta;
+                // var sameLength = Mathf.Abs(Vector2.Distance(bp, origin) - Vector2.Distance(bp, zeta));
+                // color = Color.magenta;
+                // color.a = _transparencySilider.value;
+                // Draw.Color = color;
+                // Draw.UseDashes = false;
+                // var similarityLineCenter = zeta / 2;
+                // var offset = (zeta).Normalized() * sameLength / 2;
+                // Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
+
+                Draw.Color = Color.magenta;
                 color.a = _transparencySilider.value;
-                Draw.Color = color;
-                Draw.UseDashes = false;
-                var similarityLineCenter = zeta / 2;
-                var offset = (zeta).Normalized() * sameLength / 2;
-                Draw.Line(similarityLineCenter - offset, similarityLineCenter + offset);
+                Draw.Thickness = 1;
+                Draw.Ring(bp, Vector3.Distance(bp, s.zeta.ToVector2()));
+                print(bp);
             }
         }
     }
@@ -154,7 +154,7 @@ public class BisectorPoint : MonoBehaviour
         // scale the middle link by the formula
         Vector middleLink = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
         Vector a5 = middleLink;
-        string method = "One Half";
+        string method = "BpFormula";
         switch(method)
         {
             case "First Guess":
@@ -166,9 +166,11 @@ public class BisectorPoint : MonoBehaviour
             case "No Scale":
                 a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
                 break;
-            case "One Half":
+            case "Symmetry at OneHalf":
                 a5 = BisectingLines.CrotchPoint(s5) - s5.joints[s5.middleIndex];
                 return s5.joints[s5.middleIndex] + a5;
+            case "BpFormula":
+                return BpOneHalf(s.index);
         }
 
         // Debug.Log("input: "+ bpInput);
@@ -177,6 +179,113 @@ public class BisectorPoint : MonoBehaviour
         Vector bp = s.joints[s.middleIndex] + a5;
 
         return bp;
+    }
+
+    public static Vector BpOneHalf(double index)
+    {
+        double Psi(double x)
+        {
+            return Math.Cos(2 * Math.PI * (Math.Pow(x, 2) - x - 1.0 / 16)) / Math.Cos(2 * Math.PI * x);
+        }
+        
+        double PsiThirdDerivative(double imag)
+        {
+            if (Math.Abs(imag) < 1e-15) return 0;
+
+            double pi = Math.PI;
+            double pi2 = pi * pi;
+            double pi3 = pi2 * pi;
+
+            // Precompute common values
+            double cos2piImag = Math.Cos(2 * pi * imag);
+            double sin2piImag = Math.Sin(2 * pi * imag);
+            double cosPiExpr = Math.Cos(pi * (2 * Math.Pow(imag, 2) - 2 * imag - 1.0 / 8));
+            double sinPiExpr = Math.Sin(pi * (2 * Math.Pow(imag, 2) - 2 * imag - 1.0 / 8));
+            double sin2piImagSquared = Math.Pow(sin2piImag, 2);
+
+            // Calculate terms using precomputed values
+            double term1 = pi3 * Math.Pow(4 * imag - 2, 3) * sinPiExpr / cos2piImag;
+            double term2 = -6 * pi3 * Math.Pow(4 * imag - 2, 2) * sin2piImag * cosPiExpr / Math.Pow(cos2piImag, 2);
+            double term3 = -24 * pi3 * (4 * imag - 2) * sin2piImagSquared * sinPiExpr / Math.Pow(cos2piImag, 3);
+            double term4 = -12 * pi3 * (4 * imag - 2) * sinPiExpr / cos2piImag;
+            double term5 = -4 * pi2 * (4 * imag - 2) * cosPiExpr / cos2piImag;
+            double term6 = -pi2 * (32 * imag - 16) * cosPiExpr / cos2piImag;
+            double term7 = 48 * pi3 * Math.Pow(sin2piImag, 3) * cosPiExpr / Math.Pow(cos2piImag, 4);
+            double term8 = -24 * pi2 * sin2piImag * sinPiExpr / Math.Pow(cos2piImag, 2);
+            double term9 = 40 * pi3 * sin2piImag * cosPiExpr / Math.Pow(cos2piImag, 2);
+
+            // Return the sum of terms
+            return term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8 + term9;
+        }
+
+        double Beta(double index)
+        {
+            int i = (int)Math.Ceiling(index);
+            double imag = Zeta.IndexToImag(index, false);
+            double theta = Theta(imag);
+
+            return Math.Log(i) * imag - theta - Math.PI * (i * i - 1);
+        }
+
+        double Theta(double t)
+        {
+
+            return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
+                    1 / (48 * t) +
+                    7 / (5760 * Math.Pow(t, 3)) +
+                    31 / (80640 * Math.Pow(t, 5)) +
+                    127 / (430080 * Math.Pow(t, 7)) +
+                    511 / (1216512 * Math.Pow(t, 9)));
+        }
+
+        int Square(double index)
+        {
+            return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, false) / (2 * Math.PI))) - Math.Floor(index));
+        }
+
+        double P(double imag)
+        {
+            double psqrt = Math.Sqrt(imag / (2 * Math.PI));
+            return psqrt - Math.Floor(psqrt);
+        }
+
+        double C1(double imag)
+        {
+            return (-PsiThirdDerivative(P(imag)) /
+                    (96 * Math.PI * Math.PI) *
+                    Math.Pow(imag / (2 * Math.PI), -0.5));
+        }
+        double Djoint(double index)
+        {
+            double imag = Zeta.IndexToImag(index, false);
+            double sq = (Math.Pow(-1, Square(index)) * Math.Sqrt(Math.Ceiling(index))) / (2 * Math.Cos(Beta(index)));
+            double im = Math.Pow(imag / (2 * Math.PI), -0.25);
+            double ps = Psi(P(imag)) + C1(imag);
+
+            return Square(index) - (sq * im * ps);
+        }
+
+        Vector SpiralF(double stretch, double index, double real, double imag)
+        {
+            Vector2 c = Cjoint(index, real, imag);
+            Vector2 c1 = Cjoint(index - 1, real, imag);
+            return new Vector((float)((1 - stretch) * c.x + stretch * c1.x), (float)((1 - stretch) * c.y + stretch * c1.y));
+        }
+
+        Vector2 Cjoint(double index, double real, double imag)
+        {
+            Vector2 p = new Vector2(0, 0);
+            int nLimit = (int)Math.Ceiling(index);
+            for (int n = 1; n <= nLimit; n++)
+            {
+                p.x += (float)(Math.Cos(-imag * Math.Log(n)) / Math.Pow(n, real));
+                p.y += (float)(Math.Sin(-imag * Math.Log(n)) / Math.Pow(n, real));
+            }
+            return p;
+        }
+
+        double stretch = 1 - Djoint(index);
+        return SpiralF(stretch, index, 0.5, Zeta.IndexToImag(index, false));
     }
 
     private double SeekNextEqualLength(double real, double index, Text infoText, bool reverse = false)
