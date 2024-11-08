@@ -130,7 +130,6 @@ public class BisectorPoint : MonoBehaviour
                 color.a = _transparencySilider.value;
                 Draw.Thickness = 1;
                 Draw.Ring(bp, Vector3.Distance(bp, s.zeta.ToVector2()));
-                print(bp);
             }
         }
     }
