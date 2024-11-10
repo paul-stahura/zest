@@ -254,7 +254,7 @@ public partial class ZetaSpiral : MonoBehaviour
         // Draw.Ring(pt, .08f);
         using (Draw.StyleScope)
         {
-            var zColor = color;
+            var zColor = new Color(1, .5f, 0, color.a);
             zColor.a -= 0.5f;
             zColor.a = zColor.a < 0 ? 0 : zColor.a;
             Draw.Color = zColor;

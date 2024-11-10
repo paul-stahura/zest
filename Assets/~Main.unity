@@ -7558,7 +7558,7 @@ GameObject:
   - component: {fileID: 338247104}
   - component: {fileID: 338247103}
   m_Layer: 0
-  m_Name: Bisecting Lines
+  m_Name: Symmetry Lines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

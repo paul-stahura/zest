@@ -47,6 +47,7 @@ public class BisectorPoint : MonoBehaviour
         // });
 
         _app.DrawSprial += DrawBisectorPoints;
+        _app.DrawSprial += DrawZps;
     }
 
     void OnDestroy()
@@ -54,13 +55,40 @@ public class BisectorPoint : MonoBehaviour
         _app.DrawSprial -= DrawBisectorPoints;
     }
 
+    private void DrawZps(Camera cam, Zeta.Spiral s)
+    {
+        if (!_bisectorPointToggle.isOn || _transparencySilider.value == 0)
+            return;
+        
+        using(Draw.StyleScope)
+        {
+            var color = Color.cyan;
+            color.a = _transparencySilider.value;
+            color.a -= 0.5f;
+            Draw.Color = color;
+            Draw.Thickness = 1 + color.a;
+
+            var zps = GetPaulStahuraZeta(s.index);
+            // print(zps.x + " " + zps.y);
+            // ShapesUtils.DrawCross45(zps, thickness:1);
+
+            var r = .05f;
+            Draw.Line(zps + new Vector2(-r/2, 0), zps + new Vector2(r/2, 0)); // -
+            Draw.Line(zps + new Vector2(-r, -r), zps + new Vector2(r, r));    // /
+            Draw.Line(zps + new Vector2(-r, r), zps + new Vector2(r, r));     // `
+            Draw.Line(zps + new Vector2(-r, -r), zps + new Vector2(r,-r));    // _
+        }
+    }
+
     private void DrawBisectorPoints(Camera cam, Zeta.Spiral s)
     {
         if (!_bisectorPointToggle.isOn || _transparencySilider.value == 0)
             return;
 
-        Vector zeta = s.zeta.ToVector();
-        Vector zeta2 = s.zeta.ToVector() / 2.0;
+        // Vector zeta = s.zeta.ToVector();
+        // Vector zeta2 = zeta / 2.0;
+        Vector zeta = GetPaulStahuraZeta(s.index);
+        Vector zeta2 = zeta / 2.0;
         Vector origin = s.joints[0];
         Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
 
@@ -173,6 +201,58 @@ public class BisectorPoint : MonoBehaviour
         Vector bp = s.joints[s.middleIndex] + a5;
 
         return bp;
+    }
+
+    private Vector GetPaulStahuraZeta(double index)
+    {
+        double beta(double index)
+        {
+            double i = Math.Ceiling(index);
+            double imag = Zeta.IndexToImag(index);
+
+            double Theta(double t)
+            {
+                return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
+                        1 / (48 * t) +
+                        7 / (5760 * Math.Pow(t, 3)) +
+                        31 / (80640 * Math.Pow(t, 5)) +
+                        127 / (430080 * Math.Pow(t, 7)) +
+                        511 / (1216512 * Math.Pow(t, 9)));
+            }
+
+            return Math.Log(i) * imag - Theta(imag) - Math.PI * (i * i - 1);
+        }
+
+        double LegR(Vector2 bp)
+        {
+            return Vector2.Distance(new Vector2(0, 0), bp);
+        }
+
+        double AlegR(Vector2 bp)
+        {
+            return Math.Atan2(bp.y, bp.x);
+        }
+
+        double ABlink(double index)
+        {
+            return -Zeta.IndexToImag(index) * Math.Log(Math.Ceiling(index));
+        }
+
+        double AlegG(Vector2 bp, double index)
+        {
+            return 2 * (beta(index) + ABlink(index) - AlegR(bp));
+        }
+
+        var Bp = BpOneHalf(index);
+
+        double Alr = AlegR(Bp);
+        double Alg = AlegG(Bp, index);
+        double Lr = LegR(Bp);
+
+        return new Vector(
+            (float)(Lr * (Math.Cos(Alr) + Math.Cos(Alr + Alg))),
+            (float)(Lr * (Math.Sin(Alr) + Math.Sin(Alr + Alg)))
+        );
     }
 
     public static Vector BpOneHalf(double index)

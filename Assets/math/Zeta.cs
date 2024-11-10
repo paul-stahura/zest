@@ -298,7 +298,7 @@ public class Zeta
         return i;
     }
 
-    public static double IndexToImag(double index, bool useNew)  // n is the index of the link in question.  
+    public static double IndexToImag(double index, bool useNew=false)  // n is the index of the link in question.  
     {
         //. This is from Zzrob
         // "Einstein" becasue it is exact
