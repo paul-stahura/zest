@@ -14,8 +14,8 @@ public class FineTuneSlider : MonoBehaviour
     public float factor = 1f;
 
     const float MIN_VALUE = 0;
-    const float MAX_VALUE = .99999f;
-    const float MIN_FACTOR = .00001f;
+    const float MAX_VALUE = 1.0f;
+    const float MIN_FACTOR = 0.0f;
 
     void OnApplicationQuit()
     {

@@ -46,17 +46,17 @@ public class SecondSpiral : MonoBehaviour
         if(drawRealFan.isOn)
         {
             var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral, app.useNewImagToggle.isOn);
-            DrawFanSpiral(cam, 0, spiral.index, centerBP);
-            DrawFanSpiral(cam, 0.25, spiral.index, centerBP);
-            DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
-            DrawFanSpiral(cam, 0.75, spiral.index, centerBP);
-            DrawFanSpiral(cam, 1, spiral.index, centerBP);
+            DrawFanSpiral(cam, 0, spiral.index, (SpiralFormulas)spiralFormula.value, centerBP);
+            DrawFanSpiral(cam, 0.25, spiral.index, (SpiralFormulas)spiralFormula.value, centerBP);
+            DrawFanSpiral(cam, 0.5, spiral.index, (SpiralFormulas)spiralFormula.value, centerBP);
+            DrawFanSpiral(cam, 0.75, spiral.index, (SpiralFormulas)spiralFormula.value, centerBP);
+            DrawFanSpiral(cam, 1, spiral.index, (SpiralFormulas)spiralFormula.value, centerBP);
         }
 
         if(drawRealOneHalf.isOn)
         {
             var centerBP = BisectorPoint.GetScaledBisectorPoint(spiral, app.useNewImagToggle.isOn);
-            DrawFanSpiral(cam, 0.5, spiral.index, centerBP);
+            DrawFanSpiral(cam, 0.5, spiral.index, SpiralFormulas.ReimannSiegel, centerBP);
         }
 
         if(drawSecondSpiral.isOn)
@@ -117,10 +117,10 @@ public class SecondSpiral : MonoBehaviour
         }
     }
 
-    private void DrawFanSpiral(Camera cam, double real, double index, Vector centerBP)
+    private void DrawFanSpiral(Camera cam, double real, double index, SpiralFormulas formula, Vector centerBP)
     {
         Zeta.Spiral s;
-        s = new Zeta.Spiral(real, index, (SpiralFormulas)spiralFormula.value, app.useNewImagToggle.isOn);
+        s = new Zeta.Spiral(real, index, formula, app.useNewImagToggle.isOn);
         var offset = new Vector(0,0);
         if(cbp.isOn)
         {
