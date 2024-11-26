@@ -335,6 +335,7 @@ public class App : ImmediateModeShapeDrawer
     {
         middleIndexDisplay.Value = index;
         imagDisplay.Value = (float)Zeta.IndexToImag(Index, useNewImagToggle.isOn);
+        indexIntPart.maxValue = Mathf.FloorToInt(index) + 15;
         indexIntPart.value = Mathf.FloorToInt(index);
         var realPart = (float)Math.Round(index - Mathf.FloorToInt(index), 6);
         if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)

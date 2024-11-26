@@ -11,7 +11,7 @@ public class ZoomToMouse : MonoBehaviour
 {
     [SerializeField] private CameraTracking _camTracking;
 
-    const float MAXIMUM_ZOOM = 0.00005f;
+    const float MAXIMUM_ZOOM = 0.0001f;
     const float DEFAULT_ZOOM = 690f;
     const float MINIMUM_ZOOM = 2400f;
 
