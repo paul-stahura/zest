@@ -287,23 +287,13 @@ public partial class ZetaSpiral : MonoBehaviour
                 int ptCount = 100;
                 Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
                 pt = rspiral.zeta.ToVector2();
-                // from real 0-6
-                for(int i = 0; i <= 10; i++)
+                for(int i = 1; i <= ptCount; i++)
                 {
-                    ptCount = 100 / (i + 1);
-                    for(int j = 1; j <= ptCount; j++)
-                    {
-                        float r = (float)j/ptCount + i;
-                        rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
-                        Vector2 nextTarget = rspiral.zeta.ToVector2();
-                        Draw.Line(pt, nextTarget);
-                        pt = nextTarget;
-                    }
-
-                    if(i == 10)
-                    {
-                        Draw.Line(pt, new Vector2(1, 0));
-                    }
+                    float r = (float)i/ptCount;
+                    rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                    Vector2 nextTarget = rspiral.zeta.ToVector2();
+                    Draw.Line(pt, nextTarget);
+                    pt = nextTarget;
                 }
 
                 // Draw.Line(new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2(), pt);
