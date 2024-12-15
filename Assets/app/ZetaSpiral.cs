@@ -47,6 +47,10 @@ public partial class ZetaSpiral : MonoBehaviour
     public Toggle onlyDrawOutline;
     // Draw a cross marking the location of each spiral
 
+    private LineRenderer _spiralLineRenderer;
+    private Vector _lastComplex;
+    public bool useLineRenderer = false;
+
     void OnApplicationQuit()
     {
         savePlayerPrefs();
@@ -65,6 +69,8 @@ public partial class ZetaSpiral : MonoBehaviour
 
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
         toggleVisibleLinksFrom = GameObject.Find("ToggleShowLinksFrom")?.GetComponent<Toggle>();
+
+        _spiralLineRenderer = GameObject.Find("LineMesh")?.GetComponent<LineRenderer>();
 
         app.DrawSprial += DrawShapes;
         app.SceneChange += savePlayerPrefs;
@@ -120,6 +126,30 @@ public partial class ZetaSpiral : MonoBehaviour
         if (spiral.joints[0] == null)
             return;
 
+        if(useLineRenderer)
+        {
+            if(_lastComplex == null || _lastComplex.x != spiral.index || _lastComplex.y != spiral.real)
+            {
+                Vector3[] points = new Vector3[spiral.joints.Length];
+                for (int i = 0; i < spiral.joints.Length; i++)
+                {
+                    points[i] = spiral.joints[i].ToVector3();
+                }
+                
+                _spiralLineRenderer.positionCount = spiral.joints.Length;
+                _spiralLineRenderer.SetPositions(points);
+
+                _lastComplex = new Vector(spiral.index, spiral.real);
+            }
+
+            _spiralLineRenderer.widthMultiplier = 0.001f * Camera.main.orthographicSize;
+            var SpiralColor = spiralColor;
+            SpiralColor.a = transparency.value * 0;
+            _spiralLineRenderer.material.color = SpiralColor;
+
+            return;
+        }
+        
         Draw.Thickness = 1;
         // Since our links are zero-based, the middle index into the array
         // is not the middle link number starting from one.
