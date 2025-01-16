@@ -31,7 +31,9 @@ public partial class ZetaSpiral : MonoBehaviour
     public Color reverseSpiralColor;
 
 
-
+    // Use alternative Draw Method
+    [HideInInspector]
+    public Toggle drawPolyLine;
 
     // Dont draw a line until the total length of the vectors is at least this
     [HideInInspector]
@@ -47,9 +49,8 @@ public partial class ZetaSpiral : MonoBehaviour
     public Toggle onlyDrawOutline;
     // Draw a cross marking the location of each spiral
 
-    private LineRenderer _spiralLineRenderer;
+    private Polyline _spiralPolyline;
     private Vector _lastComplex;
-    public bool useLineRenderer = false;
 
     void OnApplicationQuit()
     {
@@ -70,7 +71,8 @@ public partial class ZetaSpiral : MonoBehaviour
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
         toggleVisibleLinksFrom = GameObject.Find("ToggleShowLinksFrom")?.GetComponent<Toggle>();
 
-        _spiralLineRenderer = GameObject.Find("LineMesh")?.GetComponent<LineRenderer>();
+        _spiralPolyline = GameObject.Find("Polyline")?.GetComponent<Polyline>();
+        drawPolyLine = GameObject.Find("PolylineToggle")?.GetComponent<Toggle>();
 
         app.DrawSprial += DrawShapes;
         app.SceneChange += savePlayerPrefs;
@@ -126,8 +128,13 @@ public partial class ZetaSpiral : MonoBehaviour
         if (spiral.joints[0] == null)
             return;
 
-        if(useLineRenderer)
+        if(drawPolyLine.isOn)
         {
+            if (_spiralPolyline.gameObject.activeSelf == false)
+            {
+                _spiralPolyline.gameObject.SetActive(true);
+            }
+
             if(_lastComplex == null || _lastComplex.x != spiral.index || _lastComplex.y != spiral.real)
             {
                 Vector3[] points = new Vector3[spiral.joints.Length];
@@ -136,18 +143,24 @@ public partial class ZetaSpiral : MonoBehaviour
                     points[i] = spiral.joints[i].ToVector3();
                 }
                 
-                _spiralLineRenderer.positionCount = spiral.joints.Length;
-                _spiralLineRenderer.SetPositions(points);
+                _spiralPolyline.SetPoints(points);
 
                 _lastComplex = new Vector(spiral.index, spiral.real);
             }
 
-            _spiralLineRenderer.widthMultiplier = 0.001f * Camera.main.orthographicSize;
+            _spiralPolyline.Thickness = 0.001f * Camera.main.orthographicSize;
             var SpiralColor = spiralColor;
-            SpiralColor.a = transparency.value * 0;
-            _spiralLineRenderer.material.color = SpiralColor;
+            SpiralColor.a = transparency.value;
+            _spiralPolyline.Color = SpiralColor;
 
             return;
+        }
+        else
+        {
+            if (_spiralPolyline.gameObject.activeSelf == true)
+            {
+                _spiralPolyline.gameObject.SetActive(false);
+            }
         }
         
         Draw.Thickness = 1;
