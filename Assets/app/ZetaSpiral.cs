@@ -31,7 +31,9 @@ public partial class ZetaSpiral : MonoBehaviour
     public Color reverseSpiralColor;
 
 
-
+    // Use alternative Draw Method
+    [HideInInspector]
+    public Toggle drawPolyLine;
 
     // Dont draw a line until the total length of the vectors is at least this
     [HideInInspector]
@@ -46,6 +48,9 @@ public partial class ZetaSpiral : MonoBehaviour
     [HideInInspector]
     public Toggle onlyDrawOutline;
     // Draw a cross marking the location of each spiral
+
+    private Polyline _spiralPolyline;
+    private Vector _lastComplex;
 
     void OnApplicationQuit()
     {
@@ -65,6 +70,9 @@ public partial class ZetaSpiral : MonoBehaviour
 
         targetLabel = GameObject.Find("ZetaPointLabel")?.GetComponent<Text>();
         toggleVisibleLinksFrom = GameObject.Find("ToggleShowLinksFrom")?.GetComponent<Toggle>();
+
+        _spiralPolyline = GameObject.Find("Polyline")?.GetComponent<Polyline>();
+        drawPolyLine = GameObject.Find("PolylineToggle")?.GetComponent<Toggle>();
 
         app.DrawSprial += DrawShapes;
         app.SceneChange += savePlayerPrefs;
@@ -120,6 +128,41 @@ public partial class ZetaSpiral : MonoBehaviour
         if (spiral.joints[0] == null)
             return;
 
+        if(drawPolyLine.isOn)
+        {
+            if (_spiralPolyline.gameObject.activeSelf == false)
+            {
+                _spiralPolyline.gameObject.SetActive(true);
+            }
+
+            if(_lastComplex == null || _lastComplex.x != spiral.index || _lastComplex.y != spiral.real)
+            {
+                Vector3[] points = new Vector3[spiral.joints.Length];
+                for (int i = 0; i < spiral.joints.Length; i++)
+                {
+                    points[i] = spiral.joints[i].ToVector3();
+                }
+                
+                _spiralPolyline.SetPoints(points);
+
+                _lastComplex = new Vector(spiral.index, spiral.real);
+            }
+
+            _spiralPolyline.Thickness = 0.001f * Camera.main.orthographicSize;
+            var SpiralColor = spiralColor;
+            SpiralColor.a = transparency.value;
+            _spiralPolyline.Color = SpiralColor;
+
+            return;
+        }
+        else
+        {
+            if (_spiralPolyline.gameObject.activeSelf == true)
+            {
+                _spiralPolyline.gameObject.SetActive(false);
+            }
+        }
+        
         Draw.Thickness = 1;
         // Since our links are zero-based, the middle index into the array
         // is not the middle link number starting from one.

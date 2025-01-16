@@ -28,10 +28,33 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     public event Action<Camera, Zeta.Spiral> InfinityTdropPoints;
 
-    private List<Vector> _exactTdropR;
-    private List<Vector> _YangPoints;
+
+    private bool _INFSubbed = false;
+    private double _lastINFIndex;
+    private List<Vector> _InfA;
+    private List<Vector> _InfB;
+    private List<Vector> _InfTdropPointsA;
+    private List<Vector> _InfTdropPointsB;
+    private List<Vector> _InfTdropPointsReverseA;
+    private List<Vector> _InfTdropPointsReverseB;
+
+    private double _lastExactIndex;
+    private bool _ExactSubbed = false;
+    private List<Vector> _exactR;
+    private List<Vector> _exactG;
     private List<Vector> _exactTdropG;
+    private List<Vector> _exactTdropR;
+    private List<Vector> _exactTdropInverseR;
+    private List<Vector> _exactTdropInverseG;
+
+    private double _lastYYIndex;
+    private bool _YYSubbed = false;
+    private List<Vector> _Yang;
+    private List<Vector> _Yin;
+    private List<Vector> _YangPoints;
     private List<Vector> _YinPoints;
+    private List<Vector> _YangPointsReverse;
+    private List<Vector> _YinPointsReverse;
 
     public void Awake()
     {
@@ -59,13 +82,68 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
         INFLinkToggle.isOn = PlayerPrefs.GetInt("INFLinkToggle") == 1;
         _inverseTdropsToggle.isOn = PlayerPrefs.GetInt("InverseTdropToggle") == 1;
+
+        // INF Teardrop init
+        _InfA = new();
+        _InfB = new();
+        double i = 0;
+        double inc = 1d/200;
+        for (i = 0; i <= 1+inc; i += inc)
+        {
+            // Tdrop is undefined at 0.25 and 0.75, so we skip these values
+            if(Mathf.Approximately((float)i, 0.25f) || Mathf.Approximately((float)i, 0.75f)) {
+                i += inc;
+            }
+
+            _InfA.Add(Zeta.InfinityTdrop(i, true));
+            _InfB.Add(Zeta.InfinityTdrop(i, false));
+        }
     }
-    
-    public void Start()
+
+    public void Update()
     {
-        app.DrawSprial += DrawINFTeardrop;
-        app.DrawSprial += DrawExactTeardrop;
-        app.DrawSprial += DrawYinYang;
+        if(INFTeardropTransparency.value > 0.01f || _drawINFLink)
+        {
+            if(!_INFSubbed)
+            {   
+                app.DrawSprial += HandleINFTdrop;
+                _INFSubbed = true;
+            }
+        }
+        else if(_INFSubbed)
+        {
+            app.DrawSprial -= HandleINFTdrop;
+            _INFSubbed = false;
+        }
+
+
+        if(GRTeardropTransparency.value > 0.01f)
+        {
+            if(!_ExactSubbed)
+            {   
+                app.DrawSprial += HandleExactTeardrop;
+                _ExactSubbed = true;
+            }
+        }
+        else if(_ExactSubbed)
+        {
+            app.DrawSprial -= HandleExactTeardrop;
+            _ExactSubbed = false;
+        }
+
+        if(YinYangTeardropTransparency.value > 0.01f)
+        {
+            if(!_YYSubbed)
+            {   
+                app.DrawSprial += HandleYinYangTeardrop;
+                _YYSubbed = true;
+            }
+        }
+        else if(_YYSubbed)
+        {
+            app.DrawSprial -= HandleYinYangTeardrop;
+            _YYSubbed = false;
+        }
     }
 
     void OnApplicationQuit()
@@ -82,23 +160,49 @@ public class MiddleLinkTeardrop : MonoBehaviour
         PlayerPrefs.SetInt("InverseTdropToggle", _inverseTdropsToggle.isOn ? 1 : 0);
     }
 
-    private void DrawINFTeardrop(Camera cam, Zeta.Spiral s)
+    private void HandleINFTdrop(Camera cam, Zeta.Spiral s)
     {
-        // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
+        if(_lastINFIndex != s.index)
+        {
+            CalcINFTeardrop(s);
+            _lastINFIndex = s.index;
+        }
+
+        DrawINFTeardrop(cam);
+    }
+
+    private void CalcINFTeardrop(Zeta.Spiral s)
+    {
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+        Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
+
+        // R-G realtime points
         var index = s.index;
         index -= Math.Floor(index);
-        var orth = Mathf.Min(1f, cam.orthographicSize);
-        var size = 50.0f;
-        
-        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
-
         TdropDotR = trackDrop(Zeta.InfinityTdrop(index, true), s.joints[s.middleIndex + 1]);
-
         index = 1 - index;
         TdropDotG = trackDrop(Zeta.InfinityTdrop(index, false), s.joints[s.middleIndex]);
 
-        InfinityTdropPoints.Invoke(cam, s);
+        _InfTdropPointsA = new List<Vector>();
+        _InfTdropPointsB = new List<Vector>();
+        _InfTdropPointsReverseA = new List<Vector>();
+        _InfTdropPointsReverseB = new List<Vector>();
 
+        var z = s.zeta.ToVector();
+        var norm = z.Normalized();
+        for (int i = 0; i < _InfA.Count; i++)
+        {
+            _InfTdropPointsA.Add(trackDrop(_InfA[i], s.joints[s.middleIndex + 1]));
+            _InfTdropPointsB.Add(trackDrop(_InfB[i], s.joints[s.middleIndex]));
+
+            _InfTdropPointsReverseA.Add(trackInverseDrop(_InfA[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm)));
+            _InfTdropPointsReverseB.Add(trackInverseDrop(_InfB[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm)));
+        }
+    }
+
+    private void DrawINFTeardrop(Camera cam)
+    {
+        // Draws two dots/circles at the current location of teardrop A and B given the Zeta index
         if(_drawINFLink)
         {
             using (Draw.StyleScope)
@@ -107,6 +211,9 @@ public class MiddleLinkTeardrop : MonoBehaviour
                 dotColor.a = 0.5f;
                 Draw.Color = dotColor;
                 Draw.Thickness = 1 + 0.5f;
+
+                var orth = Mathf.Min(1f, cam.orthographicSize);
+                var size = 50.0f;
 
                 Draw.Ring(TdropDotR, orth / size / 2);
                 ShapesUtils.DrawCross(TdropDotR, orth / size, .5f);
@@ -118,123 +225,95 @@ public class MiddleLinkTeardrop : MonoBehaviour
             }
         }
 
-        if(INFTeardropTransparency.value < 0.01f)
+        if(INFTeardropTransparency.value > 0.01f)
         {
-            return;
-        }
-
-        using (Draw.StyleScope)
-        {
-            TeardropColorInf.a = INFTeardropTransparency.value / 4;
-            Draw.Color = TeardropColorInf;
-            Draw.Thickness = 1 + INFTeardropTransparency.value;
-            
-            double i = 0;
-            double inc = 1d/200;
-            var startA = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex + 1]);
-            var startB = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex]);
-            for (i = inc; i <= 1+inc; i += inc)
-            {
-                // Tdrop is undefined at 0.25 and 0.75, so we skip these values
-                if(Mathf.Approximately((float)i, 0.25f) || Mathf.Approximately((float)i, 0.75f)) {
-                    i += inc;
-                }
-
-                var endA = trackDrop(Zeta.InfinityTdrop(i, true), s.joints[s.middleIndex + 1]);
-                var endB = trackDrop(Zeta.InfinityTdrop(i, false), s.joints[s.middleIndex]);
-
-                Draw.Line(startA, endA);
-                startA = endA;
-
-                Draw.Line(startB, endB);
-                startB = endB;
-            }
-        }
-
-        if(_drawInverseTdrops)
-        {
-            Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
-
             using (Draw.StyleScope)
             {
-                var color = new Color(0, .6f, 1, 1);
-                color.a = INFTeardropTransparency.value / 4;
-                Draw.Color = color;
+                TeardropColorInf.a = INFTeardropTransparency.value / 4;
+                Draw.Color = TeardropColorInf;
                 Draw.Thickness = 1 + INFTeardropTransparency.value;
-
-                var z = s.zeta.ToVector();
-                var norm = z.Normalized();
                 
-                double i = 0;
-                double inc = 1d/200;
-                var startInverseA = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                var startInverseB = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-                for (i = inc; i <= 1+inc; i += inc)
+                for (int i = 0; i < _InfTdropPointsA.Count - 1; i++)
                 {
-                    // Tdrop is undefined at 0.25 and 0.75, so we skip these values
-                    if(Mathf.Approximately((float)i, 0.25f) || Mathf.Approximately((float)i, 0.75f)) {
-                        i += inc;
+                    Draw.Line(_InfTdropPointsA[i], _InfTdropPointsA[i + 1]);
+                    Draw.Line(_InfTdropPointsB[i], _InfTdropPointsB[i + 1]);
+                }
+            }
+
+            if(_drawInverseTdrops)
+            {
+                using (Draw.StyleScope)
+                {
+                    var color = new Color(0, .6f, 1, 1);
+                    color.a = INFTeardropTransparency.value / 4;
+                    Draw.Color = color;
+                    Draw.Thickness = 1 + INFTeardropTransparency.value;
+
+                    for (int i = 0; i < _InfTdropPointsA.Count - 1; i++)
+                    {
+                        Draw.Line(_InfTdropPointsReverseA[i], _InfTdropPointsReverseA[i + 1]);
+                        Draw.Line(_InfTdropPointsReverseB[i], _InfTdropPointsReverseB[i + 1]);
                     }
-
-                    var endInverseA = trackInverseDrop(Zeta.InfinityTdrop(i, true).Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                    var endInverseB = trackInverseDrop(Zeta.InfinityTdrop(i, false).Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-
-                    Draw.Line(startInverseA, endInverseA);
-                    startInverseA = endInverseA;
-
-                    Draw.Line(startInverseB, endInverseB);
-                    startInverseB = endInverseB;
                 }
             }
         }
     }
 
-    private void DrawYinYang(Camera cam, Zeta.Spiral s)
+    private void HandleYinYangTeardrop(Camera cam, Zeta.Spiral s)
     {
-        _YinPoints = new();
-        _YangPoints = new();
-
-        int index = (int)Math.Floor(s.index);
-        double inc = 1d / (_pointsPerTdrop - 1);
-        Debug.Assert(inc > 0);
-        for (int i = 0; i < _pointsPerTdrop; i++)
+        if(_lastYYIndex != s.index)
         {
-            double t = i * inc;
-            if(t < 0.0001) 
-            {
-                t = 0.0001;
-            }
-            else if(t > 0.9999) {
-                t = 0.9999;
-            }
-
-            _YinPoints.Add(Yin(index + t) + new Vector(0.5, 0));
-            _YangPoints.Add(Yang(index + t) - new Vector(0.5, 0));
+            CalcYinYang(s);
+            _lastYYIndex = s.index;
         }
 
-        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
+        DrawYinYang(cam);
+    }
 
-        using (Draw.StyleScope)
+    private void CalcYinYang(Zeta.Spiral s)
+    {
+        int index = (int)Math.Floor(s.index);
+
+        if(_Yang == null || (int)Math.Floor(_lastYYIndex) != index)
         {
-            TeardropColorR.a = YinYangTeardropTransparency.value;
-            TeardropColorG.a = YinYangTeardropTransparency.value;
-            Draw.Thickness = 1 + YinYangTeardropTransparency.value;
-            
-            var startR = trackDrop(_YangPoints[0], s.joints[s.middleIndex + 1]);
-            var startG = trackDrop(_YinPoints[0], s.joints[s.middleIndex]);
-            for (int i = 1; i < _YinPoints.Count; i++)
+            _Yang = new();
+            _Yin = new();
+
+            double inc = 1d / (_pointsPerTdrop - 1);
+            Debug.Assert(inc > 0);
+            for (int i = 0; i < _pointsPerTdrop; i++)
             {
-                var endR = trackDrop(_YangPoints[i], s.joints[s.middleIndex + 1]);
-                var endG = trackDrop(_YinPoints[i], s.joints[s.middleIndex]);
+                double t = i * inc;
+                if(t < 0.0001) 
+                {
+                    t = 0.0001;
+                }
+                else if(t > 0.9999) {
+                    t = 0.9999;
+                }
 
-                Draw.Color = TeardropColorR;
-                Draw.Line(startR, endR);
-                startR = endR;
-
-                Draw.Color = TeardropColorG;
-                Draw.Line(startG, endG);
-                startG = endG;
+                _Yang.Add(Yang(index + t) - new Vector(0.5, 0));
+                _Yin.Add(Yin(index + t) + new Vector(0.5, 0));
             }
+        }
+        
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+        Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+
+        _YangPoints = new();
+        _YinPoints = new();
+        _YangPointsReverse = new();
+        _YinPointsReverse = new();
+
+        var z = s.zeta.ToVector();
+        var norm = z.Normalized();
+        for (int i = 0; i < _Yang.Count; i++)
+        {
+            _YangPoints.Add(trackDrop(_Yang[i], s.joints[s.middleIndex + 1]));
+            _YinPoints.Add(trackDrop(_Yin[i], s.joints[s.middleIndex]));
+
+            _YangPointsReverse.Add(trackInverseDrop(_Yang[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm)));
+            _YinPointsReverse.Add(trackInverseDrop(_Yin[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm)));
         }
 
         // test calculations
@@ -250,11 +329,31 @@ public class MiddleLinkTeardrop : MonoBehaviour
         // Debug.Log(P(imag));
         // Debug.Log(C1(imag));
         // Debug.Log(Zeta.PsiThirdDerivative(imag));
+    }
+
+    private void DrawYinYang(Camera cam)
+    {
+        if(YinYangTeardropTransparency.value > 0.01f)
+        {
+            using (Draw.StyleScope)
+            {
+                TeardropColorR.a = YinYangTeardropTransparency.value;
+                TeardropColorG.a = YinYangTeardropTransparency.value;
+                Draw.Thickness = 1 + YinYangTeardropTransparency.value;
+
+                for (int i = 1; i < _YinPoints.Count - 1; i++)
+                {
+                    Draw.Color = TeardropColorR;
+                    Draw.Line(_YangPoints[i], _YangPoints[i + 1]);
+
+                    Draw.Color = TeardropColorG;
+                    Draw.Line(_YinPoints[i], _YinPoints[i + 1]);
+                }
+            }
+        }
 
         if(_drawInverseTdrops)
         {
-            Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
-
             using (Draw.StyleScope)
             {
                 Draw.Thickness = 1 + YinYangTeardropTransparency.value;
@@ -264,24 +363,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
                 var colorG = new Color(.6f, 1f, .2f, 1f); // green ish
                 colorG.a = YinYangTeardropTransparency.value;
-                
-                var z = s.zeta.ToVector();
-                var norm = z.Normalized();
-                
-                var startInverseR = trackInverseDrop(_YangPoints[0].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                var startInverseG = trackInverseDrop(_YinPoints[0].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-                for (int i = 1; i < _YinPoints.Count; i++)
-                {
-                    var endInverseR = trackInverseDrop(_YangPoints[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                    var endInverseG = trackInverseDrop(_YinPoints[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
 
+                for (int i = 1; i < _YinPointsReverse.Count - 1; i++)
+                {
                     Draw.Color = colorR;
-                    Draw.Line(startInverseR, endInverseR);
-                    startInverseR = endInverseR;
+                    Draw.Line(_YangPointsReverse[i], _YangPointsReverse[i + 1]);
 
                     Draw.Color = colorG;
-                    Draw.Line(startInverseG, endInverseG);
-                    startInverseG = endInverseG;
+                    Draw.Line(_YinPointsReverse[i], _YinPointsReverse[i + 1]);
                 }
             }
         }
@@ -337,54 +426,76 @@ public class MiddleLinkTeardrop : MonoBehaviour
     }
 
 
-    private void DrawExactTeardrop(Camera cam, Zeta.Spiral s)
+    private void HandleExactTeardrop(Camera cam, Zeta.Spiral s)
     {
-        if(GRTeardropTransparency.value < 0.01f)
+        if(_lastExactIndex != s.index)
         {
-            return;
+            CalcExactTeardrop(s);
+            _lastExactIndex = s.index;
+        }
+
+        DrawExactTeardrop(cam);
+    }
+
+    private void CalcExactTeardrop(Zeta.Spiral s)
+    {
+        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+        Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
+
+        int index = (int)Math.Floor(s.index);
+        double inc = 1d / (_pointsPerTdrop - 1);
+        Debug.Assert(inc > 0);
+
+        if(_exactR == null || (int)Math.Floor(_lastExactIndex) != index)
+        {
+            _exactR = new();
+            _exactG = new();
+            for (int i = 0; i < _pointsPerTdrop; i++)
+            {
+                double t = i * inc;
+                _exactR.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn), true) - new Vector(1, 0));
+                _exactG.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn)));
+            }
         }
 
         _exactTdropR = new();
         _exactTdropG = new();
-        int index = (int)Math.Floor(s.index);
-        double inc = 1d / (_pointsPerTdrop - 1);
-        Debug.Assert(inc > 0);
-        for (int i = 0; i < _pointsPerTdrop; i++)
+        _exactTdropInverseR = new();
+        _exactTdropInverseG = new();
+
+        var z = s.zeta.ToVector();
+        var norm = z.Normalized();
+
+        for (int i = 0; i < _exactR.Count; i++)
         {
-            double t = i * inc;
-            _exactTdropR.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn), true) - new Vector(1, 0));
-            _exactTdropG.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn)));// * Math.Cos(Math.PI) + new Vector(1, 0));
+            _exactTdropR.Add(trackDrop(_exactR[i], s.joints[s.middleIndex + 1]));
+            _exactTdropG.Add(trackDrop(_exactG[i], s.joints[s.middleIndex]));// * Math.Cos(Math.PI) + new Vector(1, 0));
+
+            _exactTdropInverseR.Add(trackInverseDrop(_exactR[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm)));
+            _exactTdropInverseG.Add(trackInverseDrop(_exactG[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm)));
         }
+    }
 
-        Vector trackDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link; 
-
+    private void DrawExactTeardrop(Camera cam)
+    {
         using (Draw.StyleScope)
         {
             TeardropColorR.a = GRTeardropTransparency.value;
             TeardropColorG.a = GRTeardropTransparency.value;
             Draw.Thickness = 1 + GRTeardropTransparency.value;
             
-            var startR = trackDrop(_exactTdropR[0], s.joints[s.middleIndex + 1]);
-            var startG = trackDrop(_exactTdropG[0], s.joints[s.middleIndex]);
-            for (int i = 1; i < _exactTdropR.Count; i++)
+            for (int i = 0; i < _exactTdropR.Count - 1; i++)
             {
-                var endR = trackDrop(_exactTdropR[i], s.joints[s.middleIndex + 1]);
-                var endG = trackDrop(_exactTdropG[i], s.joints[s.middleIndex]);
-
                 Draw.Color = TeardropColorR;
-                Draw.Line(startR, endR);
-                startR = endR;
+                Draw.Line(_exactTdropR[i], _exactTdropR[i + 1]);
 
                 Draw.Color = TeardropColorG;
-                Draw.Line(startG, endG);
-                startG = endG;
+                Draw.Line(_exactTdropG[i], _exactTdropG[i + 1]);
             }
         }
 
         if(_drawInverseTdrops)
         {
-            Vector trackInverseDrop(Vector v, Vector link) => RotateAround(v, new Vector(0.0, 0.0), 2*Math.PI - LinkRad(s, s.middleIndex)) / Math.Sqrt(s.middleIndex+1) + link;
-
             using (Draw.StyleScope)
             {
                 Draw.Thickness = 1 + GRTeardropTransparency.value;
@@ -395,23 +506,13 @@ public class MiddleLinkTeardrop : MonoBehaviour
                 var colorG = new Color(.6f, 1f, .2f, 1f); // green ish
                 colorG.a = GRTeardropTransparency.value;
                 
-                var z = s.zeta.ToVector();
-                var norm = z.Normalized();
-                
-                var startInverseR = trackInverseDrop(_exactTdropR[0].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                var startInverseG = trackInverseDrop(_exactTdropG[0].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-                for (int i = 1; i < _exactTdropR.Count; i++)
+                for (int i = 1; i < _exactTdropInverseR.Count - 1; i++)
                 {
-                    var endInverseR = trackInverseDrop(_exactTdropR[i].Reflect(norm), z + s.joints[s.middleIndex + 1].Reflect(norm));
-                    var endInverseG = trackInverseDrop(_exactTdropG[i].Reflect(norm), z + s.joints[s.middleIndex].Reflect(norm));
-
                     Draw.Color = colorR;
-                    Draw.Line(startInverseR, endInverseR);
-                    startInverseR = endInverseR;
+                    Draw.Line(_exactTdropInverseR[i], _exactTdropInverseR[i + 1]);
 
                     Draw.Color = colorG;
-                    Draw.Line(startInverseG, endInverseG);
-                    startInverseG = endInverseG;
+                    Draw.Line(_exactTdropInverseG[i], _exactTdropInverseG[i + 1]);
                 }
             }
         }

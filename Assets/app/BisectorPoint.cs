@@ -21,6 +21,14 @@ public class BisectorPoint : MonoBehaviour
     // private Button _seekNextButton;
     // private Button _seekPrevButton;
     // private Text _infoText;
+
+    private bool _zpsZubbed = false;
+    private double _lastZPSIndex;
+    private Vector _ZPS;
+
+    private bool _bpSubbed = false;
+    private double _lastBPIndex;
+    private Vector _BP;
     
 
     void Awake()
@@ -46,18 +54,60 @@ public class BisectorPoint : MonoBehaviour
         //     _app.Index = next;
         // });
 
-        _app.DrawSprial += DrawBisectorPoints;
-        _app.DrawSprial += DrawZps;
+        // _app.DrawSprial += DrawBisectorPoints;
+        // _app.DrawSprial += DrawZps;
     }
 
-    void OnDestroy()
+    void Update()
     {
-        _app.DrawSprial -= DrawBisectorPoints;
+        if(_bisectorPointToggle.isOn || _transparencySilider.value > 0.01f)
+        {
+            if(!_zpsZubbed)
+            {   
+                _app.DrawSprial += HandleZPS;
+                _zpsZubbed = true;
+            }
+        }
+        else if(_zpsZubbed)
+        {
+            _app.DrawSprial -= HandleZPS;
+            _zpsZubbed = false;
+        }
+
+        if(_bisectorPointToggle.isOn || _transparencySilider.value > 0.01f)
+        {
+            if(!_bpSubbed)
+            {   
+                _app.DrawSprial += HandleBP;
+                _bpSubbed = true;
+            }
+        }
+        else if(_bpSubbed)
+        {
+            _app.DrawSprial -= HandleBP;
+            _bpSubbed = false;
+        }
     }
 
-    private void DrawZps(Camera cam, Zeta.Spiral s)
+    private void HandleZPS(Camera cam, Zeta.Spiral s)
     {
-        if (!_bisectorPointToggle.isOn || _transparencySilider.value == 0)
+        if(_ZPS == null || _lastZPSIndex != s.index)
+        {
+            CalcZPS(s);
+            _lastZPSIndex = s.index;
+        }
+
+        DrawZps(cam);
+    }
+
+    private void CalcZPS(Zeta.Spiral s)
+    {
+        _ZPS = GetPaulStahuraZeta(s.index);
+    }
+
+    private void DrawZps(Camera cam)
+    {
+        if (!_bisectorPointToggle.isOn || _transparencySilider.value < 0.01)
             return;
         
         using(Draw.StyleScope)
@@ -68,29 +118,33 @@ public class BisectorPoint : MonoBehaviour
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
-            var zps = GetPaulStahuraZeta(s.index);
-            // print(zps.x + " " + zps.y);
-            // ShapesUtils.DrawCross45(zps, thickness:1);
-
             var r = .05f;
-            Draw.Line(zps + new Vector2(-r/2, 0), zps + new Vector2(r/2, 0)); // -
-            Draw.Line(zps + new Vector2(-r, -r), zps + new Vector2(r, r));    // /
-            Draw.Line(zps + new Vector2(-r, r), zps + new Vector2(r, r));     // `
-            Draw.Line(zps + new Vector2(-r, -r), zps + new Vector2(r,-r));    // _
+            Draw.Line(_ZPS + new Vector2(-r/2, 0), _ZPS + new Vector2(r/2, 0)); // -
+            Draw.Line(_ZPS + new Vector2(-r, -r), _ZPS + new Vector2(r, r));    // /
+            Draw.Line(_ZPS + new Vector2(-r, r), _ZPS + new Vector2(r, r));     // `
+            Draw.Line(_ZPS + new Vector2(-r, -r), _ZPS + new Vector2(r,-r));    // _
         }
     }
 
+    private void HandleBP(Camera cam, Zeta.Spiral s)
+    {
+        if(_lastBPIndex != s.index)
+        {   
+            CalcBP(s);
+            _lastBPIndex = s.index;
+        }
+
+        DrawBisectorPoints(cam, s);
+    }
+    private void CalcBP(Zeta.Spiral s)
+    {   
+        _ZPS = GetPaulStahuraZeta(s.index);
+        _BP = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
+    }
     private void DrawBisectorPoints(Camera cam, Zeta.Spiral s)
     {
-        if (!_bisectorPointToggle.isOn || _transparencySilider.value == 0)
-            return;
-
-        // Vector zeta = s.zeta.ToVector();
-        // Vector zeta2 = zeta / 2.0;
-        Vector zeta = GetPaulStahuraZeta(s.index);
-        Vector zeta2 = zeta / 2.0;
-        Vector origin = s.joints[0];
-        Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
+        Vector zps2 = _ZPS / 2.0;
+        Vector origin = new Vector(0, 0);
 
         using(Draw.StyleScope)
         {
@@ -99,40 +153,40 @@ public class BisectorPoint : MonoBehaviour
             Draw.Color = color;
             Draw.Thickness = 1 + color.a;
 
-            Draw.Line(bp, origin);
+            Draw.Line(_BP, origin);
 
             color = _lineColorR;
             color.a = _transparencySilider.value;
             Draw.Color = color;
-            Draw.Line(bp, zeta);
+            Draw.Line(_BP, _ZPS);
 
             color = _lineColor;
             color.a = _transparencySilider.value;
             Draw.Color = color;
 
             // dashed bisecting line
-            Vector a1 = (origin - bp).Normalized();
-            Vector b1 = (zeta - bp).Normalized();
+            Vector a1 = (origin - _BP).Normalized();
+            Vector b1 = (_ZPS - _BP).Normalized();
             double angle1 = Math.Acos(a1.Dot(b1)) / 2.0;
             double cross = Vector3.Cross(a1, b1).normalized.z;
             Vector unitVector = RotateVector(a1, angle1 * cross).Normalized();
             Draw.UseDashes = true;
-            Draw.Line(bp - unitVector*0.5, bp + (unitVector * (bp - zeta2).Length) + unitVector*0.5);
+            Draw.Line(_BP - unitVector*0.5, _BP + (unitVector * (_BP - zps2).Length) + unitVector*0.5);
 
 
             color.a -= 0.3f;
             if(color.a > 0.1f)
             {
                 Draw.Color = color;
-                Draw.Ring(bp, .005f);
-                ShapesUtils.DrawCross45(bp, .05f);
+                Draw.Ring(_BP, .005f);
+                ShapesUtils.DrawCross45(_BP, .05f);
             }
 
-            Vector a = bp;
-            Vector b = zeta - bp;
-            // _bpLengthDiff.text = Math.Abs(a.Length - b.Length).ToString();
+            // Vector a = bp;
+            // Vector b = zeta - bp;
+            // // _bpLengthDiff.text = Math.Abs(a.Length - b.Length).ToString();
 
-            double angle = Vector2.Dot((Vector2)a.Normalized(), (Vector2)b.Normalized());
+            // double angle = Vector2.Dot((Vector2)a.Normalized(), (Vector2)b.Normalized());
             // _bpAngle.text = angle.ToString();
 
 
@@ -152,7 +206,7 @@ public class BisectorPoint : MonoBehaviour
                 Draw.Color = Color.magenta;
                 color.a = _transparencySilider.value;
                 Draw.Thickness = 1;
-                Draw.Ring(bp, Vector3.Distance(bp, s.zeta.ToVector2()));
+                Draw.Ring(_BP, Vector3.Distance(_BP, s.zeta.ToVector2()));
             }
         }
     }
