@@ -423,6 +423,7 @@ public class Zeta
             sum2 += Complex.Pow(n, s - 1);
         }
 
+        // return sum2;
         return sum1 + gammaFactor * sum2;// + RemainderTerm(s, N);
         // R(s) = -Gamma(1-s)/(2*pi*i) * integral of (-x)^(s-1)*e^(-Nx)/(e^x-1)
     }
