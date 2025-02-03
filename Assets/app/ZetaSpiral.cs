@@ -101,6 +101,11 @@ public partial class ZetaSpiral : MonoBehaviour
 
         using (Draw.StyleScope)
         {
+            drawZrFormula(spiral);
+        }
+
+        using (Draw.StyleScope)
+        {
             drawOutline(spiral);
         }
 
@@ -358,6 +363,36 @@ public partial class ZetaSpiral : MonoBehaviour
                 // Draw.Line(new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2(), pt);
                 // Draw.Line(pt, new Zeta.Spiral(1, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn).zeta.ToVector2());
             }
+        }
+    }
+
+    void drawZrFormula(Zeta.Spiral spiral)
+    {
+        Complex z = Zeta.ReimannSiegelFormula(new Complex(spiral.real, Zeta.IndexToImag(spiral.index)));
+
+        var pt = z.ToVector2();
+        print(pt);
+        // targetLabel.text = $"({z.Real.ToString("n8")}, {z.Imaginary.ToString("n8")})";
+
+        var color = spiralColor + new Color(-0.5f, 0, 0);
+        color.a = targetTransparency.value;
+
+        Draw.Color = color;
+        // Draw.Ring(pt, .08f);
+        using (Draw.StyleScope)
+        {
+            var zColor = new Color(1, .5f, 0, color.a);
+            zColor.a -= 0.5f;
+            zColor.a = zColor.a < 0 ? 0 : zColor.a;
+            Draw.Color = zColor;
+            Draw.Thickness = 1;
+            // ShapesUtils.DrawCross(pt, .1f);
+            // -Z
+            var r = .05f;
+            Draw.Line(pt + new Vector2(-r/2, 0), pt + new Vector2(r/2, 0)); // -
+            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, r));    // /
+            Draw.Line(pt + new Vector2(-r, r), pt + new Vector2(r, r));     // `
+            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r,-r));    // _
         }
     }
 
