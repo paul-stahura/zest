@@ -386,23 +386,35 @@ public partial class ZetaSpiral : MonoBehaviour
                 sum1 += next;
             }
 
+            var norm = spiral.zeta.ToVector().Normalized();
+            var perp = new Vector(-norm.y, norm.x);
+            bool reflect = false;
+
             Complex sum2 = Complex.Zero;
             for (int n = 1; n <= N; n++)
             {
                 Complex next = Complex.Pow(n, s - 1) * GammaRatio(1-s);
-                Vector2 start = sum2.ToVector2();
-                Vector2 end = (sum2 + next).ToVector2();
+                Vector start = sum2.ToVector();
+                Vector end = (sum2 + next).ToVector();
+                if(reflect)
+                {
+                    start = start.Reflect(perp).Reflect(norm) + spiral.zeta.ToVector();
+                    end = end.Reflect(perp).Reflect(norm) + spiral.zeta.ToVector();
+                }
                 Draw.Line(start, end, Color.cyan);
                 sum2 += next;
             }
 
             Draw.Line(Vector2.zero, (sum1 + sum2).ToVector2(), Color.red);
         }
-        
     }
 
     public static Complex GammaRatio(Complex s)
     {
+        print("pi^(1/2 - s)" + Complex.Pow(Math.PI, 0.5 - s));
+        print("s/2: " + Zeta.complex_gamma(s / 2.0));
+        print("(1-s) / 2: " + Zeta.complex_gamma((1 - s) / 2.0));
+        print("gamma1 / gamma2: " + (Zeta.complex_gamma(s / 2.0) / Zeta.complex_gamma((1 - s) / 2.0)));
         return  Complex.Pow(Math.PI, 0.5 - s) * (Zeta.complex_gamma(s / 2.0) / Zeta.complex_gamma((1 - s) / 2.0));
     }
 
