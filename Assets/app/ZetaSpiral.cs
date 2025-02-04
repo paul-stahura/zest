@@ -368,32 +368,42 @@ public partial class ZetaSpiral : MonoBehaviour
 
     void drawZrFormula(Zeta.Spiral spiral)
     {
-        Complex z = Zeta.ReimannSiegelFormula(new Complex(spiral.real, Zeta.IndexToImag(spiral.index)));
+        Complex s = new Complex(spiral.real, Zeta.IndexToImag(spiral.index));
+        int variedN = (int)Math.Sqrt(2 * Math.PI * s.Imaginary);
+        int N = variedN; // Number of terms in second sum
 
-        var pt = z.ToVector2();
-        print(pt);
-        // targetLabel.text = $"({z.Real.ToString("n8")}, {z.Imaginary.ToString("n8")})";
-
-        var color = spiralColor + new Color(-0.5f, 0, 0);
-        color.a = targetTransparency.value;
-
-        Draw.Color = color;
-        // Draw.Ring(pt, .08f);
         using (Draw.StyleScope)
         {
-            var zColor = new Color(1, .5f, 0, color.a);
-            zColor.a -= 0.5f;
-            zColor.a = zColor.a < 0 ? 0 : zColor.a;
-            Draw.Color = zColor;
             Draw.Thickness = 1;
-            // ShapesUtils.DrawCross(pt, .1f);
-            // -Z
-            var r = .05f;
-            Draw.Line(pt + new Vector2(-r/2, 0), pt + new Vector2(r/2, 0)); // -
-            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, r));    // /
-            Draw.Line(pt + new Vector2(-r, r), pt + new Vector2(r, r));     // `
-            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r,-r));    // _
+
+            Complex sum1 = Complex.Zero;
+            for (int n = 1; n <= N; n++)
+            {
+                Complex next = Complex.Pow(n, -s);
+                Vector2 start = sum1.ToVector2();
+                Vector2 end = (sum1 + next).ToVector2();
+                Draw.Line(start, end, Color.magenta);
+                sum1 += next;
+            }
+
+            Complex sum2 = Complex.Zero;
+            for (int n = 1; n <= N; n++)
+            {
+                Complex next = Complex.Pow(n, s - 1) * GammaRatio(1-s);
+                Vector2 start = sum2.ToVector2();
+                Vector2 end = (sum2 + next).ToVector2();
+                Draw.Line(start, end, Color.cyan);
+                sum2 += next;
+            }
+
+            Draw.Line(Vector2.zero, (sum1 + sum2).ToVector2(), Color.red);
         }
+        
+    }
+
+    public static Complex GammaRatio(Complex s)
+    {
+        return  Complex.Pow(Math.PI, 0.5 - s) * (Zeta.complex_gamma(s / 2.0) / Zeta.complex_gamma((1 - s) / 2.0));
     }
 
 

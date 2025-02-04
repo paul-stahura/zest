@@ -242,7 +242,7 @@ public class Zeta
         return poch_val;
     }
 
-    static Complex complex_gamma(Complex s)
+    public static Complex complex_gamma(Complex s)
     {
         int i;
         Complex g = g_coeff[0];
@@ -402,52 +402,6 @@ public class Zeta
         var imag = s.Imaginary;
 
         return new Complex(Zx(imag), Zy(imag));
-    }
-
-    public static Complex ReimannSiegelFormula(Complex s)
-    {
-        int variedN = (int)Math.Sqrt(2 * Math.PI * s.Imaginary);
-        int N = variedN; // Number of terms in first sum
-        int M = variedN; // Number of terms in second sum
-        Complex sum1 = Complex.Zero;
-        for (int n = 1; n <= N; n++)
-        {
-            sum1 += Complex.Pow(n, -s);
-        }
-
-        Complex gammaFactor = GammaRatio(1 - s);
-
-        Complex sum2 = Complex.Zero;
-        for (int n = 1; n <= M; n++)
-        {
-            sum2 += Complex.Pow(n, s - 1);
-        }
-
-        // return sum2;
-        return sum1 + gammaFactor * sum2;// + RemainderTerm(s, N);
-        // R(s) = -Gamma(1-s)/(2*pi*i) * integral of (-x)^(s-1)*e^(-Nx)/(e^x-1)
-    }
-
-    private static Complex RemainderTerm(Complex s, int N, int steps = 1000)
-    {
-        Complex integral = Complex.Zero;
-        double stepSize = 0.01;
-        
-        for (int i = 0; i < steps; i++)
-        {
-            double x = i * stepSize;
-            Complex integrand = Complex.Pow(-x, s - 1) * 
-                              Complex.Exp(-N * x) / 
-                              (Complex.Exp(x) - 1);
-            integral += integrand * stepSize;
-        }
-
-        return -complex_gamma(1 - s) / (Complex.ImaginaryOne * 2 * Math.PI) * integral;
-    }
-
-    private static Complex GammaRatio(Complex s)
-    {
-        return  Complex.Pow(Math.PI, 0.5 - s) * (complex_gamma(s / 2) / complex_gamma((1 - s) / 2));
     }
 
     public static double PsiThirdDerivative(double imag)
