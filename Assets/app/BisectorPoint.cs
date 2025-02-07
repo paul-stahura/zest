@@ -60,7 +60,7 @@ public class BisectorPoint : MonoBehaviour
 
     void Update()
     {
-        if(_bisectorPointToggle.isOn || _transparencySilider.value > 0.01f)
+        if(_bisectorPointToggle.isOn && _transparencySilider.value > 0.01f)
         {
             if(!_zpsZubbed)
             {   
@@ -74,7 +74,7 @@ public class BisectorPoint : MonoBehaviour
             _zpsZubbed = false;
         }
 
-        if(_bisectorPointToggle.isOn || _transparencySilider.value > 0.01f)
+        if(_bisectorPointToggle.isOn && _transparencySilider.value > 0.01f)
         {
             if(!_bpSubbed)
             {   

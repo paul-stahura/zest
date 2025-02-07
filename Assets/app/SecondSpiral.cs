@@ -122,7 +122,7 @@ public class SecondSpiral : MonoBehaviour
         Zeta.Spiral s;
         s = new Zeta.Spiral(real, index, formula, app.useNewImagToggle.isOn);
         var offset = new Vector(0,0);
-        if(cbp.isOn)
+        if(cbp != null && cbp.isOn)
         {
             offset = centerBP - BisectorPoint.GetScaledBisectorPoint(s, app.useNewImagToggle.isOn);
         }

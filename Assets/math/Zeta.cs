@@ -242,7 +242,7 @@ public class Zeta
         return poch_val;
     }
 
-    static Complex complex_gamma(Complex s)
+    public static Complex complex_gamma(Complex s)
     {
         int i;
         Complex g = g_coeff[0];
