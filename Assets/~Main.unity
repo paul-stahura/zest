@@ -1836,7 +1836,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Change between spiral formulas. Most functions work best under Euler
+  description: '[Spiral Formula] Choose the mathematical formula used for spiral
+    calculations. Available options are:  Riemann-Siegel: A powerful asymptotic formula
+    used to approximate the Zeta function along the critical line (real = 1/2). It
+    is particularly effective for high-precision calculations in this region. Euler-Maclaurin:
+    A summation-based formula that provides a smooth approximation for a wider range
+    of values. It is used when the real value is not 1/2, making it a flexible alternative
+    to Riemann-Siegel. Eta Formula: Uses the Dirichlet eta function, an alternating
+    series representation of the Zeta function, which can offer better convergence
+    properties in some cases. RS Sums: A variant of Riemann-Siegel that emphasizes
+    summation techniques for numerical approximations. Automatic Switching: If Riemann-Siegel
+    is selected but the real value is not 1/2, it will automatically switch to Euler-Maclaurin.
+    If Euler-Maclaurin is selected and the real value is changed to 1/2, it will
+    switch to Riemann-Siegel, taking advantage of its superior accuracy on the critical
+    line.'
 --- !u!114 &60280370
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4632,141 +4645,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
---- !u!1 &154547576
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 154547577}
-  - component: {fileID: 154547579}
-  - component: {fileID: 154547578}
-  m_Layer: 5
-  m_Name: Text (TMP)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &154547577
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 154547576}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 879584456}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.000015258789, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &154547578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 154547576}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: Trace Zeta
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 12.45
-  m_fontSizeBase: 36
-  m_fontWeight: 400
-  m_enableAutoSizing: 1
-  m_fontSizeMin: 2
-  m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 1
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &154547579
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 154547576}
-  m_CullTransparentMesh: 1
 --- !u!1 &164756911
 GameObject:
   m_ObjectHideFlags: 0
@@ -9752,8 +9630,6 @@ RectTransform:
   - {fileID: 898668843}
   - {fileID: 60280368}
   - {fileID: 1088758036}
-  - {fileID: 879584456}
-  - {fileID: 2081170647}
   - {fileID: 1112969357}
   m_Father: {fileID: 1314996052}
   m_RootOrder: 1
@@ -21771,102 +21647,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 878416801}
   m_CullTransparentMesh: 1
---- !u!1 &879584455
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 879584456}
-  - component: {fileID: 879584459}
-  - component: {fileID: 879584458}
-  - component: {fileID: 879584457}
-  m_Layer: 5
-  m_Name: TraceZetaToggle
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &879584456
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 879584455}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 154547577}
-  m_Father: {fileID: 371038929}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 60, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &879584457
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 879584455}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8b2f0bcd8b747a4191a9c446994586e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _selectedOption: 0
-  _options:
-  - Trace Zeta
-  _colors:
-  - {r: 0.8117648, g: 0, b: 0.08627451, a: 0.36078432}
-  - {r: 0, g: 0.8117648, b: 0.18431373, a: 0.36078432}
---- !u!114 &879584458
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 879584455}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.8117648, g: 0, b: 0.08627451, a: 0.36078432}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &879584459
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 879584455}
-  m_CullTransparentMesh: 1
 --- !u!1 &881260277
 GameObject:
   m_ObjectHideFlags: 0
@@ -25827,6 +25607,7 @@ GameObject:
   - component: {fileID: 1069770073}
   - component: {fileID: 1069770072}
   - component: {fileID: 1069770071}
+  - component: {fileID: 1069770074}
   m_Layer: 5
   m_Name: Spiral Visibility
   m_TagString: Untagged
@@ -25912,6 +25693,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1069770069}
   m_CullTransparentMesh: 1
+--- !u!114 &1069770074
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1069770069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Spiral Visibility] Controls the display of spiral. The available
+    options are:  OFF: Hides the spiral completely. ON: Displays the spiral normally.
+    Transparent: Shows the spiral with reduced opacity, allowing it to be visible
+    without overpowering other elements.'
 --- !u!1 &1070180697
 GameObject:
   m_ObjectHideFlags: 0
@@ -26596,7 +26393,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Fan
+  m_text: Real Variation
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -26623,7 +26420,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.9
+  m_fontSize: 12.5
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -27144,6 +26941,7 @@ GameObject:
   - component: {fileID: 1112969360}
   - component: {fileID: 1112969359}
   - component: {fileID: 1112969358}
+  - component: {fileID: 1112969361}
   m_Layer: 5
   m_Name: Real Path Toggle
   m_TagString: Untagged
@@ -27165,7 +26963,7 @@ RectTransform:
   m_Children:
   - {fileID: 1503690025}
   m_Father: {fileID: 371038929}
-  m_RootOrder: 6
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -27228,6 +27026,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1112969356}
   m_CullTransparentMesh: 1
+--- !u!114 &1112969361
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112969356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Real Path] Draws a line tracing the path of the Zeta function as
+    the real component changes. It provides a visual representation of how the function
+    evolves along the real axis.  When Riemann-Siegel is selected, Euler-Maclaurin
+    is used to calculate the real path'
 --- !u!1 &1119424243
 GameObject:
   m_ObjectHideFlags: 0
@@ -32399,8 +32213,9 @@ GameObject:
   - component: {fileID: 1378944017}
   - component: {fileID: 1378944016}
   - component: {fileID: 1378944015}
+  - component: {fileID: 1378944018}
   m_Layer: 5
-  m_Name: Fan Second Spiral
+  m_Name: Real Variation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32425,7 +32240,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 35.1703, y: 0}
+  m_SizeDelta: {x: 78, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1378944015
 MonoBehaviour:
@@ -32441,9 +32256,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _selectedOption: 0
   _options:
+  - Real Variation
+  - r = 1/2
   - Fan
   _colors:
   - {r: 0.8117648, g: 0, b: 0.08627451, a: 0.36078432}
+  - {r: 0, g: 0.8117648, b: 0.94509804, a: 0.36078432}
   - {r: 0, g: 0.8117648, b: 0.18431373, a: 0.36078432}
 --- !u!114 &1378944016
 MonoBehaviour:
@@ -32483,6 +32301,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378944013}
   m_CullTransparentMesh: 1
+--- !u!114 &1378944018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378944013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Real Variation] Draws the spiral using real values seperate from
+    the main program.  r = 1/2: Uses a fixed real value of 1/2. Fan: Draws spirals
+    at r = 0, 1/4, 1/2, 3/4, and 1 to show the spiral changing along the real axis.'
 --- !u!1 &1383169941
 GameObject:
   m_ObjectHideFlags: 0
@@ -32797,6 +32630,7 @@ GameObject:
   - component: {fileID: 1392048525}
   - component: {fileID: 1392048524}
   - component: {fileID: 1392048523}
+  - component: {fileID: 1392048526}
   m_Layer: 5
   m_Name: ShowLinksToggle
   m_TagString: Untagged
@@ -32886,6 +32720,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1392048521}
   m_CullTransparentMesh: 1
+--- !u!114 &1392048526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392048521}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Link Display Mode] This setting controls the visibility of links
+    within the spirals. You can toggle between the following options:  None: Hides
+    all links. All: Displays all available links. Middle: Shows links up to the designated
+    "symmetry link" or middle link. Clock: Highlights the symmetry link along with
+    its immediate neighbors (+1 and -1).'
 --- !u!1 &1392983961
 GameObject:
   m_ObjectHideFlags: 0
@@ -33565,6 +33416,7 @@ GameObject:
   - component: {fileID: 1415827357}
   - component: {fileID: 1415827356}
   - component: {fileID: 1415827355}
+  - component: {fileID: 1415827358}
   m_Layer: 5
   m_Name: ReverseSecondSpiral
   m_TagString: Untagged
@@ -33649,6 +33501,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1415827353}
   m_CullTransparentMesh: 1
+--- !u!114 &1415827358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1415827353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Reverse Spiral] Rreflects the spiral along the "symmetry line" (A
+    bisector line between zeta and the origin.)'
 --- !u!1 &1417762106
 GameObject:
   m_ObjectHideFlags: 0
@@ -40483,7 +40349,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Change between spiral formulas. Most functions work best under Euler
+  description: '[Spiral Formula] Choose the mathematical formula used for spiral
+    calculations. Available options are:  Riemann-Siegel: A powerful asymptotic formula
+    used to approximate the Zeta function along the critical line (real = 1/2). It
+    is particularly effective for high-precision calculations in this region. Euler-Maclaurin:
+    A summation-based formula that provides a smooth approximation for a wider range
+    of values. It is used when the real value is not 1/2, making it a flexible alternative
+    to Riemann-Siegel. Eta Formula: Uses the Dirichlet eta function, an alternating
+    series representation of the Zeta function, which can offer better convergence
+    properties in some cases. RS Sums: A variant of Riemann-Siegel that emphasizes
+    summation techniques for numerical approximations. Automatic Switching: If Riemann-Siegel
+    is selected but the real value is not 1/2, it will automatically switch to Euler-Maclaurin.
+    If Euler-Maclaurin is selected and the real value is changed to 1/2, it will
+    switch to Riemann-Siegel, taking advantage of its superior accuracy on the critical
+    line.'
 --- !u!114 &1687401760
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43035,6 +42914,7 @@ GameObject:
   - component: {fileID: 1755495233}
   - component: {fileID: 1755495232}
   - component: {fileID: 1755495231}
+  - component: {fileID: 1755495234}
   m_Layer: 5
   m_Name: Second Spiral Visibility
   m_TagString: Untagged
@@ -43120,6 +43000,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1755495229}
   m_CullTransparentMesh: 1
+--- !u!114 &1755495234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1755495229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Spiral Visibility] Controls the display of spiral. The available
+    options are:  OFF: Hides the spiral completely. ON: Displays the spiral normally.
+    Transparent: Shows the spiral with reduced opacity, allowing it to be visible
+    without overpowering other elements.'
 --- !u!1 &1755543942
 GameObject:
   m_ObjectHideFlags: 0
@@ -44239,6 +44135,7 @@ GameObject:
   - component: {fileID: 1778438040}
   - component: {fileID: 1778438039}
   - component: {fileID: 1778438038}
+  - component: {fileID: 1778438041}
   m_Layer: 5
   m_Name: Color Middle Links
   m_TagString: Untagged
@@ -44323,6 +44220,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1778438036}
   m_CullTransparentMesh: 1
+--- !u!114 &1778438041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1778438036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Color Middle Links] This option highlights the symmetry link and
+    its immediate neighbors (+1 and -1) with distinct colors.'
 --- !u!1 &1779104618
 GameObject:
   m_ObjectHideFlags: 0
@@ -49262,6 +49173,7 @@ GameObject:
   - component: {fileID: 1963072125}
   - component: {fileID: 1963072127}
   - component: {fileID: 1963072126}
+  - component: {fileID: 1963072128}
   m_Layer: 5
   m_Name: label (1)
   m_TagString: Untagged
@@ -49331,6 +49243,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1963072124}
   m_CullTransparentMesh: 0
+--- !u!114 &1963072128
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963072124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Link Display Mode] This setting controls the visibility of links
+    within the spirals. You can toggle between the following options:  None: Hides
+    all links. All: Displays all available links. Middle: Shows links up to the designated
+    "symmetry link" or middle link. Clock: Highlights the symmetry link along with
+    its immediate neighbors (+1 and -1).'
 --- !u!1 &1963989546
 GameObject:
   m_ObjectHideFlags: 0
@@ -52825,86 +52754,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2079731813}
   m_CullTransparentMesh: 0
---- !u!1 &2081170646
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2081170647}
-  - component: {fileID: 2081170649}
-  - component: {fileID: 2081170648}
-  m_Layer: 5
-  m_Name: Spacer (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2081170647
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081170646}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 371038929}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 8, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2081170648
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081170646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.8509804, g: 0.8509804, b: 0.8509804, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 3
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: 
---- !u!222 &2081170649
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2081170646}
-  m_CullTransparentMesh: 0
 --- !u!1 &2082944168
 GameObject:
   m_ObjectHideFlags: 0
@@ -53872,6 +53721,7 @@ GameObject:
   - component: {fileID: 2112649162}
   - component: {fileID: 2112649161}
   - component: {fileID: 2112649160}
+  - component: {fileID: 2112649163}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -53994,6 +53844,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2112649158}
   m_CullTransparentMesh: 1
+--- !u!114 &2112649163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112649158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Spiral] Customize spiral visualization: links to display, formula
+    selection, real value variations, and reflections'
 --- !u!1 &2117007164
 GameObject:
   m_ObjectHideFlags: 0
