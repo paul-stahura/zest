@@ -6,6 +6,7 @@ using UnityEngine.UI;
 /// A toggle that cycles through a list of options when clicked.
 /// </summary>
 [RequireComponent(typeof(Button))]
+[RequireComponent(typeof(Image))]
 public class MultiOptionToggle : MonoBehaviour
 {
     [SerializeField] int _selectedOption = 0;
@@ -13,10 +14,14 @@ public class MultiOptionToggle : MonoBehaviour
     [SerializeField] List<Color> _colors;
 
     Button _toggleButton;
+    Image _image;
+    TMPro.TMP_Text _textObject;
 
     void Awake()
     {
         _toggleButton = GetComponent<Button>();
+        _image = GetComponent<Image>();
+        _textObject = _toggleButton.GetComponentInChildren<TMPro.TMP_Text>();
         _toggleButton.onClick.AddListener(OnToggleClicked);
         UpdateText();
         UpdateColor();
@@ -36,11 +41,20 @@ public class MultiOptionToggle : MonoBehaviour
 
     private void UpdateText()
     {
-        _toggleButton.GetComponentInChildren<TMPro.TMP_Text>().text = _options[_selectedOption];
+        if(_textObject != null)
+            _textObject.text = _options[_selectedOption];
     }
 
     private void UpdateColor()
     {
-        _toggleButton.GetComponent<Image>().color = _colors[_selectedOption];
+        if(_image == null)
+            return;
+
+        int colorIndex = _selectedOption;
+        if(colorIndex >= _colors.Count)
+        {
+            colorIndex = _colors.Count - 1;
+        }
+        _toggleButton.GetComponent<Image>().color = _colors[colorIndex];
     }
 }
