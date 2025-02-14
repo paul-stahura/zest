@@ -22,6 +22,11 @@ public class MultiOptionToggle : MonoBehaviour
         UpdateColor();
     }
 
+    public (int, string) GetSelectedOption()
+    {
+        return (_selectedOption, _options[_selectedOption]);
+    }
+
     private void OnToggleClicked()
     {
         _selectedOption = (_selectedOption + 1) % _options.Count;
