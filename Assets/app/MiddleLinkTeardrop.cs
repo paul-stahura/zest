@@ -396,14 +396,14 @@ public class MiddleLinkTeardrop : MonoBehaviour
     private double Dyinl(double index)
     {
         double psi(double t) => Math.Cos(2.0 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2.0 * Math.PI * t);
-        double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+        double imag = Zeta.IndexToImag(index, app.usingPolyImag);
         return (-Square(index) * 2.0*Math.Cos(Beta(index))) + (Math.Pow(-1.0, Square(index)) * Math.Sqrt(Math.Ceiling(index)) * Math.Pow(imag / (2.0*Math.PI), -0.25) * (psi(P(imag)) + C1(imag)));
     }
 
     private double Beta(double index)
     {
         int i = (int)Math.Ceiling(index);
-        double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+        double imag = Zeta.IndexToImag(index, app.usingPolyImag);
         double Theta(double t) => t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
         
         return Math.Log(i) * imag - Theta(imag) - Math.PI*(i*i - 1.0);
@@ -411,7 +411,7 @@ public class MiddleLinkTeardrop : MonoBehaviour
 
     private int Square(double index)
     {
-        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, app.useNewImagToggle.isOn)/(2*Math.PI))) - Math.Floor(index));
+        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, app.usingPolyImag)/(2*Math.PI))) - Math.Floor(index));
     }
 
     private double P(double imag)
@@ -453,8 +453,8 @@ public class MiddleLinkTeardrop : MonoBehaviour
             for (int i = 0; i < _pointsPerTdrop; i++)
             {
                 double t = i * inc;
-                _exactR.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn), true) - new Vector(1, 0));
-                _exactG.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.useNewImagToggle.isOn)));
+                _exactR.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.usingPolyImag), true) - new Vector(1, 0));
+                _exactG.Add(Zeta.TearDrop(index + 1, s.real, Zeta.IndexToImag(index + t, app.usingPolyImag)));
             }
         }
 
