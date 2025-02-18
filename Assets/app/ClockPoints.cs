@@ -166,7 +166,7 @@ public class ClockPoints : MonoBehaviour
                 _ptTable[2][tableIndex] = Zeta.InfinityTdrop(index - nFamily, true) + new Vector(1, 0);
                 _ptTable[3][tableIndex] = Zeta.InfinityTdrop(index - nFamily, false);
 
-                double imag = Zeta.IndexToImag(index, app.useNewImagToggle.isOn);
+                double imag = Zeta.IndexToImag(index, app.usingPolyImag);
                 _ptTable[4][tableIndex] = Zeta.TearDrop(nFamily + 1, 0.5, imag);
                 _ptTable[5][tableIndex] = Zeta.TearDrop(nFamily + 1, 0.5, imag, true);
             }
@@ -328,7 +328,7 @@ public class ClockPoints : MonoBehaviour
     /// <returns></returns>
     private double A(double index, int offset)
     {
-        double value = -Zeta.IndexToImag(index, app.useNewImagToggle.isOn) * (Math.Log(Math.Floor(index + offset)) - Math.Log(Math.Floor(index + offset + 1.0)));
+        double value = -Zeta.IndexToImag(index, app.usingPolyImag) * (Math.Log(Math.Floor(index + offset)) - Math.Log(Math.Floor(index + offset + 1.0)));
         return value % (2*Math.PI);
     }
 }
