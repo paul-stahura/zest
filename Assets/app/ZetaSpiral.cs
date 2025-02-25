@@ -330,7 +330,7 @@ public partial class ZetaSpiral : MonoBehaviour
                 Draw.Color = pathColor1;
 
                 int ptCount = 100;
-                Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                Zeta.Spiral rspiral = new Zeta.Spiral(0, s.index, (SpiralFormulas)_spiralFormula.value, app.usingPolyImag);
                 pt = rspiral.zeta.ToVector2();
                 // from real 0-6
                 for(int i = 0; i <= 10; i++)
@@ -341,7 +341,7 @@ public partial class ZetaSpiral : MonoBehaviour
                     for(int j = 1; j <= ptCount; j++)
                     {
                         float r = (float)j/ptCount + i;
-                        rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.useNewImagToggle.isOn);
+                        rspiral = new Zeta.Spiral(r, s.index, (SpiralFormulas)_spiralFormula.value, app.usingPolyImag);
                         Vector2 nextTarget = rspiral.zeta.ToVector2();
                         Draw.Line(pt, nextTarget);
                         pt = nextTarget;

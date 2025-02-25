@@ -16,6 +16,7 @@ public class Accordion : MonoBehaviour
     public Button toggleButton;
     // the hidden content in the accordion
     public RectTransform content;
+    [SerializeField] private ExpandableDropdownSettings _expandableDropdownSettings;
 
     private Coroutine _animCoroutine;
     private float _collapsedHight;
@@ -25,6 +26,17 @@ public class Accordion : MonoBehaviour
     public void Start()
     {   
         SetContentSizes();
+        if(_expandableDropdownSettings != null)
+        {
+            _expandableDropdownSettings.OnResize += (size) => 
+            {
+                _exstendedHeight = size.y + _collapsedHight;
+                if(IsExstended)
+                {
+                    rect.sizeDelta = new Vector2(rect.sizeDelta.x, _exstendedHeight);
+                }
+            };
+        }
     }
 
     public void OnValidate() 

@@ -298,7 +298,7 @@ public class Zeta
         return i;
     }
 
-    public static double IndexToImag(double index, bool useNew=false)  // n is the index of the link in question.  
+    public static double IndexToImag(double index, bool usePoly=false)  // n is the index of the link in question.  
     {
         //. This is from Zzrob
         // "Einstein" becasue it is exact
@@ -307,7 +307,7 @@ public class Zeta
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
         var n = index;
 
-        if(useNew)
+        if(usePoly)
         {
             // new
             // 2pi*(t^2+t+1/6)

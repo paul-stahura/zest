@@ -139,7 +139,7 @@ public class BisectorPoint : MonoBehaviour
     private void CalcBP(Zeta.Spiral s)
     {   
         _ZPS = GetPaulStahuraZeta(s.index);
-        _BP = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
+        _BP = GetScaledBisectorPoint(s, _app.usingPolyImag);
     }
     private void DrawBisectorPoints(Camera cam, Zeta.Spiral s)
     {
@@ -435,8 +435,8 @@ public class BisectorPoint : MonoBehaviour
 
         infoText.text = $"Searching...";
 
-        Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, _app.useNewImagToggle.isOn);
-        Vector bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
+        Zeta.Spiral s = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
+        Vector bp = GetScaledBisectorPoint(s, _app.usingPolyImag);
         
         bool dir = Vector3.Dot(BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex], s.joints[s.middleIndex +1] - s.joints[s.middleIndex]) > 0;
         double lastPos = (BisectingLines.CrotchPoint(s) - s.joints[s.middleIndex]).Length * (dir ? 1d : -1d);
@@ -447,8 +447,8 @@ public class BisectorPoint : MonoBehaviour
             // int searchPersentage = depth / maxDepth * 100;
             // _infoText.text = $"Find Next: Searching... {searchPersentage}%";
 
-            s = new Zeta.Spiral(real, index + inc, SpiralFormulas.EulerMaclauren, _app.useNewImagToggle.isOn);
-            bp = GetScaledBisectorPoint(s, _app.useNewImagToggle.isOn);
+            s = new Zeta.Spiral(real, index + inc, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
+            bp = GetScaledBisectorPoint(s, _app.usingPolyImag);
 
             Vector ml = s.joints[s.middleIndex + 1] - s.joints[s.middleIndex];
             double bpPos = (bp - s.joints[s.middleIndex]).Length;
