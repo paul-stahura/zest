@@ -136,9 +136,6 @@ public class App : ImmediateModeShapeDrawer
 
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
-            
-            // animate index
-            AnimateSpiral();
 
             DrawSprial?.Invoke(cam, spiral);
         }
@@ -280,6 +277,9 @@ public class App : ImmediateModeShapeDrawer
     public Canvas canvas;
     void Update()
     {
+        // animate index
+        AnimateSpiral();
+
         if (Input.GetKeyUp("space"))
         {
             var active = canvas.gameObject.activeSelf;
