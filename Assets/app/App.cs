@@ -198,7 +198,7 @@ public class App : ImmediateModeShapeDrawer
         // Here, we set Robot3.imag to the value you typed in.
         imagDisplay.onValueChanged.AddListener(value =>
         {
-            IndexDisplay.onValueChanged.Invoke((float)Zeta.ImagToIndex(value));
+            IndexDisplay.onValueChanged.Invoke(Zeta.SearchImagToIndex(value));
         });
 
         // When you input a middle index value, this updates the imaginary number

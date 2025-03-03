@@ -354,6 +354,48 @@ public class Zeta
         // );
     }
 
+    public static double SearchImagToIndex(double targetImag, int maxIters = 100)
+    {
+        double approxIndex = ImagToIndex(targetImag);
+        double currentImag = IndexToImag(approxIndex);
+
+        // If the approximation is already good enough, return the approximate value
+        if (Math.Abs(currentImag - targetImag) <= 0)
+        {
+            return approxIndex;
+        }
+
+        // Otherwise, begin a binary search for the exact value
+        double lowerBound = approxIndex - 1;  // An arbitrary lower bound for the search
+        double upperBound = approxIndex + 1;  // An arbitrary upper bound for the search
+        double midIndex = 0;
+
+        for (int i = 0; i < maxIters; i++)
+        {
+            midIndex = (lowerBound + upperBound) / 2;
+            currentImag = IndexToImag(midIndex);
+
+            // Check if the current imag value is close enough to target
+            if (Math.Abs(currentImag - targetImag) <= 0)
+            {
+                return midIndex;
+            }
+
+            // Adjust the search range based on the current result
+            if (currentImag < targetImag)
+            {
+                lowerBound = midIndex;
+            }
+            else
+            {
+                upperBound = midIndex;
+            }
+        }
+
+        // If the loop finishes without finding an exact match, return the best approximation
+        return midIndex;
+    }
+
     /// <summary>
     /// Only works when the real part is .5
     /// </summary>
