@@ -10,6 +10,7 @@ using Shapes;
 using System.Runtime.CompilerServices;
 using Unity.VersionControl.Git;
 using System.Xml.Schema;
+using UnityEngine.EventSystems;
 
 public enum SpiralFormulas
 {
@@ -38,8 +39,7 @@ public class App : ImmediateModeShapeDrawer
     // Animation slider controls
     //
     [Header("Animation Controls")]
-    public Toggle animLeftToggle;
-    public Toggle animRightToggle;
+    public Toggle animHoldToggle;
     public Slider animSpeed;
 
     [Header("Real Part Control")]
@@ -138,25 +138,30 @@ public class App : ImmediateModeShapeDrawer
             Draw.Matrix = transform.localToWorldMatrix;
             
             // animate index
-            if (animLeftToggle.isOn ^ animRightToggle.isOn)
-            {
-                double index = Index;
-
-                // Scale the speed inversely based on the index
-                // so that the speed is slower when the index is larger
-                // and slower when the index is smaller
-                var speed = (animSpeed.value * animSpeed.value) * 0.001 / (index + 1); // adding 1 to avoid division by zero
-
-                index += speed * (animLeftToggle.isOn ? -1 : 1);
-
-                if(index <= 0)
-                    index = 0;
-
-                UpdateIndexSliders(index);
-                Index = index;
-            }
+            AnimateSpiral();
 
             DrawSprial?.Invoke(cam, spiral);
+        }
+    }
+
+    private void AnimateSpiral()
+    {
+        var deadzone = 0.0001;
+        if (Math.Abs(animSpeed.value) > deadzone)
+        {
+            double index = Index;
+
+            // Scale the speed inversely based on the index
+            // so that the speed is slower when the index is larger
+            // and faster when the index is smaller
+            var speed = (animSpeed.value * animSpeed.value) * 0.001 / (index + 1); // adding 1 to avoid division by zero
+
+            index += speed * (animSpeed.value < 0 ? -1 : 1);
+
+            if(index <= 0)
+                index = 0;
+
+            Index = index;
         }
     }
 
@@ -248,6 +253,26 @@ public class App : ImmediateModeShapeDrawer
         #endregion
 
         spiralFormula.value = PlayerPrefs.GetInt("AppSpiralFormula");
+
+
+        #region Animation Controls
+        animHoldToggle.onValueChanged.AddListener(value =>
+        {
+            if (value)
+                animSpeed.value = 0;
+        });
+
+        EventTrigger animTrigger = animSpeed.gameObject.AddComponent<EventTrigger>();
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = EventTriggerType.PointerUp;
+        entry.callback.AddListener((data) => {
+            if (animHoldToggle.isOn)
+                animSpeed.value = 0;
+        });
+        animTrigger.triggers.Add(entry);
+
+        animHoldToggle.onValueChanged.Invoke(true);
+        #endregion
     }
 
     float t = 0f;
