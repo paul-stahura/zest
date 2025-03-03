@@ -24,9 +24,9 @@ public class App : ImmediateModeShapeDrawer
 
     [Header("Index Controls")]
     // Input box for the imaginary number
-    public FloatInput imagDisplay;
+    public DoubleInput imagDisplay;
     // Input box for the middle index
-    public FloatInput middleIndexDisplay;
+    public DoubleInput IndexDisplay;
     public double _index;
     private Toggle _usePolyImagToggle;
     public bool usingPolyImag = false;
@@ -38,8 +38,9 @@ public class App : ImmediateModeShapeDrawer
     // Animation slider controls
     //
     [Header("Animation Controls")]
-    public FloatInput animMax;
-    public ImagSlider animSlider;
+    public Toggle animLeftToggle;
+    public Toggle animRightToggle;
+    public Slider animSpeed;
 
     [Header("Real Part Control")]
     public Slider realPartSlider;
@@ -85,7 +86,7 @@ public class App : ImmediateModeShapeDrawer
             {
                 _index = value;
 
-                UpdateIndexSliders((float)value);
+                UpdateIndexSliders(value);
 
                 if (spiral == null)
                     spiral = new Zeta.Spiral(_real, _index, (SpiralFormulas)spiralFormula.value, usingPolyImag);
@@ -136,12 +137,17 @@ public class App : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
             
-            // The animSlider is zero when it is in the center.
-            if (animSlider.Value != 0)
+            // animate index
+            if (animLeftToggle.isOn ^ animRightToggle.isOn)
             {
-                // Imag += .04f * animSlider.Value;
-                var index = indexIntPart.value + indexRealPart.value;
-                index += .001f * animSlider.Value;
+                double index = Index;
+
+                // Scale the speed inversely based on the index
+                // so that the speed is slower when the index is larger
+                // and slower when the index is smaller
+                var speed = (animSpeed.value * animSpeed.value) * 0.001 / (index + 1); // adding 1 to avoid division by zero
+
+                index += speed * (animLeftToggle.isOn ? -1 : 1);
 
                 if(index <= 0)
                     index = 0;
@@ -192,11 +198,11 @@ public class App : ImmediateModeShapeDrawer
         // Here, we set Robot3.imag to the value you typed in.
         imagDisplay.onValueChanged.AddListener(value =>
         {
-            middleIndexDisplay.onValueChanged.Invoke((float)Zeta.ImagToIndex(value));
+            IndexDisplay.onValueChanged.Invoke((float)Zeta.ImagToIndex(value));
         });
 
         // When you input a middle index value, this updates the imaginary number
-        middleIndexDisplay.onValueChanged.AddListener(value =>
+        IndexDisplay.onValueChanged.AddListener(value =>
         {
             Index = value;
         });
@@ -213,15 +219,6 @@ public class App : ImmediateModeShapeDrawer
         {
             Index = indexIntPart.value + value;
         });
-
-
-        #region Animation Slider
-        animMax.onValueChanged.AddListener(value =>
-        {
-            animSlider.Max = value;
-        });
-        animSlider.Max = animMax.Value; // set the default value
-        #endregion
 
         #region Real Part Slider
         realPartSlider.onValueChanged.AddListener(value =>
@@ -336,15 +333,15 @@ public class App : ImmediateModeShapeDrawer
         SceneManager.LoadScene("~Input-Output");
     }
 
-    private void UpdateIndexSliders(float index)
+    private void UpdateIndexSliders(double index)
     {
-        middleIndexDisplay.Value = index;
-        imagDisplay.Value = (float)Zeta.IndexToImag(Index, usingPolyImag);
-        indexIntPart.maxValue = Mathf.FloorToInt(index) + 15;
-        indexIntPart.value = Mathf.FloorToInt(index);
-        var realPart = (float)Math.Round(index - Mathf.FloorToInt(index), 6);
+        IndexDisplay.Value = index;
+        imagDisplay.Value = Zeta.IndexToImag(Index, usingPolyImag);
+        indexIntPart.maxValue = Mathf.FloorToInt((float)index) + 15;
+        indexIntPart.value = Mathf.FloorToInt((float)index);
+        double realPart = Math.Round(index - Mathf.FloorToInt((float)index), 6);
         if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)
             fineTuneReal.reset();
-        indexRealPart.value = realPart;
+        indexRealPart.value = (float)realPart;
     }
 }
