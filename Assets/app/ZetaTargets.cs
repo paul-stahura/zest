@@ -46,6 +46,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _emsToggle = GameObject.Find("Ems Zeta Toggle").GetComponent<Toggle>();
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
 
+        SubTargets();
+
         _traceToggle = GameObject.Find("Trace Zeta Toggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
@@ -61,17 +63,44 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
 
-            UpdateTargets();
-
             DrawTargets();
         }
     }
 
-    private void UpdateTargets()
+    private void SubTargets()
     {
-        if(_zrsToggle.isOn) UpdateTargetPos(_spiralCalculator.GetZrsPos(), ref _zrsComplex, ref _zrsPath, ref _zrsPathIndex);
-        if(_zpsToggle.isOn) UpdateTargetPos(_spiralCalculator.GetZpsPos(), ref _zpsComplex, ref _zpsPath, ref _zpsPathIndex);
-        if(_emsToggle.isOn) UpdateTargetPos(_spiralCalculator.GetEmsPos(), ref _emsComplex, ref _emsPath, ref _emsPathIndex);
+        _zrsToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateZrs += UpdateZrs;
+            else SpiralCalculator.UpdateZrs -= UpdateZrs; 
+        });
+
+        _zpsToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateZps += UpdateZps;
+            else SpiralCalculator.UpdateZps -= UpdateZps; 
+        });
+
+        _emsToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateEms += UpdateEms;
+            else SpiralCalculator.UpdateEms -= UpdateEms; 
+        });
+    }
+
+    private void UpdateZrs(Zeta.Spiral zrs)
+    {
+        UpdateTargetPos(zrs.zeta, ref _zrsComplex, ref _zrsPath, ref _zrsPathIndex);
+    }
+
+    private void UpdateZps(Vector zps)
+    {
+        UpdateTargetPos(zps, ref _zpsComplex, ref _zpsPath, ref _zpsPathIndex);
+    }
+
+    private void UpdateEms(Zeta.Spiral ems)
+    {
+        UpdateTargetPos(ems.zeta, ref _emsComplex, ref _emsPath, ref _emsPathIndex);
     }
 
     private void DrawTargets()
