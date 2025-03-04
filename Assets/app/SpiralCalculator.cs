@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing.Text;
 using System.Numerics;
 using UnityEngine;
@@ -19,6 +20,10 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
+
+    public static Action<List<Vector>, int> UpdateRealPath;
+    private List<Vector> _realPath;
+    private int _realPathIndexOne;
 
     void Awake()
     {
@@ -53,8 +58,14 @@ public class SpiralCalculator : MonoBehaviour
 
     public Vector GetZps()
     {
-        if(_zpsPos == null) return null;
+        if(_zpsPos == null) CalcZps(_app.Index);
         return _zpsPos;
+    }
+
+    public (List<Vector>, int) GetRealPath()
+    {
+        if(_realPath == null) CalcRealPath(_app.Index);
+        return (_realPath, _realPathIndexOne);
     }
 
     private void OnIndexChanged(double index)
@@ -113,6 +124,15 @@ public class SpiralCalculator : MonoBehaviour
         {
             _zpsPos = null;
         }
+
+        if(UpdateRealPath != null)
+        {
+            CalcRealPath(index);
+        }
+        else
+        {
+            _realPath = null;
+        }
     }
 
     private void CalcEms(double real, double index)
@@ -125,7 +145,7 @@ public class SpiralCalculator : MonoBehaviour
         {
             _emsSpiral.Update(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
         }
-        UpdateEms.Invoke(_emsSpiral);
+        UpdateEms?.Invoke(_emsSpiral);
     }
 
     private void CalcZrs(double index)
@@ -138,7 +158,7 @@ public class SpiralCalculator : MonoBehaviour
         {
             _zrsSpiral.Update(0.5, index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
         }
-        UpdateZrs.Invoke(_zrsSpiral);
+        UpdateZrs?.Invoke(_zrsSpiral);
     }
 
     private void CalcEta(double real, double index)
@@ -151,7 +171,7 @@ public class SpiralCalculator : MonoBehaviour
         {
             _etaSpiral.Update(real, index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
         }
-        UpdateEta.Invoke(_etaSpiral);
+        UpdateEta?.Invoke(_etaSpiral);
     }
 
     private void CalcRsInverseSum(double real, double index)
@@ -164,12 +184,33 @@ public class SpiralCalculator : MonoBehaviour
         {
             _rsInverseSumSpiral.Update(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
         }
-        UpdateRsInverseSum.Invoke(_rsInverseSumSpiral.joints);
+        UpdateRsInverseSum?.Invoke(_rsInverseSumSpiral.joints);
     }
 
     private void CalcZps(double index)
     {
         _zpsPos = BisectorPoint.GetZPS(index);
-        UpdateZps.Invoke(_zpsPos);
+        UpdateZps?.Invoke(_zpsPos);
+    }
+
+    private void CalcRealPath(double index)
+    {
+        _realPath = new List<Vector>();
+        _realPathIndexOne = 0;
+
+        for(int i = 0; i <= 10; i++)
+        {
+            var ptCount = 100 / (i + 1);
+            for(int j = 0; j < ptCount; j++)
+            {
+                var r = i + (float)j/ptCount;
+                var spiral = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+                _realPath.Add(spiral.zeta.ToVector());
+            }
+
+            if(i == 0 && _realPathIndexOne == 0) _realPathIndexOne = _realPath.Count;
+        }
+
+        UpdateRealPath?.Invoke(_realPath, _realPathIndexOne);
     }
 }

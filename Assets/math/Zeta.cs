@@ -582,7 +582,7 @@ public class Zeta
             var imag = IndexToImag(index, useNewImag);
 
             Complex s = new Complex(real, imag);
-            int variedN = (int)Math.Sqrt(2 * Math.PI * s.Imaginary);
+            int variedN = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
             int N = variedN;
 
             numLinks = N + 1;

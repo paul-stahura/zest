@@ -10,6 +10,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class MultiOptionToggle : MonoBehaviour
 {
+    public Action<int> OnOptionChanged;
+
     [SerializeField] int _selectedOption = 0;
     [SerializeField] List<string> _options;
     [SerializeField] List<Color> _colors;
@@ -44,6 +46,7 @@ public class MultiOptionToggle : MonoBehaviour
         _selectedOption = (_selectedOption + 1) % Math.Max(_options.Count, _colors.Count);
         UpdateText();
         UpdateColor();
+        OnOptionChanged?.Invoke(_selectedOption);
     }
 
     private void UpdateText()
