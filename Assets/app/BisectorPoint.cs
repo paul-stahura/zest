@@ -100,6 +100,11 @@ public class BisectorPoint : MonoBehaviour
         DrawZps(cam);
     }
 
+    public static Vector GetZPS(double index)
+    {
+        return GetPaulStahuraZeta(index);
+    }
+
     private void CalcZPS(Zeta.Spiral s)
     {
         _ZPS = GetPaulStahuraZeta(s.index);
@@ -257,7 +262,7 @@ public class BisectorPoint : MonoBehaviour
         return bp;
     }
 
-    private Vector GetPaulStahuraZeta(double index)
+    private static Vector GetPaulStahuraZeta(double index)
     {
         double beta(double index)
         {

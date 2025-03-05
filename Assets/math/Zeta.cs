@@ -565,10 +565,44 @@ public class Zeta
                     UpdateZetFormula(realValue, indexValue, useNewImag);
                     break;
 
+                case SpiralFormulas.RSInverseSum:
+                    UpdateRSInverseSum(realValue, indexValue, useNewImag);
+                    break;
+
                 default:
                     this.zeta = Zeta.ReimannSiegel(new Complex(realValue, Zeta.IndexToImag(indexValue, useNewImag)));
                     break;
             }
+        }
+
+        private void UpdateRSInverseSum(double realValue, double indexValue, bool useNewImag)
+        {
+            real = realValue;
+            index = indexValue;
+            var imag = IndexToImag(index, useNewImag);
+
+            Complex s = new Complex(real, imag);
+            int variedN = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
+            int N = variedN;
+
+            numLinks = N + 1;
+            joints = new Vector[numLinks];
+
+            
+
+            Complex sum2 = Complex.Zero;
+            joints[0] = sum2.ToVector();
+
+            for (int n = 1; n <= N; n++)
+            {
+                Complex next = Complex.Pow(n, s - 1) * NewRiemmanSeigalFormulaSums.GammaRatio(1-s);
+                Vector start = sum2.ToVector();
+                Vector end = (sum2 + next).ToVector();
+                sum2 += next;
+                joints[n] = end;
+            }
+            
+            findSpirals();
         }
 
         public void UpdateReimannSiegel(double realValue, double indexValue, bool useNewImag)
