@@ -2121,7 +2121,7 @@ GameObject:
   - component: {fileID: 51544546}
   - component: {fileID: 51544549}
   m_Layer: 5
-  m_Name: LinksToDrawOptions
+  m_Name: LinksToDrawDropdown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10497,12 +10497,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useCullingMasks: 0
-  EmsColor: {r: 0.6901961, g: 0.7019608, b: 0.76470596, a: 1}
-  ZrsColor: {r: 0.6901961, g: 0.7019608, b: 0.76470596, a: 1}
+  EmsColor: {r: 0.6084906, g: 1, b: 0.8931701, a: 1}
+  _emsForwardToggle: {fileID: 0}
+  ZrsColor: {r: 0.5801887, g: 0.8671955, b: 1, a: 1}
+  _ZrsForwardToggle: {fileID: 0}
   ReverseSpiralColor: {r: 0, g: 0.24799477, b: 0.94509804, a: 1}
+  _reverseSpiralToggle: {fileID: 0}
   InverseSpiralColor: {r: 0.8117648, g: 0, b: 0.08627451, a: 1}
+  _inverseSpiralToggle: {fileID: 0}
   InverseReflectedColor: {r: 0.56884766, g: 0, b: 1, a: 1}
-  EtaSpiralColor: {r: 0.6901961, g: 0.7019608, b: 0.76470596, a: 1}
+  _inverseReflectedToggle: {fileID: 0}
+  EtaSpiralColor: {r: 1, g: 1, b: 1, a: 1}
+  _etaSpiralToggle: {fileID: 0}
+  _realPathToggle: {fileID: 0}
+  _linksToDrawDropdown: {fileID: 0}
+  _colorLinksToggle: {fileID: 0}
+  _bisectorColor: {r: 0.9607844, g: 0.6901961, b: 0.33333334, a: 1}
+  _clockYinColor: {r: 0, g: 1, b: 0, a: 1}
+  _clockYangColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &329520421
 GameObject:
   m_ObjectHideFlags: 0
@@ -12918,10 +12930,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 176.9961, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 88.49805, y: -10}
+  m_SizeDelta: {x: 176.9961, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &399531977
 MonoBehaviour:
@@ -24304,10 +24316,10 @@ RectTransform:
   m_Father: {fileID: 1945959616}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 176.9961, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 88.49805, y: -10}
+  m_SizeDelta: {x: 176.9961, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &747407838
 MonoBehaviour:
@@ -27866,8 +27878,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577174951}
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
-  m_Value: 0.9999881
-  m_Size: 0.9935093
+  m_Value: 0.99999905
+  m_Size: 0.8927115
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -33530,10 +33542,10 @@ RectTransform:
   m_Father: {fileID: 1945959616}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 186.9961, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1005994102
 MonoBehaviour:
@@ -36203,10 +36215,10 @@ RectTransform:
   m_Father: {fileID: 369265268}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 186.9961, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1079409820
 MonoBehaviour:
@@ -37202,10 +37214,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 186.9961, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1117548069
 MonoBehaviour:
@@ -51236,7 +51248,7 @@ GameObject:
   - component: {fileID: 1521460641}
   - component: {fileID: 1521460640}
   m_Layer: 5
-  m_Name: ColorMiddleLinksToggle
+  m_Name: ColorBisectorLinksToggle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -51324,7 +51336,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &1523119286
 GameObject:
   m_ObjectHideFlags: 0
@@ -55017,7 +55029,7 @@ MonoBehaviour:
   onValueChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &1609120643
 GameObject:
   m_ObjectHideFlags: 0
@@ -57733,10 +57745,10 @@ RectTransform:
   m_Father: {fileID: 369265268}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 176.9961, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 88.49805, y: -10}
+  m_SizeDelta: {x: 176.9961, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1713771665
 MonoBehaviour:
@@ -76717,7 +76729,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: 0, y: 108.9723}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &7749546806075207708
 MonoBehaviour:
@@ -76731,7 +76743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed08684e322dd04eae0daedf5e63b90, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  StartExstended: 0
+  StartExstended: 1
   animSpeed: 0.5
   rect: {fileID: 7749546806075207707}
   toggleButton: {fileID: 7749546805854067023}

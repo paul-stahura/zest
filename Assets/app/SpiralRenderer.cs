@@ -3,25 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using Shapes;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SpiralRenderer : ImmediateModeShapeDrawer
 {
+    [Header("Spiral Colors")]
     [SerializeField] private Color EmsColor;
-    private MultiOptionToggle _emsForwardToggle;
+    [SerializeField] private MultiOptionToggle _emsForwardToggle;
     [SerializeField] private Color ZrsColor;
-    private MultiOptionToggle _ZrsForwardToggle;
+    [SerializeField] private MultiOptionToggle _ZrsForwardToggle;
     [SerializeField] private Color ReverseSpiralColor;
-    private Toggle _reverseSpiralToggle;
+    [SerializeField] private Toggle _reverseSpiralToggle;
     [SerializeField] private Color InverseSpiralColor;
-    private Toggle _inverseSpiralToggle;
+    [SerializeField] private Toggle _inverseSpiralToggle;
     [SerializeField] private Color InverseReflectedColor;
-    private Toggle _inverseReflectedToggle;
+    [SerializeField] private Toggle _inverseReflectedToggle;
     [SerializeField] private Color EtaSpiralColor;
-    private Toggle _etaSpiralToggle;
+    [SerializeField] private Toggle _etaSpiralToggle;
 
-    private Toggle _realPathToggle;
+    [SerializeField] private Toggle _realPathToggle;
+
+    [Header("Bisector/Clock Colors")]
+    [SerializeField] private TMP_Dropdown _linksToDrawDropdown;
+    [SerializeField] private Toggle _colorLinksToggle;
+    [SerializeField] private Color _bisectorColor = new Color(0.9607844f, 0.6901961f, 0.3333333f, 1);
+    [SerializeField] private Color _clockYinColor = Color.green;
+    [SerializeField] private Color _clockYangColor = Color.red;
 
     private SpiralCalculator _spiralCalculator;
 
@@ -35,6 +44,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _etaSpiralToggle = GameObject.Find("EtaSpiralToggle").GetComponent<Toggle>();
 
         _realPathToggle = GameObject.Find("RealPathToggle").GetComponent<Toggle>();
+        _linksToDrawDropdown = GameObject.Find("LinksToDrawDropdown").GetComponent<TMP_Dropdown>();
+        _colorLinksToggle = GameObject.Find("ColorBisectorLinksToggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
 
@@ -129,7 +140,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void SubEms(Zeta.Spiral spiral){}
     private void DrawEms(Zeta.Spiral ems)
     {
-        DrawSpiralLines(ems.joints, EmsColor);
+        DrawSpiral(ems, ems.joints, EmsColor);
     }
 
      private void ZrsOptionChanged(int option)
@@ -144,13 +155,13 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void SubZrs(Zeta.Spiral spiral){}
     private void DrawZrs(Zeta.Spiral zrs)
     {
-        DrawSpiralLines(zrs.joints, ZrsColor);
+        DrawSpiral(zrs, zrs.joints, ZrsColor);
     }
 
     private void DrawReverseSpiral()
     {
         var spiral = _spiralCalculator.GetEms();
-        if(spiral.real == 0.5) spiral = _spiralCalculator.GetZrs();
+        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
         var zeta = spiral.zeta.ToVector();
         var norm = zeta.Normalized();
 
@@ -160,12 +171,15 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             newJoints[i] = zeta + spiral.joints[i].Reflect(norm);
         }
 
-        DrawSpiralLines(newJoints, ReverseSpiralColor);
+        DrawSpiral(spiral, newJoints, ReverseSpiralColor);
     }
 
     private void SubRsInverseSum(Vector[] links){}
     private void DrawRsInverseSum(Vector[] links)
     {
+        var spiral = _spiralCalculator.GetEms();
+        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
+
         DrawSpiralLines(links, InverseSpiralColor);
     }
 
@@ -173,7 +187,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void DrawRsInverseSumReflected(Vector[] links)
     {
         var spiral = _spiralCalculator.GetEms();
-        if(spiral.real == 0.5) spiral = _spiralCalculator.GetZrs();
+        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
         var zeta = spiral.zeta.ToVector();
         var norm = zeta.Normalized();
         var perp = new Vector(-norm.y, norm.x);
@@ -184,7 +198,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             newJoints[i] = zeta + links[i].Reflect(norm).Reflect(perp);
         }
 
-        DrawSpiralLines(newJoints, InverseReflectedColor);
+        DrawSpiral(spiral, newJoints, InverseReflectedColor);
     }
 
     private void SubEtaSpiral(Zeta.Spiral spiral){}
@@ -209,8 +223,50 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         {
             afterOne[i] = realPath[i + indexOne];
         }
-        DrawSpiralLines(realUpToOne, Color.red);
+        DrawSpiralLines(realUpToOne, Color.magenta);
         DrawSpiralLines(afterOne, Color.blue);
+    }
+
+    private void DrawSpiral(Zeta.Spiral spiral, Vector[] joints, Color color)
+    {
+        switch(_linksToDrawDropdown.value)
+        {
+            case 0: // ALL
+                DrawSpiralLines(joints, color);
+                if(_colorLinksToggle.isOn) HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+                break;
+            case 1: // Bisector Link
+                HighlightBisectorLink(joints, spiral.middleIndex, color, false);
+                break;
+            case 2: // Clock
+                HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+                break;
+        }
+    }
+
+    private void HighlightBisectorLink(Vector[] points, int middleIndex, Color color, bool includeClockArms)
+    {
+        using (Draw.StyleScope)
+        {
+            // color tint the bisector link
+            var colorAlpha = 0.3f;
+            var colorTint = 0.8f;
+            Color newColor = Color.Lerp(color, _bisectorColor, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Thickness = 3;
+            Draw.Line(points[middleIndex], points[middleIndex + 1], newColor);
+
+            if(includeClockArms)
+            {
+                newColor = Color.Lerp(color, _clockYinColor, colorTint);
+                newColor.a = colorAlpha;
+                Draw.Line(points[middleIndex - 1], points[middleIndex], newColor);
+
+                newColor = Color.Lerp(color, _clockYangColor, colorTint);
+                newColor.a = colorAlpha;
+                Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
+            }
+        }
     }
 
     private void DrawSpiralLines(Vector[] points, Color color)
