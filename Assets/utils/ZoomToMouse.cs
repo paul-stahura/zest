@@ -133,6 +133,23 @@ public class ZoomToMouse : MonoBehaviour
             }
         }
     }
+    // public void Zoom(float amount)
+    // {
+    //     if (_camera.orthographic)
+    //     {
+    //         float scaleFactor = Mathf.Pow(ZoomLevel, -amount); // Invert zoom direction
+    //         Matrix4x4 proj = _camera.projectionMatrix;
+            
+    //         proj.m00 *= scaleFactor; // Scale X
+    //         proj.m11 *= scaleFactor; // Scale Y
+
+    //         _camera.projectionMatrix = proj;
+    //     }
+    //     else
+    //     {
+    //         _camera.fieldOfView = Mathf.Clamp(_camera.fieldOfView - amount * 5f, 10f, 100f); // Zoom for perspective
+    //     }
+    // }
 
     public float ZoomLevel
     {
