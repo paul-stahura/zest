@@ -23,6 +23,18 @@ public class SpiralCalculator : MonoBehaviour
     private List<Vector> _realPath;
     private int _realPathIndexOne;
 
+    public static Action<Vector> UpdateSymmetryPoint;
+    private Vector _symmetryPoint;
+
+    public static Action<Vector> UpdateBpOneHalf;
+    private Vector _bpOneHalf;
+
+    public static Action<Vector> UpdateYin;
+    private Vector _yin;
+
+    public static Action<Vector> UpdateYang;
+    private Vector _yang;
+
     void Awake()
     {
         _app = GameObject.Find("App").GetComponent<App>();
@@ -66,6 +78,30 @@ public class SpiralCalculator : MonoBehaviour
         return (_realPath, _realPathIndexOne);
     }
 
+    public Vector GetSymmetryPoint()
+    {
+        if(_symmetryPoint == null) CalcSymmetryPoint(_app.Index, _app.Real);
+        return _symmetryPoint;
+    }
+
+    public Vector GetBpOneHalf()
+    {
+        if(_bpOneHalf == null) CalcBpOneHalf(_app.Index);
+        return _bpOneHalf;
+    }
+
+    public Vector GetYin()
+    {
+        if(_yin == null) CalcYin(_app.Index, _app.Real);
+        return _yin;
+    }
+
+    public Vector GetYang()
+    {
+        if(_yang == null) CalcYang(_app.Index, _app.Real);
+        return _yang;
+    }
+
     private void OnIndexChanged(double index)
     {
         Calculate(_app.Index, _app.Real);
@@ -78,59 +114,35 @@ public class SpiralCalculator : MonoBehaviour
 
     private void Calculate(double index, double real)
     {
-        if(UpdateEms != null)
-        {
-            CalcEms(real, index);
-        }
-        else
-        {
-            _emsSpiral = null;
-        }
+        if(UpdateEms != null) CalcEms(real, index);
+        else _emsSpiral = null;
 
-        if(UpdateZrs != null)
-        {
-            CalcZrs(index);
-        }
-        else
-        {
-            _zrsSpiral = null;
-        }
+        if(UpdateZrs != null) CalcZrs(index);
+        else _zrsSpiral = null;
 
-        if(UpdateEta != null)
-        {
-            CalcEta(real, index);
-        }
-        else
-        {
-            _etaSpiral = null;
-        }
+        if(UpdateEta != null) CalcEta(real, index);
+        else _etaSpiral = null;
 
-        if(UpdateRsInverseSum != null)
-        {
-            CalcRsInverseSum(real, index);
-        }
-        else
-        {
-            _rsInverseSumSpiral = null;
-        }
+        if(UpdateRsInverseSum != null) CalcRsInverseSum(real, index);
+        else _rsInverseSumSpiral = null;
 
-        if(UpdateZps != null)
-        {
-            CalcZps(index);
-        }
-        else
-        {
-            _zpsPos = null;
-        }
+        if(UpdateZps != null) CalcZps(index);
+        else _zpsPos = null;
 
-        if(UpdateRealPath != null)
-        {
-            CalcRealPath(index);
-        }
-        else
-        {
-            _realPath = null;
-        }
+        if(UpdateRealPath != null) CalcRealPath(index);
+        else _realPath = null;
+
+        if(UpdateSymmetryPoint != null) CalcSymmetryPoint(index, real);
+        else _symmetryPoint = null;
+
+        if(UpdateBpOneHalf != null) CalcBpOneHalf(index);
+        else _bpOneHalf = null;
+
+        if(UpdateYin != null) CalcYin(index, real);
+        else _yin = null;
+
+        if(UpdateYang != null) CalcYang(index, real);
+        else _yang = null;
     }
 
     private void CalcEms(double real, double index)
@@ -210,5 +222,33 @@ public class SpiralCalculator : MonoBehaviour
         }
 
         UpdateRealPath?.Invoke(_realPath, _realPathIndexOne);
+    }
+
+    private void CalcSymmetryPoint(double index, double real)
+    {
+        Zeta.Spiral spiral;
+        if(_emsSpiral == null && _zrsSpiral != null) spiral = GetZrs();
+        else spiral = GetEms();
+
+        _symmetryPoint = BisectingLines.CrotchPoint(spiral);
+        UpdateSymmetryPoint?.Invoke(_symmetryPoint);
+    }
+
+    private void CalcBpOneHalf(double index)
+    {
+        _bpOneHalf = BisectorPoint.BpOneHalf(index);
+        UpdateBpOneHalf?.Invoke(_bpOneHalf);
+    }
+
+    private void CalcYin(double index, double real)
+    {
+        _yin = MiddleLinkTeardrop.Yin(index);
+        UpdateYin?.Invoke(_yin);
+    }
+
+    private void CalcYang(double index, double real)
+    {
+        _yang = MiddleLinkTeardrop.Yang(index);
+        UpdateYang?.Invoke(_yang);
     }
 }

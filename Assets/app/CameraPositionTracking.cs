@@ -3,6 +3,7 @@ using Lean.Touch;
 using TMPro;
 using System.Collections;
 using System;
+using UnityEngine.UI;
 
 public class CameraPositionTracking : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class CameraPositionTracking : MonoBehaviour
     private Vector2 _cameraUp = Vector2.up;
 
     [Header("Zeta Target")]
-    [SerializeField] private TMP_Dropdown _ZetaTargetDropdown;
+    [SerializeField] private TMP_Dropdown _zetaTargetDropdown;
     private enum ZetaTarget
     {
         Auto = 0,
@@ -31,21 +32,31 @@ public class CameraPositionTracking : MonoBehaviour
     }
 
     [Header("Symmetry Target")]
-    [SerializeField] private TMP_Dropdown _SymmetryTargetDropdown;
+    [SerializeField] private TMP_Dropdown _symmetryTargetDropdown;
     private enum SymmetryTarget
     {
         Auto = 0,
         BisectorLink = 1,
-        SymmetryBisector = 2,
+        SymmetryPoint = 2,
         BpOneHalf = 3,
     }
 
     [Header("YinYang Target")]
+    [SerializeField] private TMP_Dropdown _yinYangTargetDropdown;
+    private enum YinYangTarget
+    {
+        BisectorLink = 0,
+        Yin = 1,
+        Yang = 2,
+    }
 
     [Header("Spiral Target")]
+    [SerializeField] private TMP_Dropdown _spiralLinkTrackingOption;
+    [SerializeField] private Slider _spiralTargetSlider;
+    [SerializeField] private TMP_Text _spiralHandle;
+    [SerializeField] private Text _spiralMaxText;
 
     [Header("Cam Control")]
-
     [SerializeField] public Camera _cam;
 
     [Header("Tracking Settings")]
@@ -79,17 +90,29 @@ public class CameraPositionTracking : MonoBehaviour
     private void OnTargetChanged(int v)
     {
         _cameraTrackingOffset = Vector2.zero;
+        _cameraUp = Vector2.up;
 
-        if(_camTrackingDropdown.value != 1)
+        switch((TrackingTarget)v)
         {
-            if(_ZetaTargetDropdown != null)
-                _ZetaTargetDropdown.value = (int)ZetaTarget.Auto;
-        }
+            case TrackingTarget.Zeta:
+                if(_zetaTargetDropdown != null)
+                    _zetaTargetDropdown.value = (int)ZetaTarget.Auto;
+                break;
 
-        if(_camTrackingDropdown.value != 2)
-        {
-            if(_SymmetryTargetDropdown != null)
-                _SymmetryTargetDropdown.value = (int)SymmetryTarget.Auto;
+            case TrackingTarget.Symmetry:
+                if(_symmetryTargetDropdown != null)
+                    _symmetryTargetDropdown.value = (int)SymmetryTarget.Auto;
+                break;
+            
+            case TrackingTarget.YinYang:
+                if(_yinYangTargetDropdown != null)
+                    _yinYangTargetDropdown.value = (int)YinYangTarget.BisectorLink;
+                break;
+
+            case TrackingTarget.Spiral:
+                if(_spiralLinkTrackingOption != null)
+                    _spiralLinkTrackingOption.value = 0;
+                break;
         }
     }
 
@@ -121,12 +144,12 @@ public class CameraPositionTracking : MonoBehaviour
     #region Zeta Target
     private Vector2 GetZetaTarget()
     {
-        if(_ZetaTargetDropdown == null)
+        if(_zetaTargetDropdown == null)
         {
-            _ZetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
+            _zetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
         }
 
-        ZetaTarget zTarget = (ZetaTarget)_ZetaTargetDropdown.value;
+        ZetaTarget zTarget = (ZetaTarget)_zetaTargetDropdown.value;
         if(zTarget == ZetaTarget.Auto)
         {
             if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
@@ -166,12 +189,12 @@ public class CameraPositionTracking : MonoBehaviour
     #region Symmetry Target
     private Vector2 GetSymmetryTarget()
     {
-        if(_SymmetryTargetDropdown == null)
+        if(_symmetryTargetDropdown == null)
         {
-            _SymmetryTargetDropdown = GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>();
+            _symmetryTargetDropdown = GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>();
         }
 
-        SymmetryTarget sTarget = (SymmetryTarget)_SymmetryTargetDropdown.value;
+        SymmetryTarget sTarget = (SymmetryTarget)_symmetryTargetDropdown.value;
         // if(sTarget == SymmetryTarget.Auto)
         // {
         //     if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
@@ -189,7 +212,6 @@ public class CameraPositionTracking : MonoBehaviour
         // }
 
         bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
-        bool isZrs = SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0;
 
         Zeta.Spiral spiral = null;
         Vector2 midLink = Vector2.zero;
@@ -205,12 +227,14 @@ public class CameraPositionTracking : MonoBehaviour
                 _cameraUp = new Vector2(-midLink.y, midLink.x).normalized;
                 break;
 
-            case SymmetryTarget.SymmetryBisector:
-                // get Symmetry pt
+            case SymmetryTarget.SymmetryPoint:
+                pt = _spiralCalculator.GetSymmetryPoint().ToVector2();
+                _cameraUp = Vector2.up;
                 break;   
 
             case SymmetryTarget.BpOneHalf:
-                // Get BpOneHalf pt
+                pt = _spiralCalculator.GetBpOneHalf().ToVector2();
+                _cameraUp = Vector2.up;
                 break;
         }
         return pt;
@@ -220,14 +244,95 @@ public class CameraPositionTracking : MonoBehaviour
     #region YinYang Target
     private Vector2 GetYinYangTarget()
     {
-        return new Vector2(0, 0);
+        if(_yinYangTargetDropdown == null)
+        {
+            _yinYangTargetDropdown = GameObject.Find("YinYangTargetDropdown").GetComponent<TMP_Dropdown>();
+        }
+
+        bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
+        YinYangTarget yyTarget = (YinYangTarget)_yinYangTargetDropdown.value;
+        Vector2 pt = Vector2.zero;
+
+        Zeta.Spiral spiral = null;
+        if(isEms) spiral = _spiralCalculator.GetEms();
+        else spiral = _spiralCalculator.GetZrs();
+        Vector2 midLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
+        pt = spiral.joints[spiral.middleIndex] + midLink / 2f;
+        _cameraUp = new Vector2(-midLink.y, midLink.x).normalized;
+
+        switch(yyTarget)
+        {
+            case YinYangTarget.Yin:
+                var rotYin = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * _spiralCalculator.GetYin());
+                pt += rotYin * midLink.magnitude;
+                break;
+
+            case YinYangTarget.Yang:
+                var rotYang = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * _spiralCalculator.GetYang());
+                pt += rotYang * midLink.magnitude;
+                break;
+        }
+
+        return pt;
     }
     #endregion
 
     #region Spiral Target
     private Vector2 GetSpiralTarget()
     {
-        return new Vector2(0, 0);
+        if(_spiralLinkTrackingOption == null)
+        {
+            _spiralLinkTrackingOption = GameObject.Find("LinkTrackingOption").GetComponent<TMP_Dropdown>();
+            _spiralTargetSlider = GameObject.Find("SprialTrackingRangeSlider").GetComponent<Slider>();
+            _spiralHandle = GameObject.Find("SpiralRangeHandleText").GetComponent<TMP_Text>();
+            _spiralMaxText = GameObject.Find("SpiralTrackingRangeEnd").GetComponent<Text>();
+
+            _spiralTargetSlider.onValueChanged.AddListener((float v) => _spiralHandle.text = ((int)v).ToString());
+        }
+        
+        ZetaTarget zTarget = ZetaTarget.Ems;
+        if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+        {
+            zTarget = ZetaTarget.Ems;
+        }
+        else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+        {
+            zTarget = ZetaTarget.Zrs;
+        }
+        else if(SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
+        {
+            zTarget = ZetaTarget.Eta;
+        }
+
+        Zeta.Spiral spiral = null;
+        switch(zTarget)
+        {
+            case ZetaTarget.Ems:
+                spiral = _spiralCalculator.GetEms();
+                break;
+            case ZetaTarget.Zrs:
+                spiral = _spiralCalculator.GetZrs();
+                break;
+            case ZetaTarget.Eta:
+                spiral = _spiralCalculator.GetEta();
+                break;
+        }
+
+        _spiralTargetSlider.maxValue = spiral.spirals.Length - 1;
+        _spiralMaxText.text = _spiralTargetSlider.maxValue.ToString();
+        if(_spiralLinkTrackingOption.value == 0)
+        {
+            _cameraUp = Vector2.up;
+            return spiral.spirals[(int)_spiralTargetSlider.value];
+        }
+        else
+        {
+            int index = (int)Math.Floor(spiral.SpiralMiddleIndex(spiral.index, (int)_spiralTargetSlider.value));
+            Vector2 link = spiral.joints[index + 1] - spiral.joints[index];
+            Vector2 pt = spiral.joints[index] + link / 2f;
+            _cameraUp = new Vector2(-link.y, link.x).normalized;
+            return pt;
+        }
     }
     #endregion
 
