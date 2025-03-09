@@ -2,10 +2,22 @@ using UnityEngine;
 using Lean.Touch;
 using TMPro;
 using System.Collections;
+using System;
 
 public class CameraPositionTracking : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown _camTrackingDropdown;
+    [Header("Zeta Target Options")]
+    [SerializeField] private TMP_Dropdown _ZetaTargetDropdown;
+    private enum ZetaTarget
+    {
+        Auto = 0,
+        Ems = 1,
+        Zps = 2,
+        Zrs = 3,
+        Eta = 4
+    }
+    private ZetaTarget _zetaTarget = ZetaTarget.Auto;
     [SerializeField] private SpiralCalculator _spiralCalculator;
 
     [SerializeField] public Camera _cam;
@@ -52,8 +64,57 @@ public class CameraPositionTracking : MonoBehaviour
                 target = new Vector2(0, 0);
                 break;
             case 1:
-                target = _spiralCalculator.GetEms().zeta.ToVector2();
+                target = GetZetaTarget();
                 break;
+        }
+
+        return target;
+    }
+
+    private Vector2 GetZetaTarget()
+    {
+        if(_ZetaTargetDropdown == null)
+        {
+            _ZetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
+            _ZetaTargetDropdown.onValueChanged.AddListener((int value) => _zetaTarget = (ZetaTarget)value);
+        }
+
+        switch(_zetaTarget)
+        {
+            case ZetaTarget.Auto:
+                return GetAutoZetaTarget();
+            case ZetaTarget.Ems:
+                return _spiralCalculator.GetEms().zeta.ToVector2();
+            case ZetaTarget.Zps:
+                return _spiralCalculator.GetZps().ToVector2();
+            case ZetaTarget.Zrs:
+                return _spiralCalculator.GetZrs().zeta.ToVector2();
+            case ZetaTarget.Eta:
+                return _spiralCalculator.GetEta().zeta.ToVector2();
+            default:
+                return _spiralCalculator.GetZrs().zeta.ToVector2();
+        }
+    }
+
+    private Vector2 GetAutoZetaTarget()
+    {
+        Vector2 target = new Vector2(0, 0);
+        if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+        {
+            print(SpiralCalculator.UpdateEms.GetInvocationList().Length);
+            target = _spiralCalculator.GetEms().zeta.ToVector2();
+        }
+        else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
+        {
+            target = _spiralCalculator.GetZps().ToVector2();
+        }
+        else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+        {
+            target = _spiralCalculator.GetZrs().zeta.ToVector2();
+        }
+        else if(SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
+        {
+            target = _spiralCalculator.GetEta().zeta.ToVector2();
         }
 
         return target;

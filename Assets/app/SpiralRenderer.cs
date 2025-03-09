@@ -130,12 +130,22 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void EmsOptionChanged(int option)
     {
-        if(option != 0)
+        if(option > 0)
         {
-            SpiralCalculator.UpdateEms += SubEms;
-            EmsColor.a = option / 4f;
+            if(option == 1) 
+            {
+                SpiralCalculator.UpdateEms += SubEms;
+                EmsColor.a = 0.25f;
+            }
+            else
+            {
+                EmsColor.a = 1f;
+            }
         }
-        else SpiralCalculator.UpdateEms -= SubEms;
+        else if (option == 0)
+        {
+            SpiralCalculator.UpdateEms -= SubEms;
+        }
     }
     private void SubEms(Zeta.Spiral spiral){}
     private void DrawEms(Zeta.Spiral ems)
@@ -145,12 +155,22 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
      private void ZrsOptionChanged(int option)
     {
-        if(option != 0)
+        if(option > 0)
         {
-            SpiralCalculator.UpdateZrs += SubZrs;
-            ZrsColor.a =  option / 4f;
+            if(option == 1) 
+            {
+                SpiralCalculator.UpdateZrs += SubZrs;
+                ZrsColor.a = 0.25f;
+            }
+            else
+            {
+                ZrsColor.a = 1f;
+            }
         }
-        else SpiralCalculator.UpdateZrs -= SubZrs;
+        else if (option == 0)
+        {
+            SpiralCalculator.UpdateZrs -= SubZrs;
+        }
     }
     private void SubZrs(Zeta.Spiral spiral){}
     private void DrawZrs(Zeta.Spiral zrs)
