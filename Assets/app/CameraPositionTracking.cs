@@ -101,7 +101,6 @@ public class CameraPositionTracking : MonoBehaviour
         Vector2 target = new Vector2(0, 0);
         if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
         {
-            print(SpiralCalculator.UpdateEms.GetInvocationList().Length);
             target = _spiralCalculator.GetEms().zeta.ToVector2();
         }
         else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
@@ -150,6 +149,8 @@ public class CameraPositionTracking : MonoBehaviour
 
     private void HandleZooming()
     {
+        if(IsPointerOverUIElement()) return;
+
         float sensitivity = _scrollSensitivity;
         #if UNITY_EDITOR_WIN
         // Scrolling on Windows seems way less sensitive than the Mac trackpad
