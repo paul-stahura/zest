@@ -6,8 +6,20 @@ using System;
 
 public class CameraPositionTracking : MonoBehaviour
 {
+    private enum TrackingTarget
+    {
+        Origin = 0,
+        Zeta = 1,
+        Symmetry = 2,
+        YinYang = 3,
+        Spiral = 4
+    }
     [SerializeField] private TMP_Dropdown _camTrackingDropdown;
-    [Header("Zeta Target Options")]
+    [SerializeField] private SpiralCalculator _spiralCalculator;
+
+    private Vector2 _cameraUp = Vector2.up;
+
+    [Header("Zeta Target")]
     [SerializeField] private TMP_Dropdown _ZetaTargetDropdown;
     private enum ZetaTarget
     {
@@ -17,8 +29,22 @@ public class CameraPositionTracking : MonoBehaviour
         Zrs = 3,
         Eta = 4
     }
-    private ZetaTarget _zetaTarget = ZetaTarget.Auto;
-    [SerializeField] private SpiralCalculator _spiralCalculator;
+
+    [Header("Symmetry Target")]
+    [SerializeField] private TMP_Dropdown _SymmetryTargetDropdown;
+    private enum SymmetryTarget
+    {
+        Auto = 0,
+        BisectorLink = 1,
+        SymmetryBisector = 2,
+        BpOneHalf = 3,
+    }
+
+    [Header("YinYang Target")]
+
+    [Header("Spiral Target")]
+
+    [Header("Cam Control")]
 
     [SerializeField] public Camera _cam;
 
@@ -36,7 +62,7 @@ public class CameraPositionTracking : MonoBehaviour
     void Awake()
     {
         _camTrackingDropdown = GameObject.Find("Camera Tracking Options").GetComponent<TMP_Dropdown>();
-        _camTrackingDropdown.onValueChanged.AddListener((int value) => ResetOffset());
+        _camTrackingDropdown.onValueChanged.AddListener((int v) => OnTargetChanged(v));
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
         
@@ -50,39 +76,79 @@ public class CameraPositionTracking : MonoBehaviour
         UpdateProjectionMatrix();
     }
 
-    private void ResetOffset()
+    private void OnTargetChanged(int v)
     {
         _cameraTrackingOffset = Vector2.zero;
+
+        if(_camTrackingDropdown.value != 1)
+        {
+            if(_ZetaTargetDropdown != null)
+                _ZetaTargetDropdown.value = (int)ZetaTarget.Auto;
+        }
+
+        if(_camTrackingDropdown.value != 2)
+        {
+            if(_SymmetryTargetDropdown != null)
+                _SymmetryTargetDropdown.value = (int)SymmetryTarget.Auto;
+        }
     }
 
     private Vector2 GetTrackingTarget()
     {
         Vector2 target = new Vector2(0, 0);
-        switch (_camTrackingDropdown.value)
+        switch ((TrackingTarget)_camTrackingDropdown.value)
         {
-            case 0:
+            case TrackingTarget.Origin:
                 target = new Vector2(0, 0);
                 break;
-            case 1:
+            case TrackingTarget.Zeta:
                 target = GetZetaTarget();
+                break;
+            case TrackingTarget.Symmetry:
+                target = GetSymmetryTarget();
+                break;
+            case TrackingTarget.YinYang:
+                target = GetYinYangTarget();
+                break;
+            case TrackingTarget.Spiral:
+                target = GetSpiralTarget();
                 break;
         }
 
         return target;
     }
 
+    #region Zeta Target
     private Vector2 GetZetaTarget()
     {
         if(_ZetaTargetDropdown == null)
         {
             _ZetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
-            _ZetaTargetDropdown.onValueChanged.AddListener((int value) => _zetaTarget = (ZetaTarget)value);
         }
 
-        switch(_zetaTarget)
+        ZetaTarget zTarget = (ZetaTarget)_ZetaTargetDropdown.value;
+        if(zTarget == ZetaTarget.Auto)
         {
-            case ZetaTarget.Auto:
-                return GetAutoZetaTarget();
+            if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Ems;
+            }
+            else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Zps;
+            }
+            else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Zrs;
+            }
+            else if(SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Eta;
+            }
+        }
+        
+        switch(zTarget)
+        {
             case ZetaTarget.Ems:
                 return _spiralCalculator.GetEms().zeta.ToVector2();
             case ZetaTarget.Zps:
@@ -95,30 +161,77 @@ public class CameraPositionTracking : MonoBehaviour
                 return _spiralCalculator.GetZrs().zeta.ToVector2();
         }
     }
+    #endregion
 
-    private Vector2 GetAutoZetaTarget()
+    #region Symmetry Target
+    private Vector2 GetSymmetryTarget()
     {
-        Vector2 target = new Vector2(0, 0);
-        if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+        if(_SymmetryTargetDropdown == null)
         {
-            target = _spiralCalculator.GetEms().zeta.ToVector2();
-        }
-        else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
-        {
-            target = _spiralCalculator.GetZps().ToVector2();
-        }
-        else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
-        {
-            target = _spiralCalculator.GetZrs().zeta.ToVector2();
-        }
-        else if(SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
-        {
-            target = _spiralCalculator.GetEta().zeta.ToVector2();
+            _SymmetryTargetDropdown = GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>();
         }
 
-        return target;
+        SymmetryTarget sTarget = (SymmetryTarget)_SymmetryTargetDropdown.value;
+        // if(sTarget == SymmetryTarget.Auto)
+        // {
+        //     if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+        //     {
+        //         sTarget = SymmetryTarget.BisectorLink;
+        //     }
+        //     else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+        //     {
+        //         sTarget = SymmetryTarget.SymmetryBisector;
+        //     }
+        //     else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
+        //     {
+        //         sTarget = SymmetryTarget.BpOneHalf;
+        //     }
+        // }
+
+        bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
+        bool isZrs = SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0;
+
+        Zeta.Spiral spiral = null;
+        Vector2 midLink = Vector2.zero;
+        Vector2 pt = Vector2.zero;
+        switch(sTarget)
+        {
+            case SymmetryTarget.BisectorLink:
+                if(isEms) spiral = _spiralCalculator.GetEms();
+                else spiral = _spiralCalculator.GetZrs();
+                pt = spiral.joints[spiral.middleIndex];
+                midLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
+                pt += midLink / 2f;
+                _cameraUp = new Vector2(-midLink.y, midLink.x).normalized;
+                break;
+
+            case SymmetryTarget.SymmetryBisector:
+                // get Symmetry pt
+                break;   
+
+            case SymmetryTarget.BpOneHalf:
+                // Get BpOneHalf pt
+                break;
+        }
+        return pt;
     }
+    #endregion
 
+    #region YinYang Target
+    private Vector2 GetYinYangTarget()
+    {
+        return new Vector2(0, 0);
+    }
+    #endregion
+
+    #region Spiral Target
+    private Vector2 GetSpiralTarget()
+    {
+        return new Vector2(0, 0);
+    }
+    #endregion
+
+    #region CameraControl
     private void HandlePanning()
     {
         if (Input.GetMouseButtonDown(0))
@@ -193,5 +306,9 @@ public class CameraPositionTracking : MonoBehaviour
         var pos = GetTrackingTarget() + _cameraTrackingOffset;
         // Apply the offset to the camera's position
         _cam.transform.position = new Vector3(pos.x, pos.y, _cam.transform.position.z);
+
+        // rotate the camera to keep the up vector in the same direction
+        _cam.transform.rotation = Quaternion.LookRotation(Vector3.forward, _cameraUp);
     }
+    #endregion
 }
