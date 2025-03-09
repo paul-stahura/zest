@@ -30,7 +30,7 @@ public class App : ImmediateModeShapeDrawer
     // Input box for the middle index
     public DoubleInput IndexDisplay;
     public double _index;
-    private Toggle _usePolyImagToggle;
+    [SerializeField] private Toggle _usePolyImagToggle;
     public bool usingPolyImag = false;
     public Slider indexIntPart;
     public Slider indexRealPart;
