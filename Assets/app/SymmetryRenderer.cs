@@ -58,7 +58,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     private void DrawSymmetry()
     {
         if(_bisectorLinkToggle.isOn) DrawBisectorLink();
-        // if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
+        if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
 
         // if(_zpsBisectorToggle.isOn) DrawZpsBisector();
         // if(_symmeytryToggle.isOn) DrawSymmetryPoint();
@@ -67,7 +67,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawBisectorLink()
     {
-        
         var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
         var zeta = spiral.zeta.ToVector();
         var norm = zeta.Normalized();
@@ -95,6 +94,24 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Color = _bisectorLinkColor;
             Draw.Line(yin, yang);
+        }
+    }
+
+    private void DrawLinksToSpirals()
+    {
+        Zeta.Spiral spiral = _spiralCalculator.GetZrs();
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _linksToSpiralsColor;
+            Draw.Thickness = 1f;
+
+            for (int i = 0; i < spiral.spirals.Length; i++)
+            {
+                var from = spiral.joints[i];
+                var to = spiral.spirals[i];
+                Draw.Line(from, to);
+            }
         }
     }
 
