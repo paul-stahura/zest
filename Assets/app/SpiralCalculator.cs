@@ -42,6 +42,16 @@ public class SpiralCalculator : MonoBehaviour
         _app.RealChanged += OnRealChanged;
     }
 
+    public double GetIndex()
+    {
+        return _app.Index;
+    }
+
+    public double GetReal()
+    {
+        return _app.Real;
+    }
+
     public Zeta.Spiral GetEms()
     {
         if(_emsSpiral == null) CalcEms(_app.Real, _app.Index);
@@ -226,11 +236,7 @@ public class SpiralCalculator : MonoBehaviour
 
     private void CalcSymmetryPoint(double index, double real)
     {
-        Zeta.Spiral spiral;
-        if(_emsSpiral == null && _zrsSpiral != null) spiral = GetZrs();
-        else spiral = GetEms();
-
-        _symmetryPoint = BisectingLines.CrotchPoint(spiral);
+        _symmetryPoint = BisectingLines.CrotchPoint(GetEms());
         UpdateSymmetryPoint?.Invoke(_symmetryPoint);
     }
 

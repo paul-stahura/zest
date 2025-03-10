@@ -1,7 +1,5 @@
 using UnityEngine;
-using Lean.Touch;
 using TMPro;
-using System.Collections;
 using System;
 using UnityEngine.UI;
 
@@ -85,6 +83,11 @@ public class CameraPositionTracking : MonoBehaviour
         HandlePanning();
         HandleZooming();
         UpdateProjectionMatrix();
+    }
+
+    public float GetZoomLevel()
+    {
+        return _zoomLevel;
     }
 
     private void OnTargetChanged(int v)
@@ -408,12 +411,12 @@ public class CameraPositionTracking : MonoBehaviour
         // Apply the new projection matrix to the camera
         _cam.projectionMatrix = projectionMatrix;
 
-        var pos = GetTrackingTarget() + _cameraTrackingOffset;
-        // Apply the offset to the camera's position
-        _cam.transform.position = new Vector3(pos.x, pos.y, _cam.transform.position.z);
+        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
 
-        // rotate the camera to keep the up vector in the same direction
-        _cam.transform.rotation = Quaternion.LookRotation(Vector3.forward, _cameraUp);
+        var pos = GetTrackingTarget() + (Vector2)(rot * _cameraTrackingOffset);
+
+        // Apply the offset and rotation to the camera's transform
+        _cam.transform.SetPositionAndRotation(new Vector3(pos.x, pos.y, _cam.transform.position.z), rot);
     }
     #endregion
 }
