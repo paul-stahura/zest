@@ -180,8 +180,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void DrawReverseSpiral()
     {
-        var spiral = _spiralCalculator.GetEms();
-        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
         var zeta = spiral.zeta.ToVector();
         var norm = zeta.Normalized();
 

@@ -1,7 +1,5 @@
 using UnityEngine;
-using Lean.Touch;
 using TMPro;
-using System.Collections;
 using System;
 using UnityEngine.UI;
 
@@ -80,11 +78,16 @@ public class CameraPositionTracking : MonoBehaviour
         _cam = Camera.main;
     }
 
-    void Update()
+    void LateUpdate()
     {
         HandlePanning();
         HandleZooming();
         UpdateProjectionMatrix();
+    }
+
+    public float GetZoomLevel()
+    {
+        return _zoomLevel;
     }
 
     private void OnTargetChanged(int v)
@@ -211,33 +214,38 @@ public class CameraPositionTracking : MonoBehaviour
         //     }
         // }
 
-        bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
-
-        Zeta.Spiral spiral = null;
-        Vector2 midLink = Vector2.zero;
-        Vector2 pt = Vector2.zero;
+        Zeta.Spiral spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        Vector2 zeta = spiral.zeta.ToVector2();
+        Vector2 midLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
+        Vector2 target = Vector2.zero;
+        Vector2 newUP = Vector2.up;
         switch(sTarget)
         {
             case SymmetryTarget.BisectorLink:
-                if(isEms) spiral = _spiralCalculator.GetEms();
-                else spiral = _spiralCalculator.GetZrs();
-                pt = spiral.joints[spiral.middleIndex];
-                midLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
-                pt += midLink / 2f;
-                _cameraUp = new Vector2(-midLink.y, midLink.x).normalized;
+                target = spiral.joints[spiral.middleIndex];
+                target += midLink / 2f;
+                newUP = new Vector2(-midLink.y, midLink.x).normalized;
                 break;
 
             case SymmetryTarget.SymmetryPoint:
-                pt = _spiralCalculator.GetSymmetryPoint().ToVector2();
-                _cameraUp = Vector2.up;
+                target = _spiralCalculator.GetSymmetryPoint().ToVector2();
+                newUP = new Vector2(-zeta.y, zeta.x).normalized;
                 break;   
 
             case SymmetryTarget.BpOneHalf:
-                pt = _spiralCalculator.GetBpOneHalf().ToVector2();
-                _cameraUp = Vector2.up;
+                zeta = _spiralCalculator.GetZps();
+                newUP = new Vector2(-zeta.y, zeta.x).normalized;
+                target = _spiralCalculator.GetBpOneHalf().ToVector2();
                 break;
         }
-        return pt;
+
+        // keep us upright
+        if(Vector2.Dot(_cameraUp, newUP) < 0)
+        {
+            newUP *= -1;
+        }
+        _cameraUp = newUP;
+        return target;
     }
     #endregion
 
@@ -408,12 +416,12 @@ public class CameraPositionTracking : MonoBehaviour
         // Apply the new projection matrix to the camera
         _cam.projectionMatrix = projectionMatrix;
 
-        var pos = GetTrackingTarget() + _cameraTrackingOffset;
-        // Apply the offset to the camera's position
-        _cam.transform.position = new Vector3(pos.x, pos.y, _cam.transform.position.z);
+        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
 
-        // rotate the camera to keep the up vector in the same direction
-        _cam.transform.rotation = Quaternion.LookRotation(Vector3.forward, _cameraUp);
+        var pos = GetTrackingTarget() + (Vector2)(rot * _cameraTrackingOffset);
+
+        // Apply the offset and rotation to the camera's transform
+        _cam.transform.SetPositionAndRotation(new Vector3(pos.x, pos.y, _cam.transform.position.z), rot);
     }
     #endregion
 }
