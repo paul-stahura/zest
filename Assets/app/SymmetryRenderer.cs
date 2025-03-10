@@ -92,7 +92,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             Draw.Pie(yang, rad, Mathf.PI, 1.5f * Mathf.PI);
             ShapesUtils.DrawCross(yang, rad + rad/4);
 
-            Draw.Thickness = 5f;
+            Draw.Thickness = 1f;
             Draw.Color = _bisectorLinkColor;
             Draw.Line(yin, yang);
         }

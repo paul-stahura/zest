@@ -78,7 +78,7 @@ public class CameraPositionTracking : MonoBehaviour
         _cam = Camera.main;
     }
 
-    void Update()
+    void LateUpdate()
     {
         HandlePanning();
         HandleZooming();
