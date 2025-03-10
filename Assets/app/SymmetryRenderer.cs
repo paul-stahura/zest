@@ -13,7 +13,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     [SerializeField] private Toggle _linksToSpiralsToggle;
     [SerializeField] private Color _linksToSpiralsColor;
-    [SerializeField] private Color _linksToSpiralsPointsColor;
 
     [SerializeField] private Toggle _zpsBisectorToggle;
     [SerializeField] private Color _zpsBisectorColor;
@@ -60,9 +59,9 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(_bisectorLinkToggle.isOn) DrawBisectorLink();
         if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
 
-        // if(_zpsBisectorToggle.isOn) DrawZpsBisector();
-        // if(_symmeytryToggle.isOn) DrawSymmetryPoint();
-        // if(_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
+        if(_zpsBisectorToggle.isOn) DrawZpsBisector();
+        if(_symmeytryToggle.isOn) DrawSymmetryPoint();
+        if(_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
     }
 
     private void DrawBisectorLink()
@@ -112,6 +111,81 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
                 var to = spiral.spirals[i];
                 Draw.Line(from, to);
             }
+        }
+    }
+
+    private void DrawZpsBisector()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Thickness = 1;
+
+            var zps = _spiralCalculator.GetZps();
+            var bipt = _spiralCalculator.GetBpOneHalf();
+
+            // legs
+            Draw.Color = Color.green;
+            Draw.Line(Vector2.zero, bipt);
+            Draw.Color = Color.red;
+            Draw.Line(bipt, zps);
+
+            // Draw dashed bisecting line. Extend it past a little bit
+            Draw.Color = _zpsBisectorColor;
+            var z2 = (zps / 2);
+            var dir = (z2 - bipt).Normalized() * .5f;
+            Draw.Thickness = 1.75f;
+            Draw.UseDashes = true;
+            Draw.Line(z2 + dir, bipt - dir);
+
+            Draw.Ring(bipt, .005f);
+            ShapesUtils.DrawCross45(bipt, .05f);
+        }
+    }
+
+    private void DrawSymmetryPoint()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Thickness = 1;
+            Draw.Color = _symmetryColor;
+
+            var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var zetaPt = spiral.zeta.ToVector();
+
+            var bipt = _spiralCalculator.GetSymmetryPoint();
+
+            Draw.Line(Vector2.zero, zetaPt);
+            Draw.Line(Vector2.zero, bipt);
+            Draw.Line(bipt, zetaPt);
+
+            // Draw dashed bisecting line. Extend it past a little bit
+            var z2 = (zetaPt / 2);
+            var dir = (z2 - bipt).Normalized() * .5f;
+            Draw.Thickness = 1.75f;
+            Draw.UseDashes = true;
+            Draw.Line(z2 + dir, bipt - dir);
+
+            Draw.Ring(bipt, .005f);
+            ShapesUtils.DrawCross45(bipt, .05f);
+        }
+    }
+
+    private void DrawZpsBPToZetaCircle()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _zpsBPToZetaCircleColor;
+            Draw.Thickness = 1f;
+
+            var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var zeta = spiral.zeta.ToVector();
+            Vector2 bpOneHalf = _spiralCalculator.GetBpOneHalf();
+
+            Draw.UseDashes = true;
+            Draw.Ring(bpOneHalf, (zeta - bpOneHalf).magnitude);
+
+            Draw.Color = Color.red;
+            Draw.Line(bpOneHalf, zeta);
         }
     }
 

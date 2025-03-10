@@ -55,9 +55,6 @@ public class App : ImmediateModeShapeDrawer
     readonly double IMAG_TDROP_ZERO = 0.3640107;
     readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0, true);
 
-    public ZetaSpiral zetaSpiral;
-    public ZetaSpiral secondSpiral;
-
 
     public Slider extendSpiralCount;
 
@@ -354,7 +351,7 @@ public class App : ImmediateModeShapeDrawer
         PlayerPrefs.SetInt("AppSpiralFormula", spiralFormula.value);
 
         PlayerPrefs.Save();
-        SceneChange.Invoke();
+        SceneChange?.Invoke();
         
         SceneManager.LoadScene("~Input-Output");
     }
