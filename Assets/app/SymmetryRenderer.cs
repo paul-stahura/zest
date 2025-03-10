@@ -84,10 +84,15 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
                 width = rad,
                 height = rad
             });
+
+            Draw.Color = new Color(_bisectorLinkPointsColor.r, _bisectorLinkPointsColor.g, _bisectorLinkPointsColor.b, 1);
             ShapesUtils.DrawCross(yin, rad + rad/4);
 
-            Draw.Pie(yang, rad, 0, Mathf.PI / 2);
-            Draw.Pie(yang, rad, Mathf.PI, 1.5f * Mathf.PI);
+            Draw.Color = _bisectorLinkPointsColor;
+            Draw.Pie(yang, rad*0.75f, 0, Mathf.PI / 2);
+            Draw.Pie(yang, rad*0.75f, Mathf.PI, 1.5f * Mathf.PI);
+
+            Draw.Color = new Color(_bisectorLinkPointsColor.r, _bisectorLinkPointsColor.g, _bisectorLinkPointsColor.b, 1);
             ShapesUtils.DrawCross(yang, rad + rad/4);
 
             Draw.Thickness = 1f;

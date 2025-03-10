@@ -92,8 +92,7 @@ public class CameraPositionTracking : MonoBehaviour
 
     private void OnTargetChanged(int v)
     {
-        _cameraTrackingOffset = Vector2.zero;
-        _cameraUp = Vector2.up;
+        RestCamOffset();
 
         switch((TrackingTarget)v)
         {
@@ -117,6 +116,12 @@ public class CameraPositionTracking : MonoBehaviour
                     _spiralLinkTrackingOption.value = 0;
                 break;
         }
+    }
+
+    private void RestCamOffset()
+    {
+        _cameraTrackingOffset = Vector2.zero;
+        _cameraUp = Vector2.up;
     }
 
     private Vector2 GetTrackingTarget()
@@ -150,6 +155,7 @@ public class CameraPositionTracking : MonoBehaviour
         if(_zetaTargetDropdown == null)
         {
             _zetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
+            _zetaTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
         }
 
         ZetaTarget zTarget = (ZetaTarget)_zetaTargetDropdown.value;
@@ -255,6 +261,7 @@ public class CameraPositionTracking : MonoBehaviour
         if(_yinYangTargetDropdown == null)
         {
             _yinYangTargetDropdown = GameObject.Find("YinYangTargetDropdown").GetComponent<TMP_Dropdown>();
+            _yinYangTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
         }
 
         bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
@@ -291,11 +298,14 @@ public class CameraPositionTracking : MonoBehaviour
         if(_spiralLinkTrackingOption == null)
         {
             _spiralLinkTrackingOption = GameObject.Find("LinkTrackingOption").GetComponent<TMP_Dropdown>();
+            _spiralLinkTrackingOption.onValueChanged.AddListener((v) => RestCamOffset());
+
             _spiralTargetSlider = GameObject.Find("SprialTrackingRangeSlider").GetComponent<Slider>();
             _spiralHandle = GameObject.Find("SpiralRangeHandleText").GetComponent<TMP_Text>();
             _spiralMaxText = GameObject.Find("SpiralTrackingRangeEnd").GetComponent<Text>();
 
             _spiralTargetSlider.onValueChanged.AddListener((float v) => _spiralHandle.text = ((int)v).ToString());
+            _spiralTargetSlider.onValueChanged.AddListener((float v) => RestCamOffset());
         }
         
         ZetaTarget zTarget = ZetaTarget.Ems;
