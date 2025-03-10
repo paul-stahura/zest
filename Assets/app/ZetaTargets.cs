@@ -11,17 +11,14 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Color _zrsColor;
     [SerializeField] private Toggle _zrsToggle;
     [SerializeField] private TMP_Text _zrsPos;
-    private Complex _zrsComplex;
 
     [SerializeField] private Color _zpsColor;
     [SerializeField] private Toggle _zpsToggle;
     [SerializeField] private TMP_Text _zpsPos;
-    private Complex _zpsComplex;
 
     [SerializeField] private Color _emsColor;
     [SerializeField] private Toggle _emsToggle;
     [SerializeField] private TMP_Text _emsPos;
-    private Complex _emsComplex;
 
     [Header("Trace Settings")]
     private const int _traceLength = 100;
@@ -90,24 +87,24 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     private void UpdateZrs(Zeta.Spiral zrs)
     {
-        UpdateTargetPos(zrs.zeta, ref _zrsComplex, ref _zrsPath, ref _zrsPathIndex);
+        UpdateTargetPos(zrs.zeta, ref _zrsPath, ref _zrsPathIndex);
     }
 
     private void UpdateZps(Vector zps)
     {
-        UpdateTargetPos(zps, ref _zpsComplex, ref _zpsPath, ref _zpsPathIndex);
+        UpdateTargetPos(zps, ref _zpsPath, ref _zpsPathIndex);
     }
 
     private void UpdateEms(Zeta.Spiral ems)
     {
-        UpdateTargetPos(ems.zeta, ref _emsComplex, ref _emsPath, ref _emsPathIndex);
+        UpdateTargetPos(ems.zeta, ref _emsPath, ref _emsPathIndex);
     }
 
     private void DrawTargets()
     {
-        DrawZetaTarget(_zrsToggle, _zrsPos, _zrsComplex, _zrsPath, _zrsPathIndex, _zrsColor);
-        DrawZetaTarget(_zpsToggle, _zpsPos, _zpsComplex, _zpsPath, _zpsPathIndex, _zpsColor);
-        DrawZetaTarget(_emsToggle, _emsPos, _emsComplex, _emsPath, _emsPathIndex, _emsColor);
+        DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
+        DrawZetaTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsPath, _zpsPathIndex, _zpsColor);
+        DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
     }
 
     private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)
@@ -157,9 +154,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void UpdateTargetPos(Complex complex, ref Complex targetComplex, ref Vector2[] targetPath, ref int targetPathIndex)
+    private void UpdateTargetPos(Complex complex, ref Vector2[] targetPath, ref int targetPathIndex)
     {
-        targetComplex = complex;
         UpdatePath(ref targetPath, ref targetPathIndex, complex);
     }
 
