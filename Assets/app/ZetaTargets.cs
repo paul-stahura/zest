@@ -115,7 +115,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     private void DrawReticle()
     {
-        //
         double Psi(double x)
         {
             return Math.Cos(2 * Math.PI * (Math.Pow(x, 2) - x - 1.0 / 16)) / Math.Cos(2 * Math.PI * x);
@@ -209,46 +208,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             ShapesUtils.DrawCross45(ratioPt, 0.08f);
         }
-
-        // draw intersection of bisector and inverse link
-        Vector[] inverseRef = _spiralCalculator.GetRsInverseSum();
-
-        var zeta = spiral.zeta.ToVector();
-        var norm = zeta.Normalized();
-        var perp = new Vector(-norm.y, norm.x);
-        Vector2 inverseLink = inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp) - inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp);
-        
-        // get intersection of bisector and inverse link
-        Vector2 intersection = GetIntersection(spiral.joints[spiral.middleIndex], spiral.joints[spiral.middleIndex + 1], 
-                                                zeta + inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp), zeta + inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp));
-        
-        using (Draw.StyleScope)
-        {
-            Draw.Color = Color.magenta;
-            Draw.Thickness = 1f;
-            ShapesUtils.DrawCross45(intersection, 0.08f);
-        }
-    }
-
-    private Vector2 GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
-    {
-        float a1 = p2.y - p1.y;
-        float b1 = p1.x - p2.x;
-        float c1 = a1 * p1.x + b1 * p1.y;
-
-        float a2 = q2.y - q1.y;
-        float b2 = q1.x - q2.x;
-        float c2 = a2 * q1.x + b2 * q1.y;
-
-        float delta = a1 * b2 - a2 * b1;
-        if (Mathf.Approximately(delta, 0))
-        {
-            throw new InvalidOperationException("Lines are parallel and do not intersect.");
-        }
-
-        float x = (b2 * c1 - b1 * c2) / delta;
-        float y = (a1 * c2 - a2 * c1) / delta;
-        return new Vector2(x, y);
     }
 
     private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)

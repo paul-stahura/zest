@@ -7,32 +7,42 @@ using UnityEngine.UI;
 
 public class SymmetryRenderer : ImmediateModeShapeDrawer
 {
-    [SerializeField] private Toggle _bisectorLinkToggle;
-    [SerializeField] private Color _bisectorLinkColor;
-    [SerializeField] private Color _bisectorLinkPointsColor;
+    [SerializeField] private Toggle _zpsBisectorToggle;
+    [SerializeField] private Color _zpsBisectorColor;
+    [SerializeField] private Toggle _zpsBPToZetaCirlceToggle;
+    [SerializeField] private Color _zpsBPToZetaCircleColor;
+
+    [SerializeField] private Toggle _symmeytryToggle;
+    [SerializeField] private Toggle _symmetryRealPathToggle;
+    [SerializeField] private Color _symmetryColor;
+    [SerializeField] private Toggle _reverseLinkToggle;
+    [SerializeField] private Color _reverseLinkColor;
+    [SerializeField] private Color _reverseLinkPointsColor;
+
+    [SerializeField] private Toggle _inverseBisectorToggle;
+    [SerializeField] private Toggle _inverseRealPathToggle;
+    [SerializeField] private Toggle _inverseBPToZetaCirlceToggle;
+    [SerializeField] private Color _inverseColor;
 
     [SerializeField] private Toggle _linksToSpiralsToggle;
     [SerializeField] private Color _linksToSpiralsColor;
-
-    [SerializeField] private Toggle _zpsBisectorToggle;
-    [SerializeField] private Color _zpsBisectorColor;
-
-    [SerializeField] private Toggle _symmeytryToggle;
-    [SerializeField] private Color _symmetryColor;
-
-    [SerializeField] private Toggle _zpsBPToZetaCirlceToggle;
-    [SerializeField] private Color _zpsBPToZetaCircleColor;
 
     [SerializeField] private SpiralCalculator _spiralCalculator;
     [SerializeField] private CameraPositionTracking _cam;
 
     void Awake()
     {
-        _bisectorLinkToggle = GameObject.Find("BisectorLinkToggle").GetComponent<Toggle>();
-        _linksToSpiralsToggle = GameObject.Find("LinksToSpiralsToggle").GetComponent<Toggle>();
         _zpsBisectorToggle = GameObject.Find("ZPSBisectorToggle").GetComponent<Toggle>();
-        _symmeytryToggle = GameObject.Find("SymmetryToggle").GetComponent<Toggle>();
         _zpsBPToZetaCirlceToggle = GameObject.Find("ZPSBPToZetaCircleToggle").GetComponent<Toggle>();
+
+        _symmeytryToggle = GameObject.Find("SymmetryToggle").GetComponent<Toggle>();
+        _symmetryRealPathToggle = GameObject.Find("SymmetryRealPathToggle").GetComponent<Toggle>();
+        _reverseLinkToggle = GameObject.Find("ReverseLinkToggle").GetComponent<Toggle>();
+        _linksToSpiralsToggle = GameObject.Find("LinksToSpiralsToggle").GetComponent<Toggle>();
+
+        _inverseBisectorToggle = GameObject.Find("InverseBisectorToggle").GetComponent<Toggle>();
+        _inverseRealPathToggle = GameObject.Find("InverseRealPathToggle").GetComponent<Toggle>();
+        _inverseBPToZetaCirlceToggle = GameObject.Find("InverseBPToZetaCircleToggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
         _cam = Camera.main.GetComponent<CameraPositionTracking>();
@@ -56,12 +66,17 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawSymmetry()
     {
-        if(_bisectorLinkToggle.isOn) DrawBisectorLink();
+        if(_zpsBisectorToggle.isOn) DrawZpsBisector();
+        if(_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
+
+        if(_symmeytryToggle.isOn) DrawSymmetryPoint();
+        if(_symmetryRealPathToggle.isOn) DrawSymmetryPath();
+        if(_reverseLinkToggle.isOn) DrawBisectorLink();
         if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
 
-        if(_zpsBisectorToggle.isOn) DrawZpsBisector();
-        if(_symmeytryToggle.isOn) DrawSymmetryPoint();
-        if(_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
+        if(_inverseBisectorToggle.isOn) DrawInverseBisector();
+        if(_inverseRealPathToggle.isOn) DrawInversePath();
+        if(_inverseBPToZetaCirlceToggle.isOn) DrawInverseBPToZetaCircle();
     }
 
     private void DrawBisectorLink()
@@ -74,7 +89,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
         using (Draw.StyleScope)
         {
-            Draw.Color = _bisectorLinkPointsColor;
+            Draw.Color = _reverseLinkPointsColor;
             Draw.Thickness = 1f;
 
             var rad = _cam.GetZoomLevel() * 0.03f;
@@ -85,25 +100,25 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
                 height = rad
             });
 
-            Draw.Color = new Color(_bisectorLinkPointsColor.r, _bisectorLinkPointsColor.g, _bisectorLinkPointsColor.b, 1);
+            Draw.Color = new Color(_reverseLinkPointsColor.r, _reverseLinkPointsColor.g, _reverseLinkPointsColor.b, 1);
             ShapesUtils.DrawCross(yin, rad + rad/4);
 
-            Draw.Color = _bisectorLinkPointsColor;
+            Draw.Color = _reverseLinkPointsColor;
             Draw.Pie(yang, rad*0.75f, 0, Mathf.PI / 2);
             Draw.Pie(yang, rad*0.75f, Mathf.PI, 1.5f * Mathf.PI);
 
-            Draw.Color = new Color(_bisectorLinkPointsColor.r, _bisectorLinkPointsColor.g, _bisectorLinkPointsColor.b, 1);
+            Draw.Color = new Color(_reverseLinkPointsColor.r, _reverseLinkPointsColor.g, _reverseLinkPointsColor.b, 1);
             ShapesUtils.DrawCross(yang, rad + rad/4);
 
             Draw.Thickness = 1f;
-            Draw.Color = _bisectorLinkColor;
+            Draw.Color = _reverseLinkColor;
             Draw.Line(yin, yang);
         }
     }
 
     private void DrawLinksToSpirals()
     {
-        Zeta.Spiral spiral = _spiralCalculator.GetZrs();
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
 
         using (Draw.StyleScope)
         {
@@ -175,6 +190,27 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         }
     }
 
+    private void DrawSymmetryPath()
+    {
+        Vector2[] path = _spiralCalculator.GetSymmetryPath();
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _symmetryColor;
+            Draw.Thickness = 1f;
+
+            for (int i = 1; i < path.Length; i++)
+            {
+                //if dist between points is greater that 0.5f skip
+                if((path[i - 1] - path[i]).magnitude < 5)
+                {
+                    Draw.Line(path[i - 1], path[i]);
+                }
+
+            }
+        }
+    }
+
     private void DrawZpsBPToZetaCircle()
     {
         using (Draw.StyleScope)
@@ -194,6 +230,59 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         }
     }
 
+    private void DrawInverseBisector()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _inverseColor;
+            Draw.Thickness = 1f;
+
+            var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var pt = _spiralCalculator.GetInversePoint();
+
+            ShapesUtils.DrawCross45(pt, 0.08f);
+
+            Draw.Line(Vector2.zero, pt, Color.green);
+            Draw.Line(pt, s.zeta.ToVector(), Color.red);
+        }
+    }
+
+    private void DrawInversePath()
+    {
+        Vector2[] path = _spiralCalculator.GetInverseSumPath();
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _inverseColor;
+            Draw.Thickness = 1f;
+
+            for (int i = 1; i < path.Length; i++)
+            {
+                Draw.Line(path[i - 1], path[i]);
+            }
+        }
+    }
+
+    private void DrawInverseBPToZetaCircle()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.magenta;
+            Draw.Thickness = 1f;
+
+            var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var zeta = spiral.zeta.ToVector();
+            Vector2 inversePt = _spiralCalculator.GetInversePoint();
+
+            Draw.UseDashes = true;
+            Draw.Ring(inversePt, (zeta - inversePt).magnitude);
+
+            Draw.Color = Color.red;
+            Draw.Line(inversePt, zeta);
+        }
+    }
+
+    #region Subs
     private void SubToCalculations()
     {
         _zpsBisectorToggle.onValueChanged.AddListener((value) => {
@@ -222,6 +311,17 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             }
         });
 
+        _symmetryRealPathToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateSymmetryPath += SubSymmetryPath;
+            }
+            else
+            {
+                SpiralCalculator.UpdateSymmetryPath -= SubSymmetryPath;
+            }
+        });
+
         _zpsBPToZetaCirlceToggle.onValueChanged.AddListener((value) => {
             if (value)
             {
@@ -234,10 +334,37 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
                 SpiralCalculator.UpdateBpOneHalf -= SubBpOneHalf;
             }
         });
+
+        _inverseBisectorToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInversePoint += SubInversePoint;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInversePoint -= SubInversePoint;
+            }
+        });
+
+        _inverseRealPathToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInverseSumPath += SubInversePath;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInverseSumPath -= SubInversePath;
+            }
+        });
     }
 
     private void SubZps(Vector zpsPos) {}
     private void SubBpOneHalf(Vector bps) {}
     private void SubEms(Zeta.Spiral emsSpiral) {}
     private void SubSymmetryPoint(Vector symmetryPoint) {}
+    private void SubSymmetryPath(Vector2[] symmetryPath) {}
+    private void SubInversePoint(Vector inversePt) {}
+    private void SubInversePath(Vector2[] inversePath) {}
+
+    #endregion
 }

@@ -16,8 +16,13 @@ public class SpiralCalculator : MonoBehaviour
     private Zeta.Spiral _zrsSpiral;
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
+
     public static Action<Vector[]> UpdateRsInverseSum;
     private Zeta.Spiral _rsInverseSumSpiral;
+    public static Action<Vector> UpdateInversePoint;
+    private Vector _inversePoint;
+    public static Action<Vector2[]> UpdateInverseSumPath;
+    private Vector2[] _inverseSumPath;
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
@@ -28,9 +33,12 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector> UpdateSymmetryPoint;
     private Vector _symmetryPoint;
+    public static Action<Vector2[]> UpdateSymmetryPath;
+    private Vector2[] _symmetryPath;
 
     public static Action<Vector> UpdateBpOneHalf;
     private Vector _bpOneHalf;
+
 
     public static Action<Vector> UpdateYin;
     private Vector _yin;
@@ -40,6 +48,8 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector, Vector> UpdateInfLink;
     private (Vector, Vector) _infLink;
+
+    private const int RealPathLength = 100;
 
     void Awake()
     {
@@ -78,7 +88,7 @@ public class SpiralCalculator : MonoBehaviour
 
     public Vector[] GetRsInverseSum()
     {
-        if(_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Real, _app.Index);
+        if(_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Index, _app.Real);
         return _rsInverseSumSpiral.joints;
     }
 
@@ -100,10 +110,28 @@ public class SpiralCalculator : MonoBehaviour
         return _symmetryPoint;
     }
 
+    public Vector2[] GetSymmetryPath()
+    {
+        if(_symmetryPath == null) CalcSymmetryPath(_app.Index);
+        return _symmetryPath;
+    }
+
     public Vector GetBpOneHalf()
     {
         if(_bpOneHalf == null) CalcBpOneHalf(_app.Index);
         return _bpOneHalf;
+    }
+
+    public Vector GetInversePoint()
+    {
+        if(_inversePoint == null) CalcInversePoint(_app.Index, _app.Real);
+        return _inversePoint;
+    }
+
+    public Vector2[] GetInverseSumPath()
+    {
+        if(_inverseSumPath == null) CalcInverseSumPath(_app.Index);
+        return _inverseSumPath;
     }
 
     public Vector GetYin()
@@ -147,8 +175,14 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateEta != null) CalcEta(real, index);
         else _etaSpiral = null;
 
-        if(UpdateRsInverseSum != null) CalcRsInverseSum(real, index);
+        if(UpdateRsInverseSum != null) CalcRsInverseSum(index, real);
         else _rsInverseSumSpiral = null;
+
+        if(UpdateInversePoint != null) CalcInversePoint(index, real);
+        else _inversePoint = null;
+
+        if(UpdateInverseSumPath != null) CalcInverseSumPath(index);
+        else _inverseSumPath = null;
 
         if(UpdateZps != null) CalcZps(index);
         else _zpsPos = null;
@@ -158,6 +192,9 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateSymmetryPoint != null) CalcSymmetryPoint(index, real);
         else _symmetryPoint = null;
+
+        if(UpdateSymmetryPath != null) CalcSymmetryPath(index);
+        else _symmetryPath = null;
 
         if(UpdateBpOneHalf != null) CalcBpOneHalf(index);
         else _bpOneHalf = null;
@@ -211,7 +248,7 @@ public class SpiralCalculator : MonoBehaviour
         UpdateEta?.Invoke(_etaSpiral);
     }
 
-    private void CalcRsInverseSum(double real, double index)
+    private void CalcRsInverseSum(double index, double real)
     {
         if(_rsInverseSumSpiral == null)
         {
@@ -222,6 +259,69 @@ public class SpiralCalculator : MonoBehaviour
             _rsInverseSumSpiral.Update(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
         }
         UpdateRsInverseSum?.Invoke(_rsInverseSumSpiral.joints);
+    }
+
+    private Vector CalcInversePoint(double index, double real)
+    {
+        var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
+        Vector[] rev = (Vector[])GetRsInverseSum().Clone();
+
+        var z = s.zeta.ToVector();
+        var normal = z.Normalized();
+        var perpendicular = new Vector(-normal.y, normal.x);
+    
+        // get intersection of bisector and inverse link
+        Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                    z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+        _inversePoint = intersectionPT;
+        UpdateInversePoint?.Invoke(_inversePoint);
+
+        return intersectionPT;
+    }
+
+    private void CalcInverseSumPath(double index)
+    {
+        _inverseSumPath = new Vector2[RealPathLength];
+        var pathlength = _inverseSumPath.Length;
+        for(int i = 0; i < pathlength; i++)
+        {
+            var r = (float)i/pathlength;
+            
+            var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+            Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+
+            var z = s.zeta.ToVector();
+            var normal = z.Normalized();
+            var perpendicular = new Vector(-normal.y, normal.x);
+        
+            // get intersection of bisector and inverse link
+            Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                        z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+            
+            _inverseSumPath[i] = intersectionPT;
+        }
+        UpdateInverseSumPath?.Invoke(_inverseSumPath);
+    }
+
+    private Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)
+    {
+        double a1 = p2.y - p1.y;
+        double b1 = p1.x - p2.x;
+        double c1 = a1 * p1.x + b1 * p1.y;
+
+        double a2 = q2.y - q1.y;
+        double b2 = q1.x - q2.x;
+        double c2 = a2 * q1.x + b2 * q1.y;
+
+        double delta = a1 * b2 - a2 * b1;
+        if (Mathf.Approximately((float)delta, 0))
+        {
+            throw new InvalidOperationException("Lines are parallel and do not intersect.");
+        }
+
+        double x = (b2 * c1 - b1 * c2) / delta;
+        double y = (a1 * c2 - a2 * c1) / delta;
+        return new Vector(x, y);
     }
 
     private void CalcZps(double index)
@@ -255,6 +355,20 @@ public class SpiralCalculator : MonoBehaviour
     {
         _symmetryPoint = BisectingLines.CrotchPoint(GetEms());
         UpdateSymmetryPoint?.Invoke(_symmetryPoint);
+    }
+
+    private void CalcSymmetryPath(double index)
+    {
+        _symmetryPath = new Vector2[RealPathLength];
+        var pathlength = _symmetryPath.Length;
+        for(int i = 0; i < pathlength; i++)
+        {
+            var r = (float)i/pathlength;
+            var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+
+            _symmetryPath[i] = BisectingLines.CrotchPoint(s);
+        }
+        UpdateSymmetryPath?.Invoke(_symmetryPath);
     }
 
     private void CalcBpOneHalf(double index)
