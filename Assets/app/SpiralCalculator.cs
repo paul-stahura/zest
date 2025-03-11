@@ -7,6 +7,9 @@ public class SpiralCalculator : MonoBehaviour
 {
     private App _app;
 
+    public static Action<double> IndexChanged;
+    public static Action<double> RealChanged;
+
     public static Action<Zeta.Spiral> UpdateEms;
     private Zeta.Spiral _emsSpiral;
     public static Action<Zeta.Spiral> UpdateZrs;
@@ -34,6 +37,9 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector> UpdateYang;
     private Vector _yang;
+
+    public static Action<Vector, Vector> UpdateInfLink;
+    private (Vector, Vector) _infLink;
 
     void Awake()
     {
@@ -112,14 +118,22 @@ public class SpiralCalculator : MonoBehaviour
         return _yang;
     }
 
+    public (Vector, Vector) GetInfLink()
+    {
+        if(_infLink == (null, null)) CalcInfLink(_app.Index);
+        return _infLink;
+    }
+
     private void OnIndexChanged(double index)
     {
         Calculate(_app.Index, _app.Real);
+        IndexChanged?.Invoke(index);
     }
 
     private void OnRealChanged(double real)
     {
         Calculate(_app.Index, _app.Real);
+        RealChanged?.Invoke(real);
     }
 
     private void Calculate(double index, double real)
@@ -153,6 +167,9 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateYang != null) CalcYang(index, real);
         else _yang = null;
+
+        if(UpdateInfLink != null) CalcInfLink(index);
+        else _infLink = (null, null);
     }
 
     private void CalcEms(double real, double index)
@@ -256,5 +273,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         _yang = MiddleLinkTeardrop.Yang(index);
         UpdateYang?.Invoke(_yang);
+    }
+
+    private void CalcInfLink(double index)
+    {
+        var normIndex = index - (int)Math.Floor(index);
+        _infLink = (Zeta.InfinityTdrop(1-normIndex, false) + new Vector(-0.5f, 0), Zeta.InfinityTdrop(normIndex, true) + new Vector(0.5f, 0));
+        UpdateInfLink?.Invoke(_infLink.Item1, _infLink.Item2);
     }
 }
