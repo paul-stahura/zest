@@ -298,7 +298,7 @@ public class Zeta
         return i;
     }
 
-    public static double IndexToImag(double index, bool useNew=false)  // n is the index of the link in question.  
+    public static double IndexToImag(double index, bool usePoly=false)  // n is the index of the link in question.  
     {
         //. This is from Zzrob
         // "Einstein" becasue it is exact
@@ -307,7 +307,7 @@ public class Zeta
         // this is where it is chris   ( π (2 n + 1))/( log(n + 1) - log(n))   
         var n = index;
 
-        if(useNew)
+        if(usePoly)
         {
             // new
             // 2pi*(t^2+t+1/6)
@@ -352,6 +352,48 @@ public class Zeta
         //         1 / (imag * (2 * Math.E - 1))
         //     ) - .5
         // );
+    }
+
+    public static double SearchImagToIndex(double targetImag, int maxIters = 100)
+    {
+        double approxIndex = ImagToIndex(targetImag);
+        double currentImag = IndexToImag(approxIndex);
+
+        // If the approximation is already good enough, return the approximate value
+        if (Math.Abs(currentImag - targetImag) <= 0)
+        {
+            return approxIndex;
+        }
+
+        // Otherwise, begin a binary search for the exact value
+        double lowerBound = approxIndex - 1;  // An arbitrary lower bound for the search
+        double upperBound = approxIndex + 1;  // An arbitrary upper bound for the search
+        double midIndex = 0;
+
+        for (int i = 0; i < maxIters; i++)
+        {
+            midIndex = (lowerBound + upperBound) / 2;
+            currentImag = IndexToImag(midIndex);
+
+            // Check if the current imag value is close enough to target
+            if (Math.Abs(currentImag - targetImag) <= 0)
+            {
+                return midIndex;
+            }
+
+            // Adjust the search range based on the current result
+            if (currentImag < targetImag)
+            {
+                lowerBound = midIndex;
+            }
+            else
+            {
+                upperBound = midIndex;
+            }
+        }
+
+        // If the loop finishes without finding an exact match, return the best approximation
+        return midIndex;
     }
 
     /// <summary>
@@ -523,10 +565,44 @@ public class Zeta
                     UpdateZetFormula(realValue, indexValue, useNewImag);
                     break;
 
+                case SpiralFormulas.RSInverseSum:
+                    UpdateRSInverseSum(realValue, indexValue, useNewImag);
+                    break;
+
                 default:
                     this.zeta = Zeta.ReimannSiegel(new Complex(realValue, Zeta.IndexToImag(indexValue, useNewImag)));
                     break;
             }
+        }
+
+        private void UpdateRSInverseSum(double realValue, double indexValue, bool useNewImag)
+        {
+            real = realValue;
+            index = indexValue;
+            var imag = IndexToImag(index, useNewImag);
+
+            Complex s = new Complex(real, imag);
+            int variedN = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
+            int N = variedN;
+
+            numLinks = N + 1;
+            joints = new Vector[numLinks];
+
+            
+
+            Complex sum2 = Complex.Zero;
+            joints[0] = sum2.ToVector();
+
+            for (int n = 1; n <= N; n++)
+            {
+                Complex next = Complex.Pow(n, s - 1) * NewRiemmanSeigalFormulaSums.GammaRatio(1-s);
+                Vector start = sum2.ToVector();
+                Vector end = (sum2 + next).ToVector();
+                sum2 += next;
+                joints[n] = end;
+            }
+            
+            findSpirals();
         }
 
         public void UpdateReimannSiegel(double realValue, double indexValue, bool useNewImag)

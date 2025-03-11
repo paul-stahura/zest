@@ -14,7 +14,7 @@ public class FineTuneSlider : MonoBehaviour
     public float factor = 1f;
 
     const float MIN_VALUE = 0;
-    const float MAX_VALUE = 1.0f;
+    float MAX_VALUE = 1.0f;
     const float MIN_FACTOR = 0.0f;
 
     void OnApplicationQuit()
@@ -39,6 +39,8 @@ public class FineTuneSlider : MonoBehaviour
         // slider.maxValue = PlayerPrefs.GetFloat(name + "-MaxValue", MAX_VALUE);
         // slider.value = PlayerPrefs.GetFloat(name + "-Slider", slider.value);
 
+        MAX_VALUE = slider.maxValue;
+
         zoomInButton.onClick.AddListener(decreaseRange);
         zoomOutButton.onClick.AddListener(increaseRange);
 
@@ -56,7 +58,7 @@ public class FineTuneSlider : MonoBehaviour
     public void reset()
     {
         factor = 1;
-        setRange(0, 1);
+        setRange(MIN_VALUE, MAX_VALUE);
         zoomInButton.interactable = true;
         zoomOutButton.interactable = false;
         updateDisplay();

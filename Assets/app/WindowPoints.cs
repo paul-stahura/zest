@@ -225,6 +225,6 @@ public class WindowPoints : MonoBehaviour
 
     public void LoadWindowPoint(int index)
     {
-        _app.middleIndexDisplay.onValueChanged?.Invoke((float)_windowList[index]);
+        _app.IndexDisplay.onValueChanged?.Invoke((float)_windowList[index]);
     }
 }
