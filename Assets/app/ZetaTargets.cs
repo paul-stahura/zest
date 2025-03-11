@@ -20,6 +20,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _emsToggle;
     [SerializeField] private TMP_Text _emsPos;
 
+    [SerializeField] private Toggle _drawReticle;
+
     [Header("Trace Settings")]
     private const int _traceLength = 100;
     private const double _traceInterval = 0.0000000000001f;
@@ -42,6 +44,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _zpsPos = GameObject.Find("Zps Pos").GetComponent<TMP_Text>();
         _emsToggle = GameObject.Find("Ems Zeta Toggle").GetComponent<Toggle>();
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
+
+        _drawReticle = GameObject.Find("Draw Reticle Toggle").GetComponent<Toggle>();
 
         SubTargets();
 
@@ -105,6 +109,146 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
         DrawZetaTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsPath, _zpsPathIndex, _zpsColor);
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
+
+        if(_drawReticle.isOn) DrawReticle();
+    }
+
+    private void DrawReticle()
+    {
+        //
+        double Psi(double x)
+        {
+            return Math.Cos(2 * Math.PI * (Math.Pow(x, 2) - x - 1.0 / 16)) / Math.Cos(2 * Math.PI * x);
+        }
+        
+        double PsiThirdDerivative(double imag)
+        {
+            if (Math.Abs(imag) < 1e-15) return 0;
+
+            double pi = Math.PI;
+            double pi2 = pi * pi;
+            double pi3 = pi2 * pi;
+
+            // Precompute common values
+            double cos2piImag = Math.Cos(2 * pi * imag);
+            double sin2piImag = Math.Sin(2 * pi * imag);
+            double cosPiExpr = Math.Cos(pi * (2 * Math.Pow(imag, 2) - 2 * imag - 1.0 / 8));
+            double sinPiExpr = Math.Sin(pi * (2 * Math.Pow(imag, 2) - 2 * imag - 1.0 / 8));
+            double sin2piImagSquared = Math.Pow(sin2piImag, 2);
+
+            // Calculate terms using precomputed values
+            double term1 = pi3 * Math.Pow(4 * imag - 2, 3) * sinPiExpr / cos2piImag;
+            double term2 = -6 * pi3 * Math.Pow(4 * imag - 2, 2) * sin2piImag * cosPiExpr / Math.Pow(cos2piImag, 2);
+            double term3 = -24 * pi3 * (4 * imag - 2) * sin2piImagSquared * sinPiExpr / Math.Pow(cos2piImag, 3);
+            double term4 = -12 * pi3 * (4 * imag - 2) * sinPiExpr / cos2piImag;
+            double term5 = -4 * pi2 * (4 * imag - 2) * cosPiExpr / cos2piImag;
+            double term6 = -pi2 * (32 * imag - 16) * cosPiExpr / cos2piImag;
+            double term7 = 48 * pi3 * Math.Pow(sin2piImag, 3) * cosPiExpr / Math.Pow(cos2piImag, 4);
+            double term8 = -24 * pi2 * sin2piImag * sinPiExpr / Math.Pow(cos2piImag, 2);
+            double term9 = 40 * pi3 * sin2piImag * cosPiExpr / Math.Pow(cos2piImag, 2);
+
+            // Return the sum of terms
+            return term1 + term2 + term3 + term4 + term5 + term6 + term7 + term8 + term9;
+        }
+
+        double Beta(double index)
+        {
+            int i = (int)Math.Ceiling(index);
+            double imag = Zeta.IndexToImag(index, false);
+            double theta = Theta(imag);
+
+            return Math.Log(i) * imag - theta - Math.PI * (i * i - 1);
+        }
+
+        double Theta(double t)
+        {
+
+            return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
+                    1 / (48 * t) +
+                    7 / (5760 * Math.Pow(t, 3)) +
+                    31 / (80640 * Math.Pow(t, 5)) +
+                    127 / (430080 * Math.Pow(t, 7)) +
+                    511 / (1216512 * Math.Pow(t, 9)));
+        }
+
+        int Square(double index)
+        {
+            return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, false) / (2 * Math.PI))) - Math.Floor(index));
+        }
+
+        double P(double imag)
+        {
+            double psqrt = Math.Sqrt(imag / (2 * Math.PI));
+            return psqrt - Math.Floor(psqrt);
+        }
+
+        double C1(double imag)
+        {
+            return (-PsiThirdDerivative(P(imag)) /
+                    (96 * Math.PI * Math.PI) *
+                    Math.Pow(imag / (2 * Math.PI), -0.5));
+        }
+        double Djoint(double index)
+        {
+            double imag = Zeta.IndexToImag(index, false);
+            double sq = (Math.Pow(-1, Square(index)) * Math.Sqrt(Math.Ceiling(index))) / (2 * Math.Cos(Beta(index)));
+            double im = Math.Pow(imag / (2 * Math.PI), -0.25);
+            double ps = Psi(P(imag)) + C1(imag);
+
+            return Square(index) - (sq * im * ps);
+        }
+
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        Vector2 bisectorLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
+        
+        Vector2 ratioPt = spiral.joints[spiral.middleIndex] + (float)Djoint(_spiralCalculator.GetIndex()) * bisectorLink;
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.cyan;
+            Draw.Thickness = 1f;
+            ShapesUtils.DrawCross45(ratioPt, 0.08f);
+        }
+
+        // draw intersection of bisector and inverse link
+        Vector[] inverseRef = _spiralCalculator.GetRsInverseSum();
+
+        var zeta = spiral.zeta.ToVector();
+        var norm = zeta.Normalized();
+        var perp = new Vector(-norm.y, norm.x);
+        Vector2 inverseLink = inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp) - inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp);
+        
+        // get intersection of bisector and inverse link
+        Vector2 intersection = GetIntersection(spiral.joints[spiral.middleIndex], spiral.joints[spiral.middleIndex + 1], 
+                                                zeta + inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp), zeta + inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp));
+        
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.magenta;
+            Draw.Thickness = 1f;
+            ShapesUtils.DrawCross45(intersection, 0.08f);
+        }
+    }
+
+    private Vector2 GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
+    {
+        float a1 = p2.y - p1.y;
+        float b1 = p1.x - p2.x;
+        float c1 = a1 * p1.x + b1 * p1.y;
+
+        float a2 = q2.y - q1.y;
+        float b2 = q1.x - q2.x;
+        float c2 = a2 * q1.x + b2 * q1.y;
+
+        float delta = a1 * b2 - a2 * b1;
+        if (Mathf.Approximately(delta, 0))
+        {
+            throw new InvalidOperationException("Lines are parallel and do not intersect.");
+        }
+
+        float x = (b2 * c1 - b1 * c2) / delta;
+        float y = (a1 * c2 - a2 * c1) / delta;
+        return new Vector2(x, y);
     }
 
     private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)
