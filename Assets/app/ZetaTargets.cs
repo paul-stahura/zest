@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Numerics;
 using Shapes;
 using TMPro;
@@ -20,7 +21,13 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _emsToggle;
     [SerializeField] private TMP_Text _emsPos;
 
+    [SerializeField] private Color _etaColor;
+    [SerializeField] private Toggle _etaToggle;
+    [SerializeField] private TMP_Text _etaPos;
+
     [SerializeField] private Toggle _drawReticle;
+
+    [SerializeField] private Toggle _drawOrigin;
 
     [Header("Trace Settings")]
     private const int _traceLength = 100;
@@ -32,8 +39,13 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private int _zpsPathIndex = 0;
     private Vector2[] _emsPath = new Vector2[_traceLength];
     private int _emsPathIndex = 0;
+    private Vector2[] _etaPath = new Vector2[_traceLength];
+    private int _etaPathIndex = 0;
 
     private SpiralCalculator _spiralCalculator;
+    private CameraPositionTracking _cameraPositionTracking;
+    private Coroutine _camTargetFade;
+    private Color _camTargetColor = new Color(0, 1, 0, 0);
 
 
     void Awake()
@@ -44,14 +56,18 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _zpsPos = GameObject.Find("Zps Pos").GetComponent<TMP_Text>();
         _emsToggle = GameObject.Find("Ems Zeta Toggle").GetComponent<Toggle>();
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
+        _etaToggle = GameObject.Find("Eta Zeta Toggle").GetComponent<Toggle>();
+        _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
 
         _drawReticle = GameObject.Find("Draw Reticle Toggle").GetComponent<Toggle>();
 
-        SubTargets();
-
         _traceToggle = GameObject.Find("Trace Zeta Toggle").GetComponent<Toggle>();
+        _drawOrigin = GameObject.Find("Draw Origin Toggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+        _cameraPositionTracking = Camera.main.GetComponent<CameraPositionTracking>();
+
+        SubTargets();
     }
 
     public override void DrawShapes(Camera cam)
@@ -87,6 +103,14 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             if(value) SpiralCalculator.UpdateEms += UpdateEms;
             else SpiralCalculator.UpdateEms -= UpdateEms; 
         });
+
+        _etaToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateEta += UpdateEta;
+            else SpiralCalculator.UpdateEta -= UpdateEta; 
+        });
+
+        CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
     }
 
     private void UpdateZrs(Zeta.Spiral zrs)
@@ -104,18 +128,69 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(ems.zeta, ref _emsPath, ref _emsPathIndex);
     }
 
+    private void UpdateEta(Zeta.Spiral eta)
+    {
+        UpdateTargetPos(eta.zeta, ref _etaPath, ref _etaPathIndex);
+    }
+
     private void DrawTargets()
     {
         DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
         DrawZetaTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsPath, _zpsPathIndex, _zpsColor);
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
+        DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
         if(_drawReticle.isOn) DrawReticle();
+
+        if(_drawOrigin.isOn) DrawOrigin();
+
+        if(_camTargetColor.a > 0.05f) DrawCamTarget();
+    }
+
+    private void FlashCamTarget()
+    {
+        if(_camTargetFade != null) StopCoroutine(_camTargetFade);
+        _camTargetFade = StartCoroutine(FlashCamPosition(0.5f));
+    }
+    private IEnumerator FlashCamPosition(float duration)
+    {
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < duration)
+        {
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / duration);
+            _camTargetColor.a = alpha;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private void DrawCamTarget()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _camTargetColor;
+            Draw.Thickness = 1f;
+            var pos = (Vector2)_cameraPositionTracking.transform.position;
+            float size = _cameraPositionTracking.GetZoomLevel() * 0.03f;
+            Draw.Ring(pos, size * 2);
+            ShapesUtils.DrawCross(pos, size);
+        }
+    }
+
+    private void DrawOrigin()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _zrsColor;
+            Draw.Thickness = 1f;
+            Draw.Ring(Vector2.zero, 0.032f);
+            ShapesUtils.DrawCross(Vector2.zero, 0.05f);
+        }
     }
 
     private void DrawReticle()
     {
-        //
         double Psi(double x)
         {
             return Math.Cos(2 * Math.PI * (Math.Pow(x, 2) - x - 1.0 / 16)) / Math.Cos(2 * Math.PI * x);
@@ -209,46 +284,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             ShapesUtils.DrawCross45(ratioPt, 0.08f);
         }
-
-        // draw intersection of bisector and inverse link
-        Vector[] inverseRef = _spiralCalculator.GetRsInverseSum();
-
-        var zeta = spiral.zeta.ToVector();
-        var norm = zeta.Normalized();
-        var perp = new Vector(-norm.y, norm.x);
-        Vector2 inverseLink = inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp) - inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp);
-        
-        // get intersection of bisector and inverse link
-        Vector2 intersection = GetIntersection(spiral.joints[spiral.middleIndex], spiral.joints[spiral.middleIndex + 1], 
-                                                zeta + inverseRef[spiral.middleIndex].Reflect(norm).Reflect(perp), zeta + inverseRef[spiral.middleIndex + 1].Reflect(norm).Reflect(perp));
-        
-        using (Draw.StyleScope)
-        {
-            Draw.Color = Color.magenta;
-            Draw.Thickness = 1f;
-            ShapesUtils.DrawCross45(intersection, 0.08f);
-        }
-    }
-
-    private Vector2 GetIntersection(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2)
-    {
-        float a1 = p2.y - p1.y;
-        float b1 = p1.x - p2.x;
-        float c1 = a1 * p1.x + b1 * p1.y;
-
-        float a2 = q2.y - q1.y;
-        float b2 = q1.x - q2.x;
-        float c2 = a2 * q1.x + b2 * q1.y;
-
-        float delta = a1 * b2 - a2 * b1;
-        if (Mathf.Approximately(delta, 0))
-        {
-            throw new InvalidOperationException("Lines are parallel and do not intersect.");
-        }
-
-        float x = (b2 * c1 - b1 * c2) / delta;
-        float y = (a1 * c2 - a2 * c1) / delta;
-        return new Vector2(x, y);
     }
 
     private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)
@@ -256,7 +291,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         if (toggle.isOn)
         {
             DrawZ(pos.ToVector2(), color);
-            posText.text = pos.ToString();
+
+            if(posText != null) posText.text = $"({pos.Real:F12}, {pos.Imaginary:F12})";
 
             if (_traceToggle.isOn)
             {

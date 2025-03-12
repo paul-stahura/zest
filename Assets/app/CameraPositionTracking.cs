@@ -2,8 +2,9 @@ using UnityEngine;
 using TMPro;
 using System;
 using UnityEngine.UI;
+using Shapes;
 
-public class CameraPositionTracking : MonoBehaviour
+public class CameraPositionTracking : ImmediateModeShapeDrawer
 {
     private enum TrackingTarget
     {
@@ -14,6 +15,7 @@ public class CameraPositionTracking : MonoBehaviour
         Spiral = 4
     }
     [SerializeField] private TMP_Dropdown _camTrackingDropdown;
+    [SerializeField] public static Action OnCameraTrackingChanged;
     [SerializeField] private SpiralCalculator _spiralCalculator;
 
     private Vector2 _cameraUp = Vector2.up;
@@ -78,10 +80,14 @@ public class CameraPositionTracking : MonoBehaviour
         _cam = Camera.main;
     }
 
-    void LateUpdate()
+    void Update()
     {
         HandlePanning();
         HandleZooming();
+    }
+
+    void LateUpdate()
+    {
         UpdateProjectionMatrix();
     }
 
@@ -122,6 +128,8 @@ public class CameraPositionTracking : MonoBehaviour
     {
         _cameraTrackingOffset = Vector2.zero;
         _cameraUp = Vector2.up;
+
+        OnCameraTrackingChanged?.Invoke();
     }
 
     private Vector2 GetTrackingTarget()
@@ -201,6 +209,7 @@ public class CameraPositionTracking : MonoBehaviour
         if(_symmetryTargetDropdown == null)
         {
             _symmetryTargetDropdown = GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>();
+            _symmetryTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
         }
 
         SymmetryTarget sTarget = (SymmetryTarget)_symmetryTargetDropdown.value;
@@ -393,21 +402,19 @@ public class CameraPositionTracking : MonoBehaviour
         sensitivity *= -5;
         #endif
         float scroll = Input.GetAxis("Mouse ScrollWheel") * sensitivity;
-        if (Mathf.Abs(scroll) > 0.01f) // Ensure small scrolls are ignored
+
+        float zoomFactor = 1f - scroll;
+        float dynamicZoomFactor = Mathf.Pow(Mathf.Abs(zoomFactor), 1.5f) * (Mathf.Abs(zoomFactor) > 0 ? 1 : -1); // Adjust the exponent to control the curve steepness
+        _zoomLevel = Mathf.Clamp(_zoomLevel * dynamicZoomFactor, minZoom, maxZoom);
+
+        // zoom to mouse position
+        if(!Input.GetKey(KeyCode.LeftShift) && !Mathf.Approximately(_zoomLevel, minZoom) && !Mathf.Approximately(_zoomLevel, maxZoom))
         {
-            float zoomFactor = 1f - scroll;
-            float dynamicZoomFactor = Mathf.Pow(Mathf.Abs(zoomFactor), 1.5f) * (Mathf.Abs(zoomFactor) > 0 ? 1 : -1); // Adjust the exponent to control the curve steepness
-            _zoomLevel = Mathf.Clamp(_zoomLevel * dynamicZoomFactor, minZoom, maxZoom);
+            Vector2 mousePosition = Input.mousePosition;
+            Vector2 viewportPoint = _cam.ScreenToViewportPoint(mousePosition);
+            Vector2 zoomCenter = new Vector2(viewportPoint.x - 0.5f, viewportPoint.y - 0.5f) * 2f;
 
-            // zoom to mouse position
-            if(!Input.GetKey(KeyCode.LeftShift) && !Mathf.Approximately(_zoomLevel, minZoom) && !Mathf.Approximately(_zoomLevel, maxZoom))
-            {
-                Vector2 mousePosition = Input.mousePosition;
-                Vector2 viewportPoint = _cam.ScreenToViewportPoint(mousePosition);
-                Vector2 zoomCenter = new Vector2(viewportPoint.x - 0.5f, viewportPoint.y - 0.5f) * 2f;
-
-                _cameraTrackingOffset -= zoomCenter * (1f - 1f / dynamicZoomFactor) * _zoomLevel;
-            }
+            _cameraTrackingOffset -= zoomCenter * (1f - 1f / dynamicZoomFactor) * _zoomLevel;
         }
     }
 
@@ -426,9 +433,10 @@ public class CameraPositionTracking : MonoBehaviour
         // Apply the new projection matrix to the camera
         _cam.projectionMatrix = projectionMatrix;
 
-        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
 
-        var pos = GetTrackingTarget() + (Vector2)(rot * _cameraTrackingOffset);
+        var pos = GetTrackingTarget();
+        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
+        pos += (Vector2)(rot * _cameraTrackingOffset);
 
         // Apply the offset and rotation to the camera's transform
         _cam.transform.SetPositionAndRotation(new Vector3(pos.x, pos.y, _cam.transform.position.z), rot);

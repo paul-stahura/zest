@@ -253,15 +253,14 @@ public class App : ImmediateModeShapeDrawer
         #region Animation Controls
         animHoldToggle.onValueChanged.AddListener(value =>
         {
-            if (value)
-                animSpeed.value = 0;
+            animSpeed.value = 0;
         });
 
         EventTrigger animTrigger = animSpeed.gameObject.AddComponent<EventTrigger>();
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = EventTriggerType.PointerUp;
         entry.callback.AddListener((data) => {
-            if (animHoldToggle.isOn)
+            if (!animHoldToggle.isOn)
                 animSpeed.value = 0;
         });
         animTrigger.triggers.Add(entry);
