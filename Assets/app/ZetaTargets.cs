@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Numerics;
 using Shapes;
 using TMPro;
@@ -22,6 +23,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     [SerializeField] private Toggle _drawReticle;
 
+    [SerializeField] private Toggle _drawOrigin;
+
     [Header("Trace Settings")]
     private const int _traceLength = 100;
     private const double _traceInterval = 0.0000000000001f;
@@ -34,6 +37,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private int _emsPathIndex = 0;
 
     private SpiralCalculator _spiralCalculator;
+    private CameraPositionTracking _cameraPositionTracking;
+    private Coroutine _camTargetFade;
+    private Color _camTargetColor = new Color(0, 1, 0, 0);
 
 
     void Awake()
@@ -47,11 +53,13 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
         _drawReticle = GameObject.Find("Draw Reticle Toggle").GetComponent<Toggle>();
 
-        SubTargets();
-
         _traceToggle = GameObject.Find("Trace Zeta Toggle").GetComponent<Toggle>();
+        _drawOrigin = GameObject.Find("Draw Origin Toggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+        _cameraPositionTracking = Camera.main.GetComponent<CameraPositionTracking>();
+
+        SubTargets();
     }
 
     public override void DrawShapes(Camera cam)
@@ -87,6 +95,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             if(value) SpiralCalculator.UpdateEms += UpdateEms;
             else SpiralCalculator.UpdateEms -= UpdateEms; 
         });
+
+        CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
     }
 
     private void UpdateZrs(Zeta.Spiral zrs)
@@ -111,6 +121,52 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
 
         if(_drawReticle.isOn) DrawReticle();
+
+        if(_drawOrigin.isOn) DrawOrigin();
+
+        if(_camTargetColor.a > 0.05f) DrawCamTarget();
+    }
+
+    private void FlashCamTarget()
+    {
+        if(_camTargetFade != null) StopCoroutine(_camTargetFade);
+        _camTargetFade = StartCoroutine(FlashCamPosition(0.5f));
+    }
+    private IEnumerator FlashCamPosition(float duration)
+    {
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < duration)
+        {
+            float alpha = Mathf.Lerp(1f, 0f, elapsedTime / duration);
+            _camTargetColor.a = alpha;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+    }
+
+    private void DrawCamTarget()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _camTargetColor;
+            Draw.Thickness = 1f;
+            var pos = (Vector2)_cameraPositionTracking.transform.position;
+            float size = _cameraPositionTracking.GetZoomLevel() * 0.03f;
+            Draw.Ring(pos, size * 2);
+            ShapesUtils.DrawCross(pos, size);
+        }
+    }
+
+    private void DrawOrigin()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _zrsColor;
+            Draw.Thickness = 1f;
+            Draw.Ring(Vector2.zero, 0.032f);
+            ShapesUtils.DrawCross(Vector2.zero, 0.05f);
+        }
     }
 
     private void DrawReticle()
@@ -215,7 +271,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         if (toggle.isOn)
         {
             DrawZ(pos.ToVector2(), color);
-            posText.text = pos.ToString();
+            posText.text = $"({pos.Real:F12}, {pos.Imaginary:F12})";
 
             if (_traceToggle.isOn)
             {

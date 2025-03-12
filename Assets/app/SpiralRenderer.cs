@@ -196,10 +196,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void SubRsInverseSum(Vector[] links){}
     private void DrawRsInverseSum(Vector[] links)
     {
-        var spiral = _spiralCalculator.GetEms();
-        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
-
-        DrawSpiralLines(links, InverseSpiralColor);
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        DrawSpiral(spiral, links, InverseSpiralColor);
     }
 
     private void SubRsInverseSumReflected(Vector[] links){}
