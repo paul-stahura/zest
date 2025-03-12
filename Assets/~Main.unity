@@ -50948,6 +50948,9 @@ MonoBehaviour:
   _emsColor: {r: 0, g: 0.8117648, b: 0.18431373, a: 1}
   _emsToggle: {fileID: 0}
   _emsPos: {fileID: 0}
+  _etaColor: {r: 1, g: 0.959195, b: 0, a: 1}
+  _etaToggle: {fileID: 0}
+  _etaPos: {fileID: 0}
   _drawReticle: {fileID: 0}
   _drawOrigin: {fileID: 0}
   _traceToggle: {fileID: 0}
@@ -83564,7 +83567,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Ems
+  m_text: Eta
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
