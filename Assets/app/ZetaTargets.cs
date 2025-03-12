@@ -291,7 +291,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         if (toggle.isOn)
         {
             DrawZ(pos.ToVector2(), color);
-            posText.text = $"({pos.Real:F12}, {pos.Imaginary:F12})";
+
+            if(posText != null) posText.text = $"({pos.Real:F12}, {pos.Imaginary:F12})";
 
             if (_traceToggle.isOn)
             {

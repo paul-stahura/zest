@@ -248,16 +248,20 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
     private void CalcYinYangPath()
     {
-        _yinPath[0] = MiddleLinkTeardrop.Yin(_yinYangPathIndex + 0.0001f);
-        _yangPath[0] = MiddleLinkTeardrop.Yang(_yinYangPathIndex + 0.0001f);
+        double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
+        _yinPath[0] = MiddleLinkTeardrop.Yin(first);
+        _yangPath[0] = MiddleLinkTeardrop.Yang(first);
         for(int i = 1; i < _yinPath.Length - 1; i++)
         {
-            var index = _yinYangPathIndex + ((float)i)/_yangPath.Length;
+            var index = _yinYangPathIndex + ((double)i)/_yangPath.Length;
             // avoid discontinuity at 0.25 and 0.75
-            if(Mathf.Approximately(index, 0.25f) || Mathf.Approximately(index, 0.75f)) index += 0.0001f;
+            if(Mathf.Approximately((float)index, 0.25f) || Mathf.Approximately((float)index, 0.75f)) index += 0.00001f;
             _yinPath[i] = MiddleLinkTeardrop.Yin(index);
             _yangPath[i] = MiddleLinkTeardrop.Yang(index);
         }
+        double last = _yinYangPathIndex + 1 - 0.00001;
+        _yinPath[_yinPath.Length - 1] = MiddleLinkTeardrop.Yin(last);
+        _yangPath[_yangPath.Length - 1] = MiddleLinkTeardrop.Yang(last);
     }
 
     private void CalcInfPath()
