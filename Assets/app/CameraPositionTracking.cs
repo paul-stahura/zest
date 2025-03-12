@@ -2,8 +2,9 @@ using UnityEngine;
 using TMPro;
 using System;
 using UnityEngine.UI;
+using Shapes;
 
-public class CameraPositionTracking : MonoBehaviour
+public class CameraPositionTracking : ImmediateModeShapeDrawer
 {
     private enum TrackingTarget
     {
@@ -79,10 +80,14 @@ public class CameraPositionTracking : MonoBehaviour
         _cam = Camera.main;
     }
 
-    void LateUpdate()
+    void Update()
     {
         HandlePanning();
         HandleZooming();
+    }
+
+    void LateUpdate()
+    {
         UpdateProjectionMatrix();
     }
 
@@ -428,9 +433,10 @@ public class CameraPositionTracking : MonoBehaviour
         // Apply the new projection matrix to the camera
         _cam.projectionMatrix = projectionMatrix;
 
-        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
 
-        var pos = GetTrackingTarget() + (Vector2)(rot * _cameraTrackingOffset);
+        var pos = GetTrackingTarget();
+        var rot = Quaternion.LookRotation(Vector3.forward, _cameraUp);
+        pos += (Vector2)(rot * _cameraTrackingOffset);
 
         // Apply the offset and rotation to the camera's transform
         _cam.transform.SetPositionAndRotation(new Vector3(pos.x, pos.y, _cam.transform.position.z), rot);
