@@ -198,6 +198,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
         DrawSpiral(spiral, links, InverseSpiralColor);
+
+        DrawSpiral(spiral, _spiralCalculator.Chi(spiral.numLinks, _spiralCalculator.GetReal(), _spiralCalculator.GetIndex()), Color.green);
     }
 
     private void SubRsInverseSumReflected(Vector[] links){}
@@ -216,6 +218,13 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
 
         DrawSpiral(spiral, newJoints, InverseReflectedColor);
+
+        var chiJoints = _spiralCalculator.Chi(spiral.numLinks, _spiralCalculator.GetReal(), _spiralCalculator.GetIndex());
+        for(int i = 0; i < chiJoints.Length; i++)
+        {
+            chiJoints[i] = zeta + chiJoints[i].Reflect(norm).Reflect(perp);
+        }
+        DrawSpiral(spiral, chiJoints, Color.green);
     }
 
     private void SubEtaSpiral(Zeta.Spiral spiral){}

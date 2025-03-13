@@ -395,4 +395,44 @@ public class SpiralCalculator : MonoBehaviour
         _infLink = (Zeta.InfinityTdrop(1-normIndex, false) + new Vector(-0.5f, 0), Zeta.InfinityTdrop(normIndex, true) + new Vector(0.5f, 0));
         UpdateInfLink?.Invoke(_infLink.Item1, _infLink.Item2);
     }
+
+    public Vector[] Chi(int numLinks, double real, double index)
+    {
+        Vector Mult(Vector a, Vector b) => new Vector(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+        double Xmod2(double real, double index) => Math.Pow(Math.PI, real - 0.5) * Math.Pow(Zeta.IndexToImag(index) / 2.0, (1.0-2.0*real) / 2.0) * (1.0 + (1.0/(12.0*Zeta.IndexToImag(index)) * (1.0 - 2.0*real) * (3.0 - 2.0*real)));
+        double Theta(double imag)
+        {
+            return (imag / 2 * Math.Log(imag / (2 * Math.PI)) - imag / 2 - Math.PI / 8 +
+                    1 / (48 * imag) +
+                    7 / (5760 * Math.Pow(imag, 3)) +
+                    31 / (80640 * Math.Pow(imag, 5)) +
+                    127 / (430080 * Math.Pow(imag, 7)) +
+                    511 / (1216512 * Math.Pow(imag, 9)));
+        }
+        double deltal(double g, double t)
+        {
+            return - Math.Pow(g,2)/(6*Math.Pow(t,2))
+                    - 11*Math.Pow(g,4)/(360*Math.Pow(t,4))
+                    - 17*Math.Pow(g,6)/(1260*Math.Pow(t,6))
+                    - 31*Math.Pow(g,8)/(10080*Math.Pow(t,8));
+        }
+        double Xarg(double real, double index) => -2*Theta(Zeta.IndexToImag(index)) + deltal(real - 0.5, Zeta.IndexToImag(index));
+
+        var imag = Zeta.IndexToImag(index);
+        var xArg = Xarg(real, index);
+        var xMod2 = Xmod2(real, index);
+
+        Vector[] joints = new Vector[numLinks];
+        joints[0] = new Vector(0,0);
+        for(int n = 1; n < joints.Length; n++)
+        {
+            var denom = Math.Pow(n, 1.0-real);
+            var logn = Math.Log(n);
+            var joint = new Vector(Math.Cos(imag * logn) / denom, Math.Sin(imag * logn) / denom);
+            var a = new Vector(xMod2 * Math.Cos(xArg), xMod2 * Math.Sin(xArg));
+            joints[n] = joints[n - 1] + Mult(a, joint);
+        }
+
+        return joints;
+    }
 }
