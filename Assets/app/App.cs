@@ -362,7 +362,7 @@ public class App : ImmediateModeShapeDrawer
         indexIntPart.maxValue = Mathf.FloorToInt((float)index) + 15;
         indexIntPart.value = Mathf.FloorToInt((float)index);
         double realPart = Math.Round(index - Mathf.FloorToInt((float)index), 6);
-        if (realPart > indexRealPart.maxValue || realPart < indexRealPart.minValue)
+        if (realPart > indexRealPart.maxValue + 0.01f || realPart < indexRealPart.minValue - 0.01f)
             fineTuneReal.reset();
         indexRealPart.value = (float)realPart;
     }

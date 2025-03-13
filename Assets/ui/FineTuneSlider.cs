@@ -12,6 +12,9 @@ public class FineTuneSlider : MonoBehaviour
     public Text sliderValueDisplay;
 
     public float factor = 1f;
+    
+    // will only reset if value is positive
+    public float resetValue = -1f;
 
     const float MIN_VALUE = 0;
     float MAX_VALUE = 1.0f;
@@ -47,7 +50,11 @@ public class FineTuneSlider : MonoBehaviour
         if (resetButton != null)
             resetButton.onClick.AddListener( () => {
                 reset();
-                slider.value = .5f; 
+
+                if(resetValue >= 0)
+                {
+                    slider.value = resetValue;
+                }
             });
 
         updateDisplay();
