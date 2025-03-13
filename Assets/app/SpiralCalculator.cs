@@ -24,6 +24,9 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Vector2[]> UpdateInverseSumPath;
     private Vector2[] _inverseSumPath;
 
+    public static Action<Vector[]> UpdateChi;
+    private Vector[] _chiSpiral;
+
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
 
@@ -38,6 +41,9 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector> UpdateBpOneHalf;
     private Vector _bpOneHalf;
+
+    public static Action<Vector> UpdateRAV;
+    private Vector _rav;
 
 
     public static Action<Vector> UpdateYin;
@@ -68,6 +74,11 @@ public class SpiralCalculator : MonoBehaviour
         return _app.Real;
     }
 
+    public Zeta.Spiral GetSpiral()
+    {
+        return Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+    }
+
     public Zeta.Spiral GetEms()
     {
         if(_emsSpiral == null) CalcEms(_app.Real, _app.Index);
@@ -90,6 +101,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         if(_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Index, _app.Real);
         return _rsInverseSumSpiral.joints;
+    }
+
+    public Vector[] GetChi()
+    {
+        if(_chiSpiral == null) CalcChi(_app.Index, _app.Real);
+        return _chiSpiral;
     }
 
     public Vector GetZps()
@@ -120,6 +137,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         if(_bpOneHalf == null) CalcBpOneHalf(_app.Index);
         return _bpOneHalf;
+    }
+
+    public Vector GetRAV()
+    {
+        if(_rav == null) CalcRAV(_app.Index);
+        return _rav;
     }
 
     public Vector GetInversePoint()
@@ -184,6 +207,9 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateInverseSumPath != null) CalcInverseSumPath(index);
         else _inverseSumPath = null;
 
+        if(UpdateChi != null) CalcChi(index, real);
+        else _chiSpiral = null;
+
         if(UpdateZps != null) CalcZps(index);
         else _zpsPos = null;
 
@@ -198,6 +224,9 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateBpOneHalf != null) CalcBpOneHalf(index);
         else _bpOneHalf = null;
+
+        if(UpdateRAV != null) CalcRAV(index);
+        else _rav = null;
 
         if(UpdateYin != null) CalcYin(index, real);
         else _yin = null;
@@ -259,6 +288,13 @@ public class SpiralCalculator : MonoBehaviour
             _rsInverseSumSpiral.Update(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
         }
         UpdateRsInverseSum?.Invoke(_rsInverseSumSpiral.joints);
+    }
+
+    private void CalcChi(double index, double real)
+    {
+        var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
+        _chiSpiral = Chi(s.numLinks, real, index);
+        UpdateChi?.Invoke(_chiSpiral);
     }
 
     private Vector CalcInversePoint(double index, double real)
@@ -377,6 +413,13 @@ public class SpiralCalculator : MonoBehaviour
         UpdateBpOneHalf?.Invoke(_bpOneHalf);
     }
 
+    private void CalcRAV(double index)
+    {
+        var bp = GetBpOneHalf();
+        _rav = BisectorPoint.RightAngleVertex(bp, index);
+        UpdateRAV?.Invoke(_rav);
+    }
+
     private void CalcYin(double index, double real)
     {
         _yin = MiddleLinkTeardrop.Yin(index);
@@ -394,5 +437,45 @@ public class SpiralCalculator : MonoBehaviour
         var normIndex = index - (int)Math.Floor(index);
         _infLink = (Zeta.InfinityTdrop(1-normIndex, false) + new Vector(-0.5f, 0), Zeta.InfinityTdrop(normIndex, true) + new Vector(0.5f, 0));
         UpdateInfLink?.Invoke(_infLink.Item1, _infLink.Item2);
+    }
+
+    private Vector[] Chi(int numLinks, double real, double index)
+    {
+        Vector Mult(Vector a, Vector b) => new Vector(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+        double Xmod2(double real, double index) => Math.Pow(Math.PI, real - 0.5) * Math.Pow(Zeta.IndexToImag(index) / 2.0, (1.0-2.0*real) / 2.0) * (1.0 + (1.0/(12.0*Zeta.IndexToImag(index)) * (1.0 - 2.0*real) * (3.0 - 2.0*real)));
+        double Theta(double imag)
+        {
+            return (imag / 2 * Math.Log(imag / (2 * Math.PI)) - imag / 2 - Math.PI / 8 +
+                    1 / (48 * imag) +
+                    7 / (5760 * Math.Pow(imag, 3)) +
+                    31 / (80640 * Math.Pow(imag, 5)) +
+                    127 / (430080 * Math.Pow(imag, 7)) +
+                    511 / (1216512 * Math.Pow(imag, 9)));
+        }
+        double deltal(double g, double t)
+        {
+            return - Math.Pow(g,2)/(6*Math.Pow(t,2))
+                    - 11*Math.Pow(g,4)/(360*Math.Pow(t,4))
+                    - 17*Math.Pow(g,6)/(1260*Math.Pow(t,6))
+                    - 31*Math.Pow(g,8)/(10080*Math.Pow(t,8));
+        }
+        double Xarg(double real, double index) => -2*Theta(Zeta.IndexToImag(index)) + deltal(real - 0.5, Zeta.IndexToImag(index));
+
+        var imag = Zeta.IndexToImag(index);
+        var xArg = Xarg(real, index);
+        var xMod2 = Xmod2(real, index);
+
+        Vector[] joints = new Vector[numLinks];
+        joints[0] = new Vector(0,0);
+        for(int n = 1; n < joints.Length; n++)
+        {
+            var denom = Math.Pow(n, 1.0-real);
+            var logn = Math.Log(n);
+            var joint = new Vector(Math.Cos(imag * logn) / denom, Math.Sin(imag * logn) / denom);
+            var a = new Vector(xMod2 * Math.Cos(xArg), xMod2 * Math.Sin(xArg));
+            joints[n] = joints[n - 1] + Mult(a, joint);
+        }
+
+        return joints;
     }
 }
