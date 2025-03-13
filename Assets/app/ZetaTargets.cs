@@ -26,6 +26,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private TMP_Text _etaPos;
 
     [SerializeField] private Toggle _drawReticle;
+    [SerializeField] private Toggle _ravToggle;
 
     [SerializeField] private Toggle _drawOrigin;
 
@@ -60,6 +61,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
 
         _drawReticle = GameObject.Find("Draw Reticle Toggle").GetComponent<Toggle>();
+
+        _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
 
         _traceToggle = GameObject.Find("Trace Zeta Toggle").GetComponent<Toggle>();
         _drawOrigin = GameObject.Find("Draw Origin Toggle").GetComponent<Toggle>();
@@ -110,6 +113,12 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             else SpiralCalculator.UpdateEta -= UpdateEta; 
         });
 
+        _ravToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateRAV += UpdateRAV;
+            else SpiralCalculator.UpdateRAV -= UpdateRAV; 
+        });
+
         CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
     }
 
@@ -133,6 +142,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(eta.zeta, ref _etaPath, ref _etaPathIndex);
     }
 
+    private void UpdateRAV(Vector rav) {}
+
     private void DrawTargets()
     {
         DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
@@ -141,6 +152,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
         if(_drawReticle.isOn) DrawReticle();
+
+        if(_ravToggle.isOn) DrawRav();
 
         if(_drawOrigin.isOn) DrawOrigin();
 
@@ -283,6 +296,16 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Color = Color.cyan;
             Draw.Thickness = 1f;
             ShapesUtils.DrawCross45(ratioPt, 0.08f);
+        }
+    }
+
+    private void DrawRav()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.green;
+            Draw.Thickness = 1f;
+            ShapesUtils.DrawCross45(_spiralCalculator.GetRAV(), 0.08f);
         }
     }
 

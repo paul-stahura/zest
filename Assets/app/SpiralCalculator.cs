@@ -39,6 +39,9 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Vector> UpdateBpOneHalf;
     private Vector _bpOneHalf;
 
+    public static Action<Vector> UpdateRAV;
+    private Vector _rav;
+
 
     public static Action<Vector> UpdateYin;
     private Vector _yin;
@@ -122,6 +125,12 @@ public class SpiralCalculator : MonoBehaviour
         return _bpOneHalf;
     }
 
+    public Vector GetRAV()
+    {
+        if(_rav == null) CalcRAV(_app.Index);
+        return _rav;
+    }
+
     public Vector GetInversePoint()
     {
         if(_inversePoint == null) CalcInversePoint(_app.Index, _app.Real);
@@ -198,6 +207,9 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateBpOneHalf != null) CalcBpOneHalf(index);
         else _bpOneHalf = null;
+
+        if(UpdateRAV != null) CalcRAV(index);
+        else _rav = null;
 
         if(UpdateYin != null) CalcYin(index, real);
         else _yin = null;
@@ -375,6 +387,13 @@ public class SpiralCalculator : MonoBehaviour
     {
         _bpOneHalf = BisectorPoint.BpOneHalf(index);
         UpdateBpOneHalf?.Invoke(_bpOneHalf);
+    }
+
+    private void CalcRAV(double index)
+    {
+        var bp = GetBpOneHalf();
+        _rav = BisectorPoint.RightAngleVertex(bp, index);
+        UpdateRAV?.Invoke(_rav);
     }
 
     private void CalcYin(double index, double real)

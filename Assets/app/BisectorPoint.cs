@@ -262,22 +262,23 @@ public class BisectorPoint : MonoBehaviour
         return bp;
     }
 
+    private static double Theta(double t)
+    {
+
+        return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
+                1 / (48 * t) +
+                7 / (5760 * Math.Pow(t, 3)) +
+                31 / (80640 * Math.Pow(t, 5)) +
+                127 / (430080 * Math.Pow(t, 7)) +
+                511 / (1216512 * Math.Pow(t, 9)));
+    }
+
     private static Vector GetPaulStahuraZeta(double index)
     {
         double beta(double index)
         {
             double i = Math.Ceiling(index);
             double imag = Zeta.IndexToImag(index);
-
-            double Theta(double t)
-            {
-                return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
-                        1 / (48 * t) +
-                        7 / (5760 * Math.Pow(t, 3)) +
-                        31 / (80640 * Math.Pow(t, 5)) +
-                        127 / (430080 * Math.Pow(t, 7)) +
-                        511 / (1216512 * Math.Pow(t, 9)));
-            }
 
             return Math.Log(i) * imag - Theta(imag) - Math.PI * (i * i - 1);
         }
@@ -312,6 +313,14 @@ public class BisectorPoint : MonoBehaviour
             (float)(Lr * (Math.Cos(Alr) + Math.Cos(Alr + Alg))),
             (float)(Lr * (Math.Sin(Alr) + Math.Sin(Alr + Alg)))
         );
+    }
+
+    public static Vector RightAngleVertex(Vector bp, double index)
+    {
+        var theta1 = Math.Atan2(bp.y, bp.x);
+        var theta2 = -2*(Theta(Zeta.IndexToImag(index)) + Math.PI * (Math.Pow(Math.Ceiling(index), 2) - 1) + theta1);
+
+        return bp * (Math.Cos(theta2) + 1);
     }
 
     public static Vector BpOneHalf(double index)
@@ -358,17 +367,6 @@ public class BisectorPoint : MonoBehaviour
             double theta = Theta(imag);
 
             return Math.Log(i) * imag - theta - Math.PI * (i * i - 1);
-        }
-
-        double Theta(double t)
-        {
-
-            return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
-                    1 / (48 * t) +
-                    7 / (5760 * Math.Pow(t, 3)) +
-                    31 / (80640 * Math.Pow(t, 5)) +
-                    127 / (430080 * Math.Pow(t, 7)) +
-                    511 / (1216512 * Math.Pow(t, 9)));
         }
 
         int Square(double index)
