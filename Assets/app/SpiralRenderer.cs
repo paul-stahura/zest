@@ -20,6 +20,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _inverseSpiralToggle;
     [SerializeField] private Color InverseReflectedColor;
     [SerializeField] private Toggle _inverseReflectedToggle;
+    [SerializeField] private Toggle _chiSpiralToggle;
+    [SerializeField] private Toggle _chiReflectedToggle;
+    [SerializeField] private Color ChiSpiralColor;
     [SerializeField] private Color EtaSpiralColor;
     [SerializeField] private Toggle _etaSpiralToggle;
 
@@ -41,6 +44,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _reverseSpiralToggle = GameObject.Find("ReverseSpiralToggle").GetComponent<Toggle>();
         _inverseSpiralToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
+        _chiSpiralToggle = GameObject.Find("ChiSpiralToggle").GetComponent<Toggle>();
+        _chiReflectedToggle = GameObject.Find("ChiReflectedToggle").GetComponent<Toggle>();
         _etaSpiralToggle = GameObject.Find("EtaSpiralToggle").GetComponent<Toggle>();
 
         _realPathToggle = GameObject.Find("RealPathToggle").GetComponent<Toggle>();
@@ -73,6 +78,10 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         if(_reverseSpiralToggle.isOn) DrawReverseSpiral();
         if(_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
         if(_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
+
+        if(_chiSpiralToggle.isOn) DrawChi();
+        if(_chiReflectedToggle.isOn) DrawChiReflected();
+
         if(_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
 
         if(_realPathToggle.isOn) DrawRealPath();
@@ -81,7 +90,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void SubSpirals()
     {
         _emsForwardToggle.OnOptionChanged += EmsOptionChanged;
+        EmsOptionChanged(_emsForwardToggle.GetSelectedOption().Item1);
         _ZrsForwardToggle.OnOptionChanged += ZrsOptionChanged;
+        ZrsOptionChanged(_ZrsForwardToggle.GetSelectedOption().Item1);
 
         _reverseSpiralToggle.onValueChanged.AddListener((value) => {
             if(value)
@@ -105,14 +116,26 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             if(value) 
             {
                 SpiralCalculator.UpdateRsInverseSum += SubRsInverseSumReflected;
-                SpiralCalculator.UpdateEms += SubEms;
-                SpiralCalculator.UpdateZrs += SubZrs;
             }
             else 
             {
                 SpiralCalculator.UpdateRsInverseSum -= SubRsInverseSumReflected;
-                SpiralCalculator.UpdateEms += SubEms;
-                SpiralCalculator.UpdateZrs += SubZrs;
+            }
+        });
+
+        _chiSpiralToggle.onValueChanged.AddListener((value) => {
+            if(value) SpiralCalculator.UpdateChi += SubChi;
+            else SpiralCalculator.UpdateChi -= SubChi;
+        });
+
+        _chiReflectedToggle.onValueChanged.AddListener((value) => {
+            if(value) 
+            {
+                SpiralCalculator.UpdateChi += SubChiReflected;
+            }
+            else 
+            {
+                SpiralCalculator.UpdateChi -= SubChiReflected;
             }
         });
         
@@ -196,17 +219,19 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     private void SubRsInverseSum(Vector[] links){}
     private void DrawRsInverseSum(Vector[] links)
     {
-        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-        DrawSpiral(spiral, links, InverseSpiralColor);
+        DrawSpiral(_spiralCalculator.GetSpiral(), links, InverseSpiralColor);
+    }
 
-        DrawSpiral(spiral, _spiralCalculator.Chi(spiral.numLinks, _spiralCalculator.GetReal(), _spiralCalculator.GetIndex()), Color.green);
+    private void SubChi(Vector[] chi){}
+    private void DrawChi()
+    {
+        DrawSpiral(_spiralCalculator.GetSpiral(), _spiralCalculator.GetChi(), ChiSpiralColor);
     }
 
     private void SubRsInverseSumReflected(Vector[] links){}
     private void DrawRsInverseSumReflected(Vector[] links)
     {
-        var spiral = _spiralCalculator.GetEms();
-        if(Mathf.Approximately((float)spiral.real, 0.5f)) spiral = _spiralCalculator.GetZrs();
+        var spiral = _spiralCalculator.GetSpiral();
         var zeta = spiral.zeta.ToVector();
         var norm = zeta.Normalized();
         var perp = new Vector(-norm.y, norm.x);
@@ -218,13 +243,24 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
 
         DrawSpiral(spiral, newJoints, InverseReflectedColor);
+    }
 
-        var chiJoints = _spiralCalculator.Chi(spiral.numLinks, _spiralCalculator.GetReal(), _spiralCalculator.GetIndex());
-        for(int i = 0; i < chiJoints.Length; i++)
+    private void SubChiReflected(Vector[] chi){}
+    private void DrawChiReflected()
+    {
+        var spiral = _spiralCalculator.GetSpiral();
+        var zeta = spiral.zeta.ToVector();
+        var norm = zeta.Normalized();
+        var perp = new Vector(-norm.y, norm.x);
+
+        var chi = _spiralCalculator.GetChi();
+        var newJoints = new Vector[chi.Length];
+        for(int i = 0; i < newJoints.Length; i++)
         {
-            chiJoints[i] = zeta + chiJoints[i].Reflect(norm).Reflect(perp);
+            newJoints[i] = zeta + chi[i].Reflect(norm).Reflect(perp);
         }
-        DrawSpiral(spiral, chiJoints, Color.green);
+
+        DrawSpiral(_spiralCalculator.GetSpiral(), newJoints, ChiSpiralColor);
     }
 
     private void SubEtaSpiral(Zeta.Spiral spiral){}

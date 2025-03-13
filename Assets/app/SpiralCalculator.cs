@@ -24,6 +24,9 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Vector2[]> UpdateInverseSumPath;
     private Vector2[] _inverseSumPath;
 
+    public static Action<Vector[]> UpdateChi;
+    private Vector[] _chiSpiral;
+
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
 
@@ -71,6 +74,11 @@ public class SpiralCalculator : MonoBehaviour
         return _app.Real;
     }
 
+    public Zeta.Spiral GetSpiral()
+    {
+        return Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+    }
+
     public Zeta.Spiral GetEms()
     {
         if(_emsSpiral == null) CalcEms(_app.Real, _app.Index);
@@ -93,6 +101,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         if(_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Index, _app.Real);
         return _rsInverseSumSpiral.joints;
+    }
+
+    public Vector[] GetChi()
+    {
+        if(_chiSpiral == null) CalcChi(_app.Index, _app.Real);
+        return _chiSpiral;
     }
 
     public Vector GetZps()
@@ -193,6 +207,9 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateInverseSumPath != null) CalcInverseSumPath(index);
         else _inverseSumPath = null;
 
+        if(UpdateChi != null) CalcChi(index, real);
+        else _chiSpiral = null;
+
         if(UpdateZps != null) CalcZps(index);
         else _zpsPos = null;
 
@@ -271,6 +288,13 @@ public class SpiralCalculator : MonoBehaviour
             _rsInverseSumSpiral.Update(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
         }
         UpdateRsInverseSum?.Invoke(_rsInverseSumSpiral.joints);
+    }
+
+    private void CalcChi(double index, double real)
+    {
+        var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
+        _chiSpiral = Chi(s.numLinks, real, index);
+        UpdateChi?.Invoke(_chiSpiral);
     }
 
     private Vector CalcInversePoint(double index, double real)
@@ -415,7 +439,7 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInfLink?.Invoke(_infLink.Item1, _infLink.Item2);
     }
 
-    public Vector[] Chi(int numLinks, double real, double index)
+    private Vector[] Chi(int numLinks, double real, double index)
     {
         Vector Mult(Vector a, Vector b) => new Vector(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
         double Xmod2(double real, double index) => Math.Pow(Math.PI, real - 0.5) * Math.Pow(Zeta.IndexToImag(index) / 2.0, (1.0-2.0*real) / 2.0) * (1.0 + (1.0/(12.0*Zeta.IndexToImag(index)) * (1.0 - 2.0*real) * (3.0 - 2.0*real)));
