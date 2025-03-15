@@ -23645,7 +23645,7 @@ MonoBehaviour:
   _cam: {fileID: 0}
   _scrollSensitivity: 0.25
   minZoom: 0.0001
-  maxZoom: 10
+  maxZoom: 500
   _zoomLevel: 4
 --- !u!114 &639050350
 MonoBehaviour:
