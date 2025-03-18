@@ -71,4 +71,20 @@ public class NewRiemmanSeigalFormulaSums : MonoBehaviour
         // print("gamma1 / gamma2: " + (Zeta.complex_gamma(s / 2.0) / Zeta.complex_gamma((1 - s) / 2.0)));
         return  Complex.Pow(Math.PI, 0.5 - s) * (Zeta.complex_gamma(s / 2.0) / Zeta.complex_gamma((1 - s) / 2.0));
     }
+
+    public static (Vector2, Vector2) InverseBisectorLink(double real, double index)
+    {
+        Complex s = new Complex(real, Zeta.IndexToImag(index));
+        Complex p1 = new Complex(0, 0);
+        int nLimit = (int)Math.Ceiling(index);
+        for (int n = 1; n < nLimit; n++)
+        {
+            p1 += Complex.Pow(n, s - 1) * GammaRatio(1-s);
+        }
+
+        Complex p2 = p1;
+        p2 += Complex.Pow(nLimit, s - 1) * GammaRatio(1-s);
+
+        return (p1.ToVector2(), p2.ToVector2());
+    }
 }
