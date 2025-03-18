@@ -404,7 +404,7 @@ public class SpiralCalculator : MonoBehaviour
             // var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
 
             // _symmetryPath[i] = BisectingLines.CrotchPoint(s);
-            _symmetryPath[i] = RealPaths.GetBPSymmetry(r, index);
+            _symmetryPath[i] = RhombusPoints.GetBPSymmetry(r, index);
         }
         UpdateSymmetryPath?.Invoke(_symmetryPath);
     }

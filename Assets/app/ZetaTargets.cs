@@ -208,7 +208,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         // Vector2 bisectorLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
         
         // Vector2 ratioPt = spiral.joints[spiral.middleIndex] + (float)BisectorPoint.Djoint(_spiralCalculator.GetIndex()) * bisectorLink;
-        Vector2 bpForward = RealPaths.GetBPForward(_spiralCalculator.GetReal(), _spiralCalculator.GetIndex());
+        Vector2 bpForward = RhombusPoints.GetBPForward(_spiralCalculator.GetReal(), _spiralCalculator.GetIndex());
         using (Draw.StyleScope)
         {
             Draw.Color = Color.cyan;

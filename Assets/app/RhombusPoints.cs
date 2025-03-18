@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RealPaths : MonoBehaviour
+public class RhombusPoints : MonoBehaviour
 {
     // the intersection of bpForward and bpSymmetry = rhombus
     public static Vector2 GetBPForward(double real, double index)
