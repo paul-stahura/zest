@@ -335,6 +335,7 @@ public class SpiralCalculator : MonoBehaviour
                                                         z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
             
             _inverseSumPath[i] = intersectionPT;
+            // _inverseSumPath[i] = RealPaths.GetBPForward(r, index);
         }
         UpdateInverseSumPath?.Invoke(_inverseSumPath);
     }
@@ -400,9 +401,10 @@ public class SpiralCalculator : MonoBehaviour
         for(int i = 0; i < pathlength; i++)
         {
             var r = (float)i/pathlength;
-            var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+            // var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
 
-            _symmetryPath[i] = BisectingLines.CrotchPoint(s);
+            // _symmetryPath[i] = BisectingLines.CrotchPoint(s);
+            _symmetryPath[i] = RealPaths.GetBPSymmetry(r, index);
         }
         UpdateSymmetryPath?.Invoke(_symmetryPath);
     }
