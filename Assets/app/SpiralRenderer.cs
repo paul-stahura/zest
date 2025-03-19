@@ -298,10 +298,17 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
                 DrawSpiralLines(joints, color);
                 if(_colorLinksToggle.isOn) HighlightBisectorLink(joints, spiral.middleIndex, color, true);
                 break;
-            case 1: // Bisector Link
+            case 1: // up To Bisector Link
+                // create a new joint array that only includes the joints up to the bisector link
+                var partJoints = new Vector[spiral.middleIndex + 2];
+                Array.Copy(joints, partJoints, spiral.middleIndex + 2);
+                DrawSpiralLines(partJoints, color);
+                if(_colorLinksToggle.isOn) HighlightBisectorLink(partJoints, spiral.middleIndex, color, false);
+                break;
+            case 2: // Bisector Link
                 HighlightBisectorLink(joints, spiral.middleIndex, color, false);
                 break;
-            case 2: // Clock
+            case 3: // Clock
                 HighlightBisectorLink(joints, spiral.middleIndex, color, true);
                 break;
         }
