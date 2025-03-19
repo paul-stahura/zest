@@ -25,7 +25,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _etaToggle;
     [SerializeField] private TMP_Text _etaPos;
 
-    [SerializeField] private Toggle _drawReticle;
     [SerializeField] private Toggle _ravToggle;
 
     [SerializeField] private Toggle _drawOrigin;
@@ -59,8 +58,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
         _etaToggle = GameObject.Find("Eta Zeta Toggle").GetComponent<Toggle>();
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
-
-        _drawReticle = GameObject.Find("Draw Reticle Toggle").GetComponent<Toggle>();
 
         _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
 
@@ -151,8 +148,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
-        if(_drawReticle.isOn) DrawReticle();
-
         if(_ravToggle.isOn) DrawRav();
 
         if(_drawOrigin.isOn) DrawOrigin();
@@ -199,21 +194,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Ring(Vector2.zero, 0.032f);
             ShapesUtils.DrawCross(Vector2.zero, 0.05f);
-        }
-    }
-
-    private void DrawReticle()
-    {
-        // var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-        // Vector2 bisectorLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
-        
-        // Vector2 ratioPt = spiral.joints[spiral.middleIndex] + (float)BisectorPoint.Djoint(_spiralCalculator.GetIndex()) * bisectorLink;
-        Vector2 bpForward = RhombusPoints.GetBPForward(_spiralCalculator.GetReal(), _spiralCalculator.GetIndex());
-        using (Draw.StyleScope)
-        {
-            Draw.Color = Color.cyan;
-            Draw.Thickness = 1f;
-            ShapesUtils.DrawCross45(bpForward, 0.08f);
         }
     }
 
