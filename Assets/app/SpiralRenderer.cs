@@ -30,7 +30,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     [Header("Bisector/Clock Colors")]
     [SerializeField] private TMP_Dropdown _linksToDrawDropdown;
-    [SerializeField] private Toggle _colorLinksToggle;
+    [SerializeField] private MultiOptionToggle _colorLinksToggle;
     [SerializeField] private Color _bisectorColor = new Color(0.9607844f, 0.6901961f, 0.3333333f, 1);
     [SerializeField] private Color _clockYinColor = Color.green;
     [SerializeField] private Color _clockYangColor = Color.red;
@@ -50,7 +50,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         _realPathToggle = GameObject.Find("RealPathToggle").GetComponent<Toggle>();
         _linksToDrawDropdown = GameObject.Find("LinksToDrawDropdown").GetComponent<TMP_Dropdown>();
-        _colorLinksToggle = GameObject.Find("ColorBisectorLinksToggle").GetComponent<Toggle>();
+        _colorLinksToggle = GameObject.Find("ColorBisectorOptionsToggle").GetComponent<MultiOptionToggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
 
@@ -292,50 +292,63 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void DrawSpiral(Zeta.Spiral spiral, Vector[] joints, Color color)
     {
+        var highlight = _colorLinksToggle.GetSelectedOption().Item1;
+        bool colorBisector = highlight > 0;
+        bool colorClock = highlight == 2;
         switch(_linksToDrawDropdown.value)
         {
             case 0: // ALL
                 DrawSpiralLines(joints, color);
-                if(_colorLinksToggle.isOn) HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+                if(colorBisector) HighlightBisectorLink(joints, spiral.middleIndex, color);
+                if(colorClock) HighlighClockArms(joints, spiral.middleIndex, color);
                 break;
             case 1: // up To Bisector Link
                 // create a new joint array that only includes the joints up to the bisector link
                 var partJoints = new Vector[spiral.middleIndex + 2];
                 Array.Copy(joints, partJoints, spiral.middleIndex + 2);
                 DrawSpiralLines(partJoints, color);
-                if(_colorLinksToggle.isOn) HighlightBisectorLink(partJoints, spiral.middleIndex, color, false);
+                if(colorBisector) HighlightBisectorLink(partJoints, spiral.middleIndex, color);
                 break;
             case 2: // Bisector Link
-                HighlightBisectorLink(joints, spiral.middleIndex, color, false);
+                HighlightBisectorLink(joints, spiral.middleIndex, color);
                 break;
             case 3: // Clock
-                HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+                HighlightBisectorLink(joints, spiral.middleIndex, color);
+                HighlighClockArms(joints, spiral.middleIndex, color);
                 break;
         }
     }
 
-    private void HighlightBisectorLink(Vector[] points, int middleIndex, Color color, bool includeClockArms)
+    private void HighlightBisectorLink(Vector[] points, int middleIndex, Color color)
     {
         using (Draw.StyleScope)
         {
             // color tint the bisector link
             var colorAlpha = 0.3f;
-            var colorTint = 0.8f;
+            var colorTint = 0.6f;
             Color newColor = Color.Lerp(color, _bisectorColor, colorTint);
             newColor.a = colorAlpha;
             Draw.Thickness = 3;
             Draw.Line(points[middleIndex], points[middleIndex + 1], newColor);
+        }
+    }
 
-            if(includeClockArms)
-            {
-                newColor = Color.Lerp(color, _clockYinColor, colorTint);
-                newColor.a = colorAlpha;
-                Draw.Line(points[middleIndex - 1], points[middleIndex], newColor);
+    private void HighlighClockArms(Vector[] points, int middleIndex, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            // color tint arms
+            var colorAlpha = 0.3f;
+            var colorTint = 0.6f;
+            Draw.Thickness = 3;
 
-                newColor = Color.Lerp(color, _clockYangColor, colorTint);
-                newColor.a = colorAlpha;
-                Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
-            }
+            Color newColor = Color.Lerp(color, _clockYinColor, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[middleIndex - 1], points[middleIndex], newColor);
+
+            newColor = Color.Lerp(color, _clockYangColor, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
         }
     }
 
