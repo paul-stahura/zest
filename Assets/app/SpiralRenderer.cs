@@ -233,6 +233,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         var spiral = _spiralCalculator.GetSpiral();
         var zeta = spiral.zeta.ToVector();
+        // var zeta = _spiralCalculator.GetForwardBisector() + _spiralCalculator.GetInverseBisector();
         var norm = zeta.Normalized();
         var perp = new Vector(-norm.y, norm.x);
 

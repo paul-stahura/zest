@@ -17,15 +17,29 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
 
+    #region Forward
+    public static Action<Vector> UpdateForwardBisector;
+    private Vector _forwardBisector;
+    public static Action<Vector2[]> UpdateForwardBisectorPath;
+    private Vector2[] _forwardBisectorPath;
+    #endregion
+    #region Inverse
     public static Action<Vector[]> UpdateRsInverseSum;
     private Zeta.Spiral _rsInverseSumSpiral;
-    public static Action<Vector> UpdateInversePoint;
-    private Vector _inversePoint;
     public static Action<Vector2[]> UpdateInverseSumPath;
     private Vector2[] _inverseSumPath;
+    public static Action<Vector> UpdateInverseBisector;
+    private Vector _inverseBisector;
+    public static Action<Vector2[]> UpdateInverseBisectorPath;
+    private Vector2[] _inverseBisectorPath;
+    public static Action<Vector> UpdateInverseReflectedBisector;
+    private Vector _inverseReflectedBisector;
+    public static Action<Vector2[]> UpdateInverseReflectedBisectorPath;
+    private Vector2[] _inverseRelfectedBisectorPath;
 
     public static Action<Vector[]> UpdateChi;
     private Vector[] _chiSpiral;
+    #endregion
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
@@ -145,16 +159,40 @@ public class SpiralCalculator : MonoBehaviour
         return _rav;
     }
 
-    public Vector GetInversePoint()
+    public Vector GetForwardBisector()
     {
-        if(_inversePoint == null) CalcInversePoint(_app.Index, _app.Real);
-        return _inversePoint;
+        if(_forwardBisector == null) CalcForwardBisector();
+        return _forwardBisector;
     }
 
-    public Vector2[] GetInverseSumPath()
+    public Vector2[] GetForwardBisectorPath()
     {
-        if(_inverseSumPath == null) CalcInverseSumPath(_app.Index);
-        return _inverseSumPath;
+        if(_forwardBisectorPath == null) CalcForwardBisectorPath();
+        return _forwardBisectorPath;
+    }
+
+    public Vector GetInverseBisector()
+    {
+        if(_inverseBisector == null) CalcInverseBisector();
+        return _inverseBisector;
+    }
+
+    public Vector2[] GetInverseBisectorPath()
+    {
+        if(_inverseBisectorPath == null) CalcInverseBisectorPath();
+        return _inverseBisectorPath;
+    }
+
+    public Vector GetInverseReflectedBisector()
+    {
+        if(_inverseReflectedBisector == null) CalcInverseReflectedBisector();
+        return _inverseReflectedBisector;
+    }
+
+    public Vector2[] GetInverseReflectedBisectorPath()
+    {
+        if(_inverseRelfectedBisectorPath == null) CalcInverseReflectedBisectorPath();
+        return _inverseRelfectedBisectorPath;
     }
 
     public Vector GetYin()
@@ -198,14 +236,26 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateEta != null) CalcEta(real, index);
         else _etaSpiral = null;
 
+        if(UpdateForwardBisector != null) CalcForwardBisector();
+        else _forwardBisector = null;
+
+        if(UpdateForwardBisectorPath != null) CalcForwardBisectorPath();
+        else _forwardBisectorPath = null;
+
         if(UpdateRsInverseSum != null) CalcRsInverseSum(index, real);
         else _rsInverseSumSpiral = null;
 
-        if(UpdateInversePoint != null) CalcInversePoint(index, real);
-        else _inversePoint = null;
+        if(UpdateInverseBisector != null) CalcInverseBisector();
+        else _inverseBisector = null;
 
-        if(UpdateInverseSumPath != null) CalcInverseSumPath(index);
+        if(UpdateInverseSumPath != null) CalcInverseBisectorPath();
         else _inverseSumPath = null;
+
+        if(UpdateInverseReflectedBisector != null) CalcInverseReflectedBisector();
+        else _inverseReflectedBisector = null;
+
+        if(UpdateInverseReflectedBisectorPath != null) CalcInverseReflectedBisectorPath();
+        else _inverseRelfectedBisectorPath = null;
 
         if(UpdateChi != null) CalcChi(index, real);
         else _chiSpiral = null;
@@ -277,6 +327,27 @@ public class SpiralCalculator : MonoBehaviour
         UpdateEta?.Invoke(_etaSpiral);
     }
 
+    private void CalcForwardBisector()
+    {
+        var s = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+        var links = s.joints;
+        var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
+        _forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        UpdateForwardBisector?.Invoke(_forwardBisector);
+    }
+
+    private void CalcForwardBisectorPath()
+    {
+        _forwardBisectorPath = new Vector2[RealPathLength];
+        var pathlength = _forwardBisectorPath.Length;
+        for(int i = 0; i < pathlength; i++)
+        {
+            var r = (float)i/pathlength;
+            _forwardBisectorPath[i] = RhombusPoints.GetBPForward(r, GetIndex());
+        }
+        UpdateForwardBisectorPath?.Invoke(_forwardBisectorPath);
+    }
+
     private void CalcRsInverseSum(double index, double real)
     {
         if(_rsInverseSumSpiral == null)
@@ -297,34 +368,59 @@ public class SpiralCalculator : MonoBehaviour
         UpdateChi?.Invoke(_chiSpiral);
     }
 
-    private Vector CalcInversePoint(double index, double real)
+    private Vector CalcInverseBisector()
     {
-        var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
+        var spiral = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+        var links = GetRsInverseSum();
+        var midLink = links[spiral.middleIndex + 1] - links[spiral.middleIndex];
+        _inverseBisector = links[spiral.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        UpdateInverseBisector?.Invoke(_inverseBisector);
+
+        return _inverseBisector;
+    }
+
+    private Vector CalcInverseReflectedBisector()
+    {
+        var s = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
         Vector[] rev = (Vector[])GetRsInverseSum().Clone();
 
         var z = s.zeta.ToVector();
+        // var z = GetForwardBisector() + GetInverseBisector();
         var normal = z.Normalized();
         var perpendicular = new Vector(-normal.y, normal.x);
     
         // get intersection of bisector and inverse link
         Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
                                                     z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
-        _inversePoint = intersectionPT;
-        UpdateInversePoint?.Invoke(_inversePoint);
+        _inverseReflectedBisector = intersectionPT;
+        UpdateInverseReflectedBisector?.Invoke(_inverseReflectedBisector);
 
-        return intersectionPT;
+        return _inverseReflectedBisector;
     }
 
-    private void CalcInverseSumPath(double index)
+    private void CalcInverseBisectorPath()
     {
-        _inverseSumPath = new Vector2[RealPathLength];
-        var pathlength = _inverseSumPath.Length;
+        var index = GetIndex();
+        _inverseBisectorPath = new Vector2[RealPathLength];
+        var pathlength = _inverseBisectorPath.Length;
+        for(int i = 0; i < pathlength; i++)
+        {
+            var r = (float)i/pathlength;
+            _inverseBisectorPath[i] = RhombusPoints.GetBPInverse(r, index);
+        }
+        UpdateInverseSumPath?.Invoke(_inverseBisectorPath);
+    }
+
+    private void CalcInverseReflectedBisectorPath()
+    {
+        _inverseRelfectedBisectorPath = new Vector2[RealPathLength];
+        var pathlength = _inverseRelfectedBisectorPath.Length;
         for(int i = 0; i < pathlength; i++)
         {
             var r = (float)i/pathlength;
             
-            var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
-            Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+            var s = new Zeta.Spiral(r, GetIndex(), SpiralFormulas.EulerMaclauren, false);
+            Vector[] rev = new Zeta.Spiral(r, GetIndex(), SpiralFormulas.RSInverseSum, false).joints;
 
             var z = s.zeta.ToVector();
             var normal = z.Normalized();
@@ -334,10 +430,10 @@ public class SpiralCalculator : MonoBehaviour
             Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
                                                         z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
             
-            _inverseSumPath[i] = intersectionPT;
-            // _inverseSumPath[i] = RealPaths.GetBPForward(r, index);
+            _inverseRelfectedBisectorPath[i] = intersectionPT;
+            // _inverseRelfectedSumPath[i] = RealPaths.GetBPForward(r, GetIndex());
         }
-        UpdateInverseSumPath?.Invoke(_inverseSumPath);
+        UpdateInverseReflectedBisectorPath?.Invoke(_inverseRelfectedBisectorPath);
     }
 
     private Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)

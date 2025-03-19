@@ -18,11 +18,19 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _reverseLinkToggle;
     [SerializeField] private Color _reverseLinkColor;
     [SerializeField] private Color _reverseLinkPointsColor;
-
-    [SerializeField] private Toggle _inverseBisectorToggle;
-    [SerializeField] private Toggle _inverseRealPathToggle;
-    [SerializeField] private Toggle _inverseBPToZetaCirlceToggle;
-    [SerializeField] private Color _inverseColor;
+    
+    [SerializeField] private Toggle _ForwardLegsToggle;
+    [SerializeField] private Toggle _ForwardLegsPathToggle;
+    [SerializeField] private Toggle _ForwardLegsZetaCircleToggle;
+    [SerializeField] private Color _forwardLegsColor;
+    [SerializeField] private Toggle _invserseLegsToggle;
+    [SerializeField] private Toggle _inverseLegsPathToggle;
+    [SerializeField] private Toggle _inverseLegsZetaCircleToggle;
+    [SerializeField] private Color _inverseLegsColor;
+    [SerializeField] private Toggle _inverseReflectedLegsToggle;
+    [SerializeField] private Toggle _inverseReflectedLegsPathToggle;
+    [SerializeField] private Toggle _inverseReflectedZetaCircleToggle;
+    [SerializeField] private Color _inverseReflectedColor;
 
     [SerializeField] private Toggle _linksToSpiralsToggle;
     [SerializeField] private Color _linksToSpiralsColor;
@@ -30,6 +38,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private SpiralCalculator _spiralCalculator;
     [SerializeField] private CameraPositionTracking _cam;
 
+    #region FindObjects
     void Awake()
     {
         _zpsBisectorToggle = GameObject.Find("ZPSBisectorToggle").GetComponent<Toggle>();
@@ -39,16 +48,23 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _symmetryRealPathToggle = GameObject.Find("SymmetryRealPathToggle").GetComponent<Toggle>();
         _reverseLinkToggle = GameObject.Find("ReverseLinkToggle").GetComponent<Toggle>();
         _linksToSpiralsToggle = GameObject.Find("LinksToSpiralsToggle").GetComponent<Toggle>();
-
-        _inverseBisectorToggle = GameObject.Find("InverseBisectorToggle").GetComponent<Toggle>();
-        _inverseRealPathToggle = GameObject.Find("InverseRealPathToggle").GetComponent<Toggle>();
-        _inverseBPToZetaCirlceToggle = GameObject.Find("InverseBPToZetaCircleToggle").GetComponent<Toggle>();
+        
+        _ForwardLegsToggle = GameObject.Find("ForwardLegsToggle").GetComponent<Toggle>();
+        _ForwardLegsPathToggle = GameObject.Find("ForwardLegsPathToggle").GetComponent<Toggle>();
+        _ForwardLegsZetaCircleToggle = GameObject.Find("ForwardLegsBPToZetaCircleToggle").GetComponent<Toggle>();
+        _invserseLegsToggle = GameObject.Find("InverseLegsToggle").GetComponent<Toggle>();
+        _inverseLegsPathToggle = GameObject.Find("InverseLegsPathToggle").GetComponent<Toggle>();
+        _inverseLegsZetaCircleToggle = GameObject.Find("InverseLegsBPToZetaCircleToggle").GetComponent<Toggle>();
+        _inverseReflectedLegsToggle = GameObject.Find("InverseReflectedLegsToggle").GetComponent<Toggle>();
+        _inverseReflectedLegsPathToggle = GameObject.Find("InverseReflectedLegsPathToggle").GetComponent<Toggle>();
+        _inverseReflectedZetaCircleToggle = GameObject.Find("InverseReflectedZetaCircleToggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
         _cam = Camera.main.GetComponent<CameraPositionTracking>();
 
         SubToCalculations();
     }
+    #endregion
 
     public override void DrawShapes(Camera cam)
     {
@@ -74,9 +90,15 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(_reverseLinkToggle.isOn) DrawBisectorLink();
         if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
 
-        if(_inverseBisectorToggle.isOn) DrawInverseBisector();
-        if(_inverseRealPathToggle.isOn) DrawInversePath();
-        if(_inverseBPToZetaCirlceToggle.isOn) DrawInverseBPToZetaCircle();
+        if(_ForwardLegsToggle.isOn) DrawForwardLegs();
+        if(_ForwardLegsPathToggle.isOn) DrawForwardLegsPath();
+        if(_ForwardLegsZetaCircleToggle.isOn) DrawForwardLegsZetaCircle();
+        if(_invserseLegsToggle.isOn) DrawInverseLegs();
+        if(_inverseLegsPathToggle.isOn) DrawInverseLegsPath();
+        if(_inverseLegsZetaCircleToggle.isOn) DrawInverseLegsZetaCircle();
+        if(_inverseReflectedLegsToggle.isOn) DrawInverseReflectedLegs();
+        if(_inverseReflectedLegsPathToggle.isOn) DrawInverseReflectedLegsPath();
+        if(_inverseReflectedZetaCircleToggle.isOn) DrawInverseReflectedZetaCircle();
     }
 
     private void DrawBisectorLink()
@@ -213,32 +235,85 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawZpsBPToZetaCircle()
     {
-        using (Draw.StyleScope)
-        {
-            Draw.Color = _zpsBPToZetaCircleColor;
-            Draw.Thickness = 1f;
-
-            var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-            var zeta = spiral.zeta.ToVector();
-            Vector2 bpOneHalf = _spiralCalculator.GetBpOneHalf();
-
-            Draw.UseDashes = true;
-            Draw.Ring(bpOneHalf, (zeta - bpOneHalf).magnitude);
-
-            Draw.Color = Color.red;
-            Draw.Line(bpOneHalf, zeta);
-        }
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        var zeta = spiral.zeta.ToVector();
+        Vector2 bpOneHalf = _spiralCalculator.GetBpOneHalf();
+        DrawTargetCircle(bpOneHalf, zeta, _zpsBPToZetaCircleColor, Color.red);
     }
 
-    private void DrawInverseBisector()
+    #region Forward
+    private void DrawForwardLegs()
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = _inverseColor;
+            Draw.Color = _forwardLegsColor;
             Draw.Thickness = 1f;
 
             var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-            var pt = _spiralCalculator.GetInversePoint();
+            var pt = _spiralCalculator.GetForwardBisector();
+
+            ShapesUtils.DrawCross45(pt, 0.08f);
+
+            Draw.Line(Vector2.zero, pt, Color.green);
+            Draw.Line(pt, s.zeta.ToVector(), Color.red);
+
+            // Draw.Line(pt, pt + _spiralCalculator.GetInverseBisector(), Color.cyan);
+        }
+    }
+
+    private void DrawForwardLegsPath()
+    {
+        DrawPath(_spiralCalculator.GetForwardBisectorPath(), _forwardLegsColor);
+    }
+
+    private void DrawForwardLegsZetaCircle()
+    {
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        var zeta = spiral.zeta.ToVector();
+        Vector2 forwardPt = _spiralCalculator.GetForwardBisector();
+        DrawTargetCircle(forwardPt, zeta, _forwardLegsColor, Color.red);
+    }
+    #endregion
+    #region Inverse
+    private void DrawInverseLegs()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _inverseLegsColor;
+            Draw.Thickness = 1f;
+
+            var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var pt = _spiralCalculator.GetInverseBisector();
+
+            ShapesUtils.DrawCross45(pt, 0.08f);
+
+            Draw.Line(Vector2.zero, pt, Color.red);
+            Draw.Line(pt, s.zeta.ToVector(), Color.green);
+        }
+    }
+
+    private void DrawInverseLegsPath()
+    {
+        DrawPath(_spiralCalculator.GetInverseBisectorPath(), _inverseLegsColor);
+    }
+
+    private void DrawInverseLegsZetaCircle()
+    {
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        var zeta = spiral.zeta.ToVector();
+        Vector2 inversePt = _spiralCalculator.GetInverseBisector();
+        DrawTargetCircle(inversePt, zeta, _inverseLegsColor, Color.green);
+    }
+
+    private void DrawInverseReflectedLegs()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _inverseReflectedColor;
+            Draw.Thickness = 1f;
+
+            var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+            var pt = _spiralCalculator.GetInverseReflectedBisector();
 
             ShapesUtils.DrawCross45(pt, 0.08f);
 
@@ -247,13 +322,24 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawInversePath()
+    private void DrawInverseReflectedLegsPath()
     {
-        Vector2[] path = _spiralCalculator.GetInverseSumPath();
+        DrawPath(_spiralCalculator.GetInverseReflectedBisectorPath(), _inverseReflectedColor);
+    }
 
+    private void DrawInverseReflectedZetaCircle()
+    {
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        var zeta = spiral.zeta.ToVector();
+        DrawTargetCircle(_spiralCalculator.GetInverseReflectedBisector(), zeta, _inverseReflectedColor, Color.red);
+    }
+    #endregion
+
+    private void DrawPath(Vector2[] path, Color color)
+    {
         using (Draw.StyleScope)
         {
-            Draw.Color = _inverseColor;
+            Draw.Color = color;
             Draw.Thickness = 1f;
 
             for (int i = 1; i < path.Length; i++)
@@ -262,23 +348,18 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             }
         }
     }
-
-    private void DrawInverseBPToZetaCircle()
+    private void DrawTargetCircle(Vector2 pt, Vector2 target, Color color, Color line)
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = Color.magenta;
+            Draw.Color = color;
             Draw.Thickness = 1f;
 
-            var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-            var zeta = spiral.zeta.ToVector();
-            Vector2 inversePt = _spiralCalculator.GetInversePoint();
-
             Draw.UseDashes = true;
-            Draw.Ring(inversePt, (zeta - inversePt).magnitude);
+            Draw.Ring(pt, (target - pt).magnitude);
 
-            Draw.Color = Color.red;
-            Draw.Line(inversePt, zeta);
+            Draw.Color = line;
+            Draw.Line(pt, target);
         }
     }
 
@@ -335,18 +416,18 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             }
         });
 
-        _inverseBisectorToggle.onValueChanged.AddListener((value) => {
+        _invserseLegsToggle.onValueChanged.AddListener((value) => {
             if (value)
             {
-                SpiralCalculator.UpdateInversePoint += SubInversePoint;
+                SpiralCalculator.UpdateInverseBisector += SubInversePoint;
             }
             else
             {
-                SpiralCalculator.UpdateInversePoint -= SubInversePoint;
+                SpiralCalculator.UpdateInverseBisector -= SubInversePoint;
             }
         });
 
-        _inverseRealPathToggle.onValueChanged.AddListener((value) => {
+        _inverseLegsPathToggle.onValueChanged.AddListener((value) => {
             if (value)
             {
                 SpiralCalculator.UpdateInverseSumPath += SubInversePath;
@@ -354,6 +435,50 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             else
             {
                 SpiralCalculator.UpdateInverseSumPath -= SubInversePath;
+            }
+        });
+
+        _inverseLegsZetaCircleToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInverseBisector += SubInversePoint;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInverseBisector -= SubInversePoint;
+            }
+        });
+
+        _inverseReflectedLegsToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInverseReflectedBisector += SubInverseReflectedPoint;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInverseReflectedBisector -= SubInverseReflectedPoint;
+            }
+        });
+
+        _inverseReflectedLegsPathToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInverseReflectedBisectorPath += SubInverseReflectedPath;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInverseReflectedBisectorPath -= SubInverseReflectedPath;
+            }
+        });
+
+        _inverseReflectedZetaCircleToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateInverseReflectedBisector += SubInverseReflectedPoint;
+            }
+            else
+            {
+                SpiralCalculator.UpdateInverseReflectedBisector -= SubInverseReflectedPoint;
             }
         });
     }
@@ -365,6 +490,8 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     private void SubSymmetryPath(Vector2[] symmetryPath) {}
     private void SubInversePoint(Vector inversePt) {}
     private void SubInversePath(Vector2[] inversePath) {}
+    private void SubInverseReflectedPoint(Vector inversePt) {}
+    private void SubInverseReflectedPath(Vector2[] inversePath) {}
 
     #endregion
 }
