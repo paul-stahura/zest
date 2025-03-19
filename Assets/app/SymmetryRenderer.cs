@@ -202,10 +202,11 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
             // Draw dashed bisecting line. Extend it past a little bit
             var z2 = (zetaPt / 2);
-            var dir = (z2 - bipt).Normalized() * .5f;
+            Vector dist = z2 - bipt;
+            dist += dist.Normalized() * .5f;
             Draw.Thickness = 1.75f;
             Draw.UseDashes = true;
-            Draw.Line(z2 + dir, bipt - dir);
+            Draw.Line(z2 + dist, z2 - dist);
 
             Draw.Ring(bipt, .005f);
             ShapesUtils.DrawCross45(bipt, .05f);
