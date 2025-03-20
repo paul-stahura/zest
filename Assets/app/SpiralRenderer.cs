@@ -9,11 +9,12 @@ using UnityEngine.UI;
 
 public class SpiralRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private MultiOptionToggle _spiralTransparency;
     [Header("Spiral Colors")]
     [SerializeField] private Color EmsColor;
-    [SerializeField] private MultiOptionToggle _emsForwardToggle;
+    [SerializeField] private Toggle _emsForwardToggle;
     [SerializeField] private Color ZrsColor;
-    [SerializeField] private MultiOptionToggle _ZrsForwardToggle;
+    [SerializeField] private Toggle _ZrsForwardToggle;
     [SerializeField] private Color ReverseSpiralColor;
     [SerializeField] private Toggle _reverseSpiralToggle;
     [SerializeField] private Color InverseSpiralColor;
@@ -39,8 +40,10 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     void Awake()
     {
-        _emsForwardToggle = GameObject.Find("EmsForwardMOT").GetComponent<MultiOptionToggle>();
-        _ZrsForwardToggle = GameObject.Find("ZrsForwardMOT").GetComponent<MultiOptionToggle>();
+        _spiralTransparency = GameObject.Find("SpiralTransparencyMOT").GetComponent<MultiOptionToggle>();
+
+        _emsForwardToggle = GameObject.Find("EmsForwardToggle").GetComponent<Toggle>();
+        _ZrsForwardToggle = GameObject.Find("ZrsForwardToggle").GetComponent<Toggle>();
         _reverseSpiralToggle = GameObject.Find("ReverseSpiralToggle").GetComponent<Toggle>();
         _inverseSpiralToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
@@ -73,8 +76,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void DrawSpirals()
     {
-        if(_emsForwardToggle.GetSelectedOption().Item1 != 0) DrawEms(_spiralCalculator.GetEms());
-        if(_ZrsForwardToggle.GetSelectedOption().Item1 != 0) DrawZrs(_spiralCalculator.GetZrs());
+        if(_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
+        if(_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
         if(_reverseSpiralToggle.isOn) DrawReverseSpiral();
         if(_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
         if(_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
@@ -89,10 +92,30 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void SubSpirals()
     {
-        _emsForwardToggle.OnOptionChanged += EmsOptionChanged;
-        EmsOptionChanged(_emsForwardToggle.GetSelectedOption().Item1);
-        _ZrsForwardToggle.OnOptionChanged += ZrsOptionChanged;
-        ZrsOptionChanged(_ZrsForwardToggle.GetSelectedOption().Item1);
+        _spiralTransparency.OnOptionChanged += SpiralTransparenyOptionChanged;
+        SpiralTransparenyOptionChanged(_spiralTransparency.GetSelectedOption().Item1);
+
+        _emsForwardToggle.onValueChanged.AddListener((value) => {
+            if(value)
+            {
+                SpiralCalculator.UpdateEms += SubEms;
+            }
+            else 
+            {
+                SpiralCalculator.UpdateEms -= SubEms;
+            }
+        });
+
+        _ZrsForwardToggle.onValueChanged.AddListener((value) => {
+            if(value)
+            {
+                SpiralCalculator.UpdateZrs += SubZrs;
+            }
+            else 
+            {
+                SpiralCalculator.UpdateZrs -= SubZrs;
+            }
+        });
 
         _reverseSpiralToggle.onValueChanged.AddListener((value) => {
             if(value)
@@ -151,25 +174,33 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         });
     }
 
-    private void EmsOptionChanged(int option)
+    private void SpiralTransparenyOptionChanged(int option)
     {
-        if(option > 0)
+        switch(option)
         {
-            if(option == 1) 
-            {
-                SpiralCalculator.UpdateEms += SubEms;
-                EmsColor.a = 0.25f;
-            }
-            else
-            {
-                EmsColor.a = 1f;
-            }
-        }
-        else if (option == 0)
-        {
-            SpiralCalculator.UpdateEms -= SubEms;
+            case 0: // Light
+                SetColorTransparency(0.25f);
+                break;
+            case 1: // Half
+                SetColorTransparency(0.5f);
+                break;
+            case 2: // Full
+                SetColorTransparency(1f);
+                break;
         }
     }
+
+    private void SetColorTransparency(float colorAlpha)
+    {
+        EmsColor.a = colorAlpha;
+        ZrsColor.a = colorAlpha;
+        ReverseSpiralColor.a = colorAlpha;
+        InverseSpiralColor.a = colorAlpha;
+        InverseReflectedColor.a = colorAlpha;
+        ChiSpiralColor.a = colorAlpha;
+        EtaSpiralColor.a = colorAlpha;
+    }
+
     private void SubEms(Zeta.Spiral spiral){}
     private void DrawEms(Zeta.Spiral ems)
     {

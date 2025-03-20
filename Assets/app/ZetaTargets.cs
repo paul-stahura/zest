@@ -16,16 +16,23 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Color _zpsColor;
     [SerializeField] private Toggle _zpsToggle;
     [SerializeField] private TMP_Text _zpsPos;
+    [SerializeField] private Color _zetapsColor;
+    [SerializeField] private Toggle _zetapsToggle;
+    [SerializeField] private TMP_Text _zetapsPos;
 
     [SerializeField] private Color _emsColor;
     [SerializeField] private Toggle _emsToggle;
     [SerializeField] private TMP_Text _emsPos;
+    [SerializeField] private Color _zemColor;
+    [SerializeField] private Toggle _zemToggle;
+    [SerializeField] private TMP_Text _zemPos;
 
     [SerializeField] private Color _etaColor;
     [SerializeField] private Toggle _etaToggle;
     [SerializeField] private TMP_Text _etaPos;
 
     [SerializeField] private Toggle _ravToggle;
+    [SerializeField] private Color _ravColor;
 
     [SerializeField] private Toggle _drawOrigin;
 
@@ -37,8 +44,12 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private int _zrsPathIndex = 0;
     private Vector2[] _zpsPath = new Vector2[_traceLength];
     private int _zpsPathIndex = 0;
+    private Vector2[] _zetapsPath = new Vector2[_traceLength];
+    private int _zetapsPathIndex = 0;
     private Vector2[] _emsPath = new Vector2[_traceLength];
     private int _emsPathIndex = 0;
+    private Vector2[] _zemPath = new Vector2[_traceLength];
+    private int _zemPathIndex = 0;
     private Vector2[] _etaPath = new Vector2[_traceLength];
     private int _etaPathIndex = 0;
 
@@ -52,10 +63,17 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     {
         _zrsToggle = GameObject.Find("Zrs Zeta Toggle").GetComponent<Toggle>();
         _zrsPos = GameObject.Find("Zrs Pos").GetComponent<TMP_Text>();
-        _zpsToggle = GameObject.Find("Zps Zeta Toggle").GetComponent<Toggle>();
+
+        _zpsToggle = GameObject.Find("Zps 1/2 Toggle").GetComponent<Toggle>();
         _zpsPos = GameObject.Find("Zps Pos").GetComponent<TMP_Text>();
+        _zetapsToggle = GameObject.Find("Zeta ps Toggle").GetComponent<Toggle>();
+        _zetapsPos = GameObject.Find("Zeta ps Pos").GetComponent<TMP_Text>();
+
         _emsToggle = GameObject.Find("Ems Zeta Toggle").GetComponent<Toggle>();
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
+        _zemToggle = GameObject.Find("Zem3 Toggle").GetComponent<Toggle>();
+        _zemPos = GameObject.Find("Zem3 Pos").GetComponent<TMP_Text>();
+
         _etaToggle = GameObject.Find("Eta Zeta Toggle").GetComponent<Toggle>();
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
 
@@ -97,11 +115,21 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             if(value) SpiralCalculator.UpdateZps += UpdateZps;
             else SpiralCalculator.UpdateZps -= UpdateZps; 
         });
+        _zetapsToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateZetaPS += UpdateZetaPS;
+            else SpiralCalculator.UpdateZetaPS -= UpdateZetaPS;
+        });
 
         _emsToggle.onValueChanged.AddListener((bool value) => 
         { 
             if(value) SpiralCalculator.UpdateEms += UpdateEms;
             else SpiralCalculator.UpdateEms -= UpdateEms; 
+        });
+        _zemToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateZem += UpdateZem;
+            else SpiralCalculator.UpdateZem -= UpdateZem;
         });
 
         _etaToggle.onValueChanged.AddListener((bool value) => 
@@ -129,9 +157,19 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(zps, ref _zpsPath, ref _zpsPathIndex);
     }
 
+    private void UpdateZetaPS(Vector zetaPS)
+    {
+        UpdateTargetPos(zetaPS, ref _zetapsPath, ref _zetapsPathIndex);
+    }
+
     private void UpdateEms(Zeta.Spiral ems)
     {
         UpdateTargetPos(ems.zeta, ref _emsPath, ref _emsPathIndex);
+    }
+
+    private void UpdateZem(Vector zem) 
+    {
+        UpdateTargetPos(zem, ref _zemPath, ref _zemPathIndex);
     }
 
     private void UpdateEta(Zeta.Spiral eta)
@@ -145,7 +183,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     {
         DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
         DrawZetaTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsPath, _zpsPathIndex, _zpsColor);
+        DrawZetaTarget(_zetapsToggle, _zetapsPos, _spiralCalculator.GetZetaPS(), _zetapsPath, _zetapsPathIndex, _zetapsColor);
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
+        DrawZetaTarget(_zemToggle, _zemPos, _spiralCalculator.GetZem(), _zemPath, _zemPathIndex, _zemColor);
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
         if(_ravToggle.isOn) DrawRav();
@@ -201,7 +241,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = Color.green;
+            Draw.Color = _ravColor;
             Draw.Thickness = 1f;
             ShapesUtils.DrawCross45(_spiralCalculator.GetRAV(), 0.08f);
         }

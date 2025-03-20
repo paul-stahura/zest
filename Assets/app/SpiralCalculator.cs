@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
+using Vector2 = UnityEngine.Vector2;
 
 
 public class SpiralCalculator : MonoBehaviour
@@ -12,8 +14,11 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Zeta.Spiral> UpdateEms;
     private Zeta.Spiral _emsSpiral;
+    public static Action <Vector> UpdateZem;
+    private Vector _zemPos;
     public static Action<Zeta.Spiral> UpdateZrs;
     private Zeta.Spiral _zrsSpiral;
+    
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
 
@@ -43,6 +48,8 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
+    public static Action <Vector> UpdateZetaPS;
+    private Vector _zetaPS;
 
     public static Action<List<Vector>, int> UpdateRealPath;
     private List<Vector> _realPath;
@@ -99,6 +106,12 @@ public class SpiralCalculator : MonoBehaviour
         return _emsSpiral;
     }
 
+    public Vector GetZem()
+    {
+        if(_zemPos == null) CalcZem(_app.Real, _app.Index);
+        return _zemPos;
+    }
+
     public Zeta.Spiral GetZrs()
     {
         if(_zrsSpiral == null) CalcZrs(_app.Index);
@@ -127,6 +140,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         if(_zpsPos == null) CalcZps(_app.Index);
         return _zpsPos;
+    }
+
+    public Vector GetZetaPS()
+    {
+        if(_zetaPS == null) CalcZetaPS(_app.Real, _app.Index);
+        return _zetaPS;
     }
 
     public (List<Vector>, int) GetRealPath()
@@ -230,6 +249,9 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateEms != null) CalcEms(real, index);
         else _emsSpiral = null;
 
+        if(UpdateZem != null) CalcZem(real, index);
+        else _zemPos = null;
+
         if(UpdateZrs != null) CalcZrs(index);
         else _zrsSpiral = null;
 
@@ -262,6 +284,9 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateZps != null) CalcZps(index);
         else _zpsPos = null;
+
+        if(UpdateZetaPS != null) CalcZetaPS(real, index);
+        else _zetaPS = null;
 
         if(UpdateRealPath != null) CalcRealPath(index);
         else _realPath = null;
@@ -299,6 +324,13 @@ public class SpiralCalculator : MonoBehaviour
             _emsSpiral.Update(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
         }
         UpdateEms?.Invoke(_emsSpiral);
+    }
+
+    private void CalcZem(double real, double index)
+    {
+        var c = new Complex(real, Zeta.IndexToImag(index));
+        _zemPos = Zeta.Zem3(c).ToVector();
+        UpdateZem?.Invoke(_zemPos);
     }
 
     private void CalcZrs(double index)
@@ -461,6 +493,13 @@ public class SpiralCalculator : MonoBehaviour
     {
         _zpsPos = BisectorPoint.GetZPS(index);
         UpdateZps?.Invoke(_zpsPos);
+    }
+
+    private void CalcZetaPS(double real, double index)
+    {
+        var v = RhombusPoints.GetBPForward(real, index) + RhombusPoints.GetBPInverse(real, index);
+        _zetaPS = new Vector(v.x, v.y);
+        UpdateZetaPS?.Invoke(_zetaPS);
     }
 
     private void CalcRealPath(double index)

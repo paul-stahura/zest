@@ -186,6 +186,45 @@ public class Zeta
         return new Vector ((point.x - pivot.x) * Math.Cos(rad) - (point.y - pivot.y) * Math.Sin(rad) + pivot.x, (point.x - pivot.x) * Math.Sin(rad) + (point.y - pivot.y) * Math.Cos(rad) + pivot.y);
     }
 
+    public static Complex Zem3(Complex s)
+    {
+        Complex sum = Complex.Zero;
+        int N = (int)Complex.Abs(s);
+        if (N > MAX_N) N = MAX_N;
+        if (N < MIN_N) N = MIN_N;
+        for (int n = 1; n < N; n++)
+        {
+            sum += Complex.Pow(n, -s);
+        }
+
+        Complex correctionTerm = Complex.Pow(N, 1 - s) / (s - 1);
+        Complex additionalCorrection = 1.0 / (2 * Complex.Pow(N, s));
+
+        Complex higherOrderCorrections = Complex.Zero;
+        for (int j = 1; j < 20 && j < b_coeff.Length; j++)
+        {
+            Complex productTerm = Complex.One;
+            for (int k = 0; k <= (2 * j - 2); k++)
+            {
+                productTerm *= (s + k);
+            }
+            higherOrderCorrections += (b_coeff[j] / Factorial(2 * j)) * productTerm * Complex.Pow(N, -s - 2 * j + 1);
+        }
+
+        return sum + correctionTerm + additionalCorrection + higherOrderCorrections;
+    }
+
+    // Function to compute factorial
+    private static double Factorial(int n)
+    {
+        double result = 1;
+        for (int i = 2; i <= n; i++)
+        {
+            result *= i;
+        }
+        return result;
+    }
+
     public static Complex EulerMaclauren(Complex s)
     {
         Complex z, g;
