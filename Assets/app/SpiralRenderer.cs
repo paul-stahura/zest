@@ -74,6 +74,11 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
     }
 
+    public void InvertColors()
+    {
+        EmsColor = ColorInverter.InvertColor(EmsColor);
+    }
+
     private void DrawSpirals()
     {
         if(_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
