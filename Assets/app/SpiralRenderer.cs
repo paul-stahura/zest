@@ -347,6 +347,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
                 HighlightBisectorLink(joints, spiral.middleIndex, color);
                 HighlighClockArms(joints, spiral.middleIndex, color);
                 break;
+            case 4: // Last Link
+                HighlightLastLink(joints, color);
+                break;
         }
     }
 
@@ -380,6 +383,20 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             newColor = Color.Lerp(color, _clockYangColor, colorTint);
             newColor.a = colorAlpha;
             Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
+        }
+    }
+
+    private void HighlightLastLink(Vector[] points, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            var colorAlpha = 0.3f;
+            var colorTint = 0.6f;
+            Draw.Thickness = 3;
+
+            Color newColor = Color.Lerp(color, Color.red, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[points.Length - 2], points[points.Length - 1], newColor);
         }
     }
 

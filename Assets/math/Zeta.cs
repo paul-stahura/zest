@@ -621,8 +621,8 @@ public class Zeta
             var imag = IndexToImag(index, useNewImag);
 
             Complex s = new Complex(real, imag);
-            int variedN = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
-            int N = variedN;
+            // int N = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
+            int N = (int)SpiralMiddleIndex(this.index, 0) + 2;
 
             numLinks = N + 1;
             joints = new Vector[numLinks];
