@@ -1,61 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Button))]
 public class ColorInverter : MonoBehaviour
 {
-    public Camera cam;
-    public ZetaSpiral zSpiral;
-    public bool invertButton = false;
+    [SerializeField] private SpiralRenderer _spiralRenderer;
+    private Button _invertButton;
+    private Camera _cam;
 
-    private bool invertActive = false;
-    private List<Text> texts;
-
-    void OnValidate()
+    void Awake() 
     {
-        // invert button
-        if(invertButton)
-        {
-            OnClick();
-            invertButton = false;
-        }
-    }
+        _cam = Camera.main;
 
-    void Start()
-    {
-        // ASSUMPTION: we only want to invert text objects with a white value
-        texts = new List<Text>();
-        foreach(Text txt in FindObjectsOfType<Text>())
-        {
-            
-            if(txt.color.grayscale > 0.5f)
-            {
-                texts.Add(txt);
-            }
-        }
+        _spiralRenderer = FindObjectOfType<SpiralRenderer>();
+
+        _invertButton = GetComponent<Button>();
+        _invertButton.onClick.AddListener(Invert);
     }
     
-    public void OnClick()
+    public void Invert()
     {
-        cam.backgroundColor = InvertColor(cam.backgroundColor);
-        zSpiral.spiralColor = InvertColor(zSpiral.spiralColor);
-        InvertText();
-        invertActive = !invertActive;
+        _cam.backgroundColor = InvertColor(_cam.backgroundColor);
+        _spiralRenderer.InvertColors();
     }
 
     // takes a color and returns the inverse
-    private Color InvertColor(Color originalColor)
+    public static Color InvertColor(Color originalColor)
     {
         return new Color(1.0f - originalColor.r, 1.0f - originalColor.g, 1.0f - originalColor.b, originalColor.a);
-    }
-
-    private void InvertText()
-    {
-        foreach(Text txt in texts)
-        {
-            txt.color = InvertColor(txt.color);
-        }
     }
 }

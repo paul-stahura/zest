@@ -9,11 +9,12 @@ using UnityEngine.UI;
 
 public class SpiralRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private MultiOptionToggle _spiralTransparency;
     [Header("Spiral Colors")]
     [SerializeField] private Color EmsColor;
-    [SerializeField] private MultiOptionToggle _emsForwardToggle;
+    [SerializeField] private Toggle _emsForwardToggle;
     [SerializeField] private Color ZrsColor;
-    [SerializeField] private MultiOptionToggle _ZrsForwardToggle;
+    [SerializeField] private Toggle _ZrsForwardToggle;
     [SerializeField] private Color ReverseSpiralColor;
     [SerializeField] private Toggle _reverseSpiralToggle;
     [SerializeField] private Color InverseSpiralColor;
@@ -30,7 +31,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     [Header("Bisector/Clock Colors")]
     [SerializeField] private TMP_Dropdown _linksToDrawDropdown;
-    [SerializeField] private Toggle _colorLinksToggle;
+    [SerializeField] private MultiOptionToggle _colorLinksToggle;
     [SerializeField] private Color _bisectorColor = new Color(0.9607844f, 0.6901961f, 0.3333333f, 1);
     [SerializeField] private Color _clockYinColor = Color.green;
     [SerializeField] private Color _clockYangColor = Color.red;
@@ -39,8 +40,10 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     void Awake()
     {
-        _emsForwardToggle = GameObject.Find("EmsForwardMOT").GetComponent<MultiOptionToggle>();
-        _ZrsForwardToggle = GameObject.Find("ZrsForwardMOT").GetComponent<MultiOptionToggle>();
+        _spiralTransparency = GameObject.Find("SpiralTransparencyMOT").GetComponent<MultiOptionToggle>();
+
+        _emsForwardToggle = GameObject.Find("EmsForwardToggle").GetComponent<Toggle>();
+        _ZrsForwardToggle = GameObject.Find("ZrsForwardToggle").GetComponent<Toggle>();
         _reverseSpiralToggle = GameObject.Find("ReverseSpiralToggle").GetComponent<Toggle>();
         _inverseSpiralToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
@@ -50,7 +53,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         _realPathToggle = GameObject.Find("RealPathToggle").GetComponent<Toggle>();
         _linksToDrawDropdown = GameObject.Find("LinksToDrawDropdown").GetComponent<TMP_Dropdown>();
-        _colorLinksToggle = GameObject.Find("ColorBisectorLinksToggle").GetComponent<Toggle>();
+        _colorLinksToggle = GameObject.Find("ColorBisectorOptionsToggle").GetComponent<MultiOptionToggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
 
@@ -71,10 +74,15 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
     }
 
+    public void InvertColors()
+    {
+        EmsColor = ColorInverter.InvertColor(EmsColor);
+    }
+
     private void DrawSpirals()
     {
-        if(_emsForwardToggle.GetSelectedOption().Item1 != 0) DrawEms(_spiralCalculator.GetEms());
-        if(_ZrsForwardToggle.GetSelectedOption().Item1 != 0) DrawZrs(_spiralCalculator.GetZrs());
+        if(_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
+        if(_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
         if(_reverseSpiralToggle.isOn) DrawReverseSpiral();
         if(_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
         if(_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
@@ -89,10 +97,30 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void SubSpirals()
     {
-        _emsForwardToggle.OnOptionChanged += EmsOptionChanged;
-        EmsOptionChanged(_emsForwardToggle.GetSelectedOption().Item1);
-        _ZrsForwardToggle.OnOptionChanged += ZrsOptionChanged;
-        ZrsOptionChanged(_ZrsForwardToggle.GetSelectedOption().Item1);
+        _spiralTransparency.OnOptionChanged += SpiralTransparenyOptionChanged;
+        SpiralTransparenyOptionChanged(_spiralTransparency.GetSelectedOption().Item1);
+
+        _emsForwardToggle.onValueChanged.AddListener((value) => {
+            if(value)
+            {
+                SpiralCalculator.UpdateEms += SubEms;
+            }
+            else 
+            {
+                SpiralCalculator.UpdateEms -= SubEms;
+            }
+        });
+
+        _ZrsForwardToggle.onValueChanged.AddListener((value) => {
+            if(value)
+            {
+                SpiralCalculator.UpdateZrs += SubZrs;
+            }
+            else 
+            {
+                SpiralCalculator.UpdateZrs -= SubZrs;
+            }
+        });
 
         _reverseSpiralToggle.onValueChanged.AddListener((value) => {
             if(value)
@@ -151,25 +179,33 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         });
     }
 
-    private void EmsOptionChanged(int option)
+    private void SpiralTransparenyOptionChanged(int option)
     {
-        if(option > 0)
+        switch(option)
         {
-            if(option == 1) 
-            {
-                SpiralCalculator.UpdateEms += SubEms;
-                EmsColor.a = 0.25f;
-            }
-            else
-            {
-                EmsColor.a = 1f;
-            }
-        }
-        else if (option == 0)
-        {
-            SpiralCalculator.UpdateEms -= SubEms;
+            case 0: // Light
+                SetColorTransparency(0.25f);
+                break;
+            case 1: // Half
+                SetColorTransparency(0.5f);
+                break;
+            case 2: // Full
+                SetColorTransparency(1f);
+                break;
         }
     }
+
+    private void SetColorTransparency(float colorAlpha)
+    {
+        EmsColor.a = colorAlpha;
+        ZrsColor.a = colorAlpha;
+        ReverseSpiralColor.a = colorAlpha;
+        InverseSpiralColor.a = colorAlpha;
+        InverseReflectedColor.a = colorAlpha;
+        ChiSpiralColor.a = colorAlpha;
+        EtaSpiralColor.a = colorAlpha;
+    }
+
     private void SubEms(Zeta.Spiral spiral){}
     private void DrawEms(Zeta.Spiral ems)
     {
@@ -292,43 +328,80 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void DrawSpiral(Zeta.Spiral spiral, Vector[] joints, Color color)
     {
+        var highlight = _colorLinksToggle.GetSelectedOption().Item1;
+        bool colorBisector = highlight > 0;
+        bool colorClock = highlight == 2;
         switch(_linksToDrawDropdown.value)
         {
             case 0: // ALL
                 DrawSpiralLines(joints, color);
-                if(_colorLinksToggle.isOn) HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+                if(colorBisector) HighlightBisectorLink(joints, spiral.middleIndex, color);
+                if(colorClock) HighlighClockArms(joints, spiral.middleIndex, color);
                 break;
-            case 1: // Bisector Link
-                HighlightBisectorLink(joints, spiral.middleIndex, color, false);
+            case 1: // up To Bisector Link
+                // create a new joint array that only includes the joints up to the bisector link
+                var partJoints = new Vector[spiral.middleIndex + 2];
+                Array.Copy(joints, partJoints, spiral.middleIndex + 2);
+                DrawSpiralLines(partJoints, color);
+                if(colorBisector) HighlightBisectorLink(partJoints, spiral.middleIndex, color);
                 break;
-            case 2: // Clock
-                HighlightBisectorLink(joints, spiral.middleIndex, color, true);
+            case 2: // Bisector Link
+                HighlightBisectorLink(joints, spiral.middleIndex, color);
+                break;
+            case 3: // Clock
+                HighlightBisectorLink(joints, spiral.middleIndex, color);
+                HighlighClockArms(joints, spiral.middleIndex, color);
+                break;
+            case 4: // Last Link
+                HighlightLastLink(joints, color);
                 break;
         }
     }
 
-    private void HighlightBisectorLink(Vector[] points, int middleIndex, Color color, bool includeClockArms)
+    private void HighlightBisectorLink(Vector[] points, int middleIndex, Color color)
     {
         using (Draw.StyleScope)
         {
             // color tint the bisector link
             var colorAlpha = 0.3f;
-            var colorTint = 0.8f;
+            var colorTint = 0.6f;
             Color newColor = Color.Lerp(color, _bisectorColor, colorTint);
             newColor.a = colorAlpha;
             Draw.Thickness = 3;
             Draw.Line(points[middleIndex], points[middleIndex + 1], newColor);
+        }
+    }
 
-            if(includeClockArms)
-            {
-                newColor = Color.Lerp(color, _clockYinColor, colorTint);
-                newColor.a = colorAlpha;
-                Draw.Line(points[middleIndex - 1], points[middleIndex], newColor);
+    private void HighlighClockArms(Vector[] points, int middleIndex, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            // color tint arms
+            var colorAlpha = 0.3f;
+            var colorTint = 0.6f;
+            Draw.Thickness = 3;
 
-                newColor = Color.Lerp(color, _clockYangColor, colorTint);
-                newColor.a = colorAlpha;
-                Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
-            }
+            Color newColor = Color.Lerp(color, _clockYinColor, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[middleIndex - 1], points[middleIndex], newColor);
+
+            newColor = Color.Lerp(color, _clockYangColor, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[middleIndex + 1], points[middleIndex + 2], newColor);
+        }
+    }
+
+    private void HighlightLastLink(Vector[] points, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            var colorAlpha = 0.3f;
+            var colorTint = 0.6f;
+            Draw.Thickness = 3;
+
+            Color newColor = Color.Lerp(color, Color.red, colorTint);
+            newColor.a = colorAlpha;
+            Draw.Line(points[points.Length - 2], points[points.Length - 1], newColor);
         }
     }
 
