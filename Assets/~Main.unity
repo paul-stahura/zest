@@ -12742,7 +12742,7 @@ MonoBehaviour:
     - m_Text: Origin
       m_Image: {fileID: 21300000, guid: 24f6b76476483ee43a2c464dd6b1b3a3, type: 3}
     - m_Text: Zeta
-      m_Image: {fileID: 21300000, guid: 24f6b76476483ee43a2c464dd6b1b3a3, type: 3}
+      m_Image: {fileID: 21300000, guid: a051d3390e7c08447b80f9a0687110a2, type: 3}
     - m_Text: Symmetry
       m_Image: {fileID: 21300000, guid: df978026d6adfff4cb97877024eca2a1, type: 3}
     - m_Text: YinYang
@@ -53503,6 +53503,10 @@ MonoBehaviour:
       m_Image: {fileID: 21300000, guid: 24f6b76476483ee43a2c464dd6b1b3a3, type: 3}
     - m_Text: Ems
       m_Image: {fileID: 21300000, guid: a47957c7c1738364a92c8c08ac26c572, type: 3}
+    - m_Text: "\u03B6em"
+      m_Image: {fileID: 21300000, guid: a47957c7c1738364a92c8c08ac26c572, type: 3}
+    - m_Text: "\u03B6ps"
+      m_Image: {fileID: 21300000, guid: b14b70c4ad5b2fd45a55f92ecb863122, type: 3}
     - m_Text: Zps
       m_Image: {fileID: 21300000, guid: a051d3390e7c08447b80f9a0687110a2, type: 3}
     - m_Text: Zrs

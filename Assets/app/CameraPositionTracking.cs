@@ -24,11 +24,13 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     [SerializeField] private TMP_Dropdown _zetaTargetDropdown;
     private enum ZetaTarget
     {
-        Auto = 0,
-        Ems = 1,
-        Zps = 2,
-        Zrs = 3,
-        Eta = 4
+        Auto,
+        Ems,
+        Zem,
+        ZetaPS,
+        Zps,
+        Zrs,
+        Eta
     }
 
     [Header("Symmetry Target")]
@@ -173,6 +175,14 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 zTarget = ZetaTarget.Ems;
             }
+            else if(SpiralCalculator.UpdateZem != null && SpiralCalculator.UpdateZem.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Zem;
+            }
+            else if(SpiralCalculator.UpdateZetaPS != null && SpiralCalculator.UpdateZetaPS.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.ZetaPS;
+            }
             else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
             {
                 zTarget = ZetaTarget.Zps;
@@ -191,8 +201,12 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         {
             case ZetaTarget.Ems:
                 return _spiralCalculator.GetEms().zeta.ToVector2();
+            case ZetaTarget.Zem:
+                return _spiralCalculator.GetZem();
+            case ZetaTarget.ZetaPS:
+                return _spiralCalculator.GetZetaPS();
             case ZetaTarget.Zps:
-                return _spiralCalculator.GetZps().ToVector2();
+                return _spiralCalculator.GetZps();
             case ZetaTarget.Zrs:
                 return _spiralCalculator.GetZrs().zeta.ToVector2();
             case ZetaTarget.Eta:
@@ -213,21 +227,21 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         }
 
         SymmetryTarget sTarget = (SymmetryTarget)_symmetryTargetDropdown.value;
-        // if(sTarget == SymmetryTarget.Auto)
-        // {
-        //     if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
-        //     {
-        //         sTarget = SymmetryTarget.BisectorLink;
-        //     }
-        //     else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
-        //     {
-        //         sTarget = SymmetryTarget.SymmetryBisector;
-        //     }
-        //     else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
-        //     {
-        //         sTarget = SymmetryTarget.BpOneHalf;
-        //     }
-        // }
+        if(sTarget == SymmetryTarget.Auto)
+        {
+            if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.BisectorLink;
+            }
+            else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.BisectorLink;
+            }
+            else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.BpOneHalf;
+            }
+        }
 
         Zeta.Spiral spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
         Vector2 zeta = spiral.zeta.ToVector2();
