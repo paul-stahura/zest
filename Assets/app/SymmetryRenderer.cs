@@ -251,15 +251,13 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             Draw.Color = _forwardLegsColor;
             Draw.Thickness = 1f;
 
-            var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
             var pt = _spiralCalculator.GetForwardBisector();
+            var inversePt = _spiralCalculator.GetInverseBisector();
 
             ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.green);
-            if(numToDraw == 2) Draw.Line(pt, s.zeta.ToVector(), Color.red);
-
-            // Draw.Line(pt, pt + _spiralCalculator.GetInverseBisector(), Color.cyan);
+            if(numToDraw == 2) Draw.Line(pt, pt + inversePt, Color.red);
         }
     }
 
@@ -270,10 +268,9 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawForwardLegsZetaCircle()
     {
-        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
-        var zeta = spiral.zeta.ToVector();
-        Vector2 forwardPt = _spiralCalculator.GetForwardBisector();
-        DrawTargetCircle(forwardPt, zeta, _forwardLegsColor, Color.red);
+        var forwardPt = _spiralCalculator.GetForwardBisector();
+        var inversePt = _spiralCalculator.GetInverseBisector();
+        DrawTargetCircle(forwardPt, forwardPt + inversePt, _forwardLegsColor, Color.red);
     }
     #endregion
     #region Inverse
@@ -286,13 +283,13 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             Draw.Color = _inverseLegsColor;
             Draw.Thickness = 1f;
 
-            var s = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
             var pt = _spiralCalculator.GetInverseBisector();
+            var forwardPt = _spiralCalculator.GetForwardBisector();
 
             ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.red);
-            if(numToDraw == 2) Draw.Line(pt, s.zeta.ToVector(), Color.green);
+            if(numToDraw == 2) Draw.Line(pt, pt + forwardPt, Color.green);
         }
     }
 
@@ -501,10 +498,12 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(option == 0)
         {
             SpiralCalculator.UpdateForwardBisector -= SubForwardBisector;
+            SpiralCalculator.UpdateInverseBisector -= SubInverseBisector;
         }
         else
         {
             SpiralCalculator.UpdateForwardBisector += SubForwardBisector;
+            SpiralCalculator.UpdateInverseBisector += SubInverseBisector;
         }
     }
     private void SubForwardBisector(Vector forwardPt) {}
@@ -513,10 +512,12 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     {
         if(option == 0)
         {
+            SpiralCalculator.UpdateForwardBisector -= SubForwardBisector;
             SpiralCalculator.UpdateInverseBisector -= SubInverseBisector;
         }
         else
         {
+            SpiralCalculator.UpdateForwardBisector += SubForwardBisector;
             SpiralCalculator.UpdateInverseBisector += SubInverseBisector;
         }
     }

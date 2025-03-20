@@ -144,7 +144,7 @@ public class SpiralCalculator : MonoBehaviour
 
     public Vector GetZetaPS()
     {
-        if(_zetaPS == null) CalcZetaPS(_app.Real, _app.Index);
+        if(_zetaPS == null) CalcZetaPS();
         return _zetaPS;
     }
 
@@ -285,7 +285,7 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateZps != null) CalcZps(index);
         else _zpsPos = null;
 
-        if(UpdateZetaPS != null) CalcZetaPS(real, index);
+        if(UpdateZetaPS != null) CalcZetaPS();
         else _zetaPS = null;
 
         if(UpdateRealPath != null) CalcRealPath(index);
@@ -495,9 +495,9 @@ public class SpiralCalculator : MonoBehaviour
         UpdateZps?.Invoke(_zpsPos);
     }
 
-    private void CalcZetaPS(double real, double index)
+    private void CalcZetaPS()
     {
-        var v = RhombusPoints.GetBPForward(real, index) + RhombusPoints.GetBPInverse(real, index);
+        var v = GetForwardBisector() + GetInverseBisector();
         _zetaPS = new Vector(v.x, v.y);
         UpdateZetaPS?.Invoke(_zetaPS);
     }
