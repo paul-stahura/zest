@@ -622,7 +622,7 @@ public class Zeta
 
             Complex s = new Complex(real, imag);
             // int N = (int)Math.Sqrt(4 * Math.PI * s.Imaginary);
-            int N = (int)SpiralMiddleIndex(this.index, 0) + 2;
+            int N = (int)SpiralMiddleIndex(this.index, 0) + 2 + extendSpiralCount;
 
             numLinks = N + 1;
             joints = new Vector[numLinks];

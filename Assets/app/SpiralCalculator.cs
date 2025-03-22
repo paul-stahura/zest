@@ -12,6 +12,8 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<double> IndexChanged;
     public static Action<double> RealChanged;
 
+    public static Action<int> ExtendSpiralChanged;
+
     public static Action<Zeta.Spiral> UpdateEms;
     private Zeta.Spiral _emsSpiral;
     public static Action <Vector> UpdateZem;
@@ -83,6 +85,7 @@ public class SpiralCalculator : MonoBehaviour
         _app = GameObject.Find("App").GetComponent<App>();
         _app.IndexChanged += OnIndexChanged;
         _app.RealChanged += OnRealChanged;
+        ExtendSpiralChanged += OnExtendSpiralChanged;
     }
 
     public double GetIndex()
@@ -244,6 +247,38 @@ public class SpiralCalculator : MonoBehaviour
         RealChanged?.Invoke(real);
     }
 
+    private void OnExtendSpiralChanged(int extendSpiral)
+    {
+        if(_emsSpiral != null)
+        {
+            _emsSpiral.extendSpiralCount = extendSpiral;
+            _emsSpiral.Update(_app.Real, _app.Index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
+        }
+
+        if(_zrsSpiral != null)
+        {
+            _zrsSpiral.extendSpiralCount = extendSpiral;
+            _zrsSpiral.Update(0.5, _app.Index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
+        }
+
+        if(_etaSpiral != null)
+        {
+            _etaSpiral.extendSpiralCount = extendSpiral;
+            _etaSpiral.Update(_app.Real, _app.Index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
+        }
+
+        if(_rsInverseSumSpiral != null)
+        {
+            _rsInverseSumSpiral.extendSpiralCount = extendSpiral;
+            _rsInverseSumSpiral.Update(_app.Real, _app.Index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
+        }
+
+        if(_chiSpiral != null)
+        {
+            CalcChi(_app.Index, _app.Real);
+        }
+    }
+
     private void Calculate(double index, double real)
     {
         if(UpdateEms != null) CalcEms(real, index);
@@ -318,9 +353,15 @@ public class SpiralCalculator : MonoBehaviour
         if(_emsSpiral == null)
         {
             _emsSpiral = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
+            if(_app._extendSpiral > 0)
+            {
+                _emsSpiral.extendSpiralCount = _app._extendSpiral;
+                _emsSpiral.Update(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag); // only have to do this if the spiral starts on in the app.
+            }
         }
         else
         {
+            _emsSpiral.extendSpiralCount = _app._extendSpiral;
             _emsSpiral.Update(real, index, SpiralFormulas.EulerMaclauren, _app.usingPolyImag);
         }
         UpdateEms?.Invoke(_emsSpiral);
@@ -338,9 +379,11 @@ public class SpiralCalculator : MonoBehaviour
         if(_zrsSpiral == null)
         {
             _zrsSpiral = new Zeta.Spiral(0.5, index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
+            _zrsSpiral.extendSpiralCount = _app._extendSpiral;
         }
         else
         {
+            _zrsSpiral.extendSpiralCount = _app._extendSpiral;
             _zrsSpiral.Update(0.5, index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
         }
         UpdateZrs?.Invoke(_zrsSpiral);
@@ -351,9 +394,11 @@ public class SpiralCalculator : MonoBehaviour
         if(_etaSpiral == null)
         {
             _etaSpiral = new Zeta.Spiral(real, index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
+            _etaSpiral.extendSpiralCount = _app._extendSpiral;
         }
         else
         {
+            _etaSpiral.extendSpiralCount = _app._extendSpiral;
             _etaSpiral.Update(real, index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
         }
         UpdateEta?.Invoke(_etaSpiral);
@@ -385,9 +430,11 @@ public class SpiralCalculator : MonoBehaviour
         if(_rsInverseSumSpiral == null)
         {
             _rsInverseSumSpiral = new Zeta.Spiral(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
+            _emsSpiral.extendSpiralCount = _app._extendSpiral;
         }
         else
         {
+            _rsInverseSumSpiral.extendSpiralCount = _app._extendSpiral;
             _rsInverseSumSpiral.Update(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
         }
         UpdateRsInverseSum?.Invoke(_rsInverseSumSpiral.joints);
@@ -396,7 +443,7 @@ public class SpiralCalculator : MonoBehaviour
     private void CalcChi(double index, double real)
     {
         var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
-        _chiSpiral = Chi(s.numLinks, real, index);
+        _chiSpiral = Chi(s.numLinks + _app._extendSpiral, real, index);
         UpdateChi?.Invoke(_chiSpiral);
     }
 
