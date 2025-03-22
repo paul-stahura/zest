@@ -130,17 +130,46 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public void RemovePointSet(PointSet pointSet)
     {
-        if (!isInitialized || pointSet == null) return;
+        if (!isInitialized || pointSet == null)
+        {
+            Debug.LogWarning($"[CriticalStripRenderer] Cannot remove point set: {(pointSet == null ? "null point set" : "not initialized")}");
+            return;
+        }
         
-        if (!pointObjects.TryGetValue(pointSet, out var points)) return;
+        if (!pointObjects.TryGetValue(pointSet, out var points))
+        {
+            Debug.LogWarning($"[CriticalStripRenderer] Point set not found in pointObjects dictionary");
+            return;
+        }
+        
+        Debug.Log($"[CriticalStripRenderer] Removing point set with {points.Count} points");
         
         foreach (var point in points)
         {
             if (point != null)
-                Destroy(point.gameObject);
+            {
+                Debug.Log($"[CriticalStripRenderer] Destroying point GameObject at position {point.anchoredPosition}");
+                // Remove any hover animations
+                if (hoverAnimations.TryGetValue(point, out var coroutine))
+                {
+                    if (coroutine != null)
+                        StopCoroutine(coroutine);
+                    hoverAnimations.Remove(point);
+                }
+                isPointHovered.Remove(point);
+                
+                // Ensure the point is actually destroyed
+                DestroyImmediate(point.gameObject);
+            }
+            else
+            {
+                Debug.LogWarning("[CriticalStripRenderer] Found null point in points list");
+            }
         }
         
+        points.Clear();
         pointObjects.Remove(pointSet);
+        Debug.Log($"[CriticalStripRenderer] Point set removed. Remaining sets: {pointObjects.Count}");
     }
     
     /// <summary>
