@@ -1,25 +1,44 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+public class Point
+{
+    public Vector2 TransformedCoordinates { get; private set; }
+    public double Real { get; private set; }
+    public double Index { get; private set; }
+
+    public Point(double real, double index)
+    {
+        Real = real;
+        Index = index;
+        TransformedCoordinates = new Vector2((float)real, (float)index);
+    }
+
+    public void UpdateTransformedCoordinates(float real, float index)
+    {
+        TransformedCoordinates = new Vector2(real, index);
+    }
+}
+
 public class PointSet
 {
     public string Name { get; private set; }
     public Color Color { get; set; }
     public bool IsActive { get; set; }
     
-    private List<Vector2> points;
+    private List<Point> points;
     
     public PointSet(string name, Color color)
     {
         Name = name;
         Color = color;
         IsActive = true;
-        points = new List<Vector2>();
+        points = new List<Point>();
     }
     
-    public void AddPoint(float real, float index)
+    public void AddPoint(double real, double index)
     {
-        points.Add(new Vector2(real, index));
+        points.Add(new Point(real, index));
     }
     
     public void Clear()
@@ -27,7 +46,11 @@ public class PointSet
         points.Clear();
     }
     
-    public IReadOnlyList<Vector2> Points => points;
+    // For compatibility with existing code that expects Vector2
+    public IReadOnlyList<Vector2> Points => points.ConvertAll(p => p.TransformedCoordinates);
+    
+    // New property to access the original double-precision points
+    public IReadOnlyList<Point> OriginalPoints => points;
     
     public static PointSet FromFile(string filename)
     {
@@ -49,8 +72,8 @@ public class PointSet
         {
             var parts = lines[i].Split(',');
             if (parts.Length == 2 && 
-                float.TryParse(parts[0], out float real) && 
-                float.TryParse(parts[1], out float index))
+                double.TryParse(parts[0], out double real) && 
+                double.TryParse(parts[1], out double index))
             {
                 pointSet.AddPoint(real, index);
             }
@@ -68,7 +91,7 @@ public class PointSet
         
         foreach (var point in points)
         {
-            lines.Add($"{point.x},{point.y}");
+            lines.Add($"{point.Real},{point.Index}");
         }
         
         System.IO.File.WriteAllLines(filename, lines);

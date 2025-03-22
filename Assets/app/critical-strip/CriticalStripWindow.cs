@@ -11,11 +11,13 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private RectTransform windowContent;
     [SerializeField] private Button toggleButton;
     [SerializeField] private Button closeButton;
+    [SerializeField] private Button saveButton;
     
     private RectTransform rectTransform;
     private bool isExpanded = true;
     private float targetX;
     private float currentX;
+    private PointSetManager pointSetManager;
     
     public bool IsExpanded => isExpanded;
     public float Width => width;
@@ -23,12 +25,16 @@ public class CriticalStripWindow : MonoBehaviour
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
+        pointSetManager = FindObjectOfType<PointSetManager>();
         
         if (toggleButton != null)
             toggleButton.onClick.AddListener(Toggle);
             
         if (closeButton != null)
             closeButton.onClick.AddListener(() => SetExpanded(false));
+            
+        if (saveButton != null && pointSetManager != null)
+            saveButton.onClick.AddListener(pointSetManager.SaveCurrentPoint);
             
         // Initialize position
         currentX = isExpanded ? 0 : -width;

@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class CriticalStripTransform
 {
-    private float minIndex;
-    private float maxIndex;
+    private double minIndex;
+    private double maxIndex;
     private RectTransform viewportRect;
     
     /// <summary>
@@ -46,7 +46,11 @@ public class CriticalStripTransform
     public Vector2 StripToViewport(Vector2 stripPos)
     {
         float x = stripPos.x * viewportRect.rect.width;
-        float y = Mathf.InverseLerp(minIndex, maxIndex, stripPos.y) * viewportRect.rect.height;
+        
+        // Use double for index calculations to maintain precision
+        double normalizedY = (stripPos.y - minIndex) / (maxIndex - minIndex);
+        float y = (float)(normalizedY * viewportRect.rect.height);
+        
         // Adjust for viewport position
         x += viewportRect.rect.x;
         y += viewportRect.rect.y;
@@ -76,16 +80,17 @@ public class CriticalStripTransform
         if (distanceFromHalf <= CriticalValueThreshold)
         {
             real = 0.5f;
-            Debug.Log($"[CriticalStripTransform] CRITICAL VALUE: Snapped {normalizedX:F6} to exactly 0.5 " +
-                     $"(distance: {distanceFromHalf:F6}, threshold: {CriticalValueThreshold:F6})");
         }
         else
         {
             real = Mathf.Clamp01(normalizedX);
         }
         
-        float index = Mathf.Lerp(minIndex, maxIndex, adjustedY / viewportRect.rect.height);
-        return new Vector2(real, index);
+        // Use double for index calculations to maintain precision
+        double normalizedY = adjustedY / viewportRect.rect.height;
+        double index = minIndex + (normalizedY * (maxIndex - minIndex));
+        
+        return new Vector2(real, (float)index);
     }
     
     // Convert from screen coordinates to critical strip coordinates
@@ -116,6 +121,6 @@ public class CriticalStripTransform
         Debug.Log($"[CriticalStripTransform] Index range updated: [{minIndex}, {maxIndex}]");
     }
     
-    public float MinIndex => minIndex;
-    public float MaxIndex => maxIndex;
+    public float MinIndex => (float)minIndex;
+    public float MaxIndex => (float)maxIndex;
 } 

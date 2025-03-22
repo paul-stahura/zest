@@ -215,14 +215,56 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (app == null || !isInitialized) return;
         
+        // First check if we clicked directly on a point
+        Vector2 viewportMousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            transform.ViewportRect, 
+            eventData.position, 
+            null,
+            out viewportMousePos
+        );
+
+        float closestDist = float.MaxValue;
+        Point closestPoint = null;
+        float hoverThreshold = pointSize * hoverThresholdMultiplier;
+        
+        foreach (var kvp in pointObjects)
+        {
+            if (!kvp.Key.IsActive) continue;
+            
+            var pointSet = kvp.Key;
+            var originalPoints = pointSet.OriginalPoints;
+            var points = kvp.Value;
+            
+            for (int i = 0; i < points.Count; i++)
+            {
+                var dist = Vector2.Distance(viewportMousePos, points[i].anchoredPosition);
+                if (dist < closestDist && dist < hoverThreshold)
+                {
+                    closestDist = dist;
+                    closestPoint = originalPoints[i];
+                }
+            }
+        }
+        
+        if (closestPoint != null)
+        {
+            // Use the original double-precision coordinates
+            app.Real = closestPoint.Real;
+            app.Index = closestPoint.Index;
+            Debug.Log($"Clicked point: using original coordinates ({closestPoint.Real:G17}, {closestPoint.Index:G17})");
+            return;
+        }
+        
+        // If we didn't click on a point, use the strip coordinates from the click position
         var stripPos = transform.ScreenToStrip(eventData.position);
-        Debug.Log($"[CriticalStripRenderer] Click detected at strip position: {stripPos.x:F10}");
+        Debug.Log($"Click in empty space: using transformed coordinates ({stripPos.x:G17}, {stripPos.y:G17})");
         
         // If the click is near the critical line, use the dedicated method
         float distanceFromHalf = Mathf.Abs(stripPos.x - 0.5f);
         if (distanceFromHalf <= transform.CriticalValueThreshold)
         {
-            Debug.Log($"[CriticalStripRenderer] Click near critical line, setting to exact 0.5");
+            Debug.Log($"Click near critical line, setting to exact 0.5");
             app.SetToExactCriticalLine();
         }
         else
