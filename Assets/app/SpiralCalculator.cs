@@ -430,7 +430,7 @@ public class SpiralCalculator : MonoBehaviour
         if(_rsInverseSumSpiral == null)
         {
             _rsInverseSumSpiral = new Zeta.Spiral(real, index, SpiralFormulas.RSInverseSum, _app.usingPolyImag);
-            _emsSpiral.extendSpiralCount = _app._extendSpiral;
+            _rsInverseSumSpiral.extendSpiralCount = _app._extendSpiral;
         }
         else
         {
