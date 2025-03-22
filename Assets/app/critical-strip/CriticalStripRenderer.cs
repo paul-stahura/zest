@@ -15,7 +15,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [Header("Point Properties")]
     [SerializeField] private float pointSize = 8f;        // Base size of points in pixels
     [SerializeField] private float hoverScale = 4f;       // How much larger points become when hovered (multiplier)
-    [SerializeField] private float hoverThreshold = 0.8f; // Distance threshold for hover detection (larger = easier to hover)
+    [SerializeField] private float hoverThresholdMultiplier = 1.2f; // Multiplier of pointSize for hover detection
     [SerializeField] private float hoverAnimationDuration = 0.4f;  // Total duration of hover animation in seconds
     [SerializeField] private float overshootScale = 6f;   // Maximum scale during rubber band effect
     [SerializeField] private GameObject pointPrefab;      // Prefab used to create point objects
@@ -67,7 +67,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             if (rectTransform != null)
             {
                 Debug.Log($"[CriticalStripRenderer] Initializing transform with viewport rect: {rectTransform.rect}");
-                transform = new CriticalStripTransform(rectTransform);
+                transform = new CriticalStripTransform(rectTransform, 1f, 7f);  // Changed from default 0,7 to 1,7
                 isInitialized = true;
                 Debug.Log("[CriticalStripRenderer] Transform initialized successfully");
             }
@@ -339,9 +339,21 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (!isInitialized) return;
 
-        var stripPos = transform.ScreenToStrip(eventData.position);
+        // Convert screen position to viewport coordinates for consistent distance calculations
+        Vector2 viewportMousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            transform.ViewportRect, 
+            eventData.position, 
+            null, // No camera needed for overlay canvas
+            out viewportMousePos
+        );
+
         float closestDist = float.MaxValue;
         RectTransform newHoveredPoint = null;
+        Vector2 closestPointStripPos = Vector2.zero;
+        
+        // Calculate hover threshold in viewport coordinates
+        float hoverThreshold = pointSize * hoverThresholdMultiplier;
         
         foreach (var kvp in pointObjects)
         {
@@ -349,14 +361,14 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             
             foreach (var point in kvp.Value)
             {
-                var pointPos = transform.ViewportToStrip(point.anchoredPosition);
-                var dist = Vector2.Distance(stripPos, pointPos);
+                // Use viewport coordinates for distance calculation
+                var dist = Vector2.Distance(viewportMousePos, point.anchoredPosition);
                 
                 if (dist < closestDist && dist < hoverThreshold)
                 {
                     closestDist = dist;
                     newHoveredPoint = point;
-                    stripPos = pointPos; // Use exact point coordinates
+                    closestPointStripPos = transform.ViewportToStrip(point.anchoredPosition);
                 }
             }
         }
@@ -379,7 +391,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         
         if (coordinateDisplay != null)
         {
-            coordinateDisplay.UpdateHoverCoordinates(stripPos.x, stripPos.y);
+            Vector2 displayPos = hoveredPoint != null ? closestPointStripPos : transform.ScreenToStrip(eventData.position);
+            coordinateDisplay.UpdateHoverCoordinates(displayPos.x, displayPos.y);
         }
     }
 } 
