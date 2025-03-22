@@ -21,6 +21,8 @@ public class PointSetManager : MonoBehaviour
         renderer = GetComponentInChildren<CriticalStripRenderer>();
         app = FindObjectOfType<App>();
         
+        Debug.Log($"PointSetManager Awake - Renderer: {(renderer != null ? "Found" : "Not Found")}, App: {(app != null ? "Found" : "Not Found")}");
+        
         if (app != null)
         {
             app.RealChanged += OnRealChanged;
@@ -46,36 +48,60 @@ public class PointSetManager : MonoBehaviour
     private void EnsureUserPointsFile()
     {
         string filePath = Path.Combine(Application.persistentDataPath, userPointsFileName);
+        Debug.Log($"Ensuring user points file exists at: {filePath}");
+        
         if (!File.Exists(filePath))
         {
             File.WriteAllText(filePath, $"user_points,#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n");
+            Debug.Log("Created new user points file");
         }
     }
     
     public void LoadUserPoints()
     {
         string filePath = Path.Combine(Application.persistentDataPath, userPointsFileName);
+        Debug.Log($"Loading user points from: {filePath}");
+        
         if (File.Exists(filePath))
         {
             var pointSet = PointSet.FromFile(filePath);
             if (pointSet != null)
             {
+                Debug.Log($"Loaded point set '{pointSet.Name}' with {pointSet.Points.Count} points");
                 loadedSets.Add(pointSet);
                 if (renderer != null)
                 {
                     renderer.AddPointSet(pointSet);
+                    Debug.Log("Added point set to renderer");
+                }
+                else
+                {
+                    Debug.LogWarning("Could not add point set to renderer: renderer is null");
                 }
             }
+            else
+            {
+                Debug.LogWarning("Failed to load point set from file");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"User points file not found at: {filePath}");
         }
     }
     
     public void SaveCurrentPoint()
     {
-        if (app == null) return;
+        if (app == null)
+        {
+            Debug.LogWarning("Cannot save point: App reference is null");
+            return;
+        }
         
         string filePath = Path.Combine(Application.persistentDataPath, userPointsFileName);
-        string timestamp = DateTime.Now.ToString("yyyy-MM-dd'T'HH:mm:ss");
-        string newPoint = $"{timestamp},{app.Real},{app.Index}\n";
+        string newPoint = $"{app.Real:G17},{app.Index:G17}\n";  // Use G17 format to preserve full double precision
+        
+        Debug.Log($"Saving point at ({app.Real:G17}, {app.Index:G17}) to {filePath}");
         
         File.AppendAllText(filePath, newPoint);
         
