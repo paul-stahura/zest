@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Collections;
 using System;
+using System.Linq;
 
 /// <summary>
 /// Renders and manages interactive points in the critical strip visualization.
@@ -130,46 +131,86 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public void RemovePointSet(PointSet pointSet)
     {
+        Debug.Log($"[CriticalStripRenderer] RemovePointSet called for point set: {(pointSet != null ? pointSet.Name : "null")}");
+        Debug.Log($"[CriticalStripRenderer] Current initialization state: {isInitialized}");
+        
         if (!isInitialized || pointSet == null)
         {
             Debug.LogWarning($"[CriticalStripRenderer] Cannot remove point set: {(pointSet == null ? "null point set" : "not initialized")}");
             return;
         }
         
+        Debug.Log($"[CriticalStripRenderer] Looking up point set in dictionary. Current sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
+        
         if (!pointObjects.TryGetValue(pointSet, out var points))
         {
-            Debug.LogWarning($"[CriticalStripRenderer] Point set not found in pointObjects dictionary");
+            Debug.LogWarning($"[CriticalStripRenderer] Point set '{pointSet.Name}' not found in pointObjects dictionary");
             return;
         }
         
-        Debug.Log($"[CriticalStripRenderer] Removing point set with {points.Count} points");
+        Debug.Log($"[CriticalStripRenderer] Found {points.Count} points to remove for set '{pointSet.Name}'");
+        Debug.Log($"[CriticalStripRenderer] Parent transform is: {transform.ViewportRect.name}");
+        
+        int destroyedCount = 0;
+        int nullCount = 0;
         
         foreach (var point in points)
         {
             if (point != null)
             {
-                Debug.Log($"[CriticalStripRenderer] Destroying point GameObject at position {point.anchoredPosition}");
+                Debug.Log($"[CriticalStripRenderer] Destroying point GameObject at position {point.anchoredPosition} under parent {point.parent?.name}");
+                
                 // Remove any hover animations
                 if (hoverAnimations.TryGetValue(point, out var coroutine))
                 {
                     if (coroutine != null)
+                    {
+                        Debug.Log("[CriticalStripRenderer] Stopping hover animation coroutine");
                         StopCoroutine(coroutine);
+                    }
                     hoverAnimations.Remove(point);
                 }
                 isPointHovered.Remove(point);
                 
-                // Ensure the point is actually destroyed
-                DestroyImmediate(point.gameObject);
+                // Try both Destroy and DestroyImmediate
+                try
+                {
+                    DestroyImmediate(point.gameObject);
+                    destroyedCount++;
+                    Debug.Log("[CriticalStripRenderer] Successfully destroyed point GameObject");
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[CriticalStripRenderer] Error destroying point: {e.Message}");
+                    try
+                    {
+                        Destroy(point.gameObject);
+                        destroyedCount++;
+                        Debug.Log("[CriticalStripRenderer] Fallback to Destroy successful");
+                    }
+                    catch (Exception e2)
+                    {
+                        Debug.LogError($"[CriticalStripRenderer] Error in fallback Destroy: {e2.Message}");
+                    }
+                }
             }
             else
             {
+                nullCount++;
                 Debug.LogWarning("[CriticalStripRenderer] Found null point in points list");
             }
         }
         
+        Debug.Log($"[CriticalStripRenderer] Cleanup summary - Destroyed: {destroyedCount}, Null points: {nullCount}");
+        
         points.Clear();
         pointObjects.Remove(pointSet);
+        
         Debug.Log($"[CriticalStripRenderer] Point set removed. Remaining sets: {pointObjects.Count}");
+        if (pointObjects.Count > 0)
+        {
+            Debug.Log($"[CriticalStripRenderer] Remaining sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
+        }
     }
     
     /// <summary>

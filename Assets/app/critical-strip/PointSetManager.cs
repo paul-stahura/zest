@@ -108,11 +108,16 @@ public class PointSetManager : MonoBehaviour
     
     private void OnPointSetSelectionChanged(uint selectedIndex)
     {
+        Debug.Log($"[PointSetManager] OnPointSetSelectionChanged called with selectedIndex: {selectedIndex} (binary: {System.Convert.ToString(selectedIndex, 2).PadLeft(8, '0')})");
+        Debug.Log($"[PointSetManager] Previous value was: {previousSelectionValue} (binary: {System.Convert.ToString(previousSelectionValue, 2).PadLeft(8, '0')})");
+        Debug.Log($"[PointSetManager] Current loadedSets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
+        
         // For multi-select, selectedIndex is actually a bit field where each bit represents a selected item
         if (pointSetSelector.AllowMultiSelect)
         {
             // Calculate which bits changed
             uint changedBits = selectedIndex ^ previousSelectionValue;
+            Debug.Log($"[PointSetManager] Changed bits: {changedBits} (binary: {System.Convert.ToString(changedBits, 2).PadLeft(8, '0')})");
             
             // Process each changed bit
             uint bitMask = 1;
@@ -122,24 +127,34 @@ public class PointSetManager : MonoBehaviour
             {
                 if ((changedBits & 1) != 0)  // If this bit changed
                 {
+                    Debug.Log($"[PointSetManager] Processing changed bit at index {bitIndex}");
                     if (optionIndexToName.TryGetValue((uint)bitIndex, out string setName))
                     {
                         bool isSelected = (selectedIndex & bitMask) != 0;
-                        Debug.Log($"Point set selection changed: {setName} is now {(isSelected ? "selected" : "deselected")} (bit {bitIndex})");
+                        Debug.Log($"[PointSetManager] Point set '{setName}' is now {(isSelected ? "selected" : "deselected")} (bit {bitIndex})");
                         
-                        if (isSelected && !loadedSets.Any(s => s.Name == setName))
+                        if (isSelected && !loadedSets.Any(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase)))
                         {
+                            Debug.Log($"[PointSetManager] Loading point set: {setName}");
                             LoadPointSet(setName);
                         }
                         else if (!isSelected)
                         {
-                            var setToRemove = loadedSets.FirstOrDefault(s => s.Name == setName);
+                            var setToRemove = loadedSets.FirstOrDefault(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase));
                             if (setToRemove != null)
                             {
-                                Debug.Log($"Removing point set: {setName}");
+                                Debug.Log($"[PointSetManager] Found set to remove: {setName} in loadedSets");
                                 UnloadPointSet(setToRemove);
                             }
+                            else
+                            {
+                                Debug.LogWarning($"[PointSetManager] Set {setName} not found in loadedSets. Current sets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
+                            }
                         }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[PointSetManager] No point set name found for bit index {bitIndex}");
                     }
                 }
                 changedBits >>= 1;
@@ -148,19 +163,20 @@ public class PointSetManager : MonoBehaviour
             }
             
             previousSelectionValue = selectedIndex;
+            Debug.Log($"[PointSetManager] Updated previousSelectionValue to {selectedIndex}");
         }
         else
         {
             // Original single-select behavior
             if (!optionIndexToName.TryGetValue(selectedIndex, out string setName))
             {
-                Debug.LogWarning($"No point set name found for index {selectedIndex}");
+                Debug.LogWarning($"[PointSetManager] No point set name found for index {selectedIndex}");
                 return;
             }
             
-            Debug.Log($"Point set selection changed to: {setName}");
+            Debug.Log($"[PointSetManager] Point set selection changed to: {setName}");
             
-            bool isLoaded = loadedSets.Any(s => s.Name == setName);
+            bool isLoaded = loadedSets.Any(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase));
             bool isSelected = pointSetSelector.value == selectedIndex;
             
             if (isSelected && !isLoaded)
@@ -169,7 +185,7 @@ public class PointSetManager : MonoBehaviour
             }
             else if (!isSelected && isLoaded)
             {
-                var setToRemove = loadedSets.FirstOrDefault(s => s.Name == setName);
+                var setToRemove = loadedSets.FirstOrDefault(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase));
                 if (setToRemove != null)
                 {
                     UnloadPointSet(setToRemove);
@@ -181,50 +197,67 @@ public class PointSetManager : MonoBehaviour
     private void LoadPointSet(string setName)
     {
         string filePath = Path.Combine(pointsDirectoryPath, $"{setName}.csv");
-        Debug.Log($"Loading point set from: {filePath}");
+        Debug.Log($"[PointSetManager] Loading point set from: {filePath}");
         
         if (File.Exists(filePath))
         {
             var pointSet = PointSet.FromFile(filePath);
             if (pointSet != null)
             {
-                Debug.Log($"Loaded point set '{pointSet.Name}' with {pointSet.Points.Count} points");
+                // Ensure the name matches exactly what we're looking for
+                if (pointSet.Name != setName)
+                {
+                    Debug.Log($"[PointSetManager] Adjusting point set name from '{pointSet.Name}' to '{setName}' for consistency");
+                    pointSet = new PointSet(setName, pointSet.Color);
+                    foreach (var point in PointSet.FromFile(filePath).Points)
+                    {
+                        pointSet.AddPoint(point.x, point.y);
+                    }
+                }
+                
+                Debug.Log($"[PointSetManager] Loaded point set '{pointSet.Name}' with {pointSet.Points.Count} points");
                 loadedSets.Add(pointSet);
+                Debug.Log($"[PointSetManager] Added to loadedSets. Current sets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
+                
                 if (renderer != null)
                 {
                     renderer.AddPointSet(pointSet);
-                    Debug.Log("Added point set to renderer");
+                    Debug.Log("[PointSetManager] Added point set to renderer");
                 }
                 else
                 {
-                    Debug.LogWarning("Could not add point set to renderer: renderer is null");
+                    Debug.LogWarning("[PointSetManager] Could not add point set to renderer: renderer is null");
                 }
             }
             else
             {
-                Debug.LogWarning("Failed to load point set from file");
+                Debug.LogWarning("[PointSetManager] Failed to load point set from file");
             }
         }
         else
         {
-            Debug.LogWarning($"Point set file not found at: {filePath}");
+            Debug.LogWarning($"[PointSetManager] Point set file not found at: {filePath}");
         }
     }
     
     private void UnloadPointSet(PointSet set)
     {
-        Debug.Log($"Unloading point set: {set.Name}");
+        Debug.Log($"[PointSetManager] UnloadPointSet called for {set.Name}");
+        Debug.Log($"[PointSetManager] Current loadedSets before removal: {string.Join(", ", loadedSets.Select(s => s.Name))}");
+        Debug.Log($"[PointSetManager] Renderer is {(renderer != null ? "not null" : "null")}");
+        
         if (renderer != null)
         {
-            Debug.Log($"Calling RemovePointSet on renderer for {set.Name}");
+            Debug.Log($"[PointSetManager] Calling RemovePointSet on renderer for {set.Name}");
             renderer.RemovePointSet(set);
         }
         else
         {
-            Debug.LogWarning("Cannot unload point set: renderer is null");
+            Debug.LogWarning("[PointSetManager] Cannot unload point set: renderer is null");
         }
+        
         loadedSets.Remove(set);
-        Debug.Log($"Removed {set.Name} from loadedSets. Current count: {loadedSets.Count}");
+        Debug.Log($"[PointSetManager] Removed {set.Name} from loadedSets. Remaining sets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
     }
     
     public void SaveCurrentPoint()
