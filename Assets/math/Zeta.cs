@@ -6,7 +6,7 @@ using Complex = System.Numerics.Complex;
 using MoonSharp.Interpreter;
 using System.Drawing.Drawing2D;
 using UnityEditor;
-using SRDebugger.UI.Controls.Data;
+// using SRDebugger.UI.Controls.Data;
 using UnityEngine.UI;
 
 public class Zeta
