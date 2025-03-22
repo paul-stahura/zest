@@ -123,9 +123,44 @@ public class App : ImmediateModeShapeDrawer
                     spiral.Update(_real, Index, (SpiralFormulas)spiralFormula.value, usingPolyImag);
                 }
 
-                RealChanged?.Invoke(value);
+                RealChanged?.Invoke(_real);
             }
         }
+    }
+
+    /// <summary>
+    /// Sets the real value to exactly 0.5 and ensures all UI elements are properly reset.
+    /// This is crucial for the critical line in the Riemann hypothesis.
+    /// </summary>
+    public void SetToExactCriticalLine()
+    {
+        Debug.Log("[App] Setting to exact critical line value of 0.5");
+        
+        // Set the main slider to exactly 0.5
+        realPartSlider.value = 0.5f;
+        
+        // Reset the fine tune control
+        realPartFineTune.reset();
+        
+        // Set internal value to exactly 0.5
+        _real = 0.5d;
+        
+        // Explicitly click the reset button to ensure UI is in correct state
+        if (realPartFineTune.resetButton != null)
+        {
+            realPartFineTune.resetButton.onClick.Invoke();
+        }
+        
+        // Update the spiral
+        if (spiral != null)
+        {
+            spiral.Update(0.5d, Index, (SpiralFormulas)spiralFormula.value, usingPolyImag);
+        }
+        
+        // Notify listeners
+        RealChanged?.Invoke(0.5d);
+        
+        Debug.Log("[App] Critical line value set, all UI elements reset");
     }
 
     public override void DrawShapes(Camera cam)
