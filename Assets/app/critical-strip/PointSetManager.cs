@@ -12,7 +12,7 @@ public class PointSetManager : MonoBehaviour
     [SerializeField] private Color defaultPointColor = Color.green;
     [SerializeField] private DropdownEx pointSetSelector;  // Reference to the custom dropdown
     
-    private const string POINTS_DIRECTORY = "CriticalStripPoints";
+    private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
     private string pointsDirectoryPath;
     private List<PointSet> loadedSets = new List<PointSet>();
     private CriticalStripRenderer renderer;
@@ -52,6 +52,7 @@ public class PointSetManager : MonoBehaviour
     
     private void SetupPointsDirectory()
     {
+        Debug.Log($"Application.dataPath: {Application.dataPath}" + " " + POINTS_DIRECTORY);
         pointsDirectoryPath = Path.Combine(Application.dataPath, POINTS_DIRECTORY);
         Debug.Log($"Points directory path: {pointsDirectoryPath}");
         
