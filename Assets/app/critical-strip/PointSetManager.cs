@@ -62,10 +62,10 @@ public class PointSetManager : MonoBehaviour
             Debug.Log("Created points directory");
             
             // Create default user points file if it doesn't exist
-            string userPointsPath = Path.Combine(pointsDirectoryPath, "user_points.csv");
+            string userPointsPath = Path.Combine(pointsDirectoryPath, "favorites.csv");
             if (!File.Exists(userPointsPath))
             {
-                File.WriteAllText(userPointsPath, $"user_points,#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n");
+                File.WriteAllText(userPointsPath, $"Favorites,#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n");
                 Debug.Log("Created default user points file");
             }
         }
@@ -269,17 +269,42 @@ public class PointSetManager : MonoBehaviour
             return;
         }
         
-        string filePath = Path.Combine(pointsDirectoryPath, "user_points.csv");
+        string filePath = Path.Combine(pointsDirectoryPath, "favorites.csv");
         string newPoint = $"{app.Real:G17},{app.Index:G17}\n";  // Use G17 format to preserve full double precision
         
         Debug.Log($"Saving point at ({app.Real:G17}, {app.Index:G17}) to {filePath}");
         
         File.AppendAllText(filePath, newPoint);
         
-        // If user_points is currently selected, reload it to show the new point
-        if (loadedSets.Any(s => s.Name == "user_points"))
+        // If user_points is not currently loaded, load it
+        if (!loadedSets.Any(s => s.Name == "Favorites"))
         {
-            ReloadPointSet("user_points");
+            // Find the index of user_points in the dropdown
+            uint userPointsIndex = 0;
+            foreach (var kvp in optionIndexToName)
+            {
+                if (kvp.Value == "Favorites")
+                {
+                    userPointsIndex = kvp.Key;
+                    break;
+                }
+            }
+
+            if (pointSetSelector.AllowMultiSelect)
+            {
+                // For multi-select, set the bit for user_points
+                pointSetSelector.value |= (1u << (int)userPointsIndex);
+            }
+            else
+            {
+                // For single-select, just set the value directly
+                pointSetSelector.value = userPointsIndex;
+            }
+        }
+        else
+        {
+            // If already loaded, just reload to show the new point
+            ReloadPointSet("Favorites");
         }
     }
     
