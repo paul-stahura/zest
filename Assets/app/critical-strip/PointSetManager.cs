@@ -13,6 +13,8 @@ public class PointSetManager : MonoBehaviour
     [SerializeField] private DropdownEx pointSetSelector;  // Reference to the custom dropdown
     
     private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
+    private const string FAVORITES_FILE = "favorite-points.csv";
+    private const string FAVORITES_NAME = "Favorites";
     private string pointsDirectoryPath;
     private List<PointSet> loadedSets = new List<PointSet>();
     private CriticalStripRenderer renderer;
@@ -60,14 +62,6 @@ public class PointSetManager : MonoBehaviour
         {
             Directory.CreateDirectory(pointsDirectoryPath);
             Debug.Log("Created points directory");
-            
-            // Create default user points file if it doesn't exist
-            string userPointsPath = Path.Combine(pointsDirectoryPath, "favorites.csv");
-            if (!File.Exists(userPointsPath))
-            {
-                File.WriteAllText(userPointsPath, $"Favorites,#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n");
-                Debug.Log("Created default user points file");
-            }
         }
     }
     
@@ -76,33 +70,64 @@ public class PointSetManager : MonoBehaviour
         if (pointSetSelector == null) return;
         
         // Get all .csv files in the points directory
-        var files = Directory.GetFiles(pointsDirectoryPath, "*.csv")
-                           .Select(path => Path.GetFileNameWithoutExtension(path))
-                           .ToList();
+        var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
         
-        Debug.Log($"Found {files.Count} point set files");
+        Debug.Log($"Found {files.Length} point set files");
         
         // Clear the mapping dictionary
         optionIndexToName.Clear();
         
         // Update dropdown options
         var options = new List<DropdownEx.OptionData>();
-        for (uint i = 0; i < files.Count; i++)
+        uint index = 0;
+        
+        foreach (var filePath in files)
         {
-            options.Add(new DropdownEx.OptionData(files[(int)i]));  // Use constructor instead of property
-            optionIndexToName[i] = files[(int)i];
+            string displayName = Path.GetFileNameWithoutExtension(filePath); // Default to filename
+            
+            // Try to read the name from the first line of the file
+            try
+            {
+                using (var reader = new StreamReader(filePath))
+                {
+                    string firstLine = reader.ReadLine();
+                    if (!string.IsNullOrEmpty(firstLine))
+                    {
+                        // The name is everything before the first comma
+                        int commaIndex = firstLine.IndexOf(',');
+                        if (commaIndex > 0)
+                        {
+                            displayName = firstLine.Substring(0, commaIndex);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"Failed to read name from file {filePath}: {e.Message}");
+                // Keep using filename as fallback
+            }
+            
+            options.Add(new DropdownEx.OptionData(displayName));
+            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath); // Keep using filename for internal mapping
+            index++;
         }
         
         pointSetSelector.ClearOptions();
         pointSetSelector.AddOptions(options);
         
-        // Set default selection to user_points if it exists, but don't load it
-        if (files.Contains("user_points"))
+        // Set default selection to Favorites if it exists, but don't load it
+        if (files.Any(f => Path.GetFileName(f) == FAVORITES_FILE))
         {
-            uint userPointsIndex = (uint)files.IndexOf("user_points");
-            if (optionIndexToName.ContainsKey(userPointsIndex))
+            uint favoritesIndex = 0;
+            foreach (var kvp in optionIndexToName)
             {
-                pointSetSelector.value = userPointsIndex;
+                if (kvp.Value == Path.GetFileNameWithoutExtension(FAVORITES_FILE))
+                {
+                    favoritesIndex = kvp.Key;
+                    pointSetSelector.value = favoritesIndex;
+                    break;
+                }
             }
         }
     }
@@ -269,42 +294,79 @@ public class PointSetManager : MonoBehaviour
             return;
         }
         
-        string filePath = Path.Combine(pointsDirectoryPath, "favorites.csv");
+        string filePath = Path.Combine(pointsDirectoryPath, FAVORITES_FILE);
+        bool isNewFile = !File.Exists(filePath);
+        
+        // If this is the first save, create the file with header
+        if (isNewFile)
+        {
+            string header = $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n";
+            File.WriteAllText(filePath, header);
+            // Refresh the dropdown to include the new file
+            RefreshPointSetList();
+        }
+        
         string newPoint = $"{app.Real:G17},{app.Index:G17}\n";  // Use G17 format to preserve full double precision
-        
         Debug.Log($"Saving point at ({app.Real:G17}, {app.Index:G17}) to {filePath}");
-        
         File.AppendAllText(filePath, newPoint);
         
-        // If user_points is not currently loaded, load it
-        if (!loadedSets.Any(s => s.Name == "Favorites"))
+        // Always ensure Favorites is loaded and displayed after saving
+        if (!loadedSets.Any(s => s.Name == FAVORITES_NAME))
         {
-            // Find the index of user_points in the dropdown
-            uint userPointsIndex = 0;
+            // Find the index of Favorites in the dropdown
+            uint favoritesIndex = 0;
+            bool found = false;
             foreach (var kvp in optionIndexToName)
             {
-                if (kvp.Value == "Favorites")
+                if (kvp.Value == Path.GetFileNameWithoutExtension(FAVORITES_FILE))
                 {
-                    userPointsIndex = kvp.Key;
+                    favoritesIndex = kvp.Key;
+                    found = true;
                     break;
                 }
             }
 
-            if (pointSetSelector.AllowMultiSelect)
+            if (!found && isNewFile)
             {
-                // For multi-select, set the bit for user_points
-                pointSetSelector.value |= (1u << (int)userPointsIndex);
+                // If we just created the file and didn't find it in the options,
+                // refresh the list and try again
+                RefreshPointSetList();
+                foreach (var kvp in optionIndexToName)
+                {
+                    if (kvp.Value == Path.GetFileNameWithoutExtension(FAVORITES_FILE))
+                    {
+                        favoritesIndex = kvp.Key;
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (found)
+            {
+                if (pointSetSelector.AllowMultiSelect)
+                {
+                    // For multi-select, set the bit for favorites
+                    pointSetSelector.value |= (1u << (int)favoritesIndex);
+                }
+                else
+                {
+                    // For single-select, just set the value directly
+                    pointSetSelector.value = favoritesIndex;
+                }
+                
+                // Explicitly load the point set since it's not loaded
+                LoadPointSet(Path.GetFileNameWithoutExtension(FAVORITES_FILE));
             }
             else
             {
-                // For single-select, just set the value directly
-                pointSetSelector.value = userPointsIndex;
+                Debug.LogWarning($"Could not find {FAVORITES_NAME} in dropdown options after save");
             }
         }
         else
         {
             // If already loaded, just reload to show the new point
-            ReloadPointSet("Favorites");
+            ReloadPointSet(FAVORITES_NAME);
         }
     }
     

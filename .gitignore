@@ -50,4 +50,5 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
-user-points.csv
+favorite-points.csv
+favorite-points.csv.meta
