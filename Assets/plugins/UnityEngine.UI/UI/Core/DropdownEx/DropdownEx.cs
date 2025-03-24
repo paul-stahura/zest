@@ -1016,7 +1016,7 @@ namespace UnityEngine.UI
             sizeDelta.y = itemSize.y * m_Items.Count + offsetMin.y - offsetMax.y;
             contentRectTransform.sizeDelta = sizeDelta;
 
-            float extraSpace = dropdownRectTransform.rect.height - contentRectTransform.rect.height;
+            float extraSpace = dropdownRectTransform.rect.height - contentRectTransform.rect.height - 15;
             if (extraSpace > 0)
                 dropdownRectTransform.sizeDelta = new Vector2(dropdownRectTransform.sizeDelta.x, dropdownRectTransform.sizeDelta.y - extraSpace);
 
