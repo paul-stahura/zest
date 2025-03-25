@@ -24130,7 +24130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccfb6f5262c6b417ab6310036733b3e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointSize: 4
+  pointSize: 8
   hoverScale: 2
   hoverThresholdMultiplier: 1.2
   hoverAnimationDuration: 0.4
@@ -24138,6 +24138,10 @@ MonoBehaviour:
   pointPrefab: {fileID: 4212848612960195213, guid: d55772ee7cf6c46c78e4c01436393417,
     type: 3}
   coordinateDisplay: {fileID: 2103575231}
+  currentPosSize: 10
+  blinkRate: 0.5
+  indicatorColor: {r: 1, g: 0, b: 1, a: 0.33333334}
+  app: {fileID: 338235377}
 --- !u!114 &611687704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26643,7 +26647,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &694639113
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26659,6 +26663,32 @@ MonoBehaviour:
   useCullingMasks: 0
   _spiralCalculator: {fileID: 1539929575}
   _symmetryColor: {r: 1, g: 0, b: 0, a: 0}
+  _showDebugVisuals: 0
+  _fixedIndex: 5.1085615
+  _intersectionThreshold: 0.001
+  _validationThreshold: 0.005
+  _initialDivisions: 200
+  _minStepSize: 0.000001
+  _baseStepSizeDivisor: 100
+  _maxIterations: 1000
+  _midRegionStepDivisor: 4
+  _lateRegionStepDivisor: 8
+  _stepSizeIncreaseRate: 1.2
+  _requiredConsecutiveIncreases: 5
+  _minimumStepReduction: 8
+  _minimumDistanceThresholdMultiplier: 100
+  _minimumSeparationDivisor: 100
+  _significantMinimumRatio: 0.98
+  _drawPoints: 100
+  _markerHeight: 0.2
+  _intersectionPointRadius: 0.05
+  _path1Color: {r: 1, g: 0, b: 0, a: 1}
+  _path2Color: {r: 0, g: 0, b: 1, a: 1}
+  _intersectionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _minimumColor: {r: 0, g: 1, b: 0, a: 0.8}
+  _innerThresholdColor: {r: 1, g: 1, b: 0, a: 0.8}
+  _outerThresholdColor: {r: 1, g: 0.5, b: 0, a: 0.8}
+  _searchResolution: 1000
 --- !u!4 &694639114
 Transform:
   m_ObjectHideFlags: 0
@@ -41907,7 +41937,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1050236589
 RectTransform:
   m_ObjectHideFlags: 0
@@ -41925,7 +41955,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -20, y: 0}
+  m_AnchoredPosition: {x: 259, y: 510.7}
   m_SizeDelta: {x: 20, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1050236590
@@ -41941,7 +41971,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.3372549}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.16078432}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
