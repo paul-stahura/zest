@@ -145,6 +145,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             CreatePointObject(point, pointSet.Color, points);
         }
+
+        // Keep the indicator on top after adding new points
+        if (currentPosIndicator != null)
+        {
+            currentPosIndicator.SetAsLastSibling();
+        }
     }
     
     /// <summary>
@@ -546,6 +552,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             currentPosIndicator.sizeDelta = new Vector2(currentPosSize, currentPosSize);
             image.color = indicatorColor;
+            // Ensure the indicator is rendered on top of all other points
+            currentPosIndicator.SetAsLastSibling();
             UpdateCurrentPosIndicator();
         }
         else
