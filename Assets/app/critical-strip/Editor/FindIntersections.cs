@@ -180,17 +180,18 @@ public static class FindIntersections
     private static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("real,index");
+        csv.AppendLine("Pseudo Zeros,#8800FF");
         
         foreach (var (real, index, _) in intersections)
         {
             csv.AppendLine($"{real:F15},{index:F15}");
         }
         
-        string path = "Assets/Resources/intersections.csv";
+        string path = "Assets/Resources/CriticalStripPoints/intersections.csv";
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
+        Debug.Log($"[FindIntersections] Saved intersections to {path}");
     }
 
     [MenuItem("Critical Strip/Test Known values for intersection")]
