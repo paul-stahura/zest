@@ -50,5 +50,7 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
+
+# Critical Strip Points
 favorite-points.csv
 favorite-points.csv.meta
