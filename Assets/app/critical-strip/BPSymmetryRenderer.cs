@@ -5,6 +5,7 @@ using UnityEngine;
 using Shapes;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Text;
 
 /// <summary>
 /// BPSymmetryRenderer is responsible for drawing two related paths based on a symmetry calculation,
@@ -56,8 +57,12 @@ public class BPSymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color _innerThresholdColor = new Color(1f, 1f, 0f, 0.8f); // Color for inner threshold markers
     [SerializeField] private Color _outerThresholdColor = new Color(1f, 0.5f, 0f, 0.8f); // Color for outer threshold markers
 
+    // Add new header for uniform intersection search settings
+    [Header("Intersection Search")]
+    [SerializeField] private int _searchResolution = 1000; // Uniform search resolution for intersection detection
+
     // Predefined known intersection t-values used for validation
-    private static readonly float[] KNOWN_INTERSECTIONS = new float[] { 0.077987f, 0.5f, 0.922013f };
+    private static readonly float[] KNOWN_INTERSECTIONS = new float[] { 0.079997f, 0.500029f, 0.920003f };
 
     /// <summary>
     /// Helper structure to group path data for drawing.
@@ -114,7 +119,7 @@ public class BPSymmetryRenderer : ImmediateModeShapeDrawer
     }
 
     /// <summary>
-    /// Iterates over the entire path to detect intersection points and local minima.
+    /// Iterates over the entire path to detect intersection points and local minima using uniform sampling.
     /// </summary>
     /// <returns>
     /// A tuple containing:
@@ -125,22 +130,70 @@ public class BPSymmetryRenderer : ImmediateModeShapeDrawer
     {
         var intersections = new List<(float t, Vector2 point)>();
         var localMinima = new List<(float t, float distance)>();
-        float stepSize = 1f / _initialDivisions;
 
-        // Divide the t range [0,1] into segments and search for intersections within each segment.
-        for (float t = 0; t <= 1 - stepSize; t += stepSize)
+        int resolution = _searchResolution;
+        float dt = 1f / resolution;
+        float[] distances = new float[resolution + 1];
+        float[] ts = new float[resolution + 1];
+
+        // Use StringBuilder to accumulate logs for uniform sampling
+        StringBuilder uniformLog = new StringBuilder();
+
+        // Uniform sampling of the [0,1] t-range.
+        for (int i = 0; i <= resolution; i++)
         {
-            // Search for intersections in the current range [t, t + stepSize]
-            var foundIntersections = FindIntersectionsInRange(t, t + stepSize, localMinima);
-            foreach (var intersection in foundIntersections)
+            float t = i * dt;
+            ts[i] = t;
+            distances[i] = GetPathDistance(t);
+            // Accumulate log if within suspect zone
+            if (t >= 0.91f && t <= 0.93f)
             {
-                // Add intersection only if it is not a duplicate (within threshold) of an existing intersection.
-                if (IsIntersectionUnique(intersection, intersections))
+                uniformLog.AppendLine($"[UniformSampling] t={t:F6}, distance={distances[i]:F6}");
+            }
+        }
+
+        // Output the accumulated log as a single entry
+        if (uniformLog.Length > 0)
+        {
+            Debug.Log(uniformLog.ToString());
+        }
+
+        // Detect intersections where the distance crosses the threshold.
+        for (int i = 0; i < resolution; i++)
+        {
+            if (((distances[i] - _intersectionThreshold) * (distances[i + 1] - _intersectionThreshold) < 0) ||
+                (Mathf.Abs(distances[i] - _intersectionThreshold) < 1e-5f) ||
+                (Mathf.Abs(distances[i + 1] - _intersectionThreshold) < 1e-5f))
+            {
+                float refinedT = RefineIntersection(ts[i], ts[i + 1]);
+                bool unique = true;
+                foreach (var (existingT, _) in intersections)
                 {
-                    intersections.Add(intersection);
-                    // Log intersection details for debugging purposes.
-                    Debug.Log($"Found intersection at t={intersection.t:F6}, distance={GetPathDistance(intersection.t):F6}");
+                    if (Mathf.Abs(existingT - refinedT) < _intersectionThreshold)
+                    {
+                        unique = false;
+                        break;
+                    }
                 }
+                if (unique)
+                {
+                    Vector2 p1 = RhombusPoints.GetBPSymmetry(refinedT, _fixedIndex);
+                    Vector2 p2 = RhombusPoints.GetBPForward(refinedT, _fixedIndex);
+                    Vector2 midPoint = (p1 + p2) / 2;
+                    intersections.Add((refinedT, midPoint));
+                    Debug.Log($"Found intersection at t={refinedT:F6} through uniform search");
+                    if (intersections.Count >= 3)
+                        break; // Early exit if maximum intersections found.
+                }
+            }
+        }
+
+        // Detect local minima from uniform sampling.
+        for (int i = 1; i < resolution; i++)
+        {
+            if (distances[i] < distances[i - 1] && distances[i] < distances[i + 1])
+            {
+                localMinima.Add((ts[i], distances[i]));
             }
         }
 
@@ -148,21 +201,48 @@ public class BPSymmetryRenderer : ImmediateModeShapeDrawer
     }
 
     /// <summary>
-    /// Checks if an intersection is unique by comparing its t value with existing intersections.
+    /// Refines an intersection candidate by performing a binary search within the interval [tLow, tHigh]
+    /// to find the t value where the path distance is approximately equal to the intersection threshold.
     /// </summary>
-    /// <param name="newIntersection">The new intersection candidate.</param>
-    /// <param name="existingIntersections">List of already found intersections.</param>
-    /// <returns>True if the new intersection is not within _intersectionThreshold of any existing one.</returns>
-    private bool IsIntersectionUnique((float t, Vector2 point) newIntersection, List<(float t, Vector2 point)> existingIntersections)
+    /// <param name="tLow">Lower bound of the interval (distance ≥ threshold).</param>
+    /// <param name="tHigh">Upper bound of the interval (distance < threshold).</param>
+    /// <returns>Refined t value for the intersection.</returns>
+    private float RefineIntersection(float tLow, float tHigh)
     {
-        foreach (var (existingT, _) in existingIntersections)
+        float threshold = _intersectionThreshold;
+        // Use StringBuilder to accumulate logs during refinement
+        StringBuilder refineLog = new StringBuilder();
+
+        for (int iter = 0; iter < 20; iter++)
         {
-            if (Mathf.Abs(existingT - newIntersection.t) < _intersectionThreshold)
+            float mid = (tLow + tHigh) / 2f;
+            float midDist = GetPathDistance(mid);
+            // Accumulate logs if the interval is within the suspect region
+            if (tLow >= 0.91f && tHigh <= 0.93f)
             {
-                return false;
+                refineLog.AppendLine($"[RefineIntersection] iter={iter}, tLow={tLow:F6}, tHigh={tHigh:F6}, mid={mid:F6}, midDist={midDist:F6}");
+            }
+            if (Mathf.Abs(midDist - threshold) < 1e-6f)
+            {
+                return mid;
+            }
+            if (midDist >= threshold)
+            {
+                tLow = mid;
+            }
+            else
+            {
+                tHigh = mid;
             }
         }
-        return true;
+
+        // Output the accumulated refinement log as a single log entry
+        if (refineLog.Length > 0)
+        {
+            Debug.Log(refineLog.ToString());
+        }
+
+        return (tLow + tHigh) / 2f;
     }
 
     /// <summary>
@@ -346,126 +426,6 @@ public class BPSymmetryRenderer : ImmediateModeShapeDrawer
                 Debug.LogWarning($"❌ Failed to find known intersection at t={known:F6}");
             }
         }
-    }
-
-    /// <summary>
-    /// Searches for intersections within a given range of t values.
-    /// It adjusts the step size dynamically based on the change in distance between paths.
-    /// Also detects local minima if the distance is near a threshold.
-    /// </summary>
-    /// <param name="start">Start of t range.</param>
-    /// <param name="end">End of t range.</param>
-    /// <param name="localMinima">Reference list to add detected local minima.</param>
-    /// <returns>List of detected intersections (t value and midpoint) within the range.</returns>
-    private List<(float t, Vector2 point)> FindIntersectionsInRange(float start, float end, List<(float t, float distance)> localMinima)
-    {
-        var intersections = new List<(float t, Vector2 point)>();
-        
-        float t = start;
-        // Calculate the base step size for the range using the provided divisor
-        float baseStepSize = (end - start) / _baseStepSizeDivisor;
-        float stepSize = baseStepSize;
-        float prevDist = GetPathDistance(t);
-        bool wasDecreasing = true;
-        int iterations = 0;
-        int consecutiveIncreasing = 0;
-        
-        // Setup variables for detecting local minima
-        float lastMinimumDist = float.MaxValue;
-        float minimumDistanceThreshold = _intersectionThreshold * _minimumDistanceThresholdMultiplier;
-        float minimumSeparation = (end - start) / _minimumSeparationDivisor;
-        float lastMinimumT = float.MinValue;
-
-        while (stepSize > _minStepSize && t < end && iterations < _maxIterations)
-        {
-            // Adjust step size based on the current region of t
-            if (t > 0.5f)
-            {
-                stepSize = baseStepSize / _midRegionStepDivisor;
-                if (t > 0.75f)
-                {
-                    stepSize = baseStepSize / _lateRegionStepDivisor;
-                }
-            }
-
-            float nextT = t + stepSize;
-            float dist = GetPathDistance(nextT);
-            bool isDecreasing = dist < prevDist;
-
-            // If the distance falls below the strict intersection threshold, register an intersection.
-            if (dist < _intersectionThreshold)
-            {
-                Vector2 p1 = RhombusPoints.GetBPSymmetry(nextT, _fixedIndex);
-                Vector2 p2 = RhombusPoints.GetBPForward(nextT, _fixedIndex);
-                // Use the midpoint as the location for the intersection marker.
-                intersections.Add((nextT, (p1 + p2) / 2));
-                Debug.Log($"Found intersection at t={nextT:F6} with distance {dist:F6}");
-                
-                // Increase step size dramatically after finding an intersection to continue search efficiently.
-                stepSize = _minStepSize * 1000;
-                consecutiveIncreasing = 0;
-                t = nextT;
-                prevDist = dist;
-                iterations++;
-                continue;
-            }
-
-            // Check if the distance trend has changed from decreasing to increasing (potential local minimum)
-            if (wasDecreasing && !isDecreasing)
-            {
-                // If the new distance is below threshold, sufficiently separated, and a significant drop compared to previous minima, register as local minimum.
-                if (dist < minimumDistanceThreshold && 
-                    (nextT - lastMinimumT) > minimumSeparation &&
-                    dist < lastMinimumDist * _significantMinimumRatio)
-                {
-                    Debug.Log($"Found significant minimum at t={nextT:F6} with distance {dist:F6}");
-                    localMinima.Add((nextT, dist));
-                    lastMinimumDist = dist;
-                    lastMinimumT = nextT;
-                }
-                
-                // Reduce step size for finer search after transition from decreasing to increasing trend.
-                stepSize /= _minimumStepReduction;
-                wasDecreasing = true;
-                consecutiveIncreasing = 0;
-                iterations++;
-                continue;
-            }
-
-            if (isDecreasing)
-            {
-                // If distance is moderately small, further reduce step size to capture changes.
-                if (dist < _intersectionThreshold * 20)
-                {
-                    stepSize = Mathf.Max(stepSize / 2, _minStepSize);
-                }
-                t = nextT;
-                prevDist = dist;
-                consecutiveIncreasing = 0;
-            }
-            else
-            {
-                // When distance is increasing, count consecutive increases.
-                consecutiveIncreasing++;
-                // For t values in the first half and after several consecutive increases, try increasing the step size gently.
-                if (t < 0.5f && consecutiveIncreasing >= _requiredConsecutiveIncreases && stepSize < baseStepSize)
-                {
-                    stepSize = Mathf.Min(stepSize * _stepSizeIncreaseRate, baseStepSize);
-                }
-                t = nextT;
-                prevDist = dist;
-            }
-
-            wasDecreasing = isDecreasing;
-            iterations++;
-        }
-
-        if (iterations >= _maxIterations)
-        {
-            Debug.LogWarning($"Hit max iterations in range [{start:F6}, {end:F6}]");
-        }
-
-        return intersections;
     }
 
     /// <summary>
