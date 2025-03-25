@@ -14,7 +14,7 @@ using System.Linq;
 public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
 {
     [Header("Point Properties")]
-    [SerializeField] private float pointSize = 8f;        // Base size of points in pixels
+    [SerializeField] private float pointSize = 100f;        // Base size of points in pixels
     [SerializeField] private float hoverScale = 4f;       // How much larger points become when hovered (multiplier)
     [SerializeField] private float hoverThresholdMultiplier = 1.2f; // Multiplier of pointSize for hover detection
     [SerializeField] private float hoverAnimationDuration = 0.4f;  // Total duration of hover animation in seconds
