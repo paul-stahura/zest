@@ -24,11 +24,16 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [Header("References")]
     [SerializeField] private CoordinateDisplay coordinateDisplay;  // UI component to show point coordinates
     
+    [Header("Current Position Indicator")]
+    [SerializeField] private float currentPosSize = 150f;        // Size of the current position indicator
+    [SerializeField] private float blinkRate = 0.5f;            // How fast the indicator blinks (in seconds)
+    [SerializeField] private Color indicatorColor = new Color(1f, 0f, 1f, 1f); // Fuchsia color
+    
     // Core components
     private CriticalStripTransform transform;  // Handles coordinate transformations between strip and viewport
     private Dictionary<PointSet, List<RectTransform>> pointObjects;  // Maps point sets to their UI representations
     private RectTransform hoveredPoint;  // Currently hovered point, if any
-    private App app;  // Reference to main app for updating selected coordinates
+    [SerializeField] private App app;  // Reference to main app for updating selected coordinates
     private Queue<PointSet> pendingPointSets = new Queue<PointSet>();  // Points waiting to be added after initialization
     private bool isInitialized = false;  // Whether the renderer is ready to display points
     
@@ -36,10 +41,20 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private Dictionary<RectTransform, Coroutine> hoverAnimations = new Dictionary<RectTransform, Coroutine>();  // Active hover animations
     private Dictionary<RectTransform, bool> isPointHovered = new Dictionary<RectTransform, bool>();  // Hover state of each point
 
+    private RectTransform currentPosIndicator;    // The UI element for current position
+    private float blinkTimer;                     // Timer for blinking animation
+    private bool isVisible = true;                // Current visibility state
+
     private void Awake()
     {
         pointObjects = new Dictionary<PointSet, List<RectTransform>>();
         app = FindObjectOfType<App>();
+        
+        if (app != null)
+        {
+            app.IndexChanged += OnIndexChanged;
+            app.RealChanged += OnRealChanged;
+        }
     }
 
     /// <summary>
@@ -48,6 +63,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private void Start()
     {
         InitializeTransform();
+        
+        // Initialize the current position indicator after transform is ready
+        if (isInitialized && app != null)
+        {
+            InitializeCurrentPosIndicator();
+        }
         
         // Process any point sets that were added before initialization
         while (pendingPointSets.Count > 0)
@@ -505,6 +526,74 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             Vector2 displayPos = hoveredPoint != null ? closestPointStripPos : transform.ScreenToStrip(eventData.position);
             coordinateDisplay.UpdateHoverCoordinates(displayPos.x, displayPos.y);
+        }
+    }
+
+    private void InitializeCurrentPosIndicator()
+    {
+        if (!isInitialized || transform == null || transform.ViewportRect == null)
+        {
+            Debug.LogError("CriticalStripRenderer: Cannot initialize position indicator before transform is ready");
+            return;
+        }
+
+        // Create the indicator point
+        var obj = Instantiate(pointPrefab, Vector2.zero, Quaternion.identity, transform.ViewportRect);
+        currentPosIndicator = obj.GetComponent<RectTransform>();
+        var image = obj.GetComponent<Image>();
+        
+        if (currentPosIndicator != null && image != null)
+        {
+            currentPosIndicator.sizeDelta = new Vector2(currentPosSize, currentPosSize);
+            image.color = indicatorColor;
+            UpdateCurrentPosIndicator();
+        }
+        else
+        {
+            Debug.LogError("CriticalStripRenderer: Failed to initialize position indicator components");
+        }
+    }
+
+    private void OnIndexChanged(double index)
+    {
+        UpdateCurrentPosIndicator();
+    }
+
+    private void OnRealChanged(double real)
+    {
+        UpdateCurrentPosIndicator();
+    }
+
+    private void UpdateCurrentPosIndicator()
+    {
+        if (!isInitialized || currentPosIndicator == null || app == null) return;
+        
+        Vector2 stripPos = new Vector2((float)app.Real, (float)app.Index);
+        Vector2 viewportPos = transform.StripToViewport(stripPos);
+        currentPosIndicator.anchoredPosition = viewportPos;
+    }
+
+    private void Update()
+    {
+        if (currentPosIndicator != null)
+        {
+            // Update blink animation
+            blinkTimer += Time.deltaTime;
+            if (blinkTimer >= blinkRate)
+            {
+                blinkTimer = 0f;
+                isVisible = !isVisible;
+                currentPosIndicator.gameObject.SetActive(isVisible);
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (app != null)
+        {
+            app.IndexChanged -= OnIndexChanged;
+            app.RealChanged -= OnRealChanged;
         }
     }
 } 
