@@ -24138,9 +24138,9 @@ MonoBehaviour:
   pointPrefab: {fileID: 4212848612960195213, guid: d55772ee7cf6c46c78e4c01436393417,
     type: 3}
   coordinateDisplay: {fileID: 2103575231}
-  currentPosSize: 10
+  currentPosSize: 8
   blinkRate: 0.5
-  indicatorColor: {r: 1, g: 0, b: 1, a: 0.33333334}
+  indicatorColor: {r: 1, g: 0, b: 1, a: 0.8}
   app: {fileID: 338235377}
 --- !u!114 &611687704
 MonoBehaviour:

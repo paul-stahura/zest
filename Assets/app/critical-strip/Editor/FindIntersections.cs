@@ -23,8 +23,8 @@ using System.Text;
 
 public static class FindIntersections
 {
-    private const double MIN_INDEX = 5.0;
-    private const double MAX_INDEX = 6.0;
+    private const double MIN_INDEX = 1.0;
+    private const double MAX_INDEX = 7.0;
     private const double INDEX_STEP = 0.01;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
