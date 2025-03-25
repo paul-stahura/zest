@@ -23,7 +23,7 @@ using System.Text;
 
 public static class FindIntersections
 {
-    private const double MIN_INDEX = 4.0;
+    private const double MIN_INDEX = 5.0;
     private const double MAX_INDEX = 6.0;
     private const double INDEX_STEP = 0.01;
     
@@ -39,7 +39,7 @@ public static class FindIntersections
         
         // First check the known critical value with high resolution
         Debug.Log($"Checking critical index value: {CRITICAL_INDEX:F15}");
-        FindIntersectionsForIndex(CRITICAL_INDEX, intersectionData);
+        FindIntersectionsUniformForIndex(CRITICAL_INDEX, intersectionData);
         
         // Then check the range with regular steps
         int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
@@ -63,7 +63,7 @@ public static class FindIntersections
                 return;
             }
 
-            FindIntersectionsForIndex(index, intersectionData);
+            FindIntersectionsUniformForIndex(index, intersectionData);
             currentStep++;
         }
 
@@ -311,60 +311,79 @@ public static class FindIntersections
     [MenuItem("Critical Strip/Test Exact Intersection")]
     public static void TestExactIntersection()
     {
-        // Known intersection values to test (using the updated known values from the renderer)
-        double[] knownValues = { 0.079987, 0.500029, 0.920013 };
-        // Epsilon for sampling around best t - increased from 1e-6 to 1e-5 for better line segment conditioning
-        double epsilon = 1e-5;
-        // Fine scan parameters for zeroing in
-        double fineScanRange = 0.00001;      // ±0.00001 around the known value
-        double fineStep = 0.00000001;        // Fine step size: 1e-8
-
+        var intersectionData = new List<(double real, double index, Vector2 point)>();
+        FindIntersectionsUniformForIndex(CRITICAL_INDEX, intersectionData);
+        
         var log = new StringBuilder();
-        log.AppendLine("=== Exact Intersection Analysis ===");
+        log.AppendLine("=== Exact Intersection Analysis (Uniform Method) ===");
         log.AppendLine($"Critical Index: {CRITICAL_INDEX:F15}");
-        log.AppendLine();
-
-        foreach (double knownT in knownValues)
+        log.AppendLine($"Found {intersectionData.Count} intersections.");
+        foreach (var (t, idx, pt) in intersectionData)
         {
-            // Fine scan: densely sample around the known value to find the best t value
-            double bestT = knownT;
-            double minDist = double.MaxValue;
-            for (double t = knownT - fineScanRange; t <= knownT + fineScanRange; t += fineStep)
-            {
-                Vector2 sp = RhombusPoints.GetBPSymmetry((float)t, (float)CRITICAL_INDEX);
-                Vector2 fp = RhombusPoints.GetBPForward((float)t, (float)CRITICAL_INDEX);
-                double d = Vector2.Distance(sp, fp);
-                if (d < minDist)
-                {
-                    minDist = d;
-                    bestT = t;
-                }
-            }
-            
-            // Using a larger epsilon, get two points from each function around bestT
-            Vector2 symmetryPoint1 = RhombusPoints.GetBPSymmetry((float)(bestT - epsilon), (float)CRITICAL_INDEX);
-            Vector2 symmetryPoint2 = RhombusPoints.GetBPSymmetry((float)(bestT + epsilon), (float)CRITICAL_INDEX);
-            Vector2 forwardPoint1 = RhombusPoints.GetBPForward((float)(bestT - epsilon), (float)CRITICAL_INDEX);
-            Vector2 forwardPoint2 = RhombusPoints.GetBPForward((float)(bestT + epsilon), (float)CRITICAL_INDEX);
-            
-            // Compute line intersection between the line segments defined by these points
-            Vector2 intersectionPoint;
-            bool intersected = TryGetLineIntersection(symmetryPoint1, symmetryPoint2, forwardPoint1, forwardPoint2, out intersectionPoint);
-            
-            log.AppendLine($"For known t = {knownT:F15}:");
-            log.AppendLine($"Best t found = {bestT:F15} with minimal distance = {minDist:E15}");
-            log.AppendLine($"Symmetry points: ({symmetryPoint1.x:F6}, {symmetryPoint1.y:F6}) to ({symmetryPoint2.x:F6}, {symmetryPoint2.y:F6})");
-            log.AppendLine($"Forward points:  ({forwardPoint1.x:F6}, {forwardPoint1.y:F6}) to ({forwardPoint2.x:F6}, {forwardPoint2.y:F6})");
-            if (intersected)
-            {
-                log.AppendLine($"Exact intersection computed at: ({intersectionPoint.x:F6}, {intersectionPoint.y:F6})");
-            }
-            else
-            {
-                log.AppendLine("Line segments did not intersect in the approximate linear region.");
-            }
-            log.AppendLine();
+            log.AppendLine($"Intersection: t = {t:F15}, index = {idx:F15}, point = ({pt.x:F6}, {pt.y:F6})");
         }
         Debug.LogWarning(log.ToString());
+        SaveToCSV(intersectionData);
+    }
+
+    private static void FindIntersectionsUniformForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
+    {
+        const int resolution = 1000;
+        const float INTERSECTION_THRESHOLD = 0.001f;
+        double dt = 1.0 / resolution;
+        double[] distances = new double[resolution + 1];
+        double[] ts = new double[resolution + 1];
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            double t = i * dt;
+            ts[i] = t;
+            Vector2 sp = RhombusPoints.GetBPSymmetry((float)t, (float)index);
+            Vector2 fp = RhombusPoints.GetBPForward((float)t, (float)index);
+            distances[i] = Vector2.Distance(sp, fp);
+        }
+
+        for (int i = 0; i < resolution; i++)
+        {
+            double d0 = distances[i] - INTERSECTION_THRESHOLD;
+            double d1 = distances[i + 1] - INTERSECTION_THRESHOLD;
+            if (d0 * d1 < 0 || System.Math.Abs(d0) < 1e-6 || System.Math.Abs(d1) < 1e-6)
+            {
+                double low = ts[i];
+                double high = ts[i + 1];
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    float midDist = Vector2.Distance(
+                        RhombusPoints.GetBPSymmetry((float)mid, (float)index),
+                        RhombusPoints.GetBPForward((float)mid, (float)index)
+                    );
+                    double diff = midDist - INTERSECTION_THRESHOLD;
+                    if (System.Math.Abs(diff) < 1e-6) { low = mid; high = mid; break; }
+                    if (diff > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+                double refinedT = (low + high) / 2.0;
+                double epsilon = 1e-5;
+                Vector2 sym1 = RhombusPoints.GetBPSymmetry((float)(refinedT - epsilon), (float)index);
+                Vector2 sym2 = RhombusPoints.GetBPSymmetry((float)(refinedT + epsilon), (float)index);
+                Vector2 forward1 = RhombusPoints.GetBPForward((float)(refinedT - epsilon), (float)index);
+                Vector2 forward2 = RhombusPoints.GetBPForward((float)(refinedT + epsilon), (float)index);
+                Vector2 exactIntersection;
+                if (TryGetLineIntersection(sym1, sym2, forward1, forward2, out exactIntersection))
+                {
+                    intersectionData.Add((refinedT, index, exactIntersection));
+                }
+                else
+                {
+                    Vector2 spFinal = RhombusPoints.GetBPSymmetry((float)refinedT, (float)index);
+                    Vector2 fpFinal = RhombusPoints.GetBPForward((float)refinedT, (float)index);
+                    Vector2 avgIntersection = (spFinal + fpFinal) / 2;
+                    intersectionData.Add((refinedT, index, avgIntersection));
+                }
+            }
+        }
     }
 } 
