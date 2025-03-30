@@ -11,23 +11,27 @@ using System.Linq;
 /// Handles point creation, hover effects, and click interactions.
 /// </summary>
 [RequireComponent(typeof(RectTransform))]
-public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
+public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
 {
     [Header("Point Properties")]
-    [SerializeField] private float pointSize = 100f;        // Base size of points in pixels
+    [SerializeField] private float pointSize = 4f;        // Base size of points in pixels
     [SerializeField] private float hoverScale = 4f;       // How much larger points become when hovered (multiplier)
     [SerializeField] private float hoverThresholdMultiplier = 1.2f; // Multiplier of pointSize for hover detection
     [SerializeField] private float hoverAnimationDuration = 0.4f;  // Total duration of hover animation in seconds
-    [SerializeField] private float overshootScale = 6f;   // Maximum scale during rubber band effect
+    [SerializeField] private float overshootScale = 10f;   // Maximum scale during rubber band effect
     [SerializeField] private GameObject pointPrefab;      // Prefab used to create point objects
     
-    [Header("References")]
-    [SerializeField] private CoordinateDisplay coordinateDisplay;  // UI component to show point coordinates
     
     [Header("Current Position Indicator")]
-    [SerializeField] private float currentPosSize = 150f;        // Size of the current position indicator
+    [SerializeField] private float currentPosSize = 8;        // Size of the current position indicator
     [SerializeField] private float blinkRate = 0.5f;            // How fast the indicator blinks (in seconds)
-    [SerializeField] private Color indicatorColor = new Color(1f, 0f, 1f, 1f); // Fuchsia color
+    [SerializeField] private Color indicatorColor = new Color(1f, 0f, 1f, .8f); // Fuchsia color
+    
+    [Header("Zoom and Scroll Properties")]
+    [SerializeField] private float zoomSensitivity = 0.1f;  // How fast to zoom with mouse wheel
+    [SerializeField] private float minZoom = 0.5f;        // Minimum zoom level (maximum range)
+    [SerializeField] private float maxZoom = 500f;         // Maximum zoom level (minimum range)
+    [SerializeField] private float scrollSensitivity = 1f;  // How fast to scroll when dragging
     
     // Core components
     private CriticalStripTransform transform;  // Handles coordinate transformations between strip and viewport
@@ -44,6 +48,28 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private RectTransform currentPosIndicator;    // The UI element for current position
     private float blinkTimer;                     // Timer for blinking animation
     private bool isVisible = true;                // Current visibility state
+
+    private Vector2 lastDragPosition;
+    private bool isDragging = false;
+    [SerializeField] private float currentZoom = 0.8f;
+
+    private float lastScrollTime;
+    private const float SCROLL_CLICK_THRESHOLD = 0.1f; // Ignore clicks within 100ms of scrolling
+
+    // Event for notifying when the viewport changes (zoom or pan)
+    public event System.Action OnViewportChanged;
+
+    private bool isUpdating = false;
+
+    private bool isInRange = false; // Add this field to track if indicator is in visible range
+
+    /// <summary>
+    /// Component to store the original point data with each visual point
+    /// </summary>
+    private class PointData : MonoBehaviour
+    {
+        public Point originalPoint;
+    }
 
     private void Awake()
     {
@@ -69,13 +95,43 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             InitializeCurrentPosIndicator();
         }
-        
-        // Process any point sets that were added before initialization
-        while (pendingPointSets.Count > 0)
+
+        // Configure the Image component for raycasts without blocking points
+        var image = GetComponent<Image>();
+        if (image == null)
         {
-            var pointSet = pendingPointSets.Dequeue();
-            AddPointSetInternal(pointSet);
+            // Add Image component if it doesn't exist
+            image = gameObject.AddComponent<Image>();
         }
+        
+        // Configure image for raycasts only
+        image.raycastTarget = true; // Keep raycast enabled
+
+        // Disable any Mask component if present as it blocks points
+        var mask = GetComponent<Mask>();
+        if (mask != null)
+        {
+            mask.enabled = false;
+        }
+
+        // Make sure we have a RectTransform (required by [RequireComponent])
+        var rectTransform = GetComponent<RectTransform>();
+        if (rectTransform == null)
+        {
+            Debug.LogError("[CriticalStripRenderer] Missing required RectTransform component");
+            return;
+        }
+
+        // Ensure we have a parent Canvas
+        Canvas parentCanvas = GetComponentInParent<Canvas>();
+        if (parentCanvas == null)
+        {
+            Debug.LogError("[CriticalStripRenderer] Must be child of a Canvas");
+            return;
+        }
+
+        // Clear any pending point sets to prevent auto-loading
+        pendingPointSets.Clear();
     }
 
     /// <summary>
@@ -88,10 +144,27 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             var rectTransform = GetComponent<RectTransform>();
             if (rectTransform != null)
             {
-                Debug.Log($"[CriticalStripRenderer] Initializing transform with viewport rect: {rectTransform.rect}");
-                transform = new CriticalStripTransform(rectTransform, 1f, 7f);  // Changed from default 0,7 to 1,7
+                // Debug.Log($"[CriticalStripRenderer] Initializing transform with viewport rect: {rectTransform.rect}");
+                transform = new CriticalStripTransform(rectTransform, 1f, 7f); 
                 isInitialized = true;
-                Debug.Log("[CriticalStripRenderer] Transform initialized successfully");
+                
+                // Apply initial zoom level
+                float currentRange = transform.MaxIndex - transform.MinIndex;
+                float newRange = currentRange / currentZoom;
+                float center = (transform.MaxIndex + transform.MinIndex) * 0.5f;
+                float newMin = center - (newRange * 0.5f);
+                float newMax = center + (newRange * 0.5f);
+                
+                // Prevent scrolling below -1
+                if (newMin < -1f)
+                {
+                    float adjustment = -1f - newMin;
+                    newMin = -1f;
+                    newMax += adjustment;
+                }
+                
+                transform.SetIndexRange(newMin, newMax);
+                // Debug.Log("[CriticalStripRenderer] Transform initialized successfully");
             }
             else
             {
@@ -112,6 +185,16 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         }
         transform.SetIndexRange(min, max);
         UpdateAllPoints();
+        
+        // Update the index labels
+        var labelRenderer = GetComponent<IndexLabelsRenderer>();
+        if (labelRenderer != null)
+        {
+            labelRenderer.UpdateLabels(min, max);
+        }
+
+        // Notify listeners that the viewport has changed
+        OnViewportChanged?.Invoke();
     }
     
     /// <summary>
@@ -121,10 +204,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (pointSet == null) return;
 
+        // Debug.Log($"[CriticalStripRenderer] Adding point set '{pointSet.Name}' with SkipCriticalLine={pointSet.SkipCriticalLine}");
+
         if (!isInitialized)
         {
             // Queue the point set for addition after initialization
             pendingPointSets.Enqueue(pointSet);
+            // Debug.Log("[CriticalStripRenderer] Not initialized yet, queuing point set");
             return;
         }
 
@@ -141,15 +227,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         var points = new List<RectTransform>();
         pointObjects[pointSet] = points;
         
-        foreach (var point in pointSet.Points)
+        // Create points for each point in the set
+        foreach (var point in pointSet.OriginalPoints)
         {
-            CreatePointObject(point, pointSet.Color, points);
-        }
-
-        // Keep the indicator on top after adding new points
-        if (currentPosIndicator != null)
-        {
-            currentPosIndicator.SetAsLastSibling();
+            // Create point using original coordinates
+            Vector2 stripPos = new Vector2((float)point.Real, (float)point.Index);
+            CreatePointObject(stripPos, pointSet.Color, points, point);
         }
     }
     
@@ -158,8 +241,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public void RemovePointSet(PointSet pointSet)
     {
-        Debug.Log($"[CriticalStripRenderer] RemovePointSet called for point set: {(pointSet != null ? pointSet.Name : "null")}");
-        Debug.Log($"[CriticalStripRenderer] Current initialization state: {isInitialized}");
+        // Debug.Log($"[CriticalStripRenderer] RemovePointSet called for point set: {(pointSet != null ? pointSet.Name : "null")}");
+        // Debug.Log($"[CriticalStripRenderer] Current initialization state: {isInitialized}");
         
         if (!isInitialized || pointSet == null)
         {
@@ -167,7 +250,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             return;
         }
         
-        Debug.Log($"[CriticalStripRenderer] Looking up point set in dictionary. Current sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
+        // Debug.Log($"[CriticalStripRenderer] Looking up point set in dictionary. Current sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
         
         if (!pointObjects.TryGetValue(pointSet, out var points))
         {
@@ -175,8 +258,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             return;
         }
         
-        Debug.Log($"[CriticalStripRenderer] Found {points.Count} points to remove for set '{pointSet.Name}'");
-        Debug.Log($"[CriticalStripRenderer] Parent transform is: {transform.ViewportRect.name}");
+        // Debug.Log($"[CriticalStripRenderer] Found {points.Count} points to remove for set '{pointSet.Name}'");
+        // Debug.Log($"[CriticalStripRenderer] Parent transform is: {transform.ViewportRect.name}");
         
         int destroyedCount = 0;
         int nullCount = 0;
@@ -185,14 +268,14 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             if (point != null)
             {
-                Debug.Log($"[CriticalStripRenderer] Destroying point GameObject at position {point.anchoredPosition} under parent {point.parent?.name}");
+                // Debug.Log($"[CriticalStripRenderer] Destroying point GameObject at position {point.anchoredPosition} under parent {point.parent?.name}");
                 
                 // Remove any hover animations
                 if (hoverAnimations.TryGetValue(point, out var coroutine))
                 {
                     if (coroutine != null)
                     {
-                        Debug.Log("[CriticalStripRenderer] Stopping hover animation coroutine");
+                        // Debug.Log("[CriticalStripRenderer] Stopping hover animation coroutine");
                         StopCoroutine(coroutine);
                     }
                     hoverAnimations.Remove(point);
@@ -204,7 +287,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 {
                     DestroyImmediate(point.gameObject);
                     destroyedCount++;
-                    Debug.Log("[CriticalStripRenderer] Successfully destroyed point GameObject");
+                    // Debug.Log("[CriticalStripRenderer] Successfully destroyed point GameObject");
                 }
                 catch (Exception e)
                 {
@@ -213,7 +296,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                     {
                         Destroy(point.gameObject);
                         destroyedCount++;
-                        Debug.Log("[CriticalStripRenderer] Fallback to Destroy successful");
+                        // Debug.Log("[CriticalStripRenderer] Fallback to Destroy successful");
                     }
                     catch (Exception e2)
                     {
@@ -228,29 +311,35 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             }
         }
         
-        Debug.Log($"[CriticalStripRenderer] Cleanup summary - Destroyed: {destroyedCount}, Null points: {nullCount}");
+        // Debug.Log($"[CriticalStripRenderer] Cleanup summary - Destroyed: {destroyedCount}, Null points: {nullCount}");
         
         points.Clear();
         pointObjects.Remove(pointSet);
         
-        Debug.Log($"[CriticalStripRenderer] Point set removed. Remaining sets: {pointObjects.Count}");
+        // Debug.Log($"[CriticalStripRenderer] Point set removed. Remaining sets: {pointObjects.Count}");
         if (pointObjects.Count > 0)
         {
-            Debug.Log($"[CriticalStripRenderer] Remaining sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
+            // Debug.Log($"[CriticalStripRenderer] Remaining sets: {string.Join(", ", pointObjects.Keys.Select(ps => ps.Name))}");
         }
     }
     
     /// <summary>
     /// Creates a single point UI element at the specified position
     /// </summary>
-    private void CreatePointObject(Vector2 stripPos, Color color, List<RectTransform> points)
+    private void CreatePointObject(Vector2 stripPos, Color color, List<RectTransform> points, Point originalPoint)
     {
         if (!isInitialized || pointPrefab == null) return;
 
-        // Debug.Log($"[CriticalStripRenderer] Creating point at strip coordinates: {stripPos}");
+        // Convert strip coordinates to viewport
         var viewportPos = transform.StripToViewport(stripPos);
-        // Debug.Log($"[CriticalStripRenderer] Point viewport position: {viewportPos}, " + 
-        //           $"viewport rect: {GetComponent<RectTransform>().rect}");
+        
+        // Check if the point is within the viewport bounds
+        var rect = transform.ViewportRect.rect;
+        if (viewportPos.y < rect.y || viewportPos.y > rect.y + rect.height)
+        {
+            // Point is outside viewport bounds, don't create it
+            return;
+        }
 
         var obj = Instantiate(pointPrefab, viewportPos, Quaternion.identity, transform.ViewportRect);
         var rectTransform = obj.GetComponent<RectTransform>();
@@ -261,10 +350,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             rectTransform.sizeDelta = new Vector2(pointSize, pointSize);
             rectTransform.anchoredPosition = viewportPos;
             image.color = color;
-            points.Add(rectTransform);
             
-            // Debug.Log($"[CriticalStripRenderer] Point created with anchoredPosition: {rectTransform.anchoredPosition}, " +
-            //         $"size: {rectTransform.sizeDelta}, color: {color}");
+            // Add the original point data
+            var pointData = obj.AddComponent<PointData>();
+            pointData.originalPoint = originalPoint;
+            
+            points.Add(rectTransform);
         }
         else
         {
@@ -279,28 +370,28 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (!isInitialized) return;
 
-        Debug.Log($"[CriticalStripRenderer] Updating all points. Viewport rect: {GetComponent<RectTransform>().rect}");
-
         foreach (var kvp in pointObjects)
         {
             var pointSet = kvp.Key;
             var points = kvp.Value;
+            var originalPoints = pointSet.OriginalPoints;
             
-            // Ensure we have the right number of point objects
-            while (points.Count < pointSet.Points.Count)
+            // Clear existing points if we're rebuilding
+            foreach (var point in points)
             {
-                CreatePointObject(Vector2.zero, pointSet.Color, points);
+                if (point != null)
+                {
+                    Destroy(point.gameObject);
+                }
             }
+            points.Clear();
             
-            // Update positions
-            for (int i = 0; i < pointSet.Points.Count; i++)
+            // Create points for each point in the set
+            foreach (var point in originalPoints)
             {
-                var stripPos = pointSet.Points[i];
-                var viewportPos = transform.StripToViewport(stripPos);
-                points[i].anchoredPosition = viewportPos;
-                
-                Debug.Log($"[CriticalStripRenderer] Updated point {i} - strip: {stripPos}, " +
-                          $"viewport: {viewportPos}, anchored: {points[i].anchoredPosition}");
+                // Create point using original coordinates
+                Vector2 stripPos = new Vector2((float)point.Real, (float)point.Index);
+                CreatePointObject(stripPos, pointSet.Color, points, point);
             }
         }
     }
@@ -312,64 +403,117 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (app == null || !isInitialized) return;
         
-        // First check if we clicked directly on a point
-        Vector2 viewportMousePos;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            transform.ViewportRect, 
-            eventData.position, 
-            null,
-            out viewportMousePos
-        );
-
-        float closestDist = float.MaxValue;
-        Point closestPoint = null;
-        float hoverThreshold = pointSize * hoverThresholdMultiplier;
-        
-        foreach (var kvp in pointObjects)
+        // Ignore clicks that happen right after scrolling or during drag
+        if (Time.time - lastScrollTime < SCROLL_CLICK_THRESHOLD || isDragging)
         {
-            if (!kvp.Key.IsActive) continue;
-            
-            var pointSet = kvp.Key;
-            var originalPoints = pointSet.OriginalPoints;
-            var points = kvp.Value;
-            
-            for (int i = 0; i < points.Count; i++)
-            {
-                var dist = Vector2.Distance(viewportMousePos, points[i].anchoredPosition);
-                if (dist < closestDist && dist < hoverThreshold)
-                {
-                    closestDist = dist;
-                    closestPoint = originalPoints[i];
-                }
-            }
-        }
-        
-        if (closestPoint != null)
-        {
-            // Use the original double-precision coordinates
-            app.Real = closestPoint.Real;
-            app.Index = closestPoint.Index;
-            Debug.Log($"Clicked point: using original coordinates ({closestPoint.Real:G17}, {closestPoint.Index:G17})");
+            // Debug.Log("[CriticalStripRenderer] Ignoring click due to recent scroll or drag");
             return;
         }
         
-        // If we didn't click on a point, use the strip coordinates from the click position
-        var stripPos = transform.ScreenToStrip(eventData.position);
-        Debug.Log($"Click in empty space: using transformed coordinates ({stripPos.x:G17}, {stripPos.y:G17})");
-        
-        // If the click is near the critical line, use the dedicated method
-        float distanceFromHalf = Mathf.Abs(stripPos.x - 0.5f);
-        if (distanceFromHalf <= transform.CriticalValueThreshold)
+        // Only handle left mouse button clicks
+        if (eventData.button != PointerEventData.InputButton.Left)
         {
-            Debug.Log($"Click near critical line, setting to exact 0.5");
-            app.SetToExactCriticalLine();
+            return;
         }
-        else
-        {
-            app.Real = stripPos.x;
-        }
+
+        // Guard against reentrant updates
+        if (isUpdating) return;
+        isUpdating = true;
         
-        app.Index = stripPos.y;
+        try
+        {
+            // First check if we clicked directly on a point
+            Vector2 viewportMousePos;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                transform.ViewportRect, 
+                eventData.position, 
+                null,
+                out viewportMousePos
+            );
+
+            // Debug.Log($"[CriticalStripRenderer] Click at viewport position: {viewportMousePos}");
+
+            float closestDist = float.MaxValue;
+            Point closestPoint = null;
+            RectTransform closestTransform = null;
+            float hoverThreshold = pointSize * hoverThresholdMultiplier;
+            
+            foreach (var kvp in pointObjects)
+            {
+                if (!kvp.Key.IsActive) continue;
+                
+                foreach (var pointTransform in kvp.Value)
+                {
+                    var dist = Vector2.Distance(viewportMousePos, pointTransform.anchoredPosition);
+                    if (dist < closestDist && dist < hoverThreshold)
+                    {
+                        var pointData = pointTransform.GetComponent<PointData>();
+                        if (pointData != null)
+                        {
+                            closestDist = dist;
+                            closestPoint = pointData.originalPoint;
+                            closestTransform = pointTransform;
+                        }
+                    }
+                }
+            }
+            
+            if (closestPoint != null)
+            {
+                // Debug.Log($"[CriticalStripRenderer] Found closest point:");
+                // Debug.Log($"  Original coordinates (double): Real={closestPoint.Real:G17}, Index={closestPoint.Index:G17}");
+                // Debug.Log($"  Visual position (viewport): {closestTransform.anchoredPosition}");
+                Vector2 transformedStripPos = transform.ViewportToStrip(closestTransform.anchoredPosition);
+                // Debug.Log($"  Transformed back to strip: Real={transformedStripPos.x:G17}, Index={transformedStripPos.y:G17}");
+                // Debug.Log($"  Distance from click: {closestDist} pixels (threshold: {hoverThreshold})");
+                // Debug.Log($"  Current zoom level: {currentZoom}");
+
+                // Batch the updates together
+                double newReal = closestPoint.Real;
+                double newIndex = closestPoint.Index;
+                
+                // Debug.Log($"[CriticalStripRenderer] Sending to App: Real={newReal:G17}, Index={newIndex:G17}");
+                
+                // Temporarily unsubscribe from events
+                app.IndexChanged -= OnIndexChanged;
+                app.RealChanged -= OnRealChanged;
+                
+                // Update both values
+                app.Real = newReal;
+                app.Index = newIndex;
+                
+                // Resubscribe to events
+                app.IndexChanged += OnIndexChanged;
+                app.RealChanged += OnRealChanged;
+                
+                // Do a single update of the indicator
+                UpdateCurrentPosIndicator();
+                return;
+            }
+            
+            // If we didn't click on a point, use the strip coordinates from the click position
+            var stripPos = transform.ScreenToStrip(eventData.position);
+            
+            // Debug.Log($"[CriticalStripRenderer] No point clicked, using strip coordinates: Real={stripPos.x:G17}, Index={stripPos.y:G17}");
+            
+            // If the click is near the critical line, use the dedicated method
+            float distanceFromHalf = Mathf.Abs(stripPos.x - 0.5f);
+            if (distanceFromHalf <= transform.CriticalValueThreshold)
+            {
+                // Debug.Log($"[CriticalStripRenderer] Click near critical line (distance: {distanceFromHalf:G17}), snapping to 0.5");
+                app.SetToExactCriticalLine();
+            }
+            else
+            {
+                app.Real = stripPos.x;
+            }
+            
+            app.Index = stripPos.y;
+        }
+        finally
+        {
+            isUpdating = false;
+        }
     }
     
     public void OnPointerEnter(PointerEventData eventData)
@@ -384,21 +528,43 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     private IEnumerator AnimateHoverScale(RectTransform point, float targetScale)
     {
+        if (point == null) yield break;
+
         float startScale = point.localScale.x;
+        float localOvershootScale = targetScale > 1f ? this.overshootScale : targetScale;
+        float overshootDuration = hoverAnimationDuration * 0.4f;
+        float settleDuration = hoverAnimationDuration * 0.6f;
         float elapsedTime = 0f;
-        float overshootDuration = hoverAnimationDuration * 0.4f; // Time to reach max overshoot
-        float settleDuration = hoverAnimationDuration * 0.6f; // Time to settle back to target
-        
-        // Phase 1: Overshoot animation
+
+        // Phase 1: Overshoot
         while (elapsedTime < overshootDuration)
         {
+            if (point == null)
+            {
+                if (hoverAnimations.ContainsKey(point))
+                {
+                    hoverAnimations.Remove(point);
+                }
+                if (isPointHovered.ContainsKey(point))
+                {
+                    isPointHovered.Remove(point);
+                }
+                yield break;
+            }
+
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / overshootDuration;
             // Ease out quad for smooth acceleration
             t = t * (2 - t);
-            float currentScale = Mathf.Lerp(startScale, targetScale == 1f ? 1f : overshootScale, t);
+            float currentScale = Mathf.Lerp(startScale, targetScale == 1f ? 1f : localOvershootScale, t);
             point.localScale = Vector3.one * currentScale;
             yield return null;
+        }
+
+        if (point == null)
+        {
+            CleanupPointTracking(point);
+            yield break;
         }
         
         // Phase 2: Settle back to target scale
@@ -407,6 +573,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         
         while (elapsedTime < settleDuration)
         {
+            if (point == null)
+            {
+                CleanupPointTracking(point);
+                yield break;
+            }
+
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / settleDuration;
             // Elastic ease out for bouncy effect
@@ -415,12 +587,24 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             point.localScale = Vector3.one * currentScale;
             yield return null;
         }
+
+        if (point != null)
+        {
+            point.localScale = Vector3.one * targetScale;
+        }
         
-        point.localScale = Vector3.one * targetScale;
-        
+        CleanupPointTracking(point);
+    }
+
+    private void CleanupPointTracking(RectTransform point)
+    {
         if (hoverAnimations.ContainsKey(point))
         {
             hoverAnimations.Remove(point);
+        }
+        if (isPointHovered.ContainsKey(point))
+        {
+            isPointHovered.Remove(point);
         }
     }
 
@@ -462,11 +646,6 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             SetPointScale(hoveredPoint, 1f);
             hoveredPoint = null;
-        }
-        
-        if (coordinateDisplay != null)
-        {
-            coordinateDisplay.UpdateDisplay();
         }
     }
     
@@ -527,12 +706,6 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 SetPointScale(hoveredPoint, hoverScale);
             }
         }
-        
-        if (coordinateDisplay != null)
-        {
-            Vector2 displayPos = hoveredPoint != null ? closestPointStripPos : transform.ScreenToStrip(eventData.position);
-            coordinateDisplay.UpdateHoverCoordinates(displayPos.x, displayPos.y);
-        }
     }
 
     private void InitializeCurrentPosIndicator()
@@ -577,8 +750,27 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         if (!isInitialized || currentPosIndicator == null || app == null) return;
         
         Vector2 stripPos = new Vector2((float)app.Real, (float)app.Index);
-        Vector2 viewportPos = transform.StripToViewport(stripPos);
-        currentPosIndicator.anchoredPosition = viewportPos;
+        
+        // Check if the index is within the visible range
+        isInRange = stripPos.y >= transform.MinIndex && stripPos.y <= transform.MaxIndex;
+        
+        // Update position if in range
+        if (isInRange)
+        {
+            Vector2 viewportPos = transform.StripToViewport(stripPos);
+            currentPosIndicator.anchoredPosition = viewportPos;
+        }
+        
+        // Update visibility based on both range and blink state
+        UpdateIndicatorVisibility();
+    }
+
+    private void UpdateIndicatorVisibility()
+    {
+        if (currentPosIndicator != null)
+        {
+            currentPosIndicator.gameObject.SetActive(isInRange && isVisible);
+        }
     }
 
     private void Update()
@@ -591,7 +783,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             {
                 blinkTimer = 0f;
                 isVisible = !isVisible;
-                currentPosIndicator.gameObject.SetActive(isVisible);
+                UpdateIndicatorVisibility();
             }
         }
     }
@@ -603,5 +795,118 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             app.IndexChanged -= OnIndexChanged;
             app.RealChanged -= OnRealChanged;
         }
+    }
+
+    public void OnScroll(PointerEventData eventData)
+    {
+        if (!isInitialized) return;
+
+        lastScrollTime = Time.time;
+
+        // Get the mouse position in strip coordinates before zooming
+        var mouseStripPos = transform.ScreenToStrip(eventData.position);
+        
+        // Calculate new zoom level
+        float zoomDelta = eventData.scrollDelta.y * zoomSensitivity;
+        float newZoom = Mathf.Clamp(currentZoom * (1f + zoomDelta), minZoom, maxZoom);
+        
+        if (newZoom != currentZoom)
+        {            
+            // Calculate the current range and center
+            float currentRange = transform.MaxIndex - transform.MinIndex;
+            float currentCenter = (transform.MaxIndex + transform.MinIndex) * 0.5f;
+            
+            // Calculate the new range based on zoom
+            float newRange = currentRange * (currentZoom / newZoom);
+            
+            // Calculate how far the mouse is from the center in normalized coordinates
+            float mouseOffset = (mouseStripPos.y - currentCenter) / currentRange;
+            
+            // Calculate new min and max indices that keep the mouse position stable
+            float newCenter = mouseStripPos.y - (mouseOffset * newRange);
+            float newMin = newCenter - (newRange * 0.5f);
+            float newMax = newCenter + (newRange * 0.5f);
+            
+            // Prevent scrolling below -1
+            if (newMin < -1f)
+            {
+                float adjustment = -1f - newMin;
+                newMin = -1f;
+                newMax += adjustment;
+            }
+            
+            // Update the transform and current zoom
+            transform.SetIndexRange(newMin, newMax);
+            currentZoom = newZoom;
+            
+            // Update all point positions and the current position indicator
+            UpdateAllPoints();
+            UpdateCurrentPosIndicator();
+            
+            // Notify listeners that the viewport has changed
+            OnViewportChanged?.Invoke();
+        }
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (!isInitialized) return;
+        
+        isDragging = true;
+        lastDragPosition = eventData.position;
+        // Debug.Log($"[CriticalStripRenderer] Begin drag at screen position: {lastDragPosition}");
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!isInitialized || !isDragging) return;
+
+        // Debug.Log($"[CriticalStripRenderer] Dragging from {lastDragPosition} to {eventData.position}");
+
+        // Calculate the drag delta in screen coordinates
+        Vector2 dragDelta = (eventData.position - lastDragPosition) * scrollSensitivity;
+        // Debug.Log($"[CriticalStripRenderer] Drag delta (with sensitivity {scrollSensitivity}): {dragDelta}");
+        lastDragPosition = eventData.position;
+        
+        // Convert the drag distance to strip space
+        float stripDelta = dragDelta.y / transform.ViewportRect.rect.height * (transform.MaxIndex - transform.MinIndex);
+        // Debug.Log($"[CriticalStripRenderer] Strip space delta: {stripDelta}");
+        
+        // Update the index range
+        float newMin = transform.MinIndex - stripDelta;
+        float newMax = transform.MaxIndex - stripDelta;
+        
+        // Prevent dragging below -1
+        if (newMin < -1f)
+        {
+            float adjustment = -1f - newMin;
+            newMin = -1f;
+            newMax += adjustment;
+        }
+        
+        // Debug.Log($"[CriticalStripRenderer] New index range: [{newMin}, {newMax}] (current: [{transform.MinIndex}, {transform.MaxIndex}])");
+        
+        transform.SetIndexRange(newMin, newMax);
+        
+        // Update all point positions and the current position indicator
+        UpdateAllPoints();
+        UpdateCurrentPosIndicator();
+        
+        // Notify listeners that the viewport has changed
+        OnViewportChanged?.Invoke();
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        isDragging = false;
+        // Debug.Log("[CriticalStripRenderer] End drag");
+    }
+
+    /// <summary>
+    /// Gets the CriticalStripTransform used by this renderer
+    /// </summary>
+    public CriticalStripTransform GetTransform()
+    {
+        return transform;
     }
 } 

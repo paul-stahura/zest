@@ -3,47 +3,41 @@ using UnityEditor;
 
 [CustomEditor(typeof(PointSetManager))]
 public class PointSetManagerEditor : Editor
-{
-    [MenuItem("CONTEXT/PointSetManager/Add 10 Random Points")]
-    private static void AddRandomPoints(MenuCommand command)
-    {
-        var manager = command.context as PointSetManager;
-        if (manager == null) return;
-
-        var pointSet = new PointSet("test_points", Color.cyan);
-        
-        // Generate 10 random points within the critical strip
-        for (int i = 0; i < 10; i++)
-        {
-            float real = Random.value; // [0,1]
-            float index = Random.Range(0f, 7f); // Default index range
-            pointSet.AddPoint(real, index);
-        }
-        
-        manager.AddTestPointSet(pointSet);
-        
-        Debug.Log($"Added {pointSet.Points.Count} random points to test_points set");
-    }
-    
-    [MenuItem("CONTEXT/PointSetManager/Add 100 Random Points")]
+{  
+    [MenuItem("CONTEXT/PointSetManager/Add 1000 Random Points")]
     private static void AddManyRandomPoints(MenuCommand command)
     {
         var manager = command.context as PointSetManager;
         if (manager == null) return;
 
+        // Get the renderer to determine current visible range
+        var renderer = manager.GetComponentInChildren<CriticalStripRenderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("Could not find CriticalStripRenderer in children");
+            return;
+        }
+
+        var transform = renderer.GetTransform();
+        if (transform == null)
+        {
+            Debug.LogError("Could not get CriticalStripTransform");
+            return;
+        }
+
         var pointSet = new PointSet("test_points_large", new Color(1f, 0.5f, 0f, 1f)); // Orange
         
-        // Generate 100 random points within the critical strip
-        for (int i = 0; i < 100; i++)
+        // Generate points within the current visible range
+        for (int i = 0; i < 1000; i++)
         {
             float real = Random.value; // [0,1]
-            float index = Random.Range(0f, 7f); // Default index range
+            float index = Random.Range(Mathf.Max(0, transform.MinIndex), transform.MaxIndex);
             pointSet.AddPoint(real, index);
         }
         
         manager.AddTestPointSet(pointSet);
         
-        Debug.Log($"Added {pointSet.Points.Count} random points to test_points_large set");
+        Debug.Log($"Added {pointSet.Points.Count} random points to test_points_large set in range [{transform.MinIndex}, {transform.MaxIndex}]");
     }
     
     [MenuItem("CONTEXT/PointSetManager/Clear Test Points")]
@@ -62,16 +56,31 @@ public class PointSetManagerEditor : Editor
         var manager = command.context as PointSetManager;
         if (manager == null) return;
 
+        // Get the renderer to determine current visible range
+        var renderer = manager.GetComponentInChildren<CriticalStripRenderer>();
+        if (renderer == null)
+        {
+            Debug.LogError("Could not find CriticalStripRenderer in children");
+            return;
+        }
+
+        var transform = renderer.GetTransform();
+        if (transform == null)
+        {
+            Debug.LogError("Could not get CriticalStripTransform");
+            return;
+        }
+
         var pointSet = new PointSet("test_grid", Color.green);
         
         // Create a grid of points with regular intervals
         float xStep = 0.1f;  // Step size for real component (x)
-        float yStep = 0.5f;  // Step size for index component (y)
+        float yStep = 0.1f;  // Step size for index component (y)
         
-        // Cover the typical viewing range
+        // Cover the current visible range
         for (float x = 0; x <= 1.0f; x += xStep)
         {
-            for (float y = 0; y <= 7.0f; y += yStep)
+            for (float y = Mathf.Max(0, transform.MinIndex); y <= transform.MaxIndex; y += yStep)
             {
                 pointSet.AddPoint(x, y);
             }
@@ -79,7 +88,7 @@ public class PointSetManagerEditor : Editor
         
         manager.AddTestPointSet(pointSet);
         
-        Debug.Log($"Added grid points to test_grid set with intervals: x={xStep}, y={yStep}");
+        Debug.Log($"Added grid points to test_grid set with intervals: x={xStep}, y={yStep} in range [{transform.MinIndex}, {transform.MaxIndex}]");
     }
 
     [MenuItem("CONTEXT/PointSetManager/Add Critical Value Test Grid")]

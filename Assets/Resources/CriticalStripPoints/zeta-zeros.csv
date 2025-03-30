@@ -1,4 +1,10 @@
-Zeta Zeros,#FF00FF
+# Point Set File Format:
+# Header: name,color,skipCriticalLine,useOptimization
+# - name: Name of the point set
+# - color: HTML color code (e.g. #FF0000 for red)
+# - skipCriticalLine: Set to false to include points near 0.5
+# - useOptimization: Set to false to load all points without optimization
+Zeta Zeros,#FF00FF,false,false
 0.5,1.028225356559742
 0.5,1.352240439223097
 0.5,1.5162746957909619
