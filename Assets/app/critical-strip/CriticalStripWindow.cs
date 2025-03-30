@@ -12,12 +12,14 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private Button toggleButton;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button saveButton;
+    [SerializeField] private Button collapseTab;
     
     private RectTransform rectTransform;
     private bool isExpanded = true;
     private float targetX;
     private float currentX;
     private PointSetManager pointSetManager;
+    private float animationTime;
     
     public bool IsExpanded => isExpanded;
     public float Width => width;
@@ -35,6 +37,9 @@ public class CriticalStripWindow : MonoBehaviour
             
         if (saveButton != null && pointSetManager != null)
             saveButton.onClick.AddListener(pointSetManager.SaveCurrentPoint);
+
+        if (collapseTab != null)
+            collapseTab.onClick.AddListener(Toggle);
             
         // Initialize position
         currentX = isExpanded ? 0 : -width;
@@ -47,7 +52,14 @@ public class CriticalStripWindow : MonoBehaviour
         
         if (Mathf.Abs(currentX - targetX) > 0.01f)
         {
-            currentX = Mathf.Lerp(currentX, targetX, Time.deltaTime / animationDuration);
+            animationTime += Time.deltaTime;
+            float t = animationTime / animationDuration;
+            
+            // Apply easing function (ease-out cubic)
+            t = 1f - Mathf.Pow(1f - t, 3f);
+            t = Mathf.Clamp01(t);
+            
+            currentX = Mathf.Lerp(currentX, targetX, t);
             UpdatePosition(currentX);
         }
     }
@@ -63,6 +75,18 @@ public class CriticalStripWindow : MonoBehaviour
         
         isExpanded = expand;
         targetX = expand ? 0 : -width;
+        animationTime = 0f; // Reset animation time when starting new animation
+        
+        // Rotate the collapse tab if it exists
+        if (collapseTab != null)
+        {
+            var tabRect = collapseTab.GetComponent<RectTransform>();
+            if (tabRect != null)
+            {
+                // Rotate 180 degrees when collapsing
+                tabRect.rotation = Quaternion.Euler(0, 0, expand ? 0 : 180);
+            }
+        }
     }
 
     private void UpdatePosition(float x)

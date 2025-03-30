@@ -11,6 +11,17 @@ public class PointSetManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private Color defaultPointColor = Color.green;
     [SerializeField] private DropdownEx pointSetSelector;  // Reference to the custom dropdown
+    [Tooltip("How close to 0.5 before points are skipped")]
+    [SerializeField] [Range(0.001f, 0.1f)] private float criticalLineSkipTolerance = 0.01f;
+    [SerializeField] private CriticalStripStats stats;  // Reference to the Stats component
+    
+    [Header("Point Loading Optimization")]
+    [Tooltip("When enabled, reduces the number of loaded points by intelligently skipping points that are too close together")]
+    [SerializeField] private bool enableDownsampling = true;
+    [Tooltip("Minimum world-space distance between points. Points closer than this will be skipped")]
+    [SerializeField] [Range(0.001f, 0.1f)] private float minPointDistance = 0.01f;
+    [Tooltip("Controls how aggressively points are removed. Higher values remove more points")]
+    [SerializeField] [Range(0.1f, 4.0f)] private float downsampleAggressiveness = 1f;
     
     private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
     private const string FAVORITES_FILE = "favorite-points.csv";
@@ -29,22 +40,35 @@ public class PointSetManager : MonoBehaviour
         renderer = GetComponentInChildren<CriticalStripRenderer>();
         app = FindObjectOfType<App>();
         
-        Debug.Log($"PointSetManager Awake - Renderer: {(renderer != null ? "Found" : "Not Found")}, App: {(app != null ? "Found" : "Not Found")}");
+        // Debug.Log($"PointSetManager Awake - Renderer: {(renderer != null ? "Found" : "Not Found")}, App: {(app != null ? "Found" : "Not Found")}");
         
         if (app != null)
         {
             app.RealChanged += OnRealChanged;
             app.IndexChanged += OnIndexChanged;
         }
+
+        if (stats == null)
+        {
+            stats = FindObjectOfType<CriticalStripStats>();
+            if (stats == null)
+            {
+                Debug.LogWarning("Stats component not found in scene");
+            }
+        }
         
         // Set up points directory
         SetupPointsDirectory();
         
-        // Initialize dropdown
+        // Initialize dropdown without triggering selection
         if (pointSetSelector != null)
         {
-            pointSetSelector.onValueChanged.AddListener(OnPointSetSelectionChanged);
+            // First clear any existing options
+            pointSetSelector.ClearOptions();
+            // Then refresh the list
             RefreshPointSetList();
+            // Finally add the listener
+            pointSetSelector.onValueChanged.AddListener(OnPointSetSelectionChanged);
         }
         else
         {
@@ -54,14 +78,11 @@ public class PointSetManager : MonoBehaviour
     
     private void SetupPointsDirectory()
     {
-        Debug.Log($"Application.dataPath: {Application.dataPath}" + " " + POINTS_DIRECTORY);
         pointsDirectoryPath = Path.Combine(Application.dataPath, POINTS_DIRECTORY);
-        Debug.Log($"Points directory path: {pointsDirectoryPath}");
         
         if (!Directory.Exists(pointsDirectoryPath))
         {
             Directory.CreateDirectory(pointsDirectoryPath);
-            Debug.Log("Created points directory");
         }
     }
     
@@ -71,8 +92,6 @@ public class PointSetManager : MonoBehaviour
         
         // Get all .csv files in the points directory
         var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
-        
-        Debug.Log($"Found {files.Length} point set files");
         
         // Clear the mapping dictionary
         optionIndexToName.Clear();
@@ -85,19 +104,25 @@ public class PointSetManager : MonoBehaviour
         {
             string displayName = Path.GetFileNameWithoutExtension(filePath); // Default to filename
             
-            // Try to read the name from the first line of the file
+            // Try to read the name from the first non-comment line of the file
             try
             {
                 using (var reader = new StreamReader(filePath))
                 {
-                    string firstLine = reader.ReadLine();
-                    if (!string.IsNullOrEmpty(firstLine))
+                    string line;
+                    // Skip comment lines
+                    while ((line = reader.ReadLine()) != null && line.StartsWith("#"))
+                    {
+                        continue;
+                    }
+                    
+                    if (!string.IsNullOrEmpty(line))
                     {
                         // The name is everything before the first comma
-                        int commaIndex = firstLine.IndexOf(',');
+                        int commaIndex = line.IndexOf(',');
                         if (commaIndex > 0)
                         {
-                            displayName = firstLine.Substring(0, commaIndex);
+                            displayName = line.Substring(0, commaIndex);
                         }
                     }
                 }
@@ -113,37 +138,20 @@ public class PointSetManager : MonoBehaviour
             index++;
         }
         
+        // Clear options and add new ones without triggering selection
         pointSetSelector.ClearOptions();
         pointSetSelector.AddOptions(options);
-        
-        // Set default selection to Favorites if it exists, but don't load it
-        if (files.Any(f => Path.GetFileName(f) == FAVORITES_FILE))
-        {
-            uint favoritesIndex = 0;
-            foreach (var kvp in optionIndexToName)
-            {
-                if (kvp.Value == Path.GetFileNameWithoutExtension(FAVORITES_FILE))
-                {
-                    favoritesIndex = kvp.Key;
-                    pointSetSelector.value = favoritesIndex;
-                    break;
-                }
-            }
-        }
+        pointSetSelector.value = 0;  // Set to "None" option
     }
     
     private void OnPointSetSelectionChanged(uint selectedIndex)
     {
-        Debug.Log($"[PointSetManager] OnPointSetSelectionChanged called with selectedIndex: {selectedIndex} (binary: {System.Convert.ToString(selectedIndex, 2).PadLeft(8, '0')})");
-        Debug.Log($"[PointSetManager] Previous value was: {previousSelectionValue} (binary: {System.Convert.ToString(previousSelectionValue, 2).PadLeft(8, '0')})");
-        Debug.Log($"[PointSetManager] Current loadedSets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
         
         // For multi-select, selectedIndex is actually a bit field where each bit represents a selected item
         if (pointSetSelector.AllowMultiSelect)
         {
             // Calculate which bits changed
             uint changedBits = selectedIndex ^ previousSelectionValue;
-            Debug.Log($"[PointSetManager] Changed bits: {changedBits} (binary: {System.Convert.ToString(changedBits, 2).PadLeft(8, '0')})");
             
             // Process each changed bit
             uint bitMask = 1;
@@ -153,15 +161,12 @@ public class PointSetManager : MonoBehaviour
             {
                 if ((changedBits & 1) != 0)  // If this bit changed
                 {
-                    Debug.Log($"[PointSetManager] Processing changed bit at index {bitIndex}");
                     if (optionIndexToName.TryGetValue((uint)bitIndex, out string setName))
                     {
                         bool isSelected = (selectedIndex & bitMask) != 0;
-                        Debug.Log($"[PointSetManager] Point set '{setName}' is now {(isSelected ? "selected" : "deselected")} (bit {bitIndex})");
                         
                         if (isSelected && !loadedSets.Any(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase)))
                         {
-                            Debug.Log($"[PointSetManager] Loading point set: {setName}");
                             LoadPointSet(setName);
                         }
                         else if (!isSelected)
@@ -169,7 +174,6 @@ public class PointSetManager : MonoBehaviour
                             var setToRemove = loadedSets.FirstOrDefault(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase));
                             if (setToRemove != null)
                             {
-                                Debug.Log($"[PointSetManager] Found set to remove: {setName} in loadedSets");
                                 UnloadPointSet(setToRemove);
                             }
                             else
@@ -189,7 +193,6 @@ public class PointSetManager : MonoBehaviour
             }
             
             previousSelectionValue = selectedIndex;
-            Debug.Log($"[PointSetManager] Updated previousSelectionValue to {selectedIndex}");
         }
         else
         {
@@ -200,7 +203,6 @@ public class PointSetManager : MonoBehaviour
                 return;
             }
             
-            Debug.Log($"[PointSetManager] Point set selection changed to: {setName}");
             
             bool isLoaded = loadedSets.Any(s => s.Name.Equals(setName, StringComparison.OrdinalIgnoreCase));
             bool isSelected = pointSetSelector.value == selectedIndex;
@@ -223,42 +225,152 @@ public class PointSetManager : MonoBehaviour
     private void LoadPointSet(string setName)
     {
         string filePath = Path.Combine(pointsDirectoryPath, $"{setName}.csv");
-        Debug.Log($"[PointSetManager] Loading point set from: {filePath}");
         
         if (File.Exists(filePath))
         {
-            var pointSet = PointSet.FromFile(filePath);
-            if (pointSet != null)
+            var allLines = File.ReadAllLines(filePath);
+            if (allLines.Length < 1)
             {
-                // Ensure the name matches exactly what we're looking for
-                if (pointSet.Name != setName)
+                Debug.LogWarning($"[PointSetManager] Empty file: {filePath}");
+                return;
+            }
+
+            // Skip any comment lines to find the header
+            int headerIndex = 0;
+            while (headerIndex < allLines.Length && allLines[headerIndex].StartsWith("#"))
+            {
+                headerIndex++;
+            }
+
+            if (headerIndex >= allLines.Length)
+            {
+                Debug.LogWarning($"[PointSetManager] No header found in file (only comments): {filePath}");
+                return;
+            }
+
+            // Parse header
+            string[] headerParts = allLines[headerIndex].Split(',');
+            if (headerParts.Length < 2)
+            {
+                // Provide helpful message about expected header format
+                Debug.LogWarning($"[PointSetManager] Invalid header format in file: {filePath}\n" +
+                    "Expected header format:\n" +
+                    "# Header format: name,color,skipCriticalLine,useOptimization\n" +
+                    "# - name: required, the name of the point set\n" +
+                    "# - color: optional, HTML color code starting with #\n" +
+                    "# - skipCriticalLine: optional, true/false whether to skip points near critical line\n" +
+                    "# - useOptimization: optional, true/false whether to apply point optimization");
+                return;
+            }
+
+            string pointSetName = headerParts[0];
+            Color pointColor = defaultPointColor;
+            bool skipCriticalLine = false;
+            bool useOptimization = true;  // New flag for controlling optimization
+
+            // Parse color if provided
+            if (headerParts[1].StartsWith("#"))
+            {
+                ColorUtility.TryParseHtmlString(headerParts[1], out pointColor);
+            }
+
+            // Parse skipCriticalLine if provided
+            if (headerParts.Length > 2)
+            {
+                bool.TryParse(headerParts[2], out skipCriticalLine);
+            }
+
+            // Parse useOptimization if provided
+            if (headerParts.Length > 3)
+            {
+                bool.TryParse(headerParts[3], out useOptimization);
+            }
+
+            var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine);
+            int totalPoints = allLines.Length - (headerIndex + 1); // Subtract header and comment lines
+            int loadedPoints = 0;
+            int skippedCriticalPoints = 0;
+            Vector2? lastAddedPoint = null;
+
+            // Process each point
+            for (int i = headerIndex + 1; i < allLines.Length; i++)
+            {
+                // Skip comment lines
+                if (allLines[i].StartsWith("#")) 
                 {
-                    Debug.Log($"[PointSetManager] Adjusting point set name from '{pointSet.Name}' to '{setName}' for consistency");
-                    pointSet = new PointSet(setName, pointSet.Color);
-                    foreach (var point in PointSet.FromFile(filePath).Points)
+                    totalPoints--; // Adjust total points count for comments
+                    continue;
+                }
+
+                string[] parts = allLines[i].Split(',');
+                if (parts.Length != 2) continue;
+
+                if (double.TryParse(parts[0], out double real) && 
+                    double.TryParse(parts[1], out double index))
+                {
+                    // Skip points near critical line if configured
+                    if (skipCriticalLine)
                     {
-                        pointSet.AddPoint(point.x, point.y);
+                        double distanceFromHalf = Math.Abs(real - 0.5);
+                        if (distanceFromHalf <= criticalLineSkipTolerance)
+                        {
+                            skippedCriticalPoints++;
+                            continue;
+                        }
+                    }
+
+                    Vector2 currentPoint = new Vector2((float)real, (float)index);
+                    bool shouldAdd = true;
+
+                    // Only apply downsampling if useOptimization is true
+                    if (useOptimization && enableDownsampling && lastAddedPoint.HasValue)
+                    {
+                        float distSq = (currentPoint - lastAddedPoint.Value).sqrMagnitude;
+                        float threshold = minPointDistance * (1f + downsampleAggressiveness);
+                        float thresholdSq = threshold * threshold;
+                        shouldAdd = distSq >= thresholdSq;
+                    }
+
+                    if (shouldAdd)
+                    {
+                        pointSet.AddPoint(real, index);
+                        lastAddedPoint = currentPoint;
+                        loadedPoints++;
                     }
                 }
-                
-                Debug.Log($"[PointSetManager] Loaded point set '{pointSet.Name}' with {pointSet.Points.Count} points");
-                loadedSets.Add(pointSet);
-                Debug.Log($"[PointSetManager] Added to loadedSets. Current sets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
-                
-                if (renderer != null)
+            }
+
+            Debug.Log($"[PointSetManager] Loaded {loadedPoints} points out of {totalPoints} total points. " +
+                     $"Skipped {skippedCriticalPoints} points near critical line. " +
+                     $"Total reduction: {((1f - (float)loadedPoints/totalPoints) * 100):F1}% for set '{setName}'");
+
+            // Store the total points in the point set
+            pointSet.TotalPointsInFile = totalPoints;
+
+            // Ensure the name matches exactly what we're looking for
+            if (pointSet.Name != setName)
+            {
+                var originalSet = pointSet;
+                pointSet = new PointSet(setName, originalSet.Color, originalSet.SkipCriticalLine);
+                pointSet.TotalPointsInFile = originalSet.TotalPointsInFile;
+                foreach (var point in originalSet.Points)
                 {
-                    renderer.AddPointSet(pointSet);
-                    Debug.Log("[PointSetManager] Added point set to renderer");
+                    pointSet.AddPoint(point.x, point.y);
                 }
-                else
-                {
-                    Debug.LogWarning("[PointSetManager] Could not add point set to renderer: renderer is null");
-                }
+            }
+
+            loadedSets.Add(pointSet);
+            
+            if (renderer != null)
+            {
+                renderer.AddPointSet(pointSet);
             }
             else
             {
-                Debug.LogWarning("[PointSetManager] Failed to load point set from file");
+                Debug.LogWarning("[PointSetManager] Could not add point set to renderer: renderer is null");
             }
+
+            UpdateStats();
         }
         else
         {
@@ -268,13 +380,9 @@ public class PointSetManager : MonoBehaviour
     
     private void UnloadPointSet(PointSet set)
     {
-        Debug.Log($"[PointSetManager] UnloadPointSet called for {set.Name}");
-        Debug.Log($"[PointSetManager] Current loadedSets before removal: {string.Join(", ", loadedSets.Select(s => s.Name))}");
-        Debug.Log($"[PointSetManager] Renderer is {(renderer != null ? "not null" : "null")}");
         
         if (renderer != null)
         {
-            Debug.Log($"[PointSetManager] Calling RemovePointSet on renderer for {set.Name}");
             renderer.RemovePointSet(set);
         }
         else
@@ -283,7 +391,17 @@ public class PointSetManager : MonoBehaviour
         }
         
         loadedSets.Remove(set);
-        Debug.Log($"[PointSetManager] Removed {set.Name} from loadedSets. Remaining sets: {string.Join(", ", loadedSets.Select(s => s.Name))}");
+
+        UpdateStats();
+    }
+    
+    private void UpdateStats()
+    {
+        if (stats != null)
+        {
+            int totalPoints = loadedSets.Sum(set => set.TotalPointsInFile);
+            stats.UpdateTotalPoints(totalPoints);
+        }
     }
     
     public void SaveCurrentPoint()
@@ -297,17 +415,25 @@ public class PointSetManager : MonoBehaviour
         string filePath = Path.Combine(pointsDirectoryPath, FAVORITES_FILE);
         bool isNewFile = !File.Exists(filePath);
         
-        // If this is the first save, create the file with header
+        // If this is the first save, create the file with header and documentation
         if (isNewFile)
         {
-            string header = $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)}\n";
-            File.WriteAllText(filePath, header);
+            var fileContents = new List<string>
+            {
+                "# Point Set File Format:",
+                "# Header: name,color,skipCriticalLine,useOptimization",
+                "# - name: Name of the point set",
+                "# - color: HTML color code (e.g. #FF0000 for red)",
+                "# - skipCriticalLine: Set to false to include points near 0.5",
+                "# - useOptimization: Set to false to load all points without optimization",
+                $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)},false,false\n"
+            };
+            File.WriteAllLines(filePath, fileContents);
             // Refresh the dropdown to include the new file
             RefreshPointSetList();
         }
         
         string newPoint = $"{app.Real:G17},{app.Index:G17}\n";  // Use G17 format to preserve full double precision
-        Debug.Log($"Saving point at ({app.Real:G17}, {app.Index:G17}) to {filePath}");
         File.AppendAllText(filePath, newPoint);
         
         // Always ensure Favorites is loaded and displayed after saving
@@ -420,7 +546,6 @@ public class PointSetManager : MonoBehaviour
     {
         // Save the test point set to a file in our points directory
         string filePath = Path.Combine(pointsDirectoryPath, $"{pointSet.Name}.csv");
-        Debug.Log($"Saving test point set to: {filePath}");
         
         // Create the header line
         var lines = new List<string>
@@ -465,7 +590,6 @@ public class PointSetManager : MonoBehaviour
         // Remove each test file
         foreach (var file in testFiles)
         {
-            Debug.Log($"Removing test point set file: {file}");
             File.Delete(file);
             
             // Also remove from loaded sets if loaded

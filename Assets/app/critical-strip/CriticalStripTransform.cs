@@ -38,8 +38,8 @@ public class CriticalStripTransform
         this.minIndex = minIndex;
         this.maxIndex = maxIndex;
         
-        Debug.Log($"[CriticalStripTransform] Initialized with viewport width: {viewport.rect.width}, " +
-                  $"critical threshold: {CriticalValueThreshold:F6} ({CRITICAL_LINE_PIXELS} pixels)");
+        // Debug.Log($"[CriticalStripTransform] Initialized with viewport width: {viewport.rect.width}, " +
+        //           $"critical threshold: {CriticalValueThreshold:F6} ({CRITICAL_LINE_PIXELS} pixels)");
     }
     
     // Convert from critical strip coordinates (real [0,1], index) to viewport coordinates
@@ -54,15 +54,8 @@ public class CriticalStripTransform
         // Adjust for viewport position
         x += viewportRect.rect.x;
         y += viewportRect.rect.y;
-        var result = new Vector2(x, y);
         
-        // Special logging for critical value 0.5
-        if (Mathf.Approximately(stripPos.x, 0.5f))
-        {
-            Debug.Log($"[CriticalStripTransform] CRITICAL VALUE: StripToViewport 0.5 -> {result.x / viewportRect.rect.width:F6}");
-        }
-        
-        return result;
+        return new Vector2(x, y);
     }
     
     // Convert from viewport coordinates to critical strip coordinates
@@ -118,7 +111,7 @@ public class CriticalStripTransform
         }
         minIndex = min;
         maxIndex = max;
-        Debug.Log($"[CriticalStripTransform] Index range updated: [{minIndex}, {maxIndex}]");
+        // Debug.Log($"[CriticalStripTransform] Index range updated: [{minIndex}, {maxIndex}]");
     }
     
     public float MinIndex => (float)minIndex;
