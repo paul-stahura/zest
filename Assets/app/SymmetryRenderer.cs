@@ -258,6 +258,10 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
             Draw.Line(Vector2.zero, pt, Color.green);
             if(numToDraw == 2) Draw.Line(pt, pt + inversePt, Color.red);
+
+            // print the angle between the two lines
+            var angle = Vector2.SignedAngle(_spiralCalculator.GetSpiral().zeta.ToVector2(), pt);
+            print(angle);
         }
     }
 

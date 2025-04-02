@@ -419,10 +419,13 @@ public class SpiralCalculator : MonoBehaviour
         var links = s.joints;
         var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
         var forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(index);
-        Vector zeta = s.zeta.ToVector();
-        // find the angle between forward bisector and zeta
-        var angle = Math.Atan2(zeta.y, zeta.x) - Math.Atan2(forwardBisector.y, forwardBisector.x);
-        return (float)angle;
+        
+        // get the signed angle between the forward bisector and the zeta
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = forwardBisector.Normalized();
+        // find the angle between intersectionPT and zeta
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+        return angle;
     }
 
     private void CalcForwardBisectorPath()
@@ -531,9 +534,11 @@ public class SpiralCalculator : MonoBehaviour
         Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
                                                     z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
         
-        Vector zeta = s.zeta.ToVector();
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = intersectionPT.Normalized();
         // find the angle between intersectionPT and zeta
-        var angle = Math.Atan2(zeta.y, zeta.x) - Math.Atan2(intersectionPT.y, intersectionPT.x);
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+
         return (float)angle;
     }
 

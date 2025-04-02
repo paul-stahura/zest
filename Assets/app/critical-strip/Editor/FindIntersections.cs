@@ -26,7 +26,7 @@ public static class FindIntersections
 {
     private const double MIN_INDEX = 3.0;
     private const double MAX_INDEX = 4.0;
-    private const double INDEX_STEP = 0.001;
+    private const double INDEX_STEP = 0.0001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
     
@@ -362,13 +362,13 @@ public static class FindIntersections
             ts[i] = t;
             angles[i] = GetForwardRhombusAngle(t, index);
         }
-
+        
+        // find the points where the angle jumps from -180 to 180 or vice versa
         for (int i = 0; i < resolution - 1; i++)
         {
-            // if the angle is aproximately PI, find when it exactly is
-            double a0 = angles[i] - Math.PI;
-            double a1 = angles[i + 1] - Math.PI;
-            if (a0 * a1 < 0 || System.Math.Abs(a0) < 1e-6 || System.Math.Abs(a1) < 1e-6)
+            double d0 = angles[i];
+            double d1 = angles[i + 1];
+            if (Math.Abs(d0 - d1) > 180)
             {
                 double low = ts[i];
                 double high = ts[i + 1];
@@ -376,8 +376,8 @@ public static class FindIntersections
                 {
                     double mid = (low + high) / 2.0;
                     float midAngle = GetForwardRhombusAngle(mid, index);
-                    double diff = midAngle - Math.PI;
-                    if (System.Math.Abs(diff) < 1e-6) { low = mid; high = mid; break; }
+                    if(Math.Abs(midAngle) < 1e-6) {low = mid; high = mid; break;} // found zero angle
+                    double diff = midAngle - angles[i + 1];
                     if (diff > 0)
                         low = mid;
                     else
@@ -386,14 +386,25 @@ public static class FindIntersections
                 double refinedT = (low + high) / 2.0;
 
                 angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                // add symmetric angle aswell
+                if (refinedT > 0.5)
+                {
+                    refinedT = 1 - refinedT;
+                    angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                }
+                else
+                {
+                    refinedT = 1 - refinedT;
+                    angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                }
             }
         }
     }
 
     private static float GetForwardRhombusAngle(double r, double index)
     {
-        return SpiralCalculator.GetForwardBisectorAngle(r, index);
-        // return SpiralCalculator.GetInverseReflectedAngle(r, index);
+        // return SpiralCalculator.GetForwardBisectorAngle(r, index);
+        return SpiralCalculator.GetInverseReflectedAngle(r, index);
     }
 
     private static void FindSymmetricIntersections(double index, List<(double real, double index, Vector2 point)> intersectionData)
@@ -451,8 +462,8 @@ public static class FindIntersections
 
     private static Vector2 RhombusForward(float r, float i)
     {
-        return RhombusPoints.GetBPForward(r, i);
-        // return RhombusPoints.GetBPReflectedInverse(r, i);
+        // return RhombusPoints.GetBPForward(r, i);
+        return RhombusPoints.GetBPReflectedInverse(r, i);
     }
 
     private static void FindIntersectionsUniformForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
