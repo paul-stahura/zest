@@ -266,6 +266,12 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 newUP = new Vector2(-zeta.y, zeta.x).normalized;
                 target = _spiralCalculator.GetBpOneHalf().ToVector2();
                 break;
+
+            default:
+                target = spiral.joints[spiral.middleIndex];
+                target += midLink / 2f;
+                newUP = new Vector2(-midLink.y, midLink.x).normalized;
+                break;
         }
 
         // keep us upright
