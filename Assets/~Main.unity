@@ -2525,7 +2525,7 @@ MonoBehaviour:
     within the spirals. You can toggle between the following options:  None: Hides
     all links. All: Displays all available links. Middle: Shows links up to the designated
     "symmetry link" or middle link. Clock: Highlights the symmetry link along with
-    its immediate neighbors (+1 and -1).'
+    its immediate neighbors (+1 and -1). Last: shows the last link of the spiral.'
 --- !u!1 &53340556
 GameObject:
   m_ObjectHideFlags: 0
@@ -8660,7 +8660,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: "[Forward \u03C3 = 1/2] Draws the spiral at \u03C3 = 1/2"
+  description: "[Forward \u03C3 = 1/2] Draws the Riemann-Siegel Formula at \u03C3
+    = 1/2"
 --- !u!222 &225359784
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -11535,6 +11536,7 @@ GameObject:
   - component: {fileID: 333548231}
   - component: {fileID: 333548230}
   - component: {fileID: 333548229}
+  - component: {fileID: 333548232}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -11657,6 +11659,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 333548227}
   m_CullTransparentMesh: 1
+--- !u!114 &333548232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 333548227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 'Camera Tracking: Select elements to follow'
 --- !u!1 &333836060
 GameObject:
   m_ObjectHideFlags: 0
@@ -12254,7 +12269,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Inverse Reflected Spiral
+  description: The "Inverse Spiral" staring at zeta Euler Maclaurin and reflected
+    along the zeta vector.
 --- !u!222 &341179580
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -12944,7 +12960,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Forward Spiral
+  description: "[Forward Spiral] Draws each summed element or \u201Clink\u201D of
+    the Rieman-Siegel function when sigma = 1/2. When sigma is not 1/2, Euler-Maclaurin
+    summation is used instead."
 --- !u!1 &363048558
 GameObject:
   m_ObjectHideFlags: 0
@@ -25252,10 +25270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Real Path] Draws a line tracing the path of the Zeta function as
-    the real component changes. It provides a visual representation of how the function
-    evolves along the real axis.  When Riemann-Siegel is selected, Euler-Maclaurin
-    is used to calculate the real path'
+  description: Set the drawn line transparency
 --- !u!114 &653075602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30206,8 +30221,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Reverse Spiral] Rreflects the spiral along the "symmetry line" (A
-    bisector line between zeta and the origin.)'
+  description: '[Reverse Spiral] Reflects the forward spiral along the "symmetry
+    line" (A bisector line between zeta and the origin.)'
 --- !u!222 &784248956
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -33007,6 +33022,7 @@ GameObject:
   m_Component:
   - component: {fileID: 837606706}
   - component: {fileID: 837606707}
+  - component: {fileID: 837606708}
   m_Layer: 5
   m_Name: EmsForwardToggle
   m_TagString: Untagged
@@ -33083,6 +33099,21 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!114 &837606708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 837606705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "[Forward Spiral] Draws each summed element or \u201Clink\u201D of
+    the Riemann-Siegel function when sigma = 1/2. When sigma is not 1/2, Euler-Maclaurin
+    summation is used instead."
 --- !u!1 &841378489
 GameObject:
   m_ObjectHideFlags: 0
@@ -39453,7 +39484,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1004776042}
   - component: {fileID: 1004776047}
-  - component: {fileID: 1004776046}
   - component: {fileID: 1004776045}
   - component: {fileID: 1004776043}
   m_Layer: 5
@@ -39499,7 +39529,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Tell me more
+  description: Select Spiral to track
 --- !u!222 &1004776045
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -39508,19 +39538,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1004776041}
   m_CullTransparentMesh: 1
---- !u!114 &1004776046
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1004776041}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: tell me more
 --- !u!114 &1004776047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43072,7 +43089,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Eta Spiral
+  description: The EtaFormula method approximates the Riemann eta function by summing
+    an alternating series, where each term involves the cosine and sine of the logarithm
+    of n weighted by powers of n. The summation is computed for a large number of
+    iterations, refining the result by adjusting the real and imaginary components
+    based on the given complex input s = a + bi.
 --- !u!222 &1095900810
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -45886,7 +45907,7 @@ MonoBehaviour:
     within the spirals. You can toggle between the following options:  None: Hides
     all links. All: Displays all available links. Middle: Shows links up to the designated
     "symmetry link" or middle link. Clock: Highlights the symmetry link along with
-    its immediate neighbors (+1 and -1).'
+    its immediate neighbors (+1 and -1). Last: shows the last link of the spiral.'
 --- !u!114 &1154861290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59633,9 +59654,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: '[Real Path] Draws a line tracing the path of the Zeta function as
-    the real component changes. It provides a visual representation of how the function
-    evolves along the real axis.  When Riemann-Siegel is selected, Euler-Maclaurin
-    is used to calculate the real path'
+    the sigma component changes. It provides a visual representation of how the function
+    evolves along the sigma axis.  Euler-Maclaurin summation is used to calculate
+    the sigma path.'
 --- !u!1 &1469161745
 GameObject:
   m_ObjectHideFlags: 0
@@ -61916,10 +61937,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Real Path] Draws a line tracing the path of the Zeta function as
-    the real component changes. It provides a visual representation of how the function
-    evolves along the real axis.  When Riemann-Siegel is selected, Euler-Maclaurin
-    is used to calculate the real path'
+  description: Expand the number of links drawn
 --- !u!114 &1514181936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -66045,6 +66063,7 @@ GameObject:
   - component: {fileID: 1591866513}
   - component: {fileID: 1591866512}
   - component: {fileID: 1591866511}
+  - component: {fileID: 1591866514}
   m_Layer: 5
   m_Name: LinkTrackingOption
   m_TagString: Untagged
@@ -66171,6 +66190,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1591866509}
   m_CullTransparentMesh: 1
+--- !u!114 &1591866514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591866509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Change between spiral center and spiral link.
 --- !u!1 &1592228247
 GameObject:
   m_ObjectHideFlags: 0
@@ -72485,6 +72517,7 @@ GameObject:
   - component: {fileID: 1756548937}
   - component: {fileID: 1756548936}
   - component: {fileID: 1756548935}
+  - component: {fileID: 1756548938}
   m_Layer: 5
   m_Name: ColorBisectorOptionsToggle
   m_TagString: Untagged
@@ -72572,6 +72605,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1756548933}
   m_CullTransparentMesh: 1
+--- !u!114 &1756548938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756548933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Color Middle Links] This option highlights the symmetry link and
+    its immediate neighbors (+1 and -1) with distinct colors.'
 --- !u!1 &1758319370
 GameObject:
   m_ObjectHideFlags: 0
@@ -74672,7 +74719,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Inverse Spiral
+  description: '[Inverse Spiral] The inverse sum of the Riemann Siegel Formula using
+    the friggama function. [Chi*] an estimate of the angle and magnitude computed
+    by the friggama function. '
 --- !u!222 &1799302400
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -75425,6 +75474,7 @@ GameObject:
   - component: {fileID: 1821792331}
   - component: {fileID: 1821792330}
   - component: {fileID: 1821792329}
+  - component: {fileID: 1821792332}
   m_Layer: 5
   m_Name: SpiralTransparencyMOT
   m_TagString: Untagged
@@ -75510,6 +75560,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1821792327}
   m_CullTransparentMesh: 1
+--- !u!114 &1821792332
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1821792327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Set the drawn line transparency
 --- !u!1 &1823739778
 GameObject:
   m_ObjectHideFlags: 0
@@ -76227,7 +76290,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Chi Reflected
+  m_text: Chi* Reflected
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -76254,7 +76317,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.9
+  m_fontSize: 16.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -79512,7 +79575,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Chi
+  m_text: Chi* (estimate)
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -79539,7 +79602,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 17.9
+  m_fontSize: 16.2
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -82000,6 +82063,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1962261595}
+  - component: {fileID: 1962261596}
   m_Layer: 5
   m_Name: OptionSelect
   m_TagString: Untagged
@@ -82028,6 +82092,21 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1962261596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1962261594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Select Cam Tracking category. Afterwards, elements will be automatically
+    tracked by drawn priority. You can change what exact element is being tracked
+    by exploring additional category settings.
 --- !u!1 &1962322060
 GameObject:
   m_ObjectHideFlags: 0
@@ -83690,6 +83769,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1986857996}
   - component: {fileID: 1986857997}
+  - component: {fileID: 1986857998}
   m_Layer: 5
   m_Name: ToggleExtendSpiral
   m_TagString: Untagged
@@ -83766,6 +83846,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1986857998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1986857995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Expand the number of links drawn
 --- !u!1 &1986932932
 GameObject:
   m_ObjectHideFlags: 0
@@ -89645,7 +89738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   description: '[Spiral] Customize spiral visualization: links to display, formula
-    selection, real value variations, and reflections'
+    selection, and reflections'
 --- !u!1 &2117007164
 GameObject:
   m_ObjectHideFlags: 0
