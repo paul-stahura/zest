@@ -58,6 +58,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
 
         SubSpirals();
+
+        // init
+        _emsForwardToggle.isOn = true;
     }
 
     public override void DrawShapes(Camera cam)

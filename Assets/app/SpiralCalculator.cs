@@ -417,11 +417,12 @@ public class SpiralCalculator : MonoBehaviour
     {
         _forwardBisectorPath = new Vector2[RealPathLength];
         var pathlength = _forwardBisectorPath.Length;
-        for(int i = 0; i < pathlength; i++)
+        for(int i = 0; i < pathlength - 1; i++)
         {
             var r = (float)i/pathlength;
             _forwardBisectorPath[i] = RhombusPoints.GetBPForward(r, GetIndex());
         }
+        _forwardBisectorPath[RealPathLength - 1] = RhombusPoints.GetBPForward(1.0, GetIndex());
         UpdateForwardBisectorPath?.Invoke(_forwardBisectorPath);
     }
 
@@ -482,11 +483,12 @@ public class SpiralCalculator : MonoBehaviour
         var index = GetIndex();
         _inverseBisectorPath = new Vector2[RealPathLength];
         var pathlength = _inverseBisectorPath.Length;
-        for(int i = 0; i < pathlength; i++)
+        for(int i = 0; i < pathlength - 1; i++)
         {
             var r = (float)i/pathlength;
             _inverseBisectorPath[i] = RhombusPoints.GetBPInverse(r, index);
         }
+        _inverseBisectorPath[RealPathLength - 1] = RhombusPoints.GetBPInverse(1.0, index);
         UpdateInverseSumPath?.Invoke(_inverseBisectorPath);
     }
 
@@ -580,7 +582,7 @@ public class SpiralCalculator : MonoBehaviour
     {
         _symmetryPath = new Vector2[RealPathLength];
         var pathlength = _symmetryPath.Length;
-        for(int i = 0; i < pathlength; i++)
+        for(int i = 0; i < pathlength - 1; i++)
         {
             var r = (float)i/pathlength;
             // var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
@@ -588,6 +590,7 @@ public class SpiralCalculator : MonoBehaviour
             // _symmetryPath[i] = BisectingLines.CrotchPoint(s);
             _symmetryPath[i] = RhombusPoints.GetBPSymmetry(r, index);
         }
+        _symmetryPath[RealPathLength - 1] = RhombusPoints.GetBPSymmetry(1.0, index);
         UpdateSymmetryPath?.Invoke(_symmetryPath);
     }
 

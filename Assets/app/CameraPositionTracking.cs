@@ -62,6 +62,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     [SerializeField] public Camera _cam;
 
     [Header("Tracking Settings")]
+    [SerializeField] private Button _refocusButton;
     private Vector2 _cameraTrackingOffset = Vector2.zero;
     private Vector2 _lastMousePosition;
     private bool _drag;
@@ -78,6 +79,12 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         _camTrackingDropdown.onValueChanged.AddListener((int v) => OnTargetChanged(v));
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+
+        _refocusButton = GameObject.Find("CamRefocusButton").GetComponent<Button>();
+        _refocusButton.onClick.AddListener(() =>
+        {
+            ResetCamOffset();
+        });
         
         _cam = Camera.main;
     }
@@ -100,7 +107,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
 
     private void OnTargetChanged(int v)
     {
-        RestCamOffset();
+        ResetCamOffset();
 
         switch((TrackingTarget)v)
         {
@@ -126,7 +133,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         }
     }
 
-    private void RestCamOffset()
+    private void ResetCamOffset()
     {
         _cameraTrackingOffset = Vector2.zero;
         _cameraUp = Vector2.up;
@@ -165,7 +172,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         if(_zetaTargetDropdown == null)
         {
             _zetaTargetDropdown = GameObject.Find("ZetaTargetDropdown").GetComponent<TMP_Dropdown>();
-            _zetaTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
+            _zetaTargetDropdown.onValueChanged.AddListener((v) => ResetCamOffset());
         }
 
         ZetaTarget zTarget = (ZetaTarget)_zetaTargetDropdown.value;
@@ -223,7 +230,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         if(_symmetryTargetDropdown == null)
         {
             _symmetryTargetDropdown = GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>();
-            _symmetryTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
+            _symmetryTargetDropdown.onValueChanged.AddListener((v) => ResetCamOffset());
         }
 
         SymmetryTarget sTarget = (SymmetryTarget)_symmetryTargetDropdown.value;
@@ -266,6 +273,12 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 newUP = new Vector2(-zeta.y, zeta.x).normalized;
                 target = _spiralCalculator.GetBpOneHalf().ToVector2();
                 break;
+
+            default:
+                target = spiral.joints[spiral.middleIndex];
+                target += midLink / 2f;
+                newUP = new Vector2(-midLink.y, midLink.x).normalized;
+                break;
         }
 
         // keep us upright
@@ -284,7 +297,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         if(_yinYangTargetDropdown == null)
         {
             _yinYangTargetDropdown = GameObject.Find("YinYangTargetDropdown").GetComponent<TMP_Dropdown>();
-            _yinYangTargetDropdown.onValueChanged.AddListener((v) => RestCamOffset());
+            _yinYangTargetDropdown.onValueChanged.AddListener((v) => ResetCamOffset());
         }
 
         bool isEms = SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0;
@@ -321,14 +334,14 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         if(_spiralLinkTrackingOption == null)
         {
             _spiralLinkTrackingOption = GameObject.Find("LinkTrackingOption").GetComponent<TMP_Dropdown>();
-            _spiralLinkTrackingOption.onValueChanged.AddListener((v) => RestCamOffset());
+            _spiralLinkTrackingOption.onValueChanged.AddListener((v) => ResetCamOffset());
 
             _spiralTargetSlider = GameObject.Find("SprialTrackingRangeSlider").GetComponent<Slider>();
             _spiralHandle = GameObject.Find("SpiralRangeHandleText").GetComponent<TMP_Text>();
             _spiralMaxText = GameObject.Find("SpiralTrackingRangeEnd").GetComponent<Text>();
 
             _spiralTargetSlider.onValueChanged.AddListener((float v) => _spiralHandle.text = ((int)v).ToString());
-            _spiralTargetSlider.onValueChanged.AddListener((float v) => RestCamOffset());
+            _spiralTargetSlider.onValueChanged.AddListener((float v) => ResetCamOffset());
         }
         
         ZetaTarget zTarget = ZetaTarget.Ems;

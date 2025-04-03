@@ -40,7 +40,8 @@ public class App : ImmediateModeShapeDrawer
     // Animation slider controls
     //
     [Header("Animation Controls")]
-    public Toggle animHoldToggle;
+    [SerializeField] private Toggle animHoldToggle;
+    [SerializeField] private MultiOptionToggle _animSpeedMOT; 
     public Slider animSpeed;
 
     [Header("Real Part Control")]
@@ -256,6 +257,11 @@ public class App : ImmediateModeShapeDrawer
 
 
         #region Animation Controls
+
+        _animSpeedMOT = GameObject.Find("AnimSpeedMOT")?.GetComponent<MultiOptionToggle>();
+        _animSpeedMOT.OnOptionChanged += ScaleAnimSpeed;
+
+        animHoldToggle = GameObject.Find("AnimHold")?.GetComponent<Toggle>();
         animHoldToggle.onValueChanged.AddListener(value =>
         {
             animSpeed.value = 0;
@@ -272,6 +278,21 @@ public class App : ImmediateModeShapeDrawer
 
         animHoldToggle.onValueChanged.Invoke(true);
         #endregion
+    }
+
+    private void ScaleAnimSpeed(int option)
+    {
+        switch (option)
+        {
+            case 0:
+                animSpeed.minValue = -3f;
+                animSpeed.maxValue = 3f;
+                break;
+            case 1:
+                animSpeed.minValue = -0.1f;
+                animSpeed.maxValue = 0.1f;
+                break;
+        }
     }
 
     float t = 0f;
