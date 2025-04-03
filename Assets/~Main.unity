@@ -9551,7 +9551,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Insert Index definition
+  description: "Index is a new input frame of reference based off insights gained
+    from the \u201Cbisector link\u201D. Index to imaginary = (\u03C0 (2n + 1)) /
+    (log(n + 1) - log(n)). \u2013 this conversion is exact. "
 --- !u!1 &265756611
 GameObject:
   m_ObjectHideFlags: 0
@@ -14573,10 +14575,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 162, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 81, y: -10}
+  m_SizeDelta: {x: 162, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &399531977
 MonoBehaviour:
@@ -15457,6 +15459,7 @@ GameObject:
   - component: {fileID: 419149058}
   - component: {fileID: 419149057}
   - component: {fileID: 419149056}
+  - component: {fileID: 419149059}
   m_Layer: 5
   m_Name: Animate Group
   m_TagString: Untagged
@@ -15552,6 +15555,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 419149054}
   m_CullTransparentMesh: 0
+--- !u!114 &419149059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419149054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "Animation slider that dynamically adjusts the index. Click the \u201CHold\u201D
+    toggle for the slider to maintain its position after the mouse is released. "
 --- !u!1 &420923178
 GameObject:
   m_ObjectHideFlags: 0
@@ -18683,7 +18700,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: instances of when zeta.y = 0
+  description: "Gram points are specific values where the Riemann-Siegel formula
+    changes sign. Gram's Law (which is not always true) states that the zeta function\u2019s
+    zeros alternate with the Gram points. "
 --- !u!114 &497908806
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27026,6 +27045,7 @@ GameObject:
   - component: {fileID: 718862924}
   - component: {fileID: 718862926}
   - component: {fileID: 718862925}
+  - component: {fileID: 718862927}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -27152,6 +27172,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 718862923}
   m_CullTransparentMesh: 1
+--- !u!114 &718862927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 718862923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle to draw the path of enabled zeta targets
 --- !u!1 &719080332
 GameObject:
   m_ObjectHideFlags: 0
@@ -35071,10 +35104,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 312, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &877597757
 MonoBehaviour:
@@ -35833,10 +35866,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 252, y: -10}
+  m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &893044182
 MonoBehaviour:
@@ -41203,6 +41236,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1057767085}
   - component: {fileID: 1057767086}
+  - component: {fileID: 1057767087}
   m_Layer: 5
   m_Name: Draw Origin Toggle
   m_TagString: Untagged
@@ -41279,6 +41313,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1057767087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1057767084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Draw Target at (0,0)
 --- !u!1 &1059734865
 GameObject:
   m_ObjectHideFlags: 0
@@ -41448,6 +41495,7 @@ GameObject:
   - component: {fileID: 1061486020}
   - component: {fileID: 1061486019}
   - component: {fileID: 1061486018}
+  - component: {fileID: 1061486021}
   m_Layer: 5
   m_Name: Zrs
   m_TagString: Untagged
@@ -41542,6 +41590,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1061486016}
   m_CullTransparentMesh: 1
+--- !u!114 &1061486021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1061486016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 'Riemann-Siegel function: Z(index)'
 --- !u!1 &1062663165
 GameObject:
   m_ObjectHideFlags: 0
@@ -43884,10 +43945,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 172, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1117548069
 MonoBehaviour:
@@ -46981,6 +47042,7 @@ GameObject:
   - component: {fileID: 1176921919}
   - component: {fileID: 1176921918}
   - component: {fileID: 1176921917}
+  - component: {fileID: 1176921920}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -47103,6 +47165,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1176921915}
   m_CullTransparentMesh: 1
+--- !u!114 &1176921920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1176921915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 'Zeta Targets: Zeta formula outputs and points of Interest.'
 --- !u!1 &1178537692
 GameObject:
   m_ObjectHideFlags: 0
@@ -48013,10 +48088,10 @@ RectTransform:
   m_Father: {fileID: 1470574545}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 192, y: -10}
+  m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1197057454
 MonoBehaviour:
@@ -48146,6 +48221,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1201580279}
   - component: {fileID: 1201580280}
+  - component: {fileID: 1201580281}
   m_Layer: 5
   m_Name: Trace Zeta Toggle
   m_TagString: Untagged
@@ -48222,6 +48298,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1201580281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1201580278}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle to draw the path of enabled zeta targets
 --- !u!1 &1202697896
 GameObject:
   m_ObjectHideFlags: 0
@@ -48525,6 +48614,7 @@ GameObject:
   - component: {fileID: 1205601754}
   - component: {fileID: 1205601753}
   - component: {fileID: 1205601752}
+  - component: {fileID: 1205601755}
   m_Layer: 5
   m_Name: Zps Inverse
   m_TagString: Untagged
@@ -48619,6 +48709,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1205601750}
   m_CullTransparentMesh: 1
+--- !u!114 &1205601755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1205601750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "Work in progress. General case for zeta when sigma is not 1/2. Currently
+    using same method as \u201CZps\u201D using the bisector link and a distance from
+    the joint."
 --- !u!1 &1210733920
 GameObject:
   m_ObjectHideFlags: 0
@@ -52792,6 +52897,7 @@ GameObject:
   - component: {fileID: 1316732302}
   - component: {fileID: 1316732304}
   - component: {fileID: 1316732303}
+  - component: {fileID: 1316732305}
   m_Layer: 5
   m_Name: Text (TMP) (1)
   m_TagString: Untagged
@@ -52916,6 +53022,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1316732301}
   m_CullTransparentMesh: 1
+--- !u!114 &1316732305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1316732301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Draw Target at (0,0)
 --- !u!1 &1322389908
 GameObject:
   m_ObjectHideFlags: 0
@@ -53362,6 +53481,7 @@ GameObject:
   - component: {fileID: 1329172964}
   - component: {fileID: 1329172963}
   - component: {fileID: 1329172962}
+  - component: {fileID: 1329172965}
   m_Layer: 5
   m_Name: Ems
   m_TagString: Untagged
@@ -53456,6 +53576,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1329172960}
   m_CullTransparentMesh: 1
+--- !u!114 &1329172965
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329172960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: EMS approximates the Riemann zeta function by summing a series of
+    terms, adding a basic correction term, and improving accuracy with higher-order
+    refinements based on the Pochhammer symbol and a convergence check.
 --- !u!1 &1330739666
 GameObject:
   m_ObjectHideFlags: 0
@@ -58546,6 +58681,7 @@ GameObject:
   - component: {fileID: 1452447450}
   - component: {fileID: 1452447449}
   - component: {fileID: 1452447448}
+  - component: {fileID: 1452447451}
   m_Layer: 5
   m_Name: Index Slider Group
   m_TagString: Untagged
@@ -58638,6 +58774,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1452447446}
   m_CullTransparentMesh: 1
+--- !u!114 &1452447451
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1452447446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Index value broken up into its integer and fractional parts for adaptable
+    control.
 --- !u!1 &1454532523
 GameObject:
   m_ObjectHideFlags: 0
@@ -63930,6 +64080,7 @@ GameObject:
   - component: {fileID: 1553880983}
   - component: {fileID: 1553880982}
   - component: {fileID: 1553880981}
+  - component: {fileID: 1553880984}
   m_Layer: 5
   m_Name: RAV
   m_TagString: Untagged
@@ -64023,6 +64174,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1553880979}
   m_CullTransparentMesh: 1
+--- !u!114 &1553880984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1553880979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "Along the vector or first leg of the \u201CBisector legs at 1/2\"
+    there is a point perpendicular to zeta. This is drawn as the Right Angle Vertex
+    or (RAV)"
 --- !u!1 &1555867993
 GameObject:
   m_ObjectHideFlags: 0
@@ -66319,6 +66485,7 @@ GameObject:
   - component: {fileID: 1600271839}
   - component: {fileID: 1600271838}
   - component: {fileID: 1600271837}
+  - component: {fileID: 1600271840}
   m_Layer: 5
   m_Name: Zps 1/2
   m_TagString: Untagged
@@ -66413,6 +66580,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1600271835}
   m_CullTransparentMesh: 1
+--- !u!114 &1600271840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600271835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "New Formula for Zeta when sigma = 1/2. A finite sum to the bisector
+    link + a distance from the joint discerned from the symmetry of the \u201CReverse
+    Spiral\u201D."
 --- !u!1 &1600598382
 GameObject:
   m_ObjectHideFlags: 0
@@ -71430,6 +71612,7 @@ GameObject:
   - component: {fileID: 1745838181}
   - component: {fileID: 1745838180}
   - component: {fileID: 1745838179}
+  - component: {fileID: 1745838182}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -71552,6 +71735,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1745838177}
   m_CullTransparentMesh: 1
+--- !u!114 &1745838182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1745838177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: 'Zeta Input: this section controls inputs for the various equations
+    throughout the app.'
 --- !u!1 &1746009237
 GameObject:
   m_ObjectHideFlags: 0
@@ -73309,6 +73506,7 @@ GameObject:
   - component: {fileID: 1771229987}
   - component: {fileID: 1771229986}
   - component: {fileID: 1771229985}
+  - component: {fileID: 1771229988}
   m_Layer: 5
   m_Name: Eta
   m_TagString: Untagged
@@ -73403,6 +73601,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1771229983}
   m_CullTransparentMesh: 1
+--- !u!114 &1771229988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1771229983}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: The EtaFormula method approximates the Riemann eta function by summing
+    an alternating series, where each term involves the cosine and sine of the logarithm
+    of n weighted by powers of n. The summation is computed for a large number of
+    iterations, refining the result by adjusting the real and imaginary components
+    based on the given complex input s = a + bi.
 --- !u!1 &1775308830
 GameObject:
   m_ObjectHideFlags: 0
@@ -76686,6 +76901,7 @@ GameObject:
   - component: {fileID: 1853838826}
   - component: {fileID: 1853838825}
   - component: {fileID: 1853838824}
+  - component: {fileID: 1853838827}
   m_Layer: 5
   m_Name: Zem3
   m_TagString: Untagged
@@ -76780,6 +76996,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1853838822}
   m_CullTransparentMesh: 1
+--- !u!114 &1853838827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853838822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: ZEM approximates the Riemann zeta function by summing a series of
+    terms, applying a correction and refining the result with higher-order corrections
+    using product expansions.
 --- !u!1 &1854965381
 GameObject:
   m_ObjectHideFlags: 0
@@ -82041,6 +82272,7 @@ GameObject:
   - component: {fileID: 1963658977}
   - component: {fileID: 1963658976}
   - component: {fileID: 1963658975}
+  - component: {fileID: 1963658978}
   m_Layer: 5
   m_Name: Real Slider Group
   m_TagString: Untagged
@@ -82134,6 +82366,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1963658973}
   m_CullTransparentMesh: 1
+--- !u!114 &1963658978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1963658973}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "\u03C3 value and fine tune controls."
 --- !u!1 &1963989546
 GameObject:
   m_ObjectHideFlags: 0
@@ -84932,7 +85177,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: instances of when bp and zeta length are equal at real values of 1
+  description: "Instances of when \u201CBisector Legs at 1/2\" and Bisector Legs
+    at 1/2 to Zeta are equal at sigma values of 1."
 --- !u!114 &2013800628
 MonoBehaviour:
   m_ObjectHideFlags: 0
