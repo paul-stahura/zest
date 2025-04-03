@@ -4,7 +4,7 @@
 # - color: HTML color code (e.g. #FF0000 for red)
 # - skipCriticalLine: Set to false to include points near 0.5
 # - useOptimization: Set to false to load all points without optimization
-Equal Legs 1-7,#00FFFF,true,true
+Angle @ Pi 1-7,#00FFFF,true,true
 0.006000000476837,1.027100000000000
 0.993999999523163,1.027100000000000
 0.025000000476837,1.027200000000000
