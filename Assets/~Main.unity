@@ -523,6 +523,7 @@ GameObject:
   - component: {fileID: 9834036}
   - component: {fileID: 9834035}
   - component: {fileID: 9834034}
+  - component: {fileID: 9834037}
   m_Layer: 5
   m_Name: InverseLegsOptionToggle
   m_TagString: Untagged
@@ -608,6 +609,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9834032}
   m_CullTransparentMesh: 1
+--- !u!114 &9834037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9834032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Inverse Legs] Work in progress. Bisector point calculated using
+    distance from joint when sigma = 1/2.'
 --- !u!1 &10564101
 GameObject:
   m_ObjectHideFlags: 0
@@ -3122,7 +3137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: The path of the bisector link at infinity
+  description: The Yin Yang path as Index approaches infinity
 --- !u!1 &70583822
 GameObject:
   m_ObjectHideFlags: 0
@@ -8143,8 +8158,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Symmetry (2.0)] Focuses on visualizing the inherent symmetry of
-    the Zeta function'
+  description: '[Symmetry] Focuses on visualizing the inherent symmetry of the Zeta
+    function'
 --- !u!1 &213588223
 GameObject:
   m_ObjectHideFlags: 0
@@ -8196,7 +8211,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Yin Yang] {FORMULA} calculates the path of the bisector link.'
+  description: "[Yin Yang] a calculation derived from the behavior of the \u201CReverse
+    Spiral\u201D bisector link when sigma = 1/2."
 --- !u!114 &213588226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14571,6 +14587,7 @@ GameObject:
   - component: {fileID: 399531976}
   - component: {fileID: 399531978}
   - component: {fileID: 399531977}
+  - component: {fileID: 399531979}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -14695,6 +14712,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 399531975}
   m_CullTransparentMesh: 1
+--- !u!114 &399531979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399531975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "[Bisector Legs at 1/2] New Formula for Zeta when sigma = 1/2. A finite
+    sum to the bisector link + a distance from the joint discerned from the symmetry
+    of the \u201CReverse Spiral\u201D. Calculated from the \u201CYin & Yang\u201D
+    teardrop formulas."
 --- !u!1 &403752919
 GameObject:
   m_ObjectHideFlags: 0
@@ -16554,8 +16587,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Forward Path] path of Forward bisector as sigma changes from 0-1.'
 --- !u!114 &439713627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19012,6 +19044,7 @@ GameObject:
   - component: {fileID: 504277643}
   - component: {fileID: 504277645}
   - component: {fileID: 504277644}
+  - component: {fileID: 504277646}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -19136,6 +19169,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 504277642}
   m_CullTransparentMesh: 1
+--- !u!114 &504277646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 504277642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &504295754
 GameObject:
   m_ObjectHideFlags: 0
@@ -21069,8 +21116,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Inverse Reflected Path] path of Inverse Reflected bisector as sigma
+    changes from 0-1.'
 --- !u!114 &546196942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26481,6 +26528,7 @@ GameObject:
   m_Component:
   - component: {fileID: 699920049}
   - component: {fileID: 699920050}
+  - component: {fileID: 699920051}
   m_Layer: 5
   m_Name: InverseReflectedLegsToggle
   m_TagString: Untagged
@@ -26557,6 +26605,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &699920051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699920048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Inverse Reflected Legs] Intersection of the Inverse reflected bisector
+    link and the forward bisector link.'
 --- !u!1 &707715550
 GameObject:
   m_ObjectHideFlags: 0
@@ -27462,6 +27524,7 @@ GameObject:
   - component: {fileID: 725592623}
   - component: {fileID: 725592622}
   - component: {fileID: 725592621}
+  - component: {fileID: 725592624}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -27584,6 +27647,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725592619}
   m_CullTransparentMesh: 1
+--- !u!114 &725592624
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 725592619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Yin Yang] Tear Drop Shape Calculations'
 --- !u!1 &728414652
 GameObject:
   m_ObjectHideFlags: 0
@@ -27998,6 +28074,7 @@ GameObject:
   m_Component:
   - component: {fileID: 736267567}
   - component: {fileID: 736267568}
+  - component: {fileID: 736267569}
   m_Layer: 5
   m_Name: ForwardLegsBPToZetaCircleToggle
   m_TagString: Untagged
@@ -28074,6 +28151,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &736267569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 736267566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &738022026
 GameObject:
   m_ObjectHideFlags: 0
@@ -28241,6 +28332,7 @@ GameObject:
   - component: {fileID: 740674832}
   - component: {fileID: 740674834}
   - component: {fileID: 740674833}
+  - component: {fileID: 740674835}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -28365,6 +28457,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 740674831}
   m_CullTransparentMesh: 1
+--- !u!114 &740674835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 740674831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Forward Legs] Work in progress. Bisector point calculated using
+    distance from joint when sigma = 1/2.'
 --- !u!1 &741564570
 GameObject:
   m_ObjectHideFlags: 0
@@ -28376,6 +28482,7 @@ GameObject:
   - component: {fileID: 741564571}
   - component: {fileID: 741564573}
   - component: {fileID: 741564572}
+  - component: {fileID: 741564574}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -28500,6 +28607,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 741564570}
   m_CullTransparentMesh: 1
+--- !u!114 &741564574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741564570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &742058483
 GameObject:
   m_ObjectHideFlags: 0
@@ -28816,7 +28937,6 @@ GameObject:
   m_Component:
   - component: {fileID: 745897157}
   - component: {fileID: 745897159}
-  - component: {fileID: 745897160}
   - component: {fileID: 745897161}
   m_Layer: 5
   m_Name: Stahura BP
@@ -28854,20 +28974,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 745897156}
   m_CullTransparentMesh: 1
---- !u!114 &745897160
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 745897156}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Stahura Bisector] Uses a new method to calculate the exact intersection
-    of the Bisector Link and the Middle Link.'
 --- !u!114 &745897161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30168,7 +30274,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Yin Yang] {FORMULA} calculates the path of the bisector link.'
+  description: "[Yin Yang] a calculation derived from the behavior of the \u201CReverse
+    Spiral\u201D bisector link when sigma = 1/2."
 --- !u!1 &784248953
 GameObject:
   m_ObjectHideFlags: 0
@@ -31280,7 +31387,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Yin Yang reflected along the Symmetry line
+  description: Yin Yang reflected along the Symmetry Bisector
 --- !u!114 &819537644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31767,8 +31874,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Forward Path] path of Forward bisector as sigma changes from 0-1.'
 --- !u!114 &822358941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33233,8 +33339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Infinity YinYang] The path of the bisector link as index reaches
-    infinity'
+  description: The Yin Yang path as Index approaches infinity
 --- !u!114 &841799731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33870,8 +33975,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Inverse Reflected Path] path of Inverse Reflected bisector as sigma
+    changes from 0-1.'
 --- !u!114 &856022052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34728,7 +34833,7 @@ GameObject:
   m_Component:
   - component: {fileID: 873043099}
   - component: {fileID: 873043101}
-  - component: {fileID: 873043100}
+  - component: {fileID: 873043102}
   m_Layer: 5
   m_Name: SymmetryRealPathToggle
   m_TagString: Untagged
@@ -34757,20 +34862,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &873043100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 873043098}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
 --- !u!114 &873043101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -34819,6 +34910,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &873043102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 873043098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Symmetry Path] Path of the Symmetry Bisector as sigma changes from
+    0-1'
 --- !u!1 &875429033
 GameObject:
   m_ObjectHideFlags: 0
@@ -35101,7 +35206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[INF Bisector Link] the bisector link as index reaches infinity'
+  description: the bisector link as index reaches infinity
 --- !u!1 &877597755
 GameObject:
   m_ObjectHideFlags: 0
@@ -35112,6 +35217,7 @@ GameObject:
   m_Component:
   - component: {fileID: 877597756}
   - component: {fileID: 877597757}
+  - component: {fileID: 877597758}
   m_Layer: 5
   m_Name: ZPSBPToZetaCircleToggle
   m_TagString: Untagged
@@ -35188,6 +35294,21 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &877597758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 877597755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle drawn from the Bisector at 1/2 to zeta Euler Maclaurin.
+    Used to draw insights for when leg lengths are equal, indicated by \u201Cwindow
+    points\u201D when sigma = 1."
 --- !u!1 &878416801
 GameObject:
   m_ObjectHideFlags: 0
@@ -35875,6 +35996,7 @@ GameObject:
   - component: {fileID: 893044181}
   - component: {fileID: 893044183}
   - component: {fileID: 893044182}
+  - component: {fileID: 893044184}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -35999,6 +36121,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 893044180}
   m_CullTransparentMesh: 1
+--- !u!114 &893044184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 893044180}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle drawn from the Bisector at 1/2 to zeta Euler Maclaurin.
+    Used to draw insights for when leg lengths are equal, indicated by \u201Cwindow
+    points\u201D when sigma = 1."
 --- !u!1 &899520859
 GameObject:
   m_ObjectHideFlags: 0
@@ -38066,7 +38203,7 @@ GameObject:
   m_Component:
   - component: {fileID: 961978932}
   - component: {fileID: 961978934}
-  - component: {fileID: 961978933}
+  - component: {fileID: 961978935}
   m_Layer: 5
   m_Name: ReverseLinkToggle
   m_TagString: Untagged
@@ -38095,20 +38232,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &961978933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 961978931}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
 --- !u!114 &961978934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38157,6 +38280,19 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &961978935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961978931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Reverse Link] the Bisector link of the Reverse spiral'
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -42652,6 +42788,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1079409819}
   - component: {fileID: 1079409820}
+  - component: {fileID: 1079409821}
   m_Layer: 5
   m_Name: SymmetryToggle
   m_TagString: Untagged
@@ -42728,6 +42865,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1079409821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079409818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Symmetry Bisector] point of intersection between the Forward and
+    Reverse spiral bisector links.'
 --- !u!1 &1085795668
 GameObject:
   m_ObjectHideFlags: 0
@@ -43943,6 +44094,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1117548068}
   - component: {fileID: 1117548069}
+  - component: {fileID: 1117548070}
   m_Layer: 5
   m_Name: ZPSBisectorToggle
   m_TagString: Untagged
@@ -44019,6 +44171,22 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1117548070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117548067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "[Bisector Legs at 1/2] New Formula for Zeta when sigma = 1/2. A finite
+    sum to the bisector link + a distance from the joint discerned from the symmetry
+    of the \u201CReverse Spiral\u201D. Calculated from the \u201CYin & Yang\u201D
+    teardrop formulas."
 --- !u!1 &1119424243
 GameObject:
   m_ObjectHideFlags: 0
@@ -46015,6 +46183,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1155333331}
   - component: {fileID: 1155333332}
+  - component: {fileID: 1155333333}
   m_Layer: 5
   m_Name: InverseLegsBPToZetaCircleToggle
   m_TagString: Untagged
@@ -46091,6 +46260,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1155333333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1155333330}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &1155685400
 GameObject:
   m_ObjectHideFlags: 0
@@ -46304,6 +46487,7 @@ GameObject:
   - component: {fileID: 1158996995}
   - component: {fileID: 1158996997}
   - component: {fileID: 1158996996}
+  - component: {fileID: 1158996998}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -46428,6 +46612,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1158996994}
   m_CullTransparentMesh: 1
+--- !u!114 &1158996998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1158996994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Inverse Legs] Work in progress. Bisector point calculated using
+    distance from joint when sigma = 1/2.'
 --- !u!1 &1163916891
 GameObject:
   m_ObjectHideFlags: 0
@@ -53885,7 +54083,7 @@ GameObject:
   - component: {fileID: 1338529756}
   - component: {fileID: 1338529759}
   - component: {fileID: 1338529758}
-  - component: {fileID: 1338529757}
+  - component: {fileID: 1338529760}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -53913,20 +54111,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 162, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1338529757
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1338529755}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
 --- !u!114 &1338529758
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54024,6 +54208,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1338529755}
   m_CullTransparentMesh: 1
+--- !u!114 &1338529760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1338529755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Reverse Link] the Bisector link of the Reverse spiral'
 --- !u!1 &1338553075
 GameObject:
   m_ObjectHideFlags: 0
@@ -57295,6 +57492,7 @@ GameObject:
   - component: {fileID: 1414653938}
   - component: {fileID: 1414653940}
   - component: {fileID: 1414653939}
+  - component: {fileID: 1414653941}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -57419,6 +57617,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1414653937}
   m_CullTransparentMesh: 1
+--- !u!114 &1414653941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414653937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Inverse Reflected Legs] Intersection of the Inverse reflected bisector
+    link and the forward bisector link.'
 --- !u!1 &1415006956
 GameObject:
   m_ObjectHideFlags: 0
@@ -57627,8 +57839,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Inverse Path] path of Inverse bisector as sigma changes from 0-1.'
 --- !u!114 &1418617846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63745,7 +63956,6 @@ GameObject:
   - component: {fileID: 1549615631}
   - component: {fileID: 1549615634}
   - component: {fileID: 1549615633}
-  - component: {fileID: 1549615632}
   m_Layer: 5
   m_Name: YinYangFormula
   m_TagString: Untagged
@@ -63782,19 +63992,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1549615632
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1549615630}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: Yin Yang Transparency
 --- !u!114 &1549615633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68342,7 +68539,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[INF Bisector Link] the bisector link as index reaches infinity'
+  description: the bisector link as index reaches infinity
 --- !u!114 &1651603926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69989,6 +70186,7 @@ GameObject:
   - component: {fileID: 1713771664}
   - component: {fileID: 1713771666}
   - component: {fileID: 1713771665}
+  - component: {fileID: 1713771667}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -70113,6 +70311,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1713771663}
   m_CullTransparentMesh: 1
+--- !u!114 &1713771667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1713771663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Symmetry Bisector] point of intersection between the Forward and
+    Reverse spiral bisector links.'
 --- !u!1 &1717182856
 GameObject:
   m_ObjectHideFlags: 0
@@ -72251,7 +72463,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1750319376}
   - component: {fileID: 1750319378}
-  - component: {fileID: 1750319377}
+  - component: {fileID: 1750319379}
   m_Layer: 5
   m_Name: LinksToSpiralsToggle
   m_TagString: Untagged
@@ -72280,20 +72492,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1750319377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1750319375}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Links and Spirals] Draws  connections between the joints of links
-    and the center of the spirals. Emphasizing their symmetry.'
 --- !u!114 &1750319378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72354,6 +72552,20 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   m_IsOn: 0
+--- !u!114 &1750319379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1750319375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Links to Spirals] a tool emphasizing the symmetry between the first
+    few links and the positions of the spirals. Most prominent at sigma = 1/2'
 --- !u!1 &1753724864
 GameObject:
   m_ObjectHideFlags: 0
@@ -73259,7 +73471,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Yin Yang] {FORMULA} calculates the path of the bisector link.'
+  description: "[Yin Yang] a calculation derived from the behavior of the \u201CReverse
+    Spiral\u201D bisector link when sigma = 1/2."
 --- !u!1 &1767834710
 GameObject:
   m_ObjectHideFlags: 0
@@ -76070,8 +76283,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] The link of the Riemman Siegel reverse spiral that
-    intersects along the symmetry line.'
+  description: A bisector link created from the fractional part of the index, connection
+    the points along the Yin and Yang Paths.
 --- !u!1 &1842078771
 GameObject:
   m_ObjectHideFlags: 0
@@ -78653,8 +78866,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
+  description: '[Inverse Path] path of Inverse bisector as sigma changes from 0-1.'
 --- !u!114 &1882836321
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79204,6 +79416,7 @@ GameObject:
   - component: {fileID: 1898519608}
   - component: {fileID: 1898519607}
   - component: {fileID: 1898519606}
+  - component: {fileID: 1898519609}
   m_Layer: 5
   m_Name: ForwardLegsOptionToggle
   m_TagString: Untagged
@@ -79289,6 +79502,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1898519604}
   m_CullTransparentMesh: 1
+--- !u!114 &1898519609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1898519604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Forward Legs] Work in progress. Bisector point calculated using
+    distance from joint when sigma = 1/2.'
 --- !u!1 &1902568536
 GameObject:
   m_ObjectHideFlags: 0
@@ -80689,7 +80916,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Yin Yang reflected along the Symmetry line
+  description: Yin Yang reflected along the Symmetry Bisector
 --- !u!1 &1940320203
 GameObject:
   m_ObjectHideFlags: 0
@@ -81902,6 +82129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1955199236}
   - component: {fileID: 1955199237}
+  - component: {fileID: 1955199238}
   m_Layer: 5
   m_Name: InverseReflectedZetaCircleToggle
   m_TagString: Untagged
@@ -81978,6 +82206,20 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &1955199238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1955199235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &1959320859
 GameObject:
   m_ObjectHideFlags: 0
@@ -83355,7 +83597,7 @@ GameObject:
   - component: {fileID: 1979377760}
   - component: {fileID: 1979377763}
   - component: {fileID: 1979377762}
-  - component: {fileID: 1979377761}
+  - component: {fileID: 1979377764}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -83383,20 +83625,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1979377761
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1979377759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  description: '[Bisector Link] Draws the middle link of the spiral, reflected along
-    the symmetry line that bisects the Zeta function and the origin.'
 --- !u!114 &1979377762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83494,6 +83722,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1979377759}
   m_CullTransparentMesh: 1
+--- !u!114 &1979377764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979377759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: '[Symmetry Path] Path of the Symmetry Bisector as sigma changes from
+    0-1'
 --- !u!1 &1981244312
 GameObject:
   m_ObjectHideFlags: 0
@@ -85739,6 +85981,7 @@ GameObject:
   - component: {fileID: 2027847380}
   - component: {fileID: 2027847379}
   - component: {fileID: 2027847378}
+  - component: {fileID: 2027847381}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -85778,8 +86021,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Links and Spirals] Draws  connections between the joints of links
-    and the center of the spirals. Emphasizing their symmetry.'
+  description: '[Links to Spirals] a tool emphasizing the symmetry between the first
+    few links and the positions of the spirals. Most prominent at sigma = 1/2'
 --- !u!114 &2027847379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85877,6 +86120,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2027847376}
   m_CullTransparentMesh: 1
+--- !u!114 &2027847381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2027847376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Tell me more
 --- !u!1 &2029315105
 GameObject:
   m_ObjectHideFlags: 0
@@ -86380,7 +86636,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: Tell me more
+  description: A bisector link created from the fractional part of the index, connection
+    the points along the Yin and Yang Paths.
 --- !u!114 &2036540336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91415,6 +91672,7 @@ GameObject:
   - component: {fileID: 2140619350}
   - component: {fileID: 2140619352}
   - component: {fileID: 2140619351}
+  - component: {fileID: 2140619353}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -91539,6 +91797,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2140619349}
   m_CullTransparentMesh: 1
+--- !u!114 &2140619353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140619349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: "A circle to draw insights about equal leg lengths or \u201Cpseudo
+    zeros\u201D when sigma is not 1/2."
 --- !u!1 &2142048063
 GameObject:
   m_ObjectHideFlags: 0
