@@ -21,6 +21,10 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float overshootScale = 10f;   // Maximum scale during rubber band effect
     [SerializeField] private GameObject pointPrefab;      // Prefab used to create point objects
     
+    [Header("Critical Line")]
+    [SerializeField] private Color criticalLineColor = new Color(1, 1, 1, 0.1f);  // Very faint white color
+    [SerializeField] private float criticalLineWidth = 1f;  // Width of the critical line in pixels
+    private RectTransform criticalLine;  // Reference to the critical line object
     
     [Header("Current Position Indicator")]
     [SerializeField] private float currentPosSize = 8;        // Size of the current position indicator
@@ -89,6 +93,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private void Start()
     {
         InitializeTransform();
+        
+        // Initialize the critical line
+        if (isInitialized)
+        {
+            InitializeCriticalLine();
+        }
         
         // Initialize the current position indicator after transform is ready
         if (isInitialized && app != null)
@@ -908,5 +918,30 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     public CriticalStripTransform GetTransform()
     {
         return transform;
+    }
+
+    /// <summary>
+    /// Initializes the critical line at x=0.5
+    /// </summary>
+    private void InitializeCriticalLine()
+    {
+        // Create critical line
+        GameObject lineObj = new GameObject("CriticalLine");
+        lineObj.transform.SetParent(transform.ViewportRect, false);
+        criticalLine = lineObj.AddComponent<RectTransform>();
+        Image lineImage = lineObj.AddComponent<Image>();
+        
+        // Configure critical line
+        lineImage.color = criticalLineColor;
+        
+        // Set the line to be anchored at the horizontal center and stretch vertically
+        criticalLine.anchorMin = new Vector2(0.5f, 0);
+        criticalLine.anchorMax = new Vector2(0.5f, 1);
+        criticalLine.pivot = new Vector2(0.5f, 0.5f);
+        criticalLine.sizeDelta = new Vector2(criticalLineWidth, 0); // Height will be set by anchors
+        
+        // Since we're using centered anchors (0.5), the anchoredPosition should be zero
+        // This will automatically place it at 50% of the viewport width
+        criticalLine.anchoredPosition = Vector2.zero;
     }
 } 
