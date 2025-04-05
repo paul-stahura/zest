@@ -413,6 +413,21 @@ public class SpiralCalculator : MonoBehaviour
         UpdateForwardBisector?.Invoke(_forwardBisector);
     }
 
+    public static float GetForwardBisectorAngle(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        var links = s.joints;
+        var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
+        var forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(index);
+        
+        // get the signed angle between the forward bisector and the zeta
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = forwardBisector.Normalized();
+        // find the angle between intersectionPT and zeta
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+        return angle;
+    }
+
     private void CalcForwardBisectorPath()
     {
         _forwardBisectorPath = new Vector2[RealPathLength];
@@ -493,6 +508,43 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInverseSumPath?.Invoke(_inverseBisectorPath);
     }
 
+    public static Vector InverseReflectedIntersection(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+
+        var z = s.zeta.ToVector();
+        var normal = z.Normalized();
+        var perpendicular = new Vector(-normal.y, normal.x);
+    
+        // get intersection of bisector and inverse link
+        Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                    z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+
+        return intersectionPT;
+    }
+
+    public static float GetInverseReflectedAngle(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+
+        var z = s.zeta.ToVector();
+        var normal = z.Normalized();
+        var perpendicular = new Vector(-normal.y, normal.x);
+    
+        // get intersection of bisector and inverse link
+        Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                    z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+        
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = intersectionPT.Normalized();
+        // find the angle between intersectionPT and zeta
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+
+        return (float)angle;
+    }
+
     private void CalcInverseReflectedBisectorPath()
     {
         _inverseRelfectedBisectorPath = new Vector2[RealPathLength];
@@ -518,7 +570,7 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInverseReflectedBisectorPath?.Invoke(_inverseRelfectedBisectorPath);
     }
 
-    private Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)
+    private static Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)
     {
         double a1 = p2.y - p1.y;
         double b1 = p1.x - p2.x;
