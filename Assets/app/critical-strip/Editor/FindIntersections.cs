@@ -24,7 +24,7 @@ using System;
 
 public static class FindIntersections
 {
-    private const double MIN_INDEX = 7.0;
+    private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 11.0;
     private const double INDEX_STEP = 0.0001;
     
@@ -90,6 +90,43 @@ public static class FindIntersections
 
         EditorUtility.ClearProgressBar();
         SaveToCSV(AnglePointsData);
+    }
+
+    [MenuItem("Critical Strip/Find ThetaTwo")]
+    public static void FindThetaTwo()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaData",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            FindThetaData(index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
+    }
+
+    private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
+    {
+        var twoPI = 2.0*Math.PI;
+        var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+        var phase = (ThetaTwo % twoPI) / twoPI;
+        var pt = new Vector(phase, index);
+        thetaData.Add((phase, index, pt));
     }
 
     private static void FindIntersectionsForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
