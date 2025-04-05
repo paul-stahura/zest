@@ -413,6 +413,21 @@ public class SpiralCalculator : MonoBehaviour
         UpdateForwardBisector?.Invoke(_forwardBisector);
     }
 
+    public static float GetForwardBisectorAngle(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        var links = s.joints;
+        var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
+        var forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(index);
+        
+        // get the signed angle between the forward bisector and the zeta
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = forwardBisector.Normalized();
+        // find the angle between intersectionPT and zeta
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+        return angle;
+    }
+
     private void CalcForwardBisectorPath()
     {
         _forwardBisectorPath = new Vector2[RealPathLength];
@@ -493,6 +508,43 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInverseSumPath?.Invoke(_inverseBisectorPath);
     }
 
+    public static Vector InverseReflectedIntersection(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+
+        var z = s.zeta.ToVector();
+        var normal = z.Normalized();
+        var perpendicular = new Vector(-normal.y, normal.x);
+    
+        // get intersection of bisector and inverse link
+        Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                    z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+
+        return intersectionPT;
+    }
+
+    public static float GetInverseReflectedAngle(double r, double index)
+    {
+        var s = new Zeta.Spiral(r, index, SpiralFormulas.EulerMaclauren, false);
+        Vector[] rev = new Zeta.Spiral(r, index, SpiralFormulas.RSInverseSum, false).joints;
+
+        var z = s.zeta.ToVector();
+        var normal = z.Normalized();
+        var perpendicular = new Vector(-normal.y, normal.x);
+    
+        // get intersection of bisector and inverse link
+        Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
+                                                    z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
+        
+        Vector2 zetaVector = s.zeta.ToVector().Normalized();
+        Vector2 bisectorVector = intersectionPT.Normalized();
+        // find the angle between intersectionPT and zeta
+        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+
+        return (float)angle;
+    }
+
     private void CalcInverseReflectedBisectorPath()
     {
         _inverseRelfectedBisectorPath = new Vector2[RealPathLength];
@@ -518,7 +570,7 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInverseReflectedBisectorPath?.Invoke(_inverseRelfectedBisectorPath);
     }
 
-    private Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)
+    private static Vector GetIntersection(Vector p1, Vector p2, Vector q1, Vector q2)
     {
         double a1 = p2.y - p1.y;
         double b1 = p1.x - p2.x;
@@ -686,6 +738,9 @@ public class SpiralCalculator : MonoBehaviour
 
         // Final approximation
         var chi = powerTerm * expTerm;// * errorTerm;
+        // var chi = StirlingGamma(s);
+        // var chi = StirlingLogGamma(s);
+
 
         // Apply the approximation to each joint
         Vector[] joints = new Vector[numLinks + 1];
@@ -699,5 +754,63 @@ public class SpiralCalculator : MonoBehaviour
         }
 
         return joints;
+    }
+
+    // Full Stirling series for Gamma(z)
+    public static Complex StirlingGamma(Complex z)
+    {
+        // Leading term: sqrt(2π) * z^(z - 1/2) * e^(-z)
+        Complex leadingTerm = Complex.Sqrt(2 * Math.PI) * Complex.Pow(z, z - 0.5) * Complex.Exp(-z);
+
+        // Series expansion terms
+        Complex seriesTerm = 1;
+        
+        // Higher-order terms in the series
+        seriesTerm += 1.0 / (12.0 * z);
+        seriesTerm += 1.0 / (288.0 * Complex.Pow(z, 2));
+        seriesTerm -= 139.0 / (51840.0 * Complex.Pow(z, 3));
+        seriesTerm -= 571.0 / (2488320.0 * Complex.Pow(z, 4));
+        // You can add more terms here for higher precision
+
+        // Final result: Leading term multiplied by series expansion
+        return leadingTerm * seriesTerm;
+    }
+
+    // Bernoulli numbers B2, B4, ..., B20
+    private static readonly double[] BernoulliNumbers = new double[]
+    {
+        1.0 / 6.0,                 // B2
+        -1.0 / 30.0,               // B4
+        1.0 / 42.0,                // B6
+        -1.0 / 30.0,               // B8
+        5.0 / 66.0,                // B10
+        -691.0 / 2730.0,           // B12
+        7.0 / 6.0,                 // B14
+        -3617.0 / 510.0,           // B16
+        43867.0 / 798.0,           // B18
+        -174611.0 / 330.0          // B20
+    };
+
+    /// <summary>
+    /// Computes log(Gamma(z)) using Stirling's approximation with 10 error terms.
+    /// </summary>
+    public static Complex StirlingLogGamma(Complex z)
+    {
+        if (z.Real <= 0 && z.Imaginary == 0)
+            throw new ArgumentException("Stirling approximation is not valid for non-positive real values.");
+
+        Complex halfLogTwoPi = 0.5 * Complex.Log(2 * Math.PI);
+        Complex term1 = (z - 0.5) * Complex.Log(z);
+        Complex term2 = -z;
+
+        Complex correction = Complex.Zero;
+        for (int n = 1; n <= 10; n++)
+        {
+            int k = 2 * n;
+            double B = BernoulliNumbers[n - 1];
+            correction += new Complex(B / (k * (k - 1)), 0) / Complex.Pow(z, k - 1);
+        }
+
+        return Complex.Exp(term1 + term2 + halfLogTwoPi + correction);
     }
 }

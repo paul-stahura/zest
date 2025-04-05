@@ -18,6 +18,12 @@ public class RhombusPoints : MonoBehaviour
         return p1 + link * (float)BisectorPoint.Djoint(index);
     }
 
+    // intersection of foraward and inverse reflected bisector links
+    public static Vector2 GetBPReflectedInverse(double real, double index)
+    {
+        return SpiralCalculator.InverseReflectedIntersection(real, index);
+    }
+
     public static Vector2 GetBPSymmetry(double real, double index)
     {
         Zeta.Spiral ems = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, false);

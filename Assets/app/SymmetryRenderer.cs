@@ -20,6 +20,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color _reverseLinkPointsColor;
     
     [SerializeField] private MultiOptionToggle _ForwardLegsToggle;
+    [SerializeField] private Toggle _tempForwardToZetaToggle;
     [SerializeField] private Toggle _ForwardLegsPathToggle;
     [SerializeField] private Toggle _ForwardLegsZetaCircleToggle;
     [SerializeField] private Color _forwardLegsColor;
@@ -58,6 +59,8 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _inverseReflectedLegsToggle = GameObject.Find("InverseReflectedLegsToggle").GetComponent<Toggle>();
         _inverseReflectedLegsPathToggle = GameObject.Find("InverseReflectedLegsPathToggle").GetComponent<Toggle>();
         _inverseReflectedZetaCircleToggle = GameObject.Find("InverseReflectedZetaCircleToggle").GetComponent<Toggle>();
+
+        _tempForwardToZetaToggle = GameObject.Find("TempForwardToZetaToggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
         _cam = Camera.main.GetComponent<CameraPositionTracking>();
@@ -99,6 +102,19 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(_inverseReflectedLegsToggle.isOn) DrawInverseReflectedLegs();
         if(_inverseReflectedLegsPathToggle.isOn) DrawInverseReflectedLegsPath();
         if(_inverseReflectedZetaCircleToggle.isOn) DrawInverseReflectedZetaCircle();
+
+        if(_tempForwardToZetaToggle.isOn)
+        {
+            using (Draw.StyleScope)
+            {
+                Draw.Color = Color.white;
+                Draw.Thickness = 1f;
+                var bp = _spiralCalculator.GetForwardBisector();
+                var zeta = _spiralCalculator.GetSpiral().zeta.ToVector();
+                Draw.UseDashes = true;
+                Draw.Line(bp, zeta, Color.red);
+            }
+        }
     }
 
     private void DrawBisectorLink()

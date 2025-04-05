@@ -425,6 +425,14 @@ public class BisectorPoint : MonoBehaviour
         );
     }
 
+    public static double ThetaTwo(double index)
+    {
+        var bp = BpOneHalf(index);
+        var theta1 = Math.Atan2(bp.y, bp.x);
+        var theta2 = -2*(Theta(Zeta.IndexToImag(index)) + Math.PI * (Math.Pow(Math.Ceiling(index), 2) - 1) + theta1);
+        return theta2;
+    }
+
     public static Vector RightAngleVertex(Vector bp, double index)
     {
         var theta1 = Math.Atan2(bp.y, bp.x);

@@ -20,12 +20,13 @@ using UnityEditor;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
+using System;
 
 public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
-    private const double MAX_INDEX = 7.0;
-    private const double INDEX_STEP = 0.01;
+    private const double MAX_INDEX = 11.0;
+    private const double INDEX_STEP = 0.0001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
     
@@ -36,23 +37,13 @@ public static class FindIntersections
     public static void FindRhombusIntersections()
     {
         var intersectionData = new List<(double real, double index, Vector2 point)>();
-        
-        // First check the known critical value with high resolution
-        Debug.Log($"Checking critical index value: {CRITICAL_INDEX:F15}");
-        FindIntersectionsUniformForIndex(CRITICAL_INDEX, intersectionData);
-        
+
         // Then check the range with regular steps
         int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
         int currentStep = 0;
 
         for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
         {
-            if (Mathf.Abs((float)(index - CRITICAL_INDEX)) < INDEX_STEP)
-            {
-                Debug.Log($"Skipping {index:F15} as it's close to critical value");
-                continue;
-            }
-            
             if (EditorUtility.DisplayCancelableProgressBar(
                 "Finding Intersections",
                 $"Processing index {index:F15}",
@@ -63,12 +54,79 @@ public static class FindIntersections
                 return;
             }
 
-            FindIntersectionsUniformForIndex(index, intersectionData);
+            // FindIntersectionsUniformForIndex(index, intersectionData);
+            FindSymmetricIntersections(index, intersectionData);
             currentStep++;
         }
 
         EditorUtility.ClearProgressBar();
         SaveToCSV(intersectionData);
+    }
+
+    [MenuItem("Critical Strip/Find Rhombus Angle Zero Points")]
+    public static void FindRhombusAngleZeroPoints()
+    {
+        var AnglePointsData = new List<(double real, double index, Vector2 point)>();
+        
+        // Then check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding Angle Zero Points",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Intersection finding cancelled.");
+                return;
+            }
+
+            FindAngleZeroPoints(index, AnglePointsData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(AnglePointsData);
+    }
+
+    [MenuItem("Critical Strip/Find ThetaTwo")]
+    public static void FindThetaTwo()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaData",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            FindThetaData(index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
+    }
+
+    private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
+    {
+        var twoPI = 2.0*Math.PI;
+        var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+        var phase = (ThetaTwo % twoPI) / twoPI;
+        var pt = new Vector(phase, index);
+        thetaData.Add((phase, index, pt));
     }
 
     private static void FindIntersectionsForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
@@ -327,6 +385,124 @@ public static class FindIntersections
         SaveToCSV(intersectionData);
     }
 
+    // finds points where the angle between bisector legs are zero
+    private static void FindAngleZeroPoints(double index, List<(double real, double index, Vector2 point)> angleData)
+    {
+        const int resolution = 1000;
+        double dt = 1.0 / resolution;
+        double[] angles = new double[resolution + 1];
+        double[] ts = new double[resolution + 1];
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            double t = i * dt;
+            ts[i] = t;
+            angles[i] = GetForwardRhombusAngle(t, index);
+        }
+        
+        // find the points where the angle jumps from -180 to 180 or vice versa
+        for (int i = 0; i < resolution - 1; i++)
+        {
+            double d0 = angles[i];
+            double d1 = angles[i + 1];
+            if (Math.Abs(d0 - d1) > 180)
+            {
+                double low = ts[i];
+                double high = ts[i + 1];
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    float midAngle = GetForwardRhombusAngle(mid, index);
+                    if(Math.Abs(midAngle) < 1e-6) {low = mid; high = mid; break;} // found zero angle
+                    double diff = midAngle - angles[i + 1];
+                    if (diff > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+                double refinedT = (low + high) / 2.0;
+
+                angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                // add symmetric angle aswell
+                if (refinedT > 0.5)
+                {
+                    refinedT = 1 - refinedT;
+                    angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                }
+                else
+                {
+                    refinedT = 1 - refinedT;
+                    angleData.Add((refinedT, index, RhombusForward((float)refinedT, (float)index)));
+                }
+            }
+        }
+    }
+
+    private static float GetForwardRhombusAngle(double r, double index)
+    {
+        return SpiralCalculator.GetForwardBisectorAngle(r, index);
+        // return SpiralCalculator.GetInverseReflectedAngle(r, index);
+    }
+
+    private static void FindSymmetricIntersections(double index, List<(double real, double index, Vector2 point)> intersectionData)
+    {
+        // fist low res pass to find approximate path and distances
+        const int resolution = 1000;
+        double dt = 1.0 / resolution;
+        double[] distances = new double[resolution + 1];
+        double[] ts = new double[resolution + 1];
+
+        for (int i = 0; i <= resolution; i++)
+        {
+            double t = i * dt;
+            ts[i] = t;
+            Vector2 sp = RhombusPoints.GetBPSymmetry((float)t, (float)index);
+            Vector2 fp = RhombusForward((float)t, (float)index);
+            distances[i] = Vector2.Distance(sp, fp);
+        }
+    
+        // analyze the distance to find when it changes from decreasing to increasing
+        // this will give us two points to use for the exact intersection
+        for (int i = 0; i < resolution - 1; i++)
+        {
+            double d0 = distances[i] - distances[i + 1];
+            double d1 = distances[i + 1] - distances[i + 2];
+            if (d0 > 0 && d1 < 0)
+            {
+                double low = ts[i];
+                double high = ts[i + 2];
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    float midDist = Vector2.Distance(
+                        RhombusPoints.GetBPSymmetry((float)mid, (float)index),
+                        RhombusForward((float)mid, (float)index)
+                    );
+                    double diff = midDist - distances[i + 1];
+                    if (diff > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+                double refinedT = (low + high) / 2.0;
+                Vector2 spFinal = RhombusPoints.GetBPSymmetry((float)refinedT, (float)index);
+                Vector2 fpFinal = RhombusForward((float)refinedT, (float)index);
+                Vector2 avgIntersection = (spFinal + fpFinal) / 2;
+                
+                // check false positives
+                if(Vector2.Distance(spFinal, fpFinal) > 0.1f) continue;
+
+                intersectionData.Add((refinedT, index, avgIntersection));
+            }
+        }
+    }
+
+    private static Vector2 RhombusForward(float r, float i)
+    {
+        return RhombusPoints.GetBPForward(r, i);
+        // return RhombusPoints.GetBPReflectedInverse(r, i);
+    }
+
     private static void FindIntersectionsUniformForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
     {
         const int resolution = 1000;
@@ -387,4 +563,4 @@ public static class FindIntersections
             }
         }
     }
-} 
+}
