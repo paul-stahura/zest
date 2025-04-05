@@ -444,7 +444,8 @@ public class SpiralCalculator : MonoBehaviour
     private void CalcChi(double index, double real)
     {
         var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
-        _chiSpiral = Chi(s.numLinks + _app._extendSpiral, real, index);
+        // _chiSpiral = Chi(s.numLinks + _app._extendSpiral, real, index);
+        _chiSpiral = ChiTitchmarsh(s.numLinks + _app._extendSpiral, new Complex(real, Zeta.IndexToImag(index)));
         UpdateChi?.Invoke(_chiSpiral);
     }
 
@@ -661,6 +662,40 @@ public class SpiralCalculator : MonoBehaviour
             var joint = new Vector(Math.Cos(imag * logn) / denom, Math.Sin(imag * logn) / denom);
             var a = new Vector(xMod2 * Math.Cos(xArg), xMod2 * Math.Sin(xArg));
             joints[n] = joints[n - 1] + Mult(a, joint);
+        }
+
+        return joints;
+    }
+
+    private Vector[] ChiTitchmarsh(int numLinks, Complex s)
+    {
+        double t = s.Imaginary;
+        double twoPi = 2.0 * Math.PI;
+
+        // Compute the power term: (t / 2π)^(1/2 - s)
+        Complex exponent = 0.5-s;
+        Complex powerBase = new Complex(t / twoPi, 0);
+        Complex powerTerm = Complex.Pow(powerBase, exponent);
+
+        // Compute the exponential term: e^{i(t + π/4)}
+        double angle = t + Math.PI / 4.0;
+        Complex expTerm = Complex.FromPolarCoordinates(1.0, angle); // e^{iθ}
+
+        // error term needs clarification
+        // Complex errorTerm = 1.0 + (1.0/(24.0*s*t));
+
+        // Final approximation
+        var chi = powerTerm * expTerm;// * errorTerm;
+
+        // Apply the approximation to each joint
+        Vector[] joints = new Vector[numLinks + 1];
+        Complex sum2 = Complex.Zero;
+        joints[0] = sum2.ToVector();
+        for (int n = 1; n <= numLinks; n++)
+        {
+            Complex next = Complex.Pow(n, s - 1) * chi;
+            sum2 += next;
+            joints[n] = sum2.ToVector();
         }
 
         return joints;
