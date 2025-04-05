@@ -738,6 +738,9 @@ public class SpiralCalculator : MonoBehaviour
 
         // Final approximation
         var chi = powerTerm * expTerm;// * errorTerm;
+        // var chi = StirlingGamma(s);
+        // var chi = StirlingLogGamma(s);
+
 
         // Apply the approximation to each joint
         Vector[] joints = new Vector[numLinks + 1];
@@ -751,5 +754,63 @@ public class SpiralCalculator : MonoBehaviour
         }
 
         return joints;
+    }
+
+    // Full Stirling series for Gamma(z)
+    public static Complex StirlingGamma(Complex z)
+    {
+        // Leading term: sqrt(2π) * z^(z - 1/2) * e^(-z)
+        Complex leadingTerm = Complex.Sqrt(2 * Math.PI) * Complex.Pow(z, z - 0.5) * Complex.Exp(-z);
+
+        // Series expansion terms
+        Complex seriesTerm = 1;
+        
+        // Higher-order terms in the series
+        seriesTerm += 1.0 / (12.0 * z);
+        seriesTerm += 1.0 / (288.0 * Complex.Pow(z, 2));
+        seriesTerm -= 139.0 / (51840.0 * Complex.Pow(z, 3));
+        seriesTerm -= 571.0 / (2488320.0 * Complex.Pow(z, 4));
+        // You can add more terms here for higher precision
+
+        // Final result: Leading term multiplied by series expansion
+        return leadingTerm * seriesTerm;
+    }
+
+    // Bernoulli numbers B2, B4, ..., B20
+    private static readonly double[] BernoulliNumbers = new double[]
+    {
+        1.0 / 6.0,                 // B2
+        -1.0 / 30.0,               // B4
+        1.0 / 42.0,                // B6
+        -1.0 / 30.0,               // B8
+        5.0 / 66.0,                // B10
+        -691.0 / 2730.0,           // B12
+        7.0 / 6.0,                 // B14
+        -3617.0 / 510.0,           // B16
+        43867.0 / 798.0,           // B18
+        -174611.0 / 330.0          // B20
+    };
+
+    /// <summary>
+    /// Computes log(Gamma(z)) using Stirling's approximation with 10 error terms.
+    /// </summary>
+    public static Complex StirlingLogGamma(Complex z)
+    {
+        if (z.Real <= 0 && z.Imaginary == 0)
+            throw new ArgumentException("Stirling approximation is not valid for non-positive real values.");
+
+        Complex halfLogTwoPi = 0.5 * Complex.Log(2 * Math.PI);
+        Complex term1 = (z - 0.5) * Complex.Log(z);
+        Complex term2 = -z;
+
+        Complex correction = Complex.Zero;
+        for (int n = 1; n <= 10; n++)
+        {
+            int k = 2 * n;
+            double B = BernoulliNumbers[n - 1];
+            correction += new Complex(B / (k * (k - 1)), 0) / Complex.Pow(z, k - 1);
+        }
+
+        return Complex.Exp(term1 + term2 + halfLogTwoPi + correction);
     }
 }
