@@ -24,8 +24,8 @@ using System;
 
 public static class FindIntersections
 {
-    private const double MIN_INDEX = 3.0;
-    private const double MAX_INDEX = 4.0;
+    private const double MIN_INDEX = 7.0;
+    private const double MAX_INDEX = 11.0;
     private const double INDEX_STEP = 0.0001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
@@ -403,8 +403,8 @@ public static class FindIntersections
 
     private static float GetForwardRhombusAngle(double r, double index)
     {
-        // return SpiralCalculator.GetForwardBisectorAngle(r, index);
-        return SpiralCalculator.GetInverseReflectedAngle(r, index);
+        return SpiralCalculator.GetForwardBisectorAngle(r, index);
+        // return SpiralCalculator.GetInverseReflectedAngle(r, index);
     }
 
     private static void FindSymmetricIntersections(double index, List<(double real, double index, Vector2 point)> intersectionData)
@@ -462,8 +462,8 @@ public static class FindIntersections
 
     private static Vector2 RhombusForward(float r, float i)
     {
-        // return RhombusPoints.GetBPForward(r, i);
-        return RhombusPoints.GetBPReflectedInverse(r, i);
+        return RhombusPoints.GetBPForward(r, i);
+        // return RhombusPoints.GetBPReflectedInverse(r, i);
     }
 
     private static void FindIntersectionsUniformForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
