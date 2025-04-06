@@ -625,23 +625,59 @@ public class Zeta
             int N = (int)SpiralMiddleIndex(this.index, 0) + 2 + extendSpiralCount;
 
             numLinks = N + 1;
-            joints = new Vector[numLinks];
-
-            
-
-            Complex sum2 = Complex.Zero;
-            joints[0] = sum2.ToVector();
-
-            for (int n = 1; n <= N; n++)
-            {
-                Complex next = Complex.Pow(n, s - 1) * NewRiemmanSeigalFormulaSums.GammaRatio(1-s);
-                Vector start = sum2.ToVector();
-                Vector end = (sum2 + next).ToVector();
-                sum2 += next;
-                joints[n] = end;
-            }
+            joints = ChiTitchmarsh(N, s);
             
             findSpirals();
+        }
+
+        private Vector[] ChiTitchmarsh(int numLinks, Complex s)
+        {
+            // Stirling log-gamma terms
+            Complex logGammaHalfS = StirlingApproximation(s / 2.0);
+            Complex logGammaHalfOneMinusS = StirlingApproximation((1.0 - s) / 2.0);
+
+            // log(π^{s - 1/2}) = (s - 0.5) * log(π)
+            Complex logPiTerm = (s - 0.5) * Complex.Log(Math.PI);
+
+            // Final log chi
+            Complex logChi = logPiTerm + logGammaHalfOneMinusS - logGammaHalfS;
+            Complex chiStirling = Complex.Exp(logChi);
+
+
+            // Apply the approximation to each joint
+            Vector[] joints = new Vector[numLinks + 1];
+            Complex sum2 = Complex.Zero;
+            joints[0] = sum2.ToVector();
+            for (int n = 1; n <= numLinks; n++)
+            {
+                Complex next = Complex.Pow(n, s - 1) * chiStirling;
+                sum2 += next;
+                joints[n] = sum2.ToVector();
+            }
+
+            return joints;
+        }
+
+        public static Complex StirlingApproximation(Complex z)
+        {
+            // // Stirling's approximation: ln(Γ(z)) ≈ (z - 0.5) * ln(z) - z + 0.5 * ln(2π)
+
+            Complex logTwoPi = Complex.Log(2.0 * Math.PI);
+            Complex logZ = Complex.Log(z);
+            Complex result = (z - 0.5) * logZ - z + 0.5 * logTwoPi;
+
+            // Correction terms (Bernoulli numbers / Stirling series)
+            Complex z2 = z * z;
+            Complex z3 = z2 * z;
+            Complex z5 = z3 * z2;
+            Complex z7 = z5 * z2;
+
+            result += 1.0 / (12.0 * z);
+            result -= 1.0 / (360.0 * z3);
+            result += 1.0 / (1260.0 * z5);
+            result -= 1.0 / (1680.0 * z7);
+
+            return result;
         }
 
         public void UpdateReimannSiegel(double realValue, double indexValue, bool useNewImag)
