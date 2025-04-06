@@ -721,25 +721,37 @@ public class SpiralCalculator : MonoBehaviour
 
     private Vector[] ChiTitchmarsh(int numLinks, Complex s)
     {
-        double t = s.Imaginary;
-        double twoPi = 2.0 * Math.PI;
+        // double t = s.Imaginary;
+        // double twoPi = 2.0 * Math.PI;
 
-        // Compute the power term: (t / 2π)^(1/2 - s)
-        Complex exponent = 0.5-s;
-        Complex powerBase = new Complex(t / twoPi, 0);
-        Complex powerTerm = Complex.Pow(powerBase, exponent);
+        // // Compute the power term: (t / 2π)^(1/2 - s)
+        // Complex exponent = 0.5-s;
+        // Complex powerBase = new Complex(t / twoPi, 0);
+        // Complex powerTerm = Complex.Pow(powerBase, exponent);
 
-        // Compute the exponential term: e^{i(t + π/4)}
-        double angle = t + Math.PI / 4.0;
-        Complex expTerm = Complex.FromPolarCoordinates(1.0, angle); // e^{iθ}
+        // // Compute the exponential term: e^{i(t + π/4)}
+        // double angle = t + Math.PI / 4.0;
+        // Complex expTerm = Complex.FromPolarCoordinates(1.0, angle); // e^{iθ}
 
-        // error term needs clarification
-        // Complex errorTerm = 1.0 + (1.0/(24.0*s*t));
+        // // error term needs clarification
+        // // Complex errorTerm = 1.0 + (1.0/(24.0*s*t));
 
-        // Final approximation
-        var chi = powerTerm * expTerm;// * errorTerm;
-        // var chi = StirlingGamma(s);
-        // var chi = StirlingLogGamma(s);
+        // // // Final approximation
+        // var chi = powerTerm * expTerm;// * errorTerm;
+        // // var chi = StirlingGamma(s);
+        // // var chi = StirlingLogGamma(s);
+        // // var chi = LanczosLogGamma(s);
+
+        // Stirling log-gamma terms
+        Complex logGammaHalfS = StirlingApproximation(s / 2.0);
+        Complex logGammaHalfOneMinusS = StirlingApproximation((1.0 - s) / 2.0);
+
+        // log(π^{s - 1/2}) = (s - 0.5) * log(π)
+        Complex logPiTerm = (s - 0.5) * Complex.Log(Math.PI);
+
+        // Final log chi
+        Complex logChi = logPiTerm + logGammaHalfOneMinusS - logGammaHalfS;
+        Complex chiStirling = Complex.Exp(logChi);
 
 
         // Apply the approximation to each joint
@@ -748,7 +760,7 @@ public class SpiralCalculator : MonoBehaviour
         joints[0] = sum2.ToVector();
         for (int n = 1; n <= numLinks; n++)
         {
-            Complex next = Complex.Pow(n, s - 1) * chi;
+            Complex next = Complex.Pow(n, s - 1) * chiStirling;
             sum2 += next;
             joints[n] = sum2.ToVector();
         }
@@ -756,61 +768,25 @@ public class SpiralCalculator : MonoBehaviour
         return joints;
     }
 
-    // Full Stirling series for Gamma(z)
-    public static Complex StirlingGamma(Complex z)
+    public static Complex StirlingApproximation(Complex z)
     {
-        // Leading term: sqrt(2π) * z^(z - 1/2) * e^(-z)
-        Complex leadingTerm = Complex.Sqrt(2 * Math.PI) * Complex.Pow(z, z - 0.5) * Complex.Exp(-z);
+        // // Stirling's approximation: ln(Γ(z)) ≈ (z - 0.5) * ln(z) - z + 0.5 * ln(2π)
 
-        // Series expansion terms
-        Complex seriesTerm = 1;
-        
-        // Higher-order terms in the series
-        seriesTerm += 1.0 / (12.0 * z);
-        seriesTerm += 1.0 / (288.0 * Complex.Pow(z, 2));
-        seriesTerm -= 139.0 / (51840.0 * Complex.Pow(z, 3));
-        seriesTerm -= 571.0 / (2488320.0 * Complex.Pow(z, 4));
-        // You can add more terms here for higher precision
+        Complex logTwoPi = Complex.Log(2.0 * Math.PI);
+        Complex logZ = Complex.Log(z);
+        Complex result = (z - 0.5) * logZ - z + 0.5 * logTwoPi;
 
-        // Final result: Leading term multiplied by series expansion
-        return leadingTerm * seriesTerm;
-    }
+        // Correction terms (Bernoulli numbers / Stirling series)
+        Complex z2 = z * z;
+        Complex z3 = z2 * z;
+        Complex z5 = z3 * z2;
+        Complex z7 = z5 * z2;
 
-    // Bernoulli numbers B2, B4, ..., B20
-    private static readonly double[] BernoulliNumbers = new double[]
-    {
-        1.0 / 6.0,                 // B2
-        -1.0 / 30.0,               // B4
-        1.0 / 42.0,                // B6
-        -1.0 / 30.0,               // B8
-        5.0 / 66.0,                // B10
-        -691.0 / 2730.0,           // B12
-        7.0 / 6.0,                 // B14
-        -3617.0 / 510.0,           // B16
-        43867.0 / 798.0,           // B18
-        -174611.0 / 330.0          // B20
-    };
+        result += 1.0 / (12.0 * z);
+        result -= 1.0 / (360.0 * z3);
+        result += 1.0 / (1260.0 * z5);
+        result -= 1.0 / (1680.0 * z7);
 
-    /// <summary>
-    /// Computes log(Gamma(z)) using Stirling's approximation with 10 error terms.
-    /// </summary>
-    public static Complex StirlingLogGamma(Complex z)
-    {
-        if (z.Real <= 0 && z.Imaginary == 0)
-            throw new ArgumentException("Stirling approximation is not valid for non-positive real values.");
-
-        Complex halfLogTwoPi = 0.5 * Complex.Log(2 * Math.PI);
-        Complex term1 = (z - 0.5) * Complex.Log(z);
-        Complex term2 = -z;
-
-        Complex correction = Complex.Zero;
-        for (int n = 1; n <= 10; n++)
-        {
-            int k = 2 * n;
-            double B = BernoulliNumbers[n - 1];
-            correction += new Complex(B / (k * (k - 1)), 0) / Complex.Pow(z, k - 1);
-        }
-
-        return Complex.Exp(term1 + term2 + halfLogTwoPi + correction);
+        return result;
     }
 }
