@@ -460,7 +460,7 @@ public class SpiralCalculator : MonoBehaviour
     {
         var s = Mathf.Approximately((float)real, 0.5f) ? GetZrs() : GetEms();
         // _chiSpiral = Chi(s.numLinks + _app._extendSpiral, real, index);
-        _chiSpiral = ChiTitchmarsh(s.numLinks + _app._extendSpiral, new Complex(real, Zeta.IndexToImag(index)));
+        _chiSpiral = ChiJoints(s.numLinks + _app._extendSpiral, new Complex(real, Zeta.IndexToImag(index)));
         UpdateChi?.Invoke(_chiSpiral);
     }
 
@@ -679,41 +679,101 @@ public class SpiralCalculator : MonoBehaviour
         UpdateInfLink?.Invoke(_infLink.Item1, _infLink.Item2);
     }
 
-    private Vector[] Chi(int numLinks, double real, double index)
+    // chat gpt approximation
+    // private Vector[] Chi(int numLinks, double real, double index)
+    // {
+    //     Vector Mult(Vector a, Vector b) => new Vector(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+    //     double Xmod2(double real, double index) => Math.Pow(Math.PI, real - 0.5) * Math.Pow(Zeta.IndexToImag(index) / 2.0, (1.0-2.0*real) / 2.0) * (1.0 + (1.0/(12.0*Zeta.IndexToImag(index)) * (1.0 - 2.0*real) * (3.0 - 2.0*real)));
+    //     double Theta(double imag)
+    //     {
+    //         return (imag / 2 * Math.Log(imag / (2 * Math.PI)) - imag / 2 - Math.PI / 8 +
+    //                 1 / (48 * imag) +
+    //                 7 / (5760 * Math.Pow(imag, 3)) +
+    //                 31 / (80640 * Math.Pow(imag, 5)) +
+    //                 127 / (430080 * Math.Pow(imag, 7)) +
+    //                 511 / (1216512 * Math.Pow(imag, 9)));
+    //     }
+    //     double deltal(double g, double t)
+    //     {
+    //         return - Math.Pow(g,2)/(6*Math.Pow(t,2))
+    //                 - 11*Math.Pow(g,4)/(360*Math.Pow(t,4))
+    //                 - 17*Math.Pow(g,6)/(1260*Math.Pow(t,6))
+    //                 - 31*Math.Pow(g,8)/(10080*Math.Pow(t,8));
+    //     }
+    //     double Xarg(double real, double index) => -2*Theta(Zeta.IndexToImag(index)) + deltal(real - 0.5, Zeta.IndexToImag(index));
+
+    //     var imag = Zeta.IndexToImag(index);
+    //     var xArg = Xarg(real, index);
+    //     var xMod2 = Xmod2(real, index);
+
+    //     Vector[] joints = new Vector[numLinks];
+    //     joints[0] = new Vector(0,0);
+    //     for(int n = 1; n < joints.Length; n++)
+    //     {
+    //         var denom = Math.Pow(n, 1.0-real);
+    //         var logn = Math.Log(n);
+    //         var joint = new Vector(Math.Cos(imag * logn) / denom, Math.Sin(imag * logn) / denom);
+    //         var a = new Vector(xMod2 * Math.Cos(xArg), xMod2 * Math.Sin(xArg));
+    //         joints[n] = joints[n - 1] + Mult(a, joint);
+    //     }
+
+    //     return joints;
+    // }
+
+    // Evaluate the chi(s) function for a given complex number s
+    public static Complex ChiBrian(Complex s)
     {
-        Vector Mult(Vector a, Vector b) => new Vector(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
-        double Xmod2(double real, double index) => Math.Pow(Math.PI, real - 0.5) * Math.Pow(Zeta.IndexToImag(index) / 2.0, (1.0-2.0*real) / 2.0) * (1.0 + (1.0/(12.0*Zeta.IndexToImag(index)) * (1.0 - 2.0*real) * (3.0 - 2.0*real)));
-        double Theta(double imag)
-        {
-            return (imag / 2 * Math.Log(imag / (2 * Math.PI)) - imag / 2 - Math.PI / 8 +
-                    1 / (48 * imag) +
-                    7 / (5760 * Math.Pow(imag, 3)) +
-                    31 / (80640 * Math.Pow(imag, 5)) +
-                    127 / (430080 * Math.Pow(imag, 7)) +
-                    511 / (1216512 * Math.Pow(imag, 9)));
-        }
-        double deltal(double g, double t)
-        {
-            return - Math.Pow(g,2)/(6*Math.Pow(t,2))
-                    - 11*Math.Pow(g,4)/(360*Math.Pow(t,4))
-                    - 17*Math.Pow(g,6)/(1260*Math.Pow(t,6))
-                    - 31*Math.Pow(g,8)/(10080*Math.Pow(t,8));
-        }
-        double Xarg(double real, double index) => -2*Theta(Zeta.IndexToImag(index)) + deltal(real - 0.5, Zeta.IndexToImag(index));
+        double pi = Math.PI;
+        Complex i = Complex.ImaginaryOne;
 
-        var imag = Zeta.IndexToImag(index);
-        var xArg = Xarg(real, index);
-        var xMod2 = Xmod2(real, index);
+        // Basic components
+        double absS = s.Magnitude;
+        double arg = Math.Atan2(s.Real, s.Imaginary);
+        
+        // (|s| / 2π)^(s - 1/2)
+        Complex baseTerm = absS / (2 * pi);
+        Complex exponent = s - 0.5;
+        Complex term1 = Complex.Pow(baseTerm, exponent);
 
-        Vector[] joints = new Vector[numLinks];
-        joints[0] = new Vector(0,0);
-        for(int n = 1; n < joints.Length; n++)
+        // e^(-s)
+        Complex term2 = Complex.Exp(-s);
+
+        // e^{imag(s) * arctan(real/imag)}
+        Complex term3 = Complex.Exp(s.Imaginary * arg);
+
+        // e^{-i * real * arctan(real/imag)}
+        Complex term4 = Complex.Exp(-i * s.Real * arg);
+
+        // 1 + e^{-π * imag} * e^{π i * real}
+        Complex term5 = 1 + Complex.Exp(-pi * s.Imaginary) * Complex.Exp(i * pi * s.Real);
+
+        // e^{i/2 * arctan(real/imag)}
+        Complex term6 = Complex.Exp((i / 2.0) * arg);
+
+        // e^{-π i / 4}
+        Complex term7 = Complex.Exp(-i * pi / 4.0);
+
+        // (1 + 1/(12s) + 1/(288s^2))
+        Complex term8 = 1 + (1.0 / (12 * s)) + (1.0 / (288 * s * s));
+
+        // Final expression
+        Complex denominator = term1 * term2 * term3 * term4 * term5 * term6 * term7 * term8;
+        Complex chi = 1.0 / denominator;
+
+        return chi;
+    }
+
+    private Vector[] ChiJoints(int numLinks, Complex s)
+    {
+        // Apply the approximation to each joint
+        Vector[] joints = new Vector[numLinks + 1];
+        Complex sum2 = Complex.Zero;
+        joints[0] = sum2.ToVector();
+        for (int n = 1; n <= numLinks; n++)
         {
-            var denom = Math.Pow(n, 1.0-real);
-            var logn = Math.Log(n);
-            var joint = new Vector(Math.Cos(imag * logn) / denom, Math.Sin(imag * logn) / denom);
-            var a = new Vector(xMod2 * Math.Cos(xArg), xMod2 * Math.Sin(xArg));
-            joints[n] = joints[n - 1] + Mult(a, joint);
+            Complex next = Complex.Pow(n, s - 1) * ChiBrian(s);
+            sum2 += next;
+            joints[n] = sum2.ToVector();
         }
 
         return joints;
@@ -721,27 +781,6 @@ public class SpiralCalculator : MonoBehaviour
 
     private Vector[] ChiTitchmarsh(int numLinks, Complex s)
     {
-        // double t = s.Imaginary;
-        // double twoPi = 2.0 * Math.PI;
-
-        // // Compute the power term: (t / 2π)^(1/2 - s)
-        // Complex exponent = 0.5-s;
-        // Complex powerBase = new Complex(t / twoPi, 0);
-        // Complex powerTerm = Complex.Pow(powerBase, exponent);
-
-        // // Compute the exponential term: e^{i(t + π/4)}
-        // double angle = t + Math.PI / 4.0;
-        // Complex expTerm = Complex.FromPolarCoordinates(1.0, angle); // e^{iθ}
-
-        // // error term needs clarification
-        // // Complex errorTerm = 1.0 + (1.0/(24.0*s*t));
-
-        // // // Final approximation
-        // var chi = powerTerm * expTerm;// * errorTerm;
-        // // var chi = StirlingGamma(s);
-        // // var chi = StirlingLogGamma(s);
-        // // var chi = LanczosLogGamma(s);
-
         // Stirling log-gamma terms
         Complex logGammaHalfS = StirlingApproximation(s / 2.0);
         Complex logGammaHalfOneMinusS = StirlingApproximation((1.0 - s) / 2.0);
