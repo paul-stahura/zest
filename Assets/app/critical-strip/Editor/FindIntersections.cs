@@ -235,21 +235,21 @@ public static class FindIntersections
         return d1 + d2 >= lineLength - buffer && d1 + d2 <= lineLength + buffer;
     }
 
-    private static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
+    private static void SaveToCSV(List<(double real, double index, Vector2 point)> dataPoints)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("Pseudo Zeros,#8800FF");
+        csv.AppendLine("New Data,#8800FF,false,true");
         
-        foreach (var (real, index, _) in intersections)
+        foreach (var (real, index, _) in dataPoints)
         {
             csv.AppendLine($"{real:F15},{index:F15}");
         }
         
-        string path = "Assets/Resources/CriticalStripPoints/intersections.csv";
+        string path = "Assets/Resources/CriticalStripPoints/NewData.csv";
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
-        Debug.Log($"[FindIntersections] Saved intersections to {path}");
+        Debug.Log($"[dataPoints] Saved points to {path}");
     }
 
     [MenuItem("Critical Strip/Test Known values for intersection")]
@@ -440,8 +440,8 @@ public static class FindIntersections
 
     private static float GetForwardRhombusAngle(double r, double index)
     {
-        return SpiralCalculator.GetForwardBisectorAngle(r, index);
-        // return SpiralCalculator.GetInverseReflectedAngle(r, index);
+        // return SpiralCalculator.GetForwardBisectorAngle(r, index);
+        return SpiralCalculator.GetInverseReflectedAngle(r, index);
     }
 
     private static void FindSymmetricIntersections(double index, List<(double real, double index, Vector2 point)> intersectionData)
@@ -484,23 +484,70 @@ public static class FindIntersections
                     else
                         high = mid;
                 }
-                double refinedT = (low + high) / 2.0;
-                Vector2 spFinal = RhombusPoints.GetBPSymmetry((float)refinedT, (float)index);
-                Vector2 fpFinal = RhombusForward((float)refinedT, (float)index);
-                Vector2 avgIntersection = (spFinal + fpFinal) / 2;
+                // double refinedT = (low + high) / 2.0;
+                // Vector2 spFinal = RhombusPoints.GetBPSymmetry((float)refinedT, (float)index);
+                // Vector2 fpFinal = RhombusForward((float)refinedT, (float)index);
+                // Vector2 avgIntersection = (spFinal + fpFinal) / 2;
                 
-                // check false positives
-                if(Vector2.Distance(spFinal, fpFinal) > 0.1f) continue;
+                // // check false positives
+                // if(Vector2.Distance(spFinal, fpFinal) > 0.1f) continue;
 
-                intersectionData.Add((refinedT, index, avgIntersection));
+                // intersectionData.Add((refinedT, index, avgIntersection));
+            
+                double refinedT = (low + high) / 2.0f;
+                var epsilon = 1e-2;
+                double tMin = refinedT - epsilon;
+                double tMax = refinedT + epsilon;
+
+                Vector2 fpA = RhombusForward((float)tMin, (float)index);
+                Vector2 fpB = RhombusForward((float)tMax, (float)index);
+                Vector2 spA = RhombusPoints.GetBPSymmetry((float)tMin, (float)index);
+                Vector2 spB = RhombusPoints.GetBPSymmetry((float)tMax, (float)index);
+
+                if (LineSegmentsIntersect(fpA, fpB, spA, spB, out Vector2 intersection))
+                {
+                    intersectionData.Add((refinedT, index, intersection));
+                }
             }
         }
     }
 
+    private static bool LineSegmentsIntersect(Vector2 p1, Vector2 p2, Vector2 q1, Vector2 q2, out Vector2 intersection)
+    {
+        intersection = Vector2.zero;
+
+        Vector2 r = p2 - p1;
+        Vector2 s = q2 - q1;
+        float rxs = Cross(r, s);
+        float qpxr = Cross(q1 - p1, r);
+
+        if (Math.Abs(rxs) < 1e-8f && Math.Abs(qpxr) < 1e-8f)
+            return false; // collinear
+
+        if (Math.Abs(rxs) < 1e-8f)
+            return false; // parallel
+
+        float t = Cross(q1 - p1, s) / rxs;
+        float u = Cross(q1 - p1, r) / rxs;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+        {
+            intersection = p1 + t * r;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static float Cross(Vector2 a, Vector2 b)
+    {
+        return a.x * b.y - a.y * b.x;
+    }
+
     private static Vector2 RhombusForward(float r, float i)
     {
-        return RhombusPoints.GetBPForward(r, i);
-        // return RhombusPoints.GetBPReflectedInverse(r, i);
+        // return RhombusPoints.GetBPForward(r, i);
+        return RhombusPoints.GetBPReflectedInverse(r, i);
     }
 
     private static void FindIntersectionsUniformForIndex(double index, List<(double real, double index, Vector2 point)> intersectionData)
