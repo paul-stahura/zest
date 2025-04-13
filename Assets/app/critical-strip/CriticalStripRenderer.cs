@@ -117,11 +117,18 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Configure image for raycasts only
         image.raycastTarget = true; // Keep raycast enabled
 
-        // Disable any Mask component if present as it blocks points
-        var mask = GetComponent<Mask>();
-        if (mask != null)
+        // Add or ensure we have a RectMask2D for clipping points
+        var mask = GetComponent<RectMask2D>();
+        if (mask == null)
         {
-            mask.enabled = false;
+            mask = gameObject.AddComponent<RectMask2D>();
+        }
+        
+        // Make sure standard Mask is disabled if it exists
+        var standardMask = GetComponent<Mask>();
+        if (standardMask != null)
+        {
+            standardMask.enabled = false;
         }
 
         // Make sure we have a RectTransform (required by [RequireComponent])
@@ -343,9 +350,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Convert strip coordinates to viewport
         var viewportPos = transform.StripToViewport(stripPos);
         
-        // Check if the point is within the viewport bounds
+        // Get the viewport rect and check if the point (including its size) is within the bounds
         var rect = transform.ViewportRect.rect;
-        if (viewportPos.y < rect.y || viewportPos.y > rect.y + rect.height)
+        float halfSize = pointSize * 0.5f;
+        
+        // Skip points entirely outside the viewport bounds (both x and y)
+        if (viewportPos.x + halfSize < rect.x || viewportPos.x - halfSize > rect.x + rect.width ||
+            viewportPos.y + halfSize < rect.y || viewportPos.y - halfSize > rect.y + rect.height)
         {
             // Point is outside viewport bounds, don't create it
             return;

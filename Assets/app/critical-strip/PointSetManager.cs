@@ -23,6 +23,11 @@ public class PointSetManager : MonoBehaviour
     [Tooltip("Controls how aggressively points are removed. Higher values remove more points")]
     [SerializeField] [Range(0.1f, 4.0f)] private float downsampleAggressiveness = 1f;
     
+    [Header("Points Mesh Setup")]
+    [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
+    [SerializeField] private Transform pointsContainer;
+    private Dictionary<PointSet, PointsMeshRenderer> pointsMeshInstances = new Dictionary<PointSet, PointsMeshRenderer>();
+    
     private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
     private const string FAVORITES_FILE = "favorite-points.csv";
     private const string FAVORITES_NAME = "Favorites";
@@ -361,13 +366,41 @@ public class PointSetManager : MonoBehaviour
 
             loadedSets.Add(pointSet);
             
-            if (renderer != null)
+            if (pointsMeshPrefab != null && pointsContainer != null)
             {
-                renderer.AddPointSet(pointSet);
+                PointsMeshRenderer meshInstance = Instantiate(pointsMeshPrefab, pointsContainer);
+                List<Vector2> convertedPoints = new List<Vector2>();
+                
+                if (renderer != null && renderer.GetTransform() != null)
+                {
+                    // Convert each point from strip coordinates to viewport coordinates
+                    foreach (var pt in pointSet.OriginalPoints)
+                    {
+                        // Create Vector2 with original strip coordinates
+                        Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                        // Convert to viewport coordinates
+                        Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                        convertedPoints.Add(viewportPos);
+                    }
+                }
+                else
+                {
+                    // Fallback if transform is not available
+                    Debug.LogWarning("CriticalStripRenderer or transform not available - points may not display correctly");
+                    foreach (var pt in pointSet.OriginalPoints)
+                    {
+                        convertedPoints.Add(new Vector2((float)pt.Real, (float)pt.Index));
+                    }
+                }
+                
+                meshInstance.Points = convertedPoints;
+                meshInstance.color = pointSet.Color;
+                meshInstance.Refresh();
+                pointsMeshInstances[pointSet] = meshInstance;
             }
             else
             {
-                Debug.LogWarning("[PointSetManager] Could not add point set to renderer: renderer is null");
+                Debug.LogWarning("PointsMeshRenderer prefab or container not assigned in PointSetManager");
             }
 
             UpdateStats();
@@ -380,14 +413,14 @@ public class PointSetManager : MonoBehaviour
     
     private void UnloadPointSet(PointSet set)
     {
-        
-        if (renderer != null)
+        if (pointsMeshInstances.ContainsKey(set))
         {
-            renderer.RemovePointSet(set);
+            Destroy(pointsMeshInstances[set].gameObject);
+            pointsMeshInstances.Remove(set);
         }
         else
         {
-            Debug.LogWarning("[PointSetManager] Cannot unload point set: renderer is null");
+            Debug.LogWarning("No PointsMeshRenderer instance found for point set: " + set.Name);
         }
         
         loadedSets.Remove(set);
@@ -518,6 +551,12 @@ public class PointSetManager : MonoBehaviour
         {
             pointSetSelector.onValueChanged.RemoveListener(OnPointSetSelectionChanged);
         }
+        
+        // Unsubscribe from viewport changes
+        if (renderer != null)
+        {
+            renderer.OnViewportChanged -= UpdatePointPositions;
+        }
     }
     
     private void OnRealChanged(double real)
@@ -528,6 +567,41 @@ public class PointSetManager : MonoBehaviour
     private void OnIndexChanged(double index)
     {
         // Update coordinate display if needed
+    }
+    
+    private void Start()
+    {
+        // Subscribe to viewport changes
+        if (renderer != null)
+        {
+            renderer.OnViewportChanged += UpdatePointPositions;
+        }
+    }
+    
+    private void UpdatePointPositions()
+    {
+        // Skip if we don't have the required components
+        if (renderer == null || renderer.GetTransform() == null) return;
+        
+        // Update position of all point mesh instances
+        foreach (var kvp in pointsMeshInstances)
+        {
+            var pointSet = kvp.Key;
+            var meshRenderer = kvp.Value;
+            
+            // Convert points again with current transform
+            List<Vector2> updatedPoints = new List<Vector2>();
+            foreach (var pt in pointSet.OriginalPoints)
+            {
+                Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                updatedPoints.Add(viewportPos);
+            }
+            
+            // Update the renderer
+            meshRenderer.Points = updatedPoints;
+            meshRenderer.Refresh();
+        }
     }
     
     #if UNITY_EDITOR
