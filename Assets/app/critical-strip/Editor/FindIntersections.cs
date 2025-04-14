@@ -123,7 +123,23 @@ public static class FindIntersections
     private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
     {
         var twoPI = 2.0*Math.PI;
-        var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+
+        
+        // IR intersection angle
+        var r = 0.25;
+        // double ThetaTwo = GetForwardRhombusAngle(((int)r == 2) ? 0.5 : (int)r, index);
+        double ThetaTwo = GetForwardRhombusAngle(r, index);
+        // transform to fit BisectorPoint ThetaAngle
+        if(ThetaTwo < 0)
+            ThetaTwo += 360;
+
+        // Convert to radians
+        ThetaTwo = ThetaTwo * Math.PI / 180.0;
+
+
+        // theta formula
+        // var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+
         var phase = (ThetaTwo % twoPI) / twoPI;
         var pt = new Vector(phase, index);
         thetaData.Add((phase, index, pt));

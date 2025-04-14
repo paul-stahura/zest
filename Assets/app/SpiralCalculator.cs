@@ -537,10 +537,12 @@ public class SpiralCalculator : MonoBehaviour
         Vector intersectionPT = GetIntersection(s.joints[s.middleIndex], s.joints[s.middleIndex + 1], 
                                                     z + rev[s.middleIndex].Reflect(normal).Reflect(perpendicular), z + rev[s.middleIndex + 1].Reflect(normal).Reflect(perpendicular));
         
-        Vector2 zetaVector = s.zeta.ToVector().Normalized();
-        Vector2 bisectorVector = intersectionPT.Normalized();
+        Vector2 zetaVector = s.zeta.ToVector();
+        Vector2 bisectorVector = intersectionPT;
+        Vector2 bpToZeta = zetaVector - bisectorVector;
+
         // find the angle between intersectionPT and zeta
-        var angle = Vector2.SignedAngle(zetaVector, bisectorVector);
+        var angle = Vector2.SignedAngle(bpToZeta, bisectorVector);
 
         return (float)angle;
     }
