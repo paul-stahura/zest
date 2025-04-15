@@ -281,10 +281,17 @@ public class PointSetManager : MonoBehaviour
             // Parse samplingInterval if provided (replaces useOptimization)
             if (headerParts.Length > 3)
             {
+                // Default to 1 (use all points) if not a valid integer
+                samplingInterval = 1;
+                
+                // Try to parse as integer
                 if (!int.TryParse(headerParts[3], out samplingInterval) || samplingInterval < 1)
                 {
-                    // If value is not a valid positive integer, default to 1 (no sampling)
+                    // If parsing failed or value is less than 1, default to 1 (no sampling)
                     samplingInterval = 1;
+                    
+                    // Log a warning about the invalid value
+                    Debug.LogWarning($"[PointSetManager] Invalid samplingInterval '{headerParts[3]}' in file {filePath}. Using default of 1 (all points).");
                 }
             }
 
