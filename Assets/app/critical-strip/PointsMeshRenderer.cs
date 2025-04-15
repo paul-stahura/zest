@@ -70,4 +70,9 @@ public class PointsMeshRenderer : MaskableGraphic
         base.OnRectTransformDimensionsChange();
         SetVerticesDirty();
     }
+
+    public override bool Raycast(Vector2 sp, Camera eventCamera)
+    {
+        return false;
+    }
 } 

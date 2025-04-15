@@ -33,6 +33,12 @@ public class PointSetManager : MonoBehaviour
     
     public IReadOnlyList<PointSet> LoadedSets => loadedSets;
     
+    // Get all active loaded point sets
+    public List<PointSet> GetAllActiveSets()
+    {
+        return loadedSets.Where(s => s.IsActive).ToList();
+    }
+    
     private void Awake()
     {
         renderer = GetComponentInChildren<CriticalStripRenderer>();
@@ -381,6 +387,31 @@ public class PointSetManager : MonoBehaviour
                 groupRect.offsetMin = Vector2.zero;
                 groupRect.offsetMax = Vector2.zero;
                 pointSetParents[pointSet] = groupObj;
+                
+                // Add an Image component to the group to handle raycasts
+                Image groupImage = groupObj.AddComponent<Image>();
+                groupImage.color = new Color(0, 0, 0, 0.01f); // Almost transparent, but not completely (for debugging)
+                groupImage.raycastTarget = true; // Make sure it receives pointer events
+                Debug.Log($"[PointSetManager] Created group for point set '{pointSet.Name}' with rect: {groupRect.rect}");
+                Debug.Log($"[PointSetManager] Group has Image component with raycastTarget: {groupImage.raycastTarget}");
+                
+                // Add the interaction handler so pointer events on the group are handled for the whole set
+                PointSetInteractionHandler handler = groupObj.AddComponent<PointSetInteractionHandler>();
+                handler.pointSet = pointSet;
+                handler.criticalStripRenderer = renderer;
+                handler.app = app;
+                handler.pointSetManager = this;
+
+                // Create a dedicated hover point object that will be animated for hover effects
+                GameObject hoverPointObj = new GameObject("HoverPoint", typeof(RectTransform), typeof(Image));
+                hoverPointObj.transform.SetParent(groupObj.transform, false);
+                RectTransform hoverPointRect = hoverPointObj.GetComponent<RectTransform>();
+                hoverPointRect.sizeDelta = new Vector2(handler.pointSize, handler.pointSize); // Match handler's point size
+                Image hoverPointImage = hoverPointObj.GetComponent<Image>();
+                hoverPointImage.color = pointSet.Color;
+                hoverPointImage.raycastTarget = false;
+                hoverPointObj.SetActive(false); // Start hidden
+                handler.hoverPoint = hoverPointRect;
 
                 List<Vector2> convertedPoints = new List<Vector2>();
 
@@ -414,10 +445,10 @@ public class PointSetManager : MonoBehaviour
                     meshInstance.Refresh();
                     // Assign a new material instance to disable UI batching and prevent vertex merging
                     meshInstance.material = new Material(meshInstance.material);
+                    // Disable raycast target on meshInstance so it does not block pointer events
+                    meshInstance.raycastTarget = false;
                     // Try to set mesh index format if available through reflection
-                    // Unity UI doesn't expose this property publicly, so we'll work around it
                     try {
-                        // If PointsMeshRenderer has a method to access its mesh, use that
                         System.Reflection.MethodInfo method = meshInstance.GetType().GetMethod("GetMesh", 
                             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
                         if (method != null) {
@@ -427,7 +458,6 @@ public class PointSetManager : MonoBehaviour
                             }
                         }
                     } catch (System.Exception ex) {
-                        // Silent fail - this is just an optimization attempt
                         Debug.LogWarning($"Could not set mesh index format: {ex.Message}");
                     }
                     if (!pointsMeshInstances.ContainsKey(pointSet))
@@ -452,17 +482,26 @@ public class PointSetManager : MonoBehaviour
     
     private void UnloadPointSet(PointSet set)
     {
+        // Clean up the meshes dictionary
         if (pointsMeshInstances.ContainsKey(set))
         {
-            foreach (var meshInstance in pointsMeshInstances[set])
-            {
-                Destroy(meshInstance.gameObject);
-            }
+            // Individual mesh instances will be destroyed when the parent is destroyed
             pointsMeshInstances.Remove(set);
         }
-        else
+        
+        // Clean up the parent GameObject if it exists
+        if (pointSetParents.ContainsKey(set))
         {
-            Debug.LogWarning("No PointsMeshRenderer instances found for point set: " + set.Name);
+            GameObject parent = pointSetParents[set];
+            if (parent != null)
+            {
+                Destroy(parent);
+            }
+            pointSetParents.Remove(set);
+        }
+        else 
+        {
+            Debug.LogWarning("No parent GameObject found for point set: " + set.Name);
         }
         
         loadedSets.Remove(set);

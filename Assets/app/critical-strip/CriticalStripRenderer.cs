@@ -635,17 +635,25 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     private void SetPointScale(RectTransform point, float scale)
     {
-        if (point == null) return;
+        if (point == null) 
+        {
+            Debug.LogWarning("[CriticalStripRenderer] SetPointScale called with null point");
+            return;
+        }
+
+        Debug.Log($"[CriticalStripRenderer] SetPointScale called for point at {point.anchoredPosition} with scale {scale}");
 
         // If we're trying to set hover scale and point is already hovered, ignore
         if (scale > 1f && isPointHovered.TryGetValue(point, out bool hovered) && hovered)
         {
+            Debug.Log($"[CriticalStripRenderer] Point at {point.anchoredPosition} is already hovered, ignoring");
             return;
         }
         
         // Stop any existing animation
         if (hoverAnimations.TryGetValue(point, out var existingCoroutine))
         {
+            Debug.Log($"[CriticalStripRenderer] Stopping existing hover animation for point at {point.anchoredPosition}");
             StopCoroutine(existingCoroutine);
             hoverAnimations.Remove(point);
         }
@@ -654,6 +662,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         isPointHovered[point] = scale > 1f;
         
         // Start new animation
+        Debug.Log($"[CriticalStripRenderer] Starting new hover animation for point at {point.anchoredPosition} with scale {scale}");
         var newCoroutine = StartCoroutine(AnimateHoverScale(point, scale));
         hoverAnimations[point] = newCoroutine;
     }
@@ -929,6 +938,72 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     public CriticalStripTransform GetTransform()
     {
         return transform;
+    }
+
+    /// <summary>
+    /// Notifies the renderer that a point at the specified viewport position is being hovered
+    /// </summary>
+    /// <param name="viewportPos">The position in viewport coordinates</param>
+    /// <param name="isHovered">Whether the point is hovered</param>
+    public void NotifyPointHover(Vector2 viewportPos, bool isHovered)
+    {
+        Debug.Log($"[CriticalStripRenderer] NotifyPointHover called with position: {viewportPos}, isHovered: {isHovered}");
+
+        if (!isHovered)
+        {
+            // Clear hover state
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Clearing hover state for point at {hoveredPoint.anchoredPosition}");
+                SetPointScale(hoveredPoint, 1f);
+                hoveredPoint = null;
+            }
+            return;
+        }
+
+        Debug.Log($"[CriticalStripRenderer] Looking for closest point to {viewportPos}. Total point sets: {pointObjects.Count}");
+        
+        // Find the closest point to the specified position
+        float closestDist = float.MaxValue;
+        RectTransform newHoveredPoint = null;
+        
+        foreach (var kvp in pointObjects)
+        {
+            if (!kvp.Key.IsActive) continue;
+            
+            Debug.Log($"[CriticalStripRenderer] Checking points in set '{kvp.Key.Name}'. Points: {kvp.Value.Count}");
+            
+            foreach (var point in kvp.Value)
+            {
+                var dist = Vector2.Distance(viewportPos, point.anchoredPosition);
+                
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    newHoveredPoint = point;
+                }
+            }
+        }
+        
+        Debug.Log($"[CriticalStripRenderer] Closest point found: {(newHoveredPoint != null ? newHoveredPoint.anchoredPosition.ToString() : "none")}, distance: {closestDist}");
+        
+        // Only trigger changes if we're hovering a different point
+        if (newHoveredPoint != hoveredPoint)
+        {
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Resetting scale of previously hovered point at {hoveredPoint.anchoredPosition}");
+                SetPointScale(hoveredPoint, 1f);
+            }
+            
+            hoveredPoint = newHoveredPoint;
+            
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Setting scale of new hovered point at {hoveredPoint.anchoredPosition} to {hoverScale}");
+                SetPointScale(hoveredPoint, hoverScale);
+            }
+        }
     }
 
     /// <summary>
