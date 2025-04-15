@@ -54,3 +54,4 @@ crashlytics-build.properties
 
 # Critical Strip Points
 Assets/Resources/CriticalStripPoints/favorite-points.csv
+Assets/Resources/CriticalStripPoints/favorite-points.csv.meta

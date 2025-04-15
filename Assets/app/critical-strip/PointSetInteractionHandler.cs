@@ -21,13 +21,6 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
     private Coroutine hoverAnimation;
     private bool isHovered = false;
 
-    private void Start()
-    {
-        Debug.Log($"[PointSetInteractionHandler] Initialized for point set: {(pointSet != null ? pointSet.Name : "null")}");
-        Debug.Log($"[PointSetInteractionHandler] References - criticalStripRenderer: {(criticalStripRenderer != null ? "Valid" : "Null")}, app: {(app != null ? "Valid" : "Null")}");
-        Debug.Log($"[PointSetInteractionHandler] pointSize: {pointSize}, hoverThresholdMultiplier: {hoverThresholdMultiplier}");
-    }
-
     // When clicked, find the closest point and update App
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -77,15 +70,11 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         if (criticalStripRenderer == null || pointSetManager == null || hoverPoint == null)
             return;
 
-        Debug.Log($"[PointSetInteractionHandler] OnPointerMove called for point set: {(pointSet != null ? pointSet.Name : "null")}");
-
         // Convert pointer position to local position
         Vector2 localPoint;
         RectTransform viewportRect = criticalStripRenderer.GetTransform().ViewportRect;
         if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(viewportRect, eventData.position, eventData.pressEventCamera, out localPoint))
             return;
-
-        Debug.Log($"[PointSetInteractionHandler] Mouse position in viewport: {localPoint}");
 
         float closestDist = float.MaxValue;
         float threshold = pointSize * hoverThresholdMultiplier;
@@ -118,8 +107,6 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         // Handle hover animation locally instead of via CriticalStripRenderer
         if (closestOriginalPoint != null)
         {
-            Debug.Log($"[PointSetInteractionHandler] Found closest point at viewport position: {closestViewportPos}, distance: {closestDist}, threshold: {threshold}");
-            
             // Position and show the hover point
             if (!isHovered || Vector2.Distance(lastHoverPosition, closestViewportPos) > 0.1f)
             {
@@ -154,8 +141,6 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         }
         else
         {
-            Debug.Log($"[PointSetInteractionHandler] No point found within threshold {threshold}");
-            
             // Hide the hover point
             if (isHovered)
             {
@@ -213,13 +198,11 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log($"[PointSetInteractionHandler] OnPointerEnter called for point set: {(pointSet != null ? pointSet.Name : "null")}");
+        // Intentionally empty
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log($"[PointSetInteractionHandler] OnPointerExit called for point set: {(pointSet != null ? pointSet.Name : "null")}");
-        
         // Hide the hover point
         if (isHovered && hoverPoint != null)
         {

@@ -392,8 +392,6 @@ public class PointSetManager : MonoBehaviour
                 Image groupImage = groupObj.AddComponent<Image>();
                 groupImage.color = new Color(0, 0, 0, 0.01f); // Almost transparent, but not completely (for debugging)
                 groupImage.raycastTarget = true; // Make sure it receives pointer events
-                Debug.Log($"[PointSetManager] Created group for point set '{pointSet.Name}' with rect: {groupRect.rect}");
-                Debug.Log($"[PointSetManager] Group has Image component with raycastTarget: {groupImage.raycastTarget}");
                 
                 // Add the interaction handler so pointer events on the group are handled for the whole set
                 PointSetInteractionHandler handler = groupObj.AddComponent<PointSetInteractionHandler>();
