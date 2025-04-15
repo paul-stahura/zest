@@ -22,6 +22,10 @@ public class PointSetManager : MonoBehaviour
     [SerializeField] [Range(0.001f, 0.1f)] private float minPointDistance = 0.01f;
     [Tooltip("Controls how aggressively points are removed. Higher values remove more points")]
     [SerializeField] [Range(0.1f, 4.0f)] private float downsampleAggressiveness = 1f;
+    [Tooltip("When enabled, uses N-th point sampling instead of distance-based sampling")]
+    [SerializeField] private bool useNthPointSampling = false;
+    [Tooltip("Sample every Nth point when N-th point sampling is enabled")]
+    [SerializeField] [Range(2, 100)] private int samplingInterval = 10;
     
     [Header("Points Mesh Setup")]
     [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
@@ -296,6 +300,7 @@ public class PointSetManager : MonoBehaviour
             int totalPoints = allLines.Length - (headerIndex + 1); // Subtract header and comment lines
             int loadedPoints = 0;
             int skippedCriticalPoints = 0;
+            int processedPointCount = 0; // Track all processed points for N-th point sampling
             Vector2? lastAddedPoint = null;
 
             // Process each point
@@ -328,13 +333,24 @@ public class PointSetManager : MonoBehaviour
                     Vector2 currentPoint = new Vector2((float)real, (float)index);
                     bool shouldAdd = true;
 
-                    // Only apply downsampling if useOptimization is true
-                    if (useOptimization && enableDownsampling && lastAddedPoint.HasValue)
+                    // Apply optimization if enabled
+                    if (useOptimization && enableDownsampling)
                     {
-                        float distSq = (currentPoint - lastAddedPoint.Value).sqrMagnitude;
-                        float threshold = minPointDistance * (1f + downsampleAggressiveness);
-                        float thresholdSq = threshold * threshold;
-                        shouldAdd = distSq >= thresholdSq;
+                        if (useNthPointSampling)
+                        {
+                            // Use N-th point sampling - use a separate counter that includes
+                            // all points that pass the critical line filter
+                            shouldAdd = processedPointCount % samplingInterval == 0;
+                            processedPointCount++; // Increment regardless of whether we keep the point
+                        }
+                        else if (lastAddedPoint.HasValue)
+                        {
+                            // Use original distance-based sampling
+                            float distSq = (currentPoint - lastAddedPoint.Value).sqrMagnitude;
+                            float threshold = minPointDistance * (1f + downsampleAggressiveness);
+                            float thresholdSq = threshold * threshold;
+                            shouldAdd = distSq >= thresholdSq;
+                        }
                     }
 
                     if (shouldAdd)

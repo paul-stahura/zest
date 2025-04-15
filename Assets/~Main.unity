@@ -34094,8 +34094,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577174951}
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.8458034
+  m_Value: 1.0000002
+  m_Size: 0.8458035
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -86655,8 +86655,10 @@ MonoBehaviour:
   criticalLineSkipTolerance: 0.01
   stats: {fileID: 2051757074}
   enableDownsampling: 1
-  minPointDistance: 0.01
+  minPointDistance: 0.001
   downsampleAggressiveness: 4
+  useNthPointSampling: 1
+  samplingInterval: 10
   pointsMeshPrefab: {fileID: 5248475936234707483, guid: 240e32b84219f4618b358bef22c3a373,
     type: 3}
   pointsContainer: {fileID: 2042214198}
@@ -89549,7 +89551,7 @@ MonoBehaviour:
   indicatorColor: {r: 1, g: 1, b: 1, a: 0.57254905}
   zoomSensitivity: 0.1
   minZoom: 0.4
-  maxZoom: 500
+  maxZoom: 5000
   scrollSensitivity: 1
   app: {fileID: 0}
   currentZoom: 0.8
