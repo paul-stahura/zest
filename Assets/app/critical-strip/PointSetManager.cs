@@ -15,18 +15,6 @@ public class PointSetManager : MonoBehaviour
     [SerializeField] [Range(0.001f, 0.1f)] private float criticalLineSkipTolerance = 0.01f;
     [SerializeField] private CriticalStripStats stats;  // Reference to the Stats component
     
-    [Header("Point Loading Optimization")]
-    [Tooltip("When enabled, reduces the number of loaded points by intelligently skipping points that are too close together")]
-    [SerializeField] private bool enableDownsampling = true;
-    [Tooltip("Minimum world-space distance between points. Points closer than this will be skipped")]
-    [SerializeField] [Range(0.001f, 0.1f)] private float minPointDistance = 0.01f;
-    [Tooltip("Controls how aggressively points are removed. Higher values remove more points")]
-    [SerializeField] [Range(0.1f, 4.0f)] private float downsampleAggressiveness = 1f;
-    [Tooltip("When enabled, uses N-th point sampling instead of distance-based sampling")]
-    [SerializeField] private bool useNthPointSampling = false;
-    [Tooltip("Sample every Nth point when N-th point sampling is enabled")]
-    [SerializeField] [Range(2, 100)] private int samplingInterval = 10;
-    
     [Header("Points Mesh Setup")]
     [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
     [SerializeField] private Transform pointsContainer;
@@ -265,18 +253,18 @@ public class PointSetManager : MonoBehaviour
                 // Provide helpful message about expected header format
                 Debug.LogWarning($"[PointSetManager] Invalid header format in file: {filePath}\n" +
                     "Expected header format:\n" +
-                    "# Header format: name,color,skipCriticalLine,useOptimization\n" +
+                    "# Header format: name,color,skipCriticalLine,samplingInterval\n" +
                     "# - name: required, the name of the point set\n" +
                     "# - color: optional, HTML color code starting with #\n" +
                     "# - skipCriticalLine: optional, true/false whether to skip points near critical line\n" +
-                    "# - useOptimization: optional, true/false whether to apply point optimization");
+                    "# - samplingInterval: optional, integer value to sample every Nth point (1 = use all points)");
                 return;
             }
 
             string pointSetName = headerParts[0];
             Color pointColor = defaultPointColor;
             bool skipCriticalLine = false;
-            bool useOptimization = true;  // New flag for controlling optimization
+            int samplingInterval = 1;  // Default to no sampling (1 = use every point)
 
             // Parse color if provided
             if (headerParts[1].StartsWith("#"))
@@ -290,10 +278,14 @@ public class PointSetManager : MonoBehaviour
                 bool.TryParse(headerParts[2], out skipCriticalLine);
             }
 
-            // Parse useOptimization if provided
+            // Parse samplingInterval if provided (replaces useOptimization)
             if (headerParts.Length > 3)
             {
-                bool.TryParse(headerParts[3], out useOptimization);
+                if (!int.TryParse(headerParts[3], out samplingInterval) || samplingInterval < 1)
+                {
+                    // If value is not a valid positive integer, default to 1 (no sampling)
+                    samplingInterval = 1;
+                }
             }
 
             var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine);
@@ -333,24 +325,12 @@ public class PointSetManager : MonoBehaviour
                     Vector2 currentPoint = new Vector2((float)real, (float)index);
                     bool shouldAdd = true;
 
-                    // Apply optimization if enabled
-                    if (useOptimization && enableDownsampling)
+                    // Apply sampling if configured
+                    if (samplingInterval > 1)
                     {
-                        if (useNthPointSampling)
-                        {
-                            // Use N-th point sampling - use a separate counter that includes
-                            // all points that pass the critical line filter
-                            shouldAdd = processedPointCount % samplingInterval == 0;
-                            processedPointCount++; // Increment regardless of whether we keep the point
-                        }
-                        else if (lastAddedPoint.HasValue)
-                        {
-                            // Use original distance-based sampling
-                            float distSq = (currentPoint - lastAddedPoint.Value).sqrMagnitude;
-                            float threshold = minPointDistance * (1f + downsampleAggressiveness);
-                            float thresholdSq = threshold * threshold;
-                            shouldAdd = distSq >= thresholdSq;
-                        }
+                        // Use N-th point sampling
+                        shouldAdd = processedPointCount % samplingInterval == 0;
+                        processedPointCount++; // Increment regardless of whether we keep the point
                     }
 
                     if (shouldAdd)
@@ -509,12 +489,12 @@ public class PointSetManager : MonoBehaviour
             var fileContents = new List<string>
             {
                 "# Point Set File Format:",
-                "# Header: name,color,skipCriticalLine,useOptimization",
+                "# Header: name,color,skipCriticalLine,samplingInterval",
                 "# - name: Name of the point set",
                 "# - color: HTML color code (e.g. #FF0000 for red)",
                 "# - skipCriticalLine: Set to false to include points near 0.5",
-                "# - useOptimization: Set to false to load all points without optimization",
-                $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)},false,false\n"
+                "# - samplingInterval: Integer value to sample every Nth point (1 = use all points)",
+                $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)},false,1\n"
             };
             File.WriteAllLines(filePath, fileContents);
             // Refresh the dropdown to include the new file
