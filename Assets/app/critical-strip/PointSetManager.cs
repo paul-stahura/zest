@@ -26,7 +26,8 @@ public class PointSetManager : MonoBehaviour
     [Header("Points Mesh Setup")]
     [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
     [SerializeField] private Transform pointsContainer;
-    private Dictionary<PointSet, PointsMeshRenderer> pointsMeshInstances = new Dictionary<PointSet, PointsMeshRenderer>();
+    private Dictionary<PointSet, List<PointsMeshRenderer>> pointsMeshInstances = new Dictionary<PointSet, List<PointsMeshRenderer>>();
+    private Dictionary<PointSet, GameObject> pointSetParents = new Dictionary<PointSet, GameObject>();
     
     private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
     private const string FAVORITES_FILE = "favorite-points.csv";
@@ -368,35 +369,70 @@ public class PointSetManager : MonoBehaviour
             
             if (pointsMeshPrefab != null && pointsContainer != null)
             {
-                PointsMeshRenderer meshInstance = Instantiate(pointsMeshPrefab, pointsContainer);
+                // Create a parent group GameObject for this point set
+                GameObject groupObj = new GameObject(pointSet.Name + "_Group", typeof(RectTransform));
+                groupObj.transform.SetParent(pointsContainer, false);
+                RectTransform groupRect = groupObj.GetComponent<RectTransform>();
+                groupRect.anchorMin = Vector2.zero;
+                groupRect.anchorMax = Vector2.one;
+                groupRect.offsetMin = Vector2.zero;
+                groupRect.offsetMax = Vector2.zero;
+                pointSetParents[pointSet] = groupObj;
+
                 List<Vector2> convertedPoints = new List<Vector2>();
-                
+
                 if (renderer != null && renderer.GetTransform() != null)
                 {
-                    // Convert each point from strip coordinates to viewport coordinates
                     foreach (var pt in pointSet.OriginalPoints)
                     {
-                        // Create Vector2 with original strip coordinates
                         Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
-                        // Convert to viewport coordinates
                         Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
                         convertedPoints.Add(viewportPos);
                     }
                 }
                 else
                 {
-                    // Fallback if transform is not available
                     Debug.LogWarning("CriticalStripRenderer or transform not available - points may not display correctly");
                     foreach (var pt in pointSet.OriginalPoints)
                     {
                         convertedPoints.Add(new Vector2((float)pt.Real, (float)pt.Index));
                     }
                 }
-                
-                meshInstance.Points = convertedPoints;
-                meshInstance.color = pointSet.Color;
-                meshInstance.Refresh();
-                pointsMeshInstances[pointSet] = meshInstance;
+
+                // Split the convertedPoints into chunks if they exceed the threshold
+                const int maxPointsPerMesh = 5000;
+                for (int i = 0; i < convertedPoints.Count; i += maxPointsPerMesh)
+                {
+                    int count = Math.Min(maxPointsPerMesh, convertedPoints.Count - i);
+                    List<Vector2> chunk = convertedPoints.GetRange(i, count);
+                    PointsMeshRenderer meshInstance = Instantiate(pointsMeshPrefab, groupObj.transform);
+                    meshInstance.Points = chunk;
+                    meshInstance.color = pointSet.Color;
+                    meshInstance.Refresh();
+                    // Assign a new material instance to disable UI batching and prevent vertex merging
+                    meshInstance.material = new Material(meshInstance.material);
+                    // Try to set mesh index format if available through reflection
+                    // Unity UI doesn't expose this property publicly, so we'll work around it
+                    try {
+                        // If PointsMeshRenderer has a method to access its mesh, use that
+                        System.Reflection.MethodInfo method = meshInstance.GetType().GetMethod("GetMesh", 
+                            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                        if (method != null) {
+                            Mesh mesh = method.Invoke(meshInstance, null) as Mesh;
+                            if (mesh != null) {
+                                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                            }
+                        }
+                    } catch (System.Exception ex) {
+                        // Silent fail - this is just an optimization attempt
+                        Debug.LogWarning($"Could not set mesh index format: {ex.Message}");
+                    }
+                    if (!pointsMeshInstances.ContainsKey(pointSet))
+                    {
+                        pointsMeshInstances[pointSet] = new List<PointsMeshRenderer>();
+                    }
+                    pointsMeshInstances[pointSet].Add(meshInstance);
+                }
             }
             else
             {
@@ -415,12 +451,15 @@ public class PointSetManager : MonoBehaviour
     {
         if (pointsMeshInstances.ContainsKey(set))
         {
-            Destroy(pointsMeshInstances[set].gameObject);
+            foreach (var meshInstance in pointsMeshInstances[set])
+            {
+                Destroy(meshInstance.gameObject);
+            }
             pointsMeshInstances.Remove(set);
         }
         else
         {
-            Debug.LogWarning("No PointsMeshRenderer instance found for point set: " + set.Name);
+            Debug.LogWarning("No PointsMeshRenderer instances found for point set: " + set.Name);
         }
         
         loadedSets.Remove(set);
@@ -583,13 +622,15 @@ public class PointSetManager : MonoBehaviour
         // Skip if we don't have the required components
         if (renderer == null || renderer.GetTransform() == null) return;
         
+        const int maxPointsPerMesh = 5000;
+        
         // Update position of all point mesh instances
         foreach (var kvp in pointsMeshInstances)
         {
             var pointSet = kvp.Key;
-            var meshRenderer = kvp.Value;
+            var meshRenderers = kvp.Value;
             
-            // Convert points again with current transform
+            // Recalculate updated points using the original points
             List<Vector2> updatedPoints = new List<Vector2>();
             foreach (var pt in pointSet.OriginalPoints)
             {
@@ -598,9 +639,16 @@ public class PointSetManager : MonoBehaviour
                 updatedPoints.Add(viewportPos);
             }
             
-            // Update the renderer
-            meshRenderer.Points = updatedPoints;
-            meshRenderer.Refresh();
+            // Update each mesh renderer with its corresponding chunk
+            for (int i = 0; i < meshRenderers.Count; i++)
+            {
+                int startIndex = i * maxPointsPerMesh;
+                if (startIndex >= updatedPoints.Count) break;
+                int count = Math.Min(maxPointsPerMesh, updatedPoints.Count - startIndex);
+                List<Vector2> chunk = updatedPoints.GetRange(startIndex, count);
+                meshRenderers[i].Points = chunk;
+                meshRenderers[i].Refresh();
+            }
         }
     }
     

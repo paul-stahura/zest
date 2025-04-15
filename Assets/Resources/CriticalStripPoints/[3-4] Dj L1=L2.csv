@@ -4,7 +4,7 @@
 # - color: HTML color code (e.g. #FF0000 for red)
 # - skipCriticalLine: Set to false to include points near 0.5
 # - useOptimization: Set to false to load all points without optimization
-[3-4] Dj L1=L2,#FFFF00,true,true
+[3-4] Dj L1=L2,#FFFF00,false,false
 0.482668951988220,3.000000000000000
 0.499999985694885,3.000100000000000
 0.499999955177307,3.000200000000000
