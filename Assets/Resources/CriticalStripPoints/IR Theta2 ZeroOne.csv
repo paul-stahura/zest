@@ -4,7 +4,7 @@
 # - color: HTML color code (e.g. #FF0000 for red)
 # - skipCriticalLine: Set to false to include points near 0.5
 # - useOptimization: Set to false to load all points without optimization
-IR Theta2 ZeroOne,#00FFFF,false,1
+IR Theta2 0/1,#00FFFF,false,2
 0.380575137668186,1.000000000000000
 0.381152131822374,1.000100000000000
 0.381727261013455,1.000200000000000

@@ -34094,8 +34094,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577174951}
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
-  m_Value: 1.0000002
-  m_Size: 0.8458035
+  m_Value: 0.9999995
+  m_Size: 0.84580326
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -64088,7 +64088,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0.000000000000000
+  m_Text: 0.00000000000000
 --- !u!222 &1512771992
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -69724,7 +69724,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0.000000000000000
+  m_Text: 0.00000000000000
 --- !u!222 &1609120646
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -86654,11 +86654,6 @@ MonoBehaviour:
   pointSetSelector: {fileID: 2034183864}
   criticalLineSkipTolerance: 0.01
   stats: {fileID: 2051757074}
-  enableDownsampling: 1
-  minPointDistance: 0.001
-  downsampleAggressiveness: 4
-  useNthPointSampling: 1
-  samplingInterval: 10
   pointsMeshPrefab: {fileID: 5248475936234707483, guid: 240e32b84219f4618b358bef22c3a373,
     type: 3}
   pointsContainer: {fileID: 2042214198}
