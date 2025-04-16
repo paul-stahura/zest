@@ -4,7 +4,7 @@
 # - color: HTML color code (e.g. #FF0000 for red)
 # - skipCriticalLine: Set to false to include points near 0.5
 # - useOptimization: Set to false to load all points without optimization
-[1-11] IR Theta2=Pi,#FFFFFF,true,true
+[1-11] IR Theta2=Pi,#FFFFFF,false,false
 0.136000000476837,1.028200000000000
 0.863999999523163,1.028200000000000
 0.014000000476837,1.267899999999970

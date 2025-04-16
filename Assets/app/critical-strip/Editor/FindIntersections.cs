@@ -414,6 +414,10 @@ public static class FindIntersections
             double t = i * dt;
             ts[i] = t;
             angles[i] = GetForwardRhombusAngle(t, index);
+
+            // find angle = 0
+            if(angles[i] < 0)
+                angles[i] += 360;
         }
         
         // find the points where the angle jumps from -180 to 180 or vice versa
