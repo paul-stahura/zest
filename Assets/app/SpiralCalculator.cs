@@ -370,7 +370,7 @@ public class SpiralCalculator : MonoBehaviour
     private void CalcZem(double real, double index)
     {
         var c = new Complex(real, Zeta.IndexToImag(index));
-        _zemPos = Zeta.Zem3(c).ToVector();
+        _zemPos = Zeta.Zem5(c).ToVector();
         UpdateZem?.Invoke(_zemPos);
     }
 
