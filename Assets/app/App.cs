@@ -397,15 +397,17 @@ public class App : ImmediateModeShapeDrawer
         //     trackBisectFirstFrame = true;
         // }
 
-        // thata angle compared to the bisector angle
-        double angle = SpiralCalculator.GetInverseReflectedAngle(Real, Index);
-        if(angle < 0)
-            angle += 360;
+        // // thata angle compared to the bisector angle
+        // double angle = SpiralCalculator.GetInverseReflectedAngle(Real, Index);
+        // if(angle < 0)
+        //     angle += 360;
 
-        var twoPI = 2.0*Math.PI;
-        var theta = ((-BisectorPoint.ThetaTwo(Index) % twoPI) / twoPI) * 360;
+        // var twoPI = 2.0*Math.PI;
+        // var theta = ((-BisectorPoint.ThetaTwo(Index) % twoPI) / twoPI) * 360;
         
-        print("[IR: " + angle + "] [theta: " + theta + "]");
+        // print("[IR: " + angle + "] [theta: " + theta + "]");
+
+        print(-BisectorPoint.ThetaTwo(Index));
     }
 
     public void onClick()

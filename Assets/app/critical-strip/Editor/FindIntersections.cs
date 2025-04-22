@@ -26,7 +26,7 @@ public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 11.0;
-    private const double INDEX_STEP = 0.0001;
+    private const double INDEX_STEP = 0.00001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
     
@@ -113,6 +113,87 @@ public static class FindIntersections
             }
 
             FindThetaData(index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
+    }
+
+    [MenuItem("Critical Strip/Find ThetaLocalMinMax")]
+    public static void FindThetaLocalMinMax()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        double prevTheta = -BisectorPoint.ThetaTwo(MIN_INDEX);
+        bool thetaDriection = true; // true = increasing, false = decreasing
+        for (double index = MIN_INDEX + INDEX_STEP; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaLocalMinMax",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+            
+            var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+            if(ThetaTwo < prevTheta && thetaDriection)
+            {
+                thetaDriection = false;
+
+                // we know the direction changed somewhere between prevTheta and ThetaTwo
+                // find the exact point where it changed using binary search
+                // this will be when ThetaTwo is maximum
+                double low = index - INDEX_STEP;
+                double high = index;
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    double midTheta = -BisectorPoint.ThetaTwo(mid);
+                    if (midTheta > prevTheta) { low = mid; high = mid; break; } // found max theta
+                    double diff = midTheta - ThetaTwo;
+                    if (diff > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+                double bestIndex = (low + high) / 2.0;
+                var pt = new Vector(1, bestIndex);
+                thetaData.Add((1, bestIndex, pt));
+
+            }
+            else if(ThetaTwo > prevTheta && !thetaDriection)
+            {
+                thetaDriection = true;
+                // we know the direction changed somewhere between prevTheta and ThetaTwo
+                // find the exact point where it changed using binary search
+                // this will be when ThetaTwo is minimum
+                double low = index - INDEX_STEP;
+                double high = index;
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    double midTheta = -BisectorPoint.ThetaTwo(mid);
+                    if (midTheta < prevTheta) { low = mid; high = mid; break; } // found min theta
+                    double diff = midTheta - ThetaTwo;
+                    if (diff > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+                double bestIndex = (low + high) / 2.0;
+                var pt = new Vector(0, bestIndex);
+                thetaData.Add((0, bestIndex, pt));
+            }
+
+            prevTheta = ThetaTwo;
+
             currentStep++;
         }
 
