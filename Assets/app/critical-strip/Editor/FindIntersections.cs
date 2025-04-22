@@ -130,6 +130,7 @@ public static class FindIntersections
 
         double prevTheta = -BisectorPoint.ThetaTwo(MIN_INDEX);
         bool thetaDriection = true; // true = increasing, false = decreasing
+        Vector prevPt = new Vector(0, 0);
         for (double index = MIN_INDEX + INDEX_STEP; index <= MAX_INDEX; index += INDEX_STEP)
         {
             if (EditorUtility.DisplayCancelableProgressBar(
@@ -143,6 +144,8 @@ public static class FindIntersections
             }
             
             var ThetaTwo = -BisectorPoint.ThetaTwo(index);
+
+            var pt = new Vector(-1, 0);
             if(ThetaTwo < prevTheta && thetaDriection)
             {
                 thetaDriection = false;
@@ -164,9 +167,7 @@ public static class FindIntersections
                         high = mid;
                 }
                 double bestIndex = (low + high) / 2.0;
-                var pt = new Vector(1, bestIndex);
-                thetaData.Add((1, bestIndex, pt));
-
+                pt = new Vector(1, bestIndex);
             }
             else if(ThetaTwo > prevTheta && !thetaDriection)
             {
@@ -188,8 +189,17 @@ public static class FindIntersections
                         high = mid;
                 }
                 double bestIndex = (low + high) / 2.0;
-                var pt = new Vector(0, bestIndex);
-                thetaData.Add((0, bestIndex, pt));
+                pt = new Vector(0, bestIndex);
+            }
+
+            // check if the point is in sequence and if it is too close skip
+            if (pt.x > -0.5)
+            {
+                if(Math.Abs(pt.y - prevPt.y) > 0.0001)
+                {
+                    thetaData.Add((pt.x, pt.y, pt));
+                }
+                prevPt = pt;
             }
 
             prevTheta = ThetaTwo;
