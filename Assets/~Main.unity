@@ -83907,6 +83907,8 @@ MonoBehaviour:
       m_Image: {fileID: 21300000, guid: df978026d6adfff4cb97877024eca2a1, type: 3}
     - m_Text: Bisector One Half
       m_Image: {fileID: 21300000, guid: a051d3390e7c08447b80f9a0687110a2, type: 3}
+    - m_Text: Forward Bisector
+      m_Image: {fileID: 21300000, guid: a051d3390e7c08447b80f9a0687110a2, type: 3}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

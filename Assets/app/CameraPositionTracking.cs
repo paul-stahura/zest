@@ -41,6 +41,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         BisectorLink = 1,
         SymmetryPoint = 2,
         BpOneHalf = 3,
+        ForwardBisector = 4,
     }
 
     [Header("YinYang Target")]
@@ -248,6 +249,10 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 sTarget = SymmetryTarget.BpOneHalf;
             }
+            else if(SpiralCalculator.UpdateZetaPS != null && SpiralCalculator.UpdateZetaPS.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.ForwardBisector;
+            }
         }
 
         Zeta.Spiral spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
@@ -272,6 +277,11 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 zeta = _spiralCalculator.GetZps();
                 newUP = new Vector2(-zeta.y, zeta.x).normalized;
                 target = _spiralCalculator.GetBpOneHalf().ToVector2();
+                break;
+            
+            case SymmetryTarget.ForwardBisector:
+                newUP = new Vector2(-midLink.y, midLink.x).normalized;
+                target = _spiralCalculator.GetForwardBisector().ToVector2();
                 break;
 
             default:
