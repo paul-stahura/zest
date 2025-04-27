@@ -34095,7 +34095,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
   m_Value: 0.9999995
-  m_Size: 0.84580326
+  m_Size: 0.8458034
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -86654,9 +86654,8 @@ MonoBehaviour:
   pointSetSelector: {fileID: 2034183864}
   criticalLineSkipTolerance: 0.01
   stats: {fileID: 2051757074}
-  pointsMeshPrefab: {fileID: 5248475936234707483, guid: 240e32b84219f4618b358bef22c3a373,
-    type: 3}
-  pointsContainer: {fileID: 2042214198}
+  pointsMeshPrefab: {fileID: 0}
+  pointsContainer: {fileID: 0}
 --- !u!114 &1997160103
 MonoBehaviour:
   m_ObjectHideFlags: 0
