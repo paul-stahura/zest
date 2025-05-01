@@ -11,7 +11,9 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 {
     [SerializeField] private Toggle _yinYangToggle;
     [SerializeField] private Toggle _yinYangLinkToggle;
-    [SerializeField] private Toggle _inverseToggle;
+    [SerializeField] private Toggle _yinYangSpecialToggle;
+    [SerializeField] private Toggle _yinYangSpecialLinkToggle;
+    [SerializeField] private Toggle _inverseSpecialToggle;
     private int _yinYangPathIndex = 0;
     private Vector2[] _yinPath = new Vector2[200];
     private Vector2[] _yangPath = new Vector2[200];
@@ -29,7 +31,9 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
     {
         _yinYangToggle = GameObject.Find("YinYang Toggle").GetComponent<Toggle>();
         _yinYangLinkToggle = GameObject.Find("YinYang Link Toggle").GetComponent<Toggle>();
-        _inverseToggle = GameObject.Find("Inverse YinYang Toggle").GetComponent<Toggle>();
+        _yinYangSpecialToggle = GameObject.Find("YinYangSpecial Toggle").GetComponent<Toggle>();
+        _yinYangSpecialLinkToggle = GameObject.Find("YinYangSpecial Link Toggle").GetComponent<Toggle>();
+        _inverseSpecialToggle = GameObject.Find("Inverse YinYangSpecial Toggle").GetComponent<Toggle>();
 
         _infToggle = GameObject.Find("INF YinYang Toggle").GetComponent<Toggle>();
         _infLinkToggle = GameObject.Find("INF Bisector Link Toggle").GetComponent<Toggle>();
@@ -62,12 +66,12 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 1;
             Draw.Color = Color.white;
 
-            if(_yinYangToggle.isOn){
-                DrawYinYang(_yinPath, _yangPath);
-                DrawYinYang(_yangSpecialPath, _yinSpecialPath);
-            };
+            if(_yinYangToggle.isOn) DrawYinYang(_yinPath, _yangPath);
             if(_yinYangLinkToggle.isOn) DrawYinYangLink();
-            if(_inverseToggle.isOn) DrawInverseYinYang();
+
+            if(_yinYangSpecialToggle.isOn) DrawYinYang(_yangSpecialPath, _yinSpecialPath);
+            if(_yinYangSpecialLinkToggle.isOn) DrawYinYangSpecialLink();
+            if(_inverseSpecialToggle.isOn) DrawInverseYinYangSpecial();
 
             if(_infToggle.isOn) DrawInf();
             if(_infLinkToggle.isOn) DrawInfLink();
@@ -104,21 +108,30 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         Vector2 linkUp = new Vector2(-midLink.y, midLink.x).normalized;
         Quaternion rot = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, linkUp));
 
-        var yin = pt + (Vector2)(rot * _spiralCalculator.GetYin()) * midLink.magnitude;
-        var yang = pt + (Vector2)(rot * _spiralCalculator.GetYang()) * midLink.magnitude;
-        Draw.Line(yin, yang, Color.magenta);
-
         var real = _spiralCalculator.GetReal();
         var index = _spiralCalculator.GetIndex();
         var chi = SpiralCalculator.ChiBrian(new Complex(_spiralCalculator.GetReal(), Zeta.IndexToImag(_spiralCalculator.GetIndex())));
         var yinGen = ZpsGeneral.Yin(real, index, chi, _spiralCalculator.GetYin(), _spiralCalculator.GetYang());
         var yangGen = ZpsGeneral.Yang(real, index, chi, yinGen, _spiralCalculator.GetYin(), _spiralCalculator.GetYang());
-        yin = pt + (Vector2)(rot * yinGen) * midLink.magnitude;
-        yang = pt + (Vector2)(rot * yangGen) * midLink.magnitude;
+        var yin = pt + (Vector2)(rot * yinGen) * midLink.magnitude;
+        var yang = pt + (Vector2)(rot * yangGen) * midLink.magnitude;
         Draw.Line(yin, yang, Color.magenta);
     }
 
-    private void DrawInverseYinYang()
+    private void DrawYinYangSpecialLink()
+    {
+        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        Vector2 midLink = spiral.joints[spiral.middleIndex + 1] - spiral.joints[spiral.middleIndex];
+        Vector2 pt = spiral.joints[spiral.middleIndex] + midLink / 2f;
+        Vector2 linkUp = new Vector2(-midLink.y, midLink.x).normalized;
+        Quaternion rot = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, linkUp));
+
+        var yin = pt + (Vector2)(rot * _spiralCalculator.GetYin()) * midLink.magnitude;
+        var yang = pt + (Vector2)(rot * _spiralCalculator.GetYang()) * midLink.magnitude;
+        Draw.Line(yin, yang, Color.magenta);
+    }
+
+    private void DrawInverseYinYangSpecial()
     {
         var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
         var zeta = spiral.zeta.ToVector();
@@ -184,7 +197,10 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
     {
         _yinYangToggle.onValueChanged.AddListener((v) => SubIndexChanged(v));
         _yinYangLinkToggle.onValueChanged.AddListener((v) => SubYinYang(v));
-        _inverseToggle.onValueChanged.AddListener((v) => SubYinYang(v));
+
+        _yinYangSpecialToggle.onValueChanged.AddListener((v) => SubIndexChanged(v));
+        _yinYangSpecialLinkToggle.onValueChanged.AddListener((v) => SubYinYang(v));
+        _inverseSpecialToggle.onValueChanged.AddListener((v) => SubYinYang(v));
 
         _infToggle.onValueChanged.AddListener((v) => SubIndexChanged(v));
         _infLinkToggle.onValueChanged.AddListener((v) => SubInf(v));
@@ -274,21 +290,6 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
     private void CalcYinYangPath()
     {
-        // double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
-        // _yinPath[0] = MiddleLinkTeardrop.Yin(first);
-        // _yangPath[0] = MiddleLinkTeardrop.Yang(first);
-        // for(int i = 1; i < _yinPath.Length - 1; i++)
-        // {
-        //     var index = _yinYangPathIndex + ((double)i)/_yangPath.Length;
-        //     // avoid discontinuity at 0.25 and 0.75
-        //     if(Mathf.Approximately((float)index, 0.25f) || Mathf.Approximately((float)index, 0.75f)) index += 0.00001f;
-        //     _yinPath[i] = MiddleLinkTeardrop.Yin(index);
-        //     _yangPath[i] = MiddleLinkTeardrop.Yang(index);
-        // }
-        // double last = _yinYangPathIndex + 1 - 0.00001;
-        // _yinPath[_yinPath.Length - 1] = MiddleLinkTeardrop.Yin(last);
-        // _yangPath[_yangPath.Length - 1] = MiddleLinkTeardrop.Yang(last);
-
         double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
 
         var yinSpecial = MiddleLinkTeardrop.Yin(first);
