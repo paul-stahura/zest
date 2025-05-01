@@ -48,6 +48,24 @@ public class ZpsGeneral : MonoBehaviour
         return p1.x - p1.y * ((p2.x - p1.x) / (p2.y - p1.y));
     }
 
+    public static Vector Yin(double real, double index, Complex chi, Vector yinSpecial, Vector yangSpecial)
+    {
+        var imag = Zeta.IndexToImag(index);
+
+        double linkLength = B_linkLength(real, index, imag, chi);
+
+        return P_yinGen(index, yinSpecial, yangSpecial, linkLength);
+    }
+
+    public static Vector Yang(double real, double index, Complex chi, Vector yinGen, Vector yinSpecial, Vector yangSpecial)
+    {
+        var imag = Zeta.IndexToImag(index);
+
+        double linkLength = B_linkLength(real, index, imag, chi);
+
+        return P_yangGen(yinGen, yinSpecial, yangSpecial, linkLength);
+    }
+
     static Vector P_yinGen(double index, Vector yin, Vector yang, double linkLength)
     {
         Vector yinNormal = ComputeNormal(MiddleLinkTeardrop.Yin, index) * 0.5;
@@ -63,19 +81,38 @@ public class ZpsGeneral : MonoBehaviour
 
     public static Vector ComputeNormal(Func<double, Vector> func, double point, double epsilon = Fine)
     {
-        // Compute the gradient using two small steps (forward and backward) in each direction
-        Vector yangDeriv = new Vector(
-            (func(point + epsilon).x - func(point - epsilon).x) / (2 * epsilon),  // Gradient in x-direction
-            (func(point + epsilon).y - func(point - epsilon).y) / (2 * epsilon)   // Gradient in y-direction
-        );
+        var yangDeriv = new Vector(0, 0); // Initialize yangDeriv to zero
 
-        // // Compute the gradient using one small step forward
-        // Vector now = func(point);
-        // Vector next = func(point + epsilon);
-        // Vector yangDeriv = new Vector(
-        //     (next.x - now.x) / epsilon,  // Gradient in x-direction
-        //     (next.y - now.y) / epsilon   // Gradient in y-direction
-        // );
+        // get the first digit of point
+        int firstDigit = (int)Math.Floor(point);
+        if((int)Math.Floor(point - epsilon) != firstDigit)
+        {
+            // Compute the gradient using one small step forward
+            Vector now = func(point);
+            Vector next = func(point + epsilon);
+            yangDeriv = new Vector(
+                (next.x - now.x) / epsilon,  // Gradient in x-direction
+                (next.y - now.y) / epsilon   // Gradient in y-direction
+            );
+        }
+        else if((int)Math.Floor(point + epsilon) != firstDigit)
+        {
+            // Compute the gradient using one small step backward
+            Vector now = func(point);
+            Vector prev = func(point - epsilon);
+            yangDeriv = new Vector(
+                (now.x - prev.x) / epsilon,  // Gradient in x-direction
+                (now.y - prev.y) / epsilon   // Gradient in y-direction
+            );
+        }
+        else
+        {
+            // Compute the gradient using two small steps (forward and backward) in each direction
+            yangDeriv = new Vector(
+                (func(point + epsilon).x - func(point - epsilon).x) / (2 * epsilon),  // Gradient in x-direction
+                (func(point + epsilon).y - func(point - epsilon).y) / (2 * epsilon)   // Gradient in y-direction
+            );
+        }
 
         // Calculate the magnitude (or norm) of the vector
         double magnitude = Math.Sqrt(yangDeriv.x * yangDeriv.x + yangDeriv.y * yangDeriv.y);
