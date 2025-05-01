@@ -1,4 +1,11 @@
-IR Theta2 3/8,#AC00FF,false,2
+# Point Set File Format:
+# Settings are specified with #@ prefix followed by name: value
+#@name: IR Theta2 3/8
+#@color: #AC00FF
+#@skipCriticalLine: false
+#@samplingInterval: 2
+# Data format: real,imaginary
+
 0.381947157118056,1.000000000000000
 0.382508087158203,1.000100000000000
 0.383067279391819,1.000200000000000

@@ -239,86 +239,58 @@ public class PointSetManager : MonoBehaviour
                 return;
             }
 
-            // Skip any comment lines to find the header
-            int headerIndex = 0;
-            while (headerIndex < allLines.Length && allLines[headerIndex].StartsWith("#"))
-            {
-                headerIndex++;
-            }
-
-            if (headerIndex >= allLines.Length)
-            {
-                Debug.LogWarning($"[PointSetManager] No header found in file (only comments): {filePath}");
-                return;
-            }
-
-            // Parse header
-            string[] headerParts = allLines[headerIndex].Split(',');
-            if (headerParts.Length < 2)
-            {
-                // Provide helpful message about expected header format
-                Debug.LogWarning($"[PointSetManager] Invalid header format in file: {filePath}\n" +
-                    "Expected header format:\n" +
-                    "# Header format: name,color,skipCriticalLine,samplingInterval\n" +
-                    "# - name: required, the name of the point set\n" +
-                    "# - color: optional, HTML color code starting with #\n" +
-                    "# - skipCriticalLine: optional, true/false whether to skip points near critical line\n" +
-                    "# - samplingInterval: optional, integer value to sample every Nth point (1 = use all points)");
-                return;
-            }
-
-            string pointSetName = headerParts[0];
+            // Parse settings from enhanced header comments
+            var settings = ParseEnhancedHeader(allLines);
+            
+            // Set defaults
+            string pointSetName = setName; // Default to filename
             Color pointColor = defaultPointColor;
             bool skipCriticalLine = false;
-            int samplingInterval = 1;  // Default to no sampling (1 = use every point)
+            int samplingInterval = 1;
 
-            // Parse color if provided
-            if (headerParts[1].StartsWith("#"))
+            // Extract settings with fallbacks
+            if (settings.ContainsKey("name"))
             {
-                ColorUtility.TryParseHtmlString(headerParts[1], out pointColor);
+                pointSetName = settings["name"];
             }
 
-            // Parse skipCriticalLine if provided
-            if (headerParts.Length > 2)
+            if (settings.ContainsKey("color") && settings["color"].StartsWith("#"))
             {
-                bool.TryParse(headerParts[2], out skipCriticalLine);
+                ColorUtility.TryParseHtmlString(settings["color"], out pointColor);
             }
 
-            // Parse samplingInterval if provided (replaces useOptimization)
-            if (headerParts.Length > 3)
+            if (settings.ContainsKey("skipCriticalLine"))
             {
-                // Default to 1 (use all points) if not a valid integer
-                samplingInterval = 1;
-                
-                // Try to parse as integer
-                if (!int.TryParse(headerParts[3], out samplingInterval) || samplingInterval < 1)
+                bool.TryParse(settings["skipCriticalLine"], out skipCriticalLine);
+            }
+
+            if (settings.ContainsKey("samplingInterval"))
+            {
+                if (!int.TryParse(settings["samplingInterval"], out samplingInterval) || samplingInterval < 1)
                 {
-                    // If parsing failed or value is less than 1, default to 1 (no sampling)
                     samplingInterval = 1;
-                    
-                    // Log a warning about the invalid value
-                    Debug.LogWarning($"[PointSetManager] Invalid samplingInterval '{headerParts[3]}' in file {filePath}. Using default of 1 (all points).");
+                    Debug.LogWarning($"[PointSetManager] Invalid samplingInterval in file {filePath}. Using default of 1 (all points).");
                 }
             }
 
             var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine);
-            int totalPoints = allLines.Length - (headerIndex + 1); // Subtract header and comment lines
+            int totalPoints = 0;
             int loadedPoints = 0;
             int skippedCriticalPoints = 0;
-            int processedPointCount = 0; // Track all processed points for N-th point sampling
+            int processedPointCount = 0;
             Vector2? lastAddedPoint = null;
 
             // Process each point
-            for (int i = headerIndex + 1; i < allLines.Length; i++)
+            foreach (var line in allLines)
             {
-                // Skip comment lines
-                if (allLines[i].StartsWith("#")) 
+                // Skip comment and empty lines
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) 
                 {
-                    totalPoints--; // Adjust total points count for comments
                     continue;
                 }
 
-                string[] parts = allLines[i].Split(',');
+                totalPoints++;
+                string[] parts = line.Split(',');
                 if (parts.Length != 2) continue;
 
                 if (double.TryParse(parts[0], out double real) && 
@@ -341,9 +313,8 @@ public class PointSetManager : MonoBehaviour
                     // Apply sampling if configured
                     if (samplingInterval > 1)
                     {
-                        // Use N-th point sampling
                         shouldAdd = processedPointCount % samplingInterval == 0;
-                        processedPointCount++; // Increment regardless of whether we keep the point
+                        processedPointCount++;
                     }
 
                     if (shouldAdd)
@@ -767,4 +738,28 @@ public class PointSetManager : MonoBehaviour
         RefreshPointSetList();
     }
     #endif
+    
+    private Dictionary<string, string> ParseEnhancedHeader(string[] lines)
+    {
+        var settings = new Dictionary<string, string>();
+        
+        foreach (var line in lines)
+        {
+            if (!line.StartsWith("#@")) continue;
+            
+            // Remove #@ prefix
+            var settingLine = line.Substring(2).Trim();
+            
+            // Split on first : only
+            var colonIndex = settingLine.IndexOf(':');
+            if (colonIndex <= 0) continue;
+            
+            var key = settingLine.Substring(0, colonIndex).Trim();
+            var value = settingLine.Substring(colonIndex + 1).Trim();
+            
+            settings[key] = value;
+        }
+        
+        return settings;
+    }
 } 
