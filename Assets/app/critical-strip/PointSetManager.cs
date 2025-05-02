@@ -90,62 +90,92 @@ public class PointSetManager : MonoBehaviour
         }
     }
     
+    // Struct to hold parsed metadata
+    public struct PointSetMetadata
+    {
+        public string Name;
+        public Color Color;
+        public bool SkipCriticalLine;
+        public int SamplingInterval;
+        public float PointSize;
+    }
+
+    // Shared static method to parse metadata from a file
+    public static PointSetMetadata ParsePointSetMetadata(string[] lines, Color defaultColor)
+    {
+        var metadata = new PointSetMetadata
+        {
+            Name = null,
+            Color = defaultColor,
+            SkipCriticalLine = false,
+            SamplingInterval = 1,
+            PointSize = 4f
+        };
+
+        // Parse enhanced header
+        var settings = new Dictionary<string, string>();
+        foreach (var line in lines)
+        {
+            if (!line.StartsWith("#@")) continue;
+            var settingLine = line.Substring(2).Trim();
+            var colonIndex = settingLine.IndexOf(':');
+            if (colonIndex <= 0) continue;
+            var key = settingLine.Substring(0, colonIndex).Trim();
+            var value = settingLine.Substring(colonIndex + 1).Trim();
+            settings[key] = value;
+        }
+        if (settings.ContainsKey("name"))
+            metadata.Name = settings["name"];
+        if (settings.ContainsKey("color") && settings["color"].StartsWith("#"))
+            ColorUtility.TryParseHtmlString(settings["color"], out metadata.Color);
+        if (settings.ContainsKey("skipCriticalLine"))
+            bool.TryParse(settings["skipCriticalLine"], out metadata.SkipCriticalLine);
+        if (settings.ContainsKey("samplingInterval"))
+        {
+            if (!int.TryParse(settings["samplingInterval"], out metadata.SamplingInterval) || metadata.SamplingInterval < 1)
+                metadata.SamplingInterval = 1;
+        }
+        if (settings.ContainsKey("pointSize"))
+        {
+            if (!float.TryParse(settings["pointSize"], out metadata.PointSize) || metadata.PointSize <= 0)
+                metadata.PointSize = 4f;
+        }
+
+        // Parse the first non-comment line for name and color if not already set
+        foreach (var line in lines)
+        {
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+            var parts = line.Split(',');
+            if (string.IsNullOrEmpty(metadata.Name) && parts.Length > 0)
+                metadata.Name = parts[0];
+            if (parts.Length > 1 && parts[1].StartsWith("#"))
+                ColorUtility.TryParseHtmlString(parts[1], out metadata.Color);
+            break;
+        }
+        return metadata;
+    }
+    
     private void RefreshPointSetList()
     {
         if (pointSetSelector == null) return;
-        
-        // Get all .csv files in the points directory
         var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
-        
-        // Clear the mapping dictionary
         optionIndexToName.Clear();
-        
-        // Update dropdown options
         var options = new List<DropdownEx.OptionData>();
         uint index = 0;
-        
         foreach (var filePath in files)
         {
-            string displayName = Path.GetFileNameWithoutExtension(filePath); // Default to filename
-            
-            // Try to read the name from the first non-comment line of the file
-            try
-            {
-                using (var reader = new StreamReader(filePath))
-                {
-                    string line;
-                    // Skip comment lines
-                    while ((line = reader.ReadLine()) != null && line.StartsWith("#"))
-                    {
-                        continue;
-                    }
-                    
-                    if (!string.IsNullOrEmpty(line))
-                    {
-                        // The name is everything before the first comma
-                        int commaIndex = line.IndexOf(',');
-                        if (commaIndex > 0)
-                        {
-                            displayName = line.Substring(0, commaIndex);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"Failed to read name from file {filePath}: {e.Message}");
-                // Keep using filename as fallback
-            }
-            
-            options.Add(new DropdownEx.OptionData(displayName));
-            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath); // Keep using filename for internal mapping
+            string[] allLines = File.ReadAllLines(filePath);
+            var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
+            string displayName = metadata.Name ?? Path.GetFileNameWithoutExtension(filePath);
+            Color pointColor = metadata.Color;
+            options.Add(new DropdownEx.OptionData(displayName, pointColor));
+            Debug.Log($"Dropdown option: {displayName}, color: {pointColor} (RGBA: {pointColor.r}, {pointColor.g}, {pointColor.b}, {pointColor.a})");
+            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath);
             index++;
         }
-        
-        // Clear options and add new ones without triggering selection
         pointSetSelector.ClearOptions();
         pointSetSelector.AddOptions(options);
-        pointSetSelector.value = 0;  // Set to "None" option
+        pointSetSelector.value = 0;
     }
     
     private void OnPointSetSelectionChanged(uint selectedIndex)
@@ -238,52 +268,12 @@ public class PointSetManager : MonoBehaviour
                 Debug.LogWarning($"[PointSetManager] Empty file: {filePath}");
                 return;
             }
-
-            // Parse settings from enhanced header comments
-            var settings = ParseEnhancedHeader(allLines);
-            
-            // Set defaults
-            string pointSetName = setName; // Default to filename
-            Color pointColor = defaultPointColor;
-            bool skipCriticalLine = false;
-            int samplingInterval = 1;
-            float pointSize = 4f; // Default point size
-
-            // Extract settings with fallbacks
-            if (settings.ContainsKey("name"))
-            {
-                pointSetName = settings["name"];
-            }
-
-            if (settings.ContainsKey("color") && settings["color"].StartsWith("#"))
-            {
-                ColorUtility.TryParseHtmlString(settings["color"], out pointColor);
-            }
-
-            if (settings.ContainsKey("skipCriticalLine"))
-            {
-                bool.TryParse(settings["skipCriticalLine"], out skipCriticalLine);
-            }
-
-            if (settings.ContainsKey("samplingInterval"))
-            {
-                if (!int.TryParse(settings["samplingInterval"], out samplingInterval) || samplingInterval < 1)
-                {
-                    samplingInterval = 1;
-                    Debug.LogWarning($"[PointSetManager] Invalid samplingInterval in file {filePath}. Using default of 1 (all points).");
-                }
-            }
-
-            // Parse pointSize if present
-            if (settings.ContainsKey("pointSize"))
-            {
-                if (!float.TryParse(settings["pointSize"], out pointSize) || pointSize <= 0)
-                {
-                    pointSize = 4f;
-                    Debug.LogWarning($"[PointSetManager] Invalid pointSize in file {filePath}. Using default of 4.");
-                }
-            }
-
+            var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
+            string pointSetName = metadata.Name ?? setName;
+            Color pointColor = metadata.Color;
+            bool skipCriticalLine = metadata.SkipCriticalLine;
+            int samplingInterval = metadata.SamplingInterval;
+            float pointSize = metadata.PointSize;
             var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine, pointSize);
             int totalPoints = 0;
             int loadedPoints = 0;
@@ -754,28 +744,4 @@ public class PointSetManager : MonoBehaviour
         RefreshPointSetList();
     }
     #endif
-    
-    private Dictionary<string, string> ParseEnhancedHeader(string[] lines)
-    {
-        var settings = new Dictionary<string, string>();
-        
-        foreach (var line in lines)
-        {
-            if (!line.StartsWith("#@")) continue;
-            
-            // Remove #@ prefix
-            var settingLine = line.Substring(2).Trim();
-            
-            // Split on first : only
-            var colonIndex = settingLine.IndexOf(':');
-            if (colonIndex <= 0) continue;
-            
-            var key = settingLine.Substring(0, colonIndex).Trim();
-            var value = settingLine.Substring(colonIndex + 1).Trim();
-            
-            settings[key] = value;
-        }
-        
-        return settings;
-    }
 } 
