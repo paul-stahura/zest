@@ -247,6 +247,7 @@ public class PointSetManager : MonoBehaviour
             Color pointColor = defaultPointColor;
             bool skipCriticalLine = false;
             int samplingInterval = 1;
+            float pointSize = 4f; // Default point size
 
             // Extract settings with fallbacks
             if (settings.ContainsKey("name"))
@@ -273,7 +274,17 @@ public class PointSetManager : MonoBehaviour
                 }
             }
 
-            var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine);
+            // Parse pointSize if present
+            if (settings.ContainsKey("pointSize"))
+            {
+                if (!float.TryParse(settings["pointSize"], out pointSize) || pointSize <= 0)
+                {
+                    pointSize = 4f;
+                    Debug.LogWarning($"[PointSetManager] Invalid pointSize in file {filePath}. Using default of 4.");
+                }
+            }
+
+            var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine, pointSize);
             int totalPoints = 0;
             int loadedPoints = 0;
             int skippedCriticalPoints = 0;
@@ -337,7 +348,7 @@ public class PointSetManager : MonoBehaviour
             if (pointSet.Name != setName)
             {
                 var originalSet = pointSet;
-                pointSet = new PointSet(setName, originalSet.Color, originalSet.SkipCriticalLine);
+                pointSet = new PointSet(setName, originalSet.Color, originalSet.SkipCriticalLine, originalSet.PointSize);
                 pointSet.TotalPointsInFile = originalSet.TotalPointsInFile;
                 foreach (var point in originalSet.Points)
                 {
@@ -370,6 +381,7 @@ public class PointSetManager : MonoBehaviour
                 handler.criticalStripRenderer = renderer;
                 handler.app = app;
                 handler.pointSetManager = this;
+                handler.pointSize = pointSet.PointSize; // Set point size for interaction
 
                 // Create a dedicated hover point object that will be animated for hover effects
                 GameObject hoverPointObj = new GameObject("HoverPoint", typeof(RectTransform), typeof(Image));
@@ -411,6 +423,7 @@ public class PointSetManager : MonoBehaviour
                     PointsMeshRenderer meshInstance = Instantiate(pointsMeshPrefab, groupObj.transform);
                     meshInstance.Points = chunk;
                     meshInstance.color = pointSet.Color;
+                    meshInstance.PointSize = pointSet.PointSize; // Set point size for mesh
                     meshInstance.Refresh();
                     // Assign a new material instance to disable UI batching and prevent vertex merging
                     meshInstance.material = new Material(meshInstance.material);
@@ -681,10 +694,13 @@ public class PointSetManager : MonoBehaviour
         string filePath = Path.Combine(pointsDirectoryPath, $"{pointSet.Name}.csv");
         
         // Create the header line
-        var lines = new List<string>
+        var lines = new List<string>();
+        // Add enhanced header for pointSize if not default
+        if (pointSet.PointSize != 4f)
         {
-            $"{pointSet.Name},#{ColorUtility.ToHtmlStringRGBA(pointSet.Color)}"
-        };
+            lines.Add($"#@pointSize: {pointSet.PointSize}");
+        }
+        lines.Add($"{pointSet.Name},#{ColorUtility.ToHtmlStringRGBA(pointSet.Color)}");
         
         // Add all points
         foreach (var point in pointSet.Points)
