@@ -6,7 +6,8 @@ using System.Linq;
 
 /// <summary>
 /// Renders transparent bands over the critical strip based on changes in X direction
-/// of data loaded from a specified CSV file.
+/// of data loaded from a specified CSV file. The bands are rendered in the regions
+/// where the X value does NOT change direction (i.e., the gaps between direction changes).
 /// </summary>
 [RequireComponent(typeof(CanvasRenderer))]
 public class BandsOverlayRenderer : MaskableGraphic
@@ -21,14 +22,17 @@ public class BandsOverlayRenderer : MaskableGraphic
     [SerializeField] private Toggle visibilityToggle;
     
     // Internal data
-    private List<float> bandStartIndices = new List<float>();
-    private List<float> bandEndIndices = new List<float>();
+    private List<float> bandStartIndices = new List<float>(); // Y values where X direction changes start
+    private List<float> bandEndIndices = new List<float>();   // Y values where X direction changes end
     private bool isDataProcessed = false;
     private bool isVisible = true;
     
     // Cached reference to the transform component
     private CriticalStripTransform stripTransform;
     
+    /// <summary>
+    /// Unity Awake. Sets up references and toggle listener.
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -52,6 +56,9 @@ public class BandsOverlayRenderer : MaskableGraphic
         }
     }
     
+    /// <summary>
+    /// Unity OnEnable. Subscribes to viewport change events and processes data.
+    /// </summary>
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -66,6 +73,9 @@ public class BandsOverlayRenderer : MaskableGraphic
         ProcessDataFile();
     }
     
+    /// <summary>
+    /// Unity OnDisable. Unsubscribes from events and clears references.
+    /// </summary>
     protected override void OnDisable()
     {
         base.OnDisable();
@@ -81,6 +91,9 @@ public class BandsOverlayRenderer : MaskableGraphic
         isDataProcessed = false;
     }
     
+    /// <summary>
+    /// Called when the viewport (zoom/pan) changes. Triggers a redraw.
+    /// </summary>
     private void OnViewportChanged()
     {
         // Redraw the bands when viewport changes
@@ -91,7 +104,8 @@ public class BandsOverlayRenderer : MaskableGraphic
     }
     
     /// <summary>
-    /// Process the data file to identify band locations
+    /// Processes the data file to identify Y indices where X direction changes.
+    /// Populates bandStartIndices and bandEndIndices.
     /// </summary>
     private void ProcessDataFile()
     {
@@ -127,7 +141,7 @@ public class BandsOverlayRenderer : MaskableGraphic
                 dataStartLine++;
             }
             
-            // Process data points
+            // Process data points to find direction changes
             float previousX = 0;
             float previousY = 0;
             bool isIncreasing = false;
@@ -160,6 +174,7 @@ public class BandsOverlayRenderer : MaskableGraphic
                 // Determine if X is increasing or decreasing
                 bool currentIncreasing = currentX > previousX;
                 
+                // Detect direction change and mark band start/end
                 if (!bandActive && i > dataStartLine + 1) // Skip first comparison
                 {
                     if (currentIncreasing != isIncreasing)
@@ -204,13 +219,15 @@ public class BandsOverlayRenderer : MaskableGraphic
     }
     
     /// <summary>
-    /// Build the mesh for the bands
+    /// Builds the mesh for the bands. Renders bands in the regions where X does NOT change direction
+    /// (i.e., the gaps between direction changes). This is the inverse of the original band logic.
     /// </summary>
+    /// <param name="vh">VertexHelper for mesh construction</param>
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
         
-        // Add additional checks for scene cleanup
+        // Add additional checks for scene cleanup and visibility
         if (!this.isActiveAndEnabled || !Application.isPlaying || !isVisible)
         {
             return;
@@ -242,7 +259,7 @@ public class BandsOverlayRenderer : MaskableGraphic
             }
         }
         
-        // Get the viewport rect
+        // Get the viewport rect for full width
         Rect rect = rectTransform.rect;
         
         // Create the band color with opacity (adjusted for visibility)
@@ -255,51 +272,65 @@ public class BandsOverlayRenderer : MaskableGraphic
         
         int vertexIndex = 0;
         
-        // Create a band for each start/end pair
-        for (int i = 0; i < Mathf.Min(bandStartIndices.Count, bandEndIndices.Count); i++)
+        float visibleMin = stripTransform.MinIndex;
+        float visibleMax = stripTransform.MaxIndex;
+
+        // --- INVERSE BAND LOGIC ---
+        // Drawing bands between regions where X changes direction.
+        // This means:
+        //   - From the bottom of the visible range up to the first band start
+        //   - Between each band end and the next band start
+        //   - From the last band end to the top of the visible range
+        //
+        // This loop builds and draws those intervals as filled rectangles.
+        float prev = visibleMin;
+        for (int i = 0; i <= bandStartIndices.Count; i++)
         {
-            float startIndex = bandStartIndices[i];
-            float endIndex = bandEndIndices[i];
-            
-            // Skip bands completely outside the current view
-            if (endIndex < stripTransform.MinIndex || startIndex > stripTransform.MaxIndex)
-                continue;
-            
-            // Clamp the band to the visible range
-            startIndex = Mathf.Max(startIndex, stripTransform.MinIndex);
-            endIndex = Mathf.Min(endIndex, stripTransform.MaxIndex);
-            
+            float gapStart, gapEnd;
+            if (i == 0)
+            {
+                // Before the first band (bottom of view to first band start)
+                gapStart = visibleMin;
+                gapEnd = (bandStartIndices.Count > 0) ? bandStartIndices[0] : visibleMax;
+            }
+            else if (i == bandStartIndices.Count)
+            {
+                // After the last band (last band end to top of view)
+                gapStart = bandEndIndices[bandEndIndices.Count - 1];
+                gapEnd = visibleMax;
+            }
+            else
+            {
+                // Between bands (end of previous band to start of next)
+                gapStart = bandEndIndices[i - 1];
+                gapEnd = bandStartIndices[i];
+            }
+
+            // Clamp to visible range
+            gapStart = Mathf.Max(gapStart, visibleMin);
+            gapEnd = Mathf.Min(gapEnd, visibleMax);
+            if (gapEnd <= gapStart) continue;
+
             // Convert indices to viewport Y coordinates
-            Vector2 startPosStrip = new Vector2(0, startIndex);
-            Vector2 endPosStrip = new Vector2(0, endIndex);
-            
+            Vector2 startPosStrip = new Vector2(0, gapStart);
+            Vector2 endPosStrip = new Vector2(0, gapEnd);
+
             Vector2 startPosViewport = stripTransform.StripToViewport(startPosStrip);
             Vector2 endPosViewport = stripTransform.StripToViewport(endPosStrip);
-            
-            // Create rectangle vertices using the full viewport width
-            float left = rect.x;  // Use rect.x instead of 0
-            float right = rect.x + rect.width;  // Use full width
+
+            float left = rect.x;
+            float right = rect.x + rect.width;
             float top = startPosViewport.y;
             float bottom = endPosViewport.y;
-            
-            // Ensure top is above bottom
-            if (top > bottom)
-            {
-                float temp = top;
-                top = bottom;
-                bottom = temp;
-            }
-            
-            // Add vertices for quad
-            vh.AddVert(new Vector3(left, top), bandColor32, new Vector2(0, 0));  // Top-left
-            vh.AddVert(new Vector3(right, top), bandColor32, new Vector2(1, 0)); // Top-right
-            vh.AddVert(new Vector3(right, bottom), bandColor32, new Vector2(1, 1)); // Bottom-right
-            vh.AddVert(new Vector3(left, bottom), bandColor32, new Vector2(0, 1)); // Bottom-left
-            
-            // Add triangles
+            if (top > bottom) { float temp = top; top = bottom; bottom = temp; }
+
+            // Add quad for this band region
+            vh.AddVert(new Vector3(left, top), bandColor32, new Vector2(0, 0));
+            vh.AddVert(new Vector3(right, top), bandColor32, new Vector2(1, 0));
+            vh.AddVert(new Vector3(right, bottom), bandColor32, new Vector2(1, 1));
+            vh.AddVert(new Vector3(left, bottom), bandColor32, new Vector2(0, 1));
             vh.AddTriangle(vertexIndex, vertexIndex + 1, vertexIndex + 2);
             vh.AddTriangle(vertexIndex, vertexIndex + 2, vertexIndex + 3);
-            
             vertexIndex += 4;
         }
     }
@@ -322,7 +353,7 @@ public class BandsOverlayRenderer : MaskableGraphic
     }
     
     /// <summary>
-    /// Set the visibility of the bands
+    /// Set the visibility of the bands (used by UI toggle)
     /// </summary>
     public void SetVisible(bool visible)
     {
@@ -333,6 +364,9 @@ public class BandsOverlayRenderer : MaskableGraphic
         }
     }
     
+    /// <summary>
+    /// Unity OnDestroy. Cleans up listeners and references.
+    /// </summary>
     protected override void OnDestroy()
     {
         // Clean up toggle listener
