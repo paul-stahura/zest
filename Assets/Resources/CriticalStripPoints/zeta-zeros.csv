@@ -4,7 +4,7 @@
 #@color: #FF00FF
 #@skipCriticalLine: false
 #@samplingInterval: 1
-#@pointSize: 8
+#@pointSize: 10
 # Data format: real,imaginary
 
 0.5,1.028225356559742
