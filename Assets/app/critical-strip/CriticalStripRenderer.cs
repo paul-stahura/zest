@@ -36,6 +36,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float minZoom = 0.5f;        // Minimum zoom level (maximum range)
     [SerializeField] private float maxZoom = 500f;         // Maximum zoom level (minimum range)
     [SerializeField] private float scrollSensitivity = 1f;  // How fast to scroll when dragging
+    [SerializeField] private float currentZoom = 0.8f;
+
+    
+    [Header("Centering")]
+    [SerializeField] private Button centerButton; // UI button to center on current position
+    private Coroutine centerCoroutine;
+    private const float centerAnimDuration = 0.5f; // seconds
     
     // Core components
     private CriticalStripTransform transform;  // Handles coordinate transformations between strip and viewport
@@ -55,7 +62,6 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
     private Vector2 lastDragPosition;
     private bool isDragging = false;
-    [SerializeField] private float currentZoom = 0.8f;
 
     private float lastScrollTime;
     private const float SCROLL_CLICK_THRESHOLD = 0.1f; // Ignore clicks within 100ms of scrolling
@@ -149,6 +155,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
         // Clear any pending point sets to prevent auto-loading
         pendingPointSets.Clear();
+
+        // Wire up center button if assigned
+        if (centerButton != null)
+        {
+            centerButton.onClick.AddListener(CenterOnCurrentPosition);
+        }
     }
 
     /// <summary>
@@ -1029,5 +1041,66 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Since we're using centered anchors (0.5), the anchoredPosition should be zero
         // This will automatically place it at 50% of the viewport width
         criticalLine.anchoredPosition = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Smoothly animates the viewport to center the current App.Real/App.Index position if possible.
+    /// </summary>
+    public void CenterOnCurrentPosition()
+    {
+        if (!isInitialized || app == null || transform == null) return;
+        float targetIndex = (float)app.Index;
+        float currentRange = transform.MaxIndex - transform.MinIndex;
+        float minAllowed = -1f;
+        float maxAllowed = float.MaxValue; // No explicit upper bound in current logic
+
+        // Compute new min/max to center targetIndex
+        float newMin = targetIndex - currentRange * 0.5f;
+        float newMax = targetIndex + currentRange * 0.5f;
+
+        // Clamp so min >= -1
+        if (newMin < minAllowed)
+        {
+            float adjust = minAllowed - newMin;
+            newMin = minAllowed;
+            newMax += adjust;
+        }
+        // Optionally, clamp newMax if you have a max bound (not present in current code)
+
+        // If already centered (within epsilon), do nothing
+        if (Mathf.Abs(transform.MinIndex - newMin) < 1e-4f && Mathf.Abs(transform.MaxIndex - newMax) < 1e-4f)
+            return;
+
+        // Stop any existing centering animation
+        if (centerCoroutine != null)
+            StopCoroutine(centerCoroutine);
+        centerCoroutine = StartCoroutine(CenterViewportCoroutine(newMin, newMax, centerAnimDuration));
+    }
+
+    private IEnumerator CenterViewportCoroutine(float targetMin, float targetMax, float duration)
+    {
+        float startMin = transform.MinIndex;
+        float startMax = transform.MaxIndex;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Smoothstep for ease-in-out
+            float lerpT = t * t * (3f - 2f * t);
+            float min = Mathf.Lerp(startMin, targetMin, lerpT);
+            float max = Mathf.Lerp(startMax, targetMax, lerpT);
+            transform.SetIndexRange(min, max);
+            UpdateAllPoints();
+            UpdateCurrentPosIndicator();
+            OnViewportChanged?.Invoke();
+            yield return null;
+        }
+        // Final set
+        transform.SetIndexRange(targetMin, targetMax);
+        UpdateAllPoints();
+        UpdateCurrentPosIndicator();
+        OnViewportChanged?.Invoke();
+        centerCoroutine = null;
     }
 } 
