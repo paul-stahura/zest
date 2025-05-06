@@ -1,196 +1,165 @@
-# Critical Strip Visualization System
+# Critical Strip Visualization System (Revised)
 
 ## Overview
-The Critical Strip Visualization is a Unity-based overlay system that displays point data relevant to the Riemann Zeta function's critical strip. It provides an interactive window on the left side of the screen where users can view, select, and save points of interest.
+The Critical Strip Visualization System is a Unity-based tool designed to render and interact with points defined in the Riemann Zeta function's critical strip. This revised version features a refactored architecture that ensures optimal performance and smooth user interactions, even with large point datasets.
+
+Key improvements include:
+- Decoupled rendering and interaction logic
+- Optimized mesh-based point rendering with advanced performance optimizations
+- Enhanced coordinate transformations with high precision and snap-to-grid behavior
+- A streamlined UI with a collapsible critical strip window and smooth animations
+- A new interaction handler that centralizes user input events
 
 ## Core Components
 
 ### 1. CriticalStripWindow
-The main container component that manages the overlay window's state and behavior.
-
-Key features:
-- Collapsible window with smooth animations
-- Semi-transparent background
-- Header with controls
-- Point set list
-- Point visualization area
+Manages the UI container (collapsible window) for the critical strip display.
+- Provides smooth expand/collapse animations using easing curves.
+- Integrates updated UI controls and event handling, decoupled from rendering logic for improved responsiveness.
 
 ### 2. CriticalStripTransform
-Handles coordinate transformations between different spaces:
-- Critical Strip Space: (real [0,1], index)
-- Viewport Space: Local UI coordinates
-- Screen Space: Mouse/touch input coordinates
+Handles conversions between coordinate spaces:
+- **Critical Strip Space:** (real [0,1], index)
+- **Viewport Space:** Local UI coordinates
+- **Screen Space:** Mouse/touch input coordinates
 
-```csharp
-// Example transformations
-Vector2 viewportPos = transform.StripToViewport(stripPos);
-Vector2 stripPos = transform.ViewportToStrip(viewportPos);
-Vector2 stripPos = transform.ScreenToStrip(screenPos);
-```
+Features include high-precision arithmetic and a snap-to-grid behavior for points near the critical line (real = 0.5) with dynamically configurable thresholds.
 
 ### 3. PointSet
-Represents a collection of points with shared properties:
-- Name
-- Color
-- Active state
-- Point data (real, index pairs)
-
-File format:
-```csv
-set_name,#RRGGBBAA
-timestamp,real,index
-2024-03-22T14:30:00,0.5,2.7
-```
+Represents a collection of points loaded from CSV files.
+- Supports a metadata header (set name, color in #RRGGBBAA format, and a skipCriticalLine flag) to boost performance.
+- Enhanced error handling with robust CSV parsing and high-precision coordinate management.
 
 ### 4. CriticalStripRenderer
-Handles the visualization of points and user interaction:
-- Point rendering using Unity UI system
-- Point hover effects
-- Point selection
-- Coordinate updates
+The core component responsible for rendering points using advanced mesh-based techniques:
+- Efficiently generates custom meshes for high-density point rendering.
+- Separates rendering operations from user input logic to improve performance and maintainability.
+- Supports smooth panning, zooming, and real-time point selection with optimized culling and batching.
 
 ### 5. PointSetManager
-Manages point sets and handles file I/O:
-- Loading/saving point sets
-- User point collection
-- Point set toggling
-- Integration with App.cs
+Manages the loading, saving, and organization of multiple point sets.
+- Integrates with CSV file formats including metadata for color coding and optimization flags.
+- Implements filtering and batch processing to handle large datasets effectively.
+- Provides multi-select options and dynamic toggling of point set visibility.
 
-### 6. CoordinateDisplay
-Displays current coordinates:
-- Real and index values
-- Updates on hover
-- Updates on point selection
+### 6. PointsMeshRenderer
+Handles optimized mesh generation for point visualization:
+- Dynamically adjusts point size and color based on zoom and other parameters.
+- Implements off-screen culling and batching techniques to ensure smooth performance during interactions.
 
-## Integration with App.cs
+### 7. PointsMeshHoverOverlay
+Manages hover interactions over rendered points:
+- Detects and animates hover effects with configurable thresholds.
+- Implements snap-to-grid behavior for more precise point selection, especially near the critical line.
+- Provides real-time coordinate updates during hover events.
 
-The system integrates with the main App.cs through events:
-```csharp
-// Subscribing to App.cs events
-app.RealChanged += OnRealChanged;
-app.IndexChanged += OnIndexChanged;
+### 8. IndexLabelsRenderer
+Renders dynamically-scaled index labels aligned with the point sets:
+- Automatically adjusts label density and formatting based on the current zoom level.
+- Ensures clear visual context by aligning labels with their corresponding points.
 
-// Updating App.cs values
-app.Real = selectedPoint.x;
-app.Index = selectedPoint.y;
-```
+### 9. CriticalStripStats
+Displays real-time statistics about the rendered points:
+- Shows totals for points rendered and other active metrics useful for debugging and performance monitoring.
 
-## Point Interaction System
+### 10. PointSetInteractionHandler
+A newly integrated component dedicated to managing user input:
+- Centralizes mouse, touch, and keyboard interactions (clicks, drags, zooming, and keyboard shortcuts).
+- Decouples interaction logic from rendering components, ensuring a cleaner and more maintainable codebase.
 
-### Hover Behavior
-1. Mouse enters point vicinity
-2. Point scales up (2x default size)
-3. Coordinates update in display
-4. Returns to normal on mouse exit
+## Interaction and Event Handling
 
-### Selection Behavior
-1. Click point or viewport area
-2. Coordinates are sent to App.cs
-3. App.cs updates its state
-4. Other visualizations update accordingly
+- User actions (hover, click, drag, keyboard input) are managed by the PointSetInteractionHandler, which translates these events into coordinate adjustments via the CriticalStripTransform.
+- The CriticalStripRenderer and PointsMeshHoverOverlay respond to these updates, providing immediate visual feedback through smooth animations and snap-to-grid selections.
+- Integration with the main App.cs enables bidirectional event flow (e.g., RealChanged, IndexChanged), ensuring the visualization state remains synchronized with the overall application.
 
-### Point Saving
-1. Navigate to desired point
-2. Click "Save Point" button
-3. Point is saved with timestamp
-4. Point set is automatically reloaded
-5. New point appears in visualization
+## Performance Optimizations
 
-## Coordinate Systems
+- Advanced mesh-based rendering minimizes draw calls and leverages Unity's graphics pipeline for optimal performance.
+- Off-screen culling and bulletproof batching reduce overhead during panning and zooming operations.
+- Improved hover detection and debounced event handling eliminate unnecessary computations.
+- Critical line filtering and adaptive snap-to-grid thresholds enhance responsiveness in dense point regions.
 
-### Critical Strip Space
-- X-axis: Real part [0,1]
-- Y-axis: Index values
-- Default range: [0,7]
-- Supports zooming on Y-axis
+## File Management and Setup
 
-### Viewport Space
-- Normalized to window dimensions
-- Handles point positioning
-- Manages UI layout
+- Point set data is managed via CSV files that include metadata for color coding and performance flags.
+- Detailed setup instructions can be found in [SETUP.md](SETUP.md).
+- For an in-depth technical breakdown of the revised system architecture and design goals, refer to [SPECIFICATION.md](SPECIFICATION.md).
 
-## File Management
+## Best Practices
 
-### User Points File
-- Location: Application.persistentDataPath
-- Format: CSV
-- Auto-created if not exists
-- Append-only for new points
+- Use distinctive color schemes for different point sets to enhance visual differentiation.
+- Fine-tune the snap-to-grid threshold based on the current zoom level and interaction precision.
+- Limit the number of active point sets to avoid performance degradation.
+- Regularly update point set configurations to align with both performance and visual fidelity requirements.
 
-### Point Set Files
-- Support for multiple point sets
-- Color coding
-- Toggle visibility
-- Efficient loading/saving
+## Future Enhancements
 
-## Performance Considerations
+- Explore additional input modalities, such as touch gestures for mobile support.
+- Further refine dynamic label rendering as zoom levels change in real time.
+- Expand CSV support to include richer metadata for advanced filtering and customization options.
+
+---
+
+This README reflects the current design and implementation of the Critical Strip Visualization System. For further customization or to report issues, please refer to the respective component documentation within the codebase.
+
+## Coordinate Systems and Zooming
+The system operates within three distinct coordinate spaces:
+ - Critical Strip Space: Represents the logical space where the x-axis corresponds to the real part (ranging within [0,1]) and the y-axis represents index values, including negatives. The default view range for indices is [0,7].
+ - Viewport Space: The local coordinate system of the collapsible UI window where the visualization is rendered.
+ - Screen Space: The coordinate space derived from input devices (e.g., mouse, touch) which is translated into the system's logical coordinates.
+
+The CriticalStripTransform component handles precise conversions between these spaces. It supports:
+ - Mouse wheel or touch-based zooming that auto-centers on the target coordinate.
+ - Smooth panning with bounds checking to ensure the view remains in valid regions.
+ - Dynamic label adjustments to maintain clarity and readability across different zoom levels.
+
+## Performance Optimizations
 
 ### Point Rendering
-- Uses Unity UI system
-- Object pooling for large sets
-- Culling for off-screen points
-- Efficient coordinate transforms
+- Custom mesh generation for efficient batching
+- Off-screen point culling
+- Viewport-based frustum culling
+- Optimized hover detection for large sets
+- Critical line points filtering for dense sets
 
 ### Event Handling
 - Debounced coordinate updates
-- Efficient point hover detection
-- Optimized point selection
+- Viewport-based event processing
+- Efficient coordinate transformations
+
+## File Management
+
+### Point Set Files
+- Support for multiple point set files
+- CSV format with metadata header
+- Color coding and per-set active state
+- Automatic file loading/monitoring
+- Skip critical line optimization flag
 
 ## Setup Instructions
 
 Detailed setup instructions are available in [SETUP.md](SETUP.md).
 
-## Usage Examples
+## Best Practices
 
-### Adding a New Point Set
-```csharp
-var pointSet = new PointSet("example_set", Color.blue);
-pointSet.AddPoint(0.5f, 2.7f);
-pointSetManager.AddPointSet(pointSet);
-```
+1. Point Set Management
+   - Use clear naming conventions for point sets
+   - Enable critical line skipping for large sets
+   - Group related points in the same set
+   - Use distinctive colors for different sets
 
-### Saving Current Point
-```csharp
-pointSetManager.SaveCurrentPoint();
-```
+2. User Interaction
+   - Allow time for animations to complete
+   - Provide visual feedback for selections
+   - Save important points for later reference
+   - Use zoom for detailed examination
 
-### Toggling Point Set Visibility
-```csharp
-pointSetManager.TogglePointSet("example_set", false);
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. Points Not Appearing
-   - Check Point Viewport mask
-   - Verify PointPrefab assignment
-   - Check RectTransform settings
-
-2. Coordinate Transform Issues
-   - Verify viewport dimensions
-   - Check index range settings
-   - Validate transform initialization
-
-3. Point Selection Not Working
-   - Check EventSystem setup
-   - Verify Raycast Target settings
-   - Validate App.cs integration
-
-## Future Enhancements
-
-1. Planned Features
-   - Point filtering
-   - Custom point styles
-   - Advanced hover information
-   - Point annotations
-   - Dynamic loading for large sets
-
-2. Performance Optimizations
-   - GPU instancing for points
-   - Spatial partitioning
-   - Async file operations
+3. Performance Considerations
+   - Limit active point sets for best performance
+   - Consider reducing point size for dense sets
+   - Use appropriate zoom levels for interaction
+   - Avoid unnecessary point set reloading
 
 ## Dependencies
 
@@ -199,19 +168,7 @@ pointSetManager.TogglePointSet("example_set", false);
 - App.cs integration
 - Unity EventSystem
 
-## Best Practices
+## Usage Examples
 
-1. Point Management
-   - Use appropriate point set grouping
-   - Maintain reasonable set sizes
-   - Clear unused point sets
-
-2. User Interaction
-   - Provide visual feedback
-   - Maintain responsive UI
-   - Handle edge cases gracefully
-
-3. File Operations
-   - Use try-catch for I/O
-   - Validate file formats
-   - Handle missing files gracefully 
+### Adding a New Point Set
+```

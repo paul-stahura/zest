@@ -36,6 +36,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float minZoom = 0.5f;        // Minimum zoom level (maximum range)
     [SerializeField] private float maxZoom = 500f;         // Maximum zoom level (minimum range)
     [SerializeField] private float scrollSensitivity = 1f;  // How fast to scroll when dragging
+    [SerializeField] private float currentZoom = 0.8f;
+
+    
+    [Header("Centering")]
+    [SerializeField] private Button centerButton; // UI button to center on current position
+    private Coroutine centerCoroutine;
+    private const float centerAnimDuration = 0.5f; // seconds
     
     // Core components
     private CriticalStripTransform transform;  // Handles coordinate transformations between strip and viewport
@@ -55,7 +62,6 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
     private Vector2 lastDragPosition;
     private bool isDragging = false;
-    [SerializeField] private float currentZoom = 0.8f;
 
     private float lastScrollTime;
     private const float SCROLL_CLICK_THRESHOLD = 0.1f; // Ignore clicks within 100ms of scrolling
@@ -117,11 +123,18 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Configure image for raycasts only
         image.raycastTarget = true; // Keep raycast enabled
 
-        // Disable any Mask component if present as it blocks points
-        var mask = GetComponent<Mask>();
-        if (mask != null)
+        // Add or ensure we have a RectMask2D for clipping points
+        var mask = GetComponent<RectMask2D>();
+        if (mask == null)
         {
-            mask.enabled = false;
+            mask = gameObject.AddComponent<RectMask2D>();
+        }
+        
+        // Make sure standard Mask is disabled if it exists
+        var standardMask = GetComponent<Mask>();
+        if (standardMask != null)
+        {
+            standardMask.enabled = false;
         }
 
         // Make sure we have a RectTransform (required by [RequireComponent])
@@ -142,6 +155,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
         // Clear any pending point sets to prevent auto-loading
         pendingPointSets.Clear();
+
+        // Wire up center button if assigned
+        if (centerButton != null)
+        {
+            centerButton.onClick.AddListener(CenterOnCurrentPosition);
+        }
     }
 
     /// <summary>
@@ -343,9 +362,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Convert strip coordinates to viewport
         var viewportPos = transform.StripToViewport(stripPos);
         
-        // Check if the point is within the viewport bounds
+        // Get the viewport rect and check if the point (including its size) is within the bounds
         var rect = transform.ViewportRect.rect;
-        if (viewportPos.y < rect.y || viewportPos.y > rect.y + rect.height)
+        float halfSize = pointSize * 0.5f;
+        
+        // Skip points entirely outside the viewport bounds (both x and y)
+        if (viewportPos.x + halfSize < rect.x || viewportPos.x - halfSize > rect.x + rect.width ||
+            viewportPos.y + halfSize < rect.y || viewportPos.y - halfSize > rect.y + rect.height)
         {
             // Point is outside viewport bounds, don't create it
             return;
@@ -624,17 +647,25 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     private void SetPointScale(RectTransform point, float scale)
     {
-        if (point == null) return;
+        if (point == null) 
+        {
+            Debug.LogWarning("[CriticalStripRenderer] SetPointScale called with null point");
+            return;
+        }
+
+        Debug.Log($"[CriticalStripRenderer] SetPointScale called for point at {point.anchoredPosition} with scale {scale}");
 
         // If we're trying to set hover scale and point is already hovered, ignore
         if (scale > 1f && isPointHovered.TryGetValue(point, out bool hovered) && hovered)
         {
+            Debug.Log($"[CriticalStripRenderer] Point at {point.anchoredPosition} is already hovered, ignoring");
             return;
         }
         
         // Stop any existing animation
         if (hoverAnimations.TryGetValue(point, out var existingCoroutine))
         {
+            Debug.Log($"[CriticalStripRenderer] Stopping existing hover animation for point at {point.anchoredPosition}");
             StopCoroutine(existingCoroutine);
             hoverAnimations.Remove(point);
         }
@@ -643,6 +674,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         isPointHovered[point] = scale > 1f;
         
         // Start new animation
+        Debug.Log($"[CriticalStripRenderer] Starting new hover animation for point at {point.anchoredPosition} with scale {scale}");
         var newCoroutine = StartCoroutine(AnimateHoverScale(point, scale));
         hoverAnimations[point] = newCoroutine;
     }
@@ -921,6 +953,72 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     }
 
     /// <summary>
+    /// Notifies the renderer that a point at the specified viewport position is being hovered
+    /// </summary>
+    /// <param name="viewportPos">The position in viewport coordinates</param>
+    /// <param name="isHovered">Whether the point is hovered</param>
+    public void NotifyPointHover(Vector2 viewportPos, bool isHovered)
+    {
+        Debug.Log($"[CriticalStripRenderer] NotifyPointHover called with position: {viewportPos}, isHovered: {isHovered}");
+
+        if (!isHovered)
+        {
+            // Clear hover state
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Clearing hover state for point at {hoveredPoint.anchoredPosition}");
+                SetPointScale(hoveredPoint, 1f);
+                hoveredPoint = null;
+            }
+            return;
+        }
+
+        Debug.Log($"[CriticalStripRenderer] Looking for closest point to {viewportPos}. Total point sets: {pointObjects.Count}");
+        
+        // Find the closest point to the specified position
+        float closestDist = float.MaxValue;
+        RectTransform newHoveredPoint = null;
+        
+        foreach (var kvp in pointObjects)
+        {
+            if (!kvp.Key.IsActive) continue;
+            
+            Debug.Log($"[CriticalStripRenderer] Checking points in set '{kvp.Key.Name}'. Points: {kvp.Value.Count}");
+            
+            foreach (var point in kvp.Value)
+            {
+                var dist = Vector2.Distance(viewportPos, point.anchoredPosition);
+                
+                if (dist < closestDist)
+                {
+                    closestDist = dist;
+                    newHoveredPoint = point;
+                }
+            }
+        }
+        
+        Debug.Log($"[CriticalStripRenderer] Closest point found: {(newHoveredPoint != null ? newHoveredPoint.anchoredPosition.ToString() : "none")}, distance: {closestDist}");
+        
+        // Only trigger changes if we're hovering a different point
+        if (newHoveredPoint != hoveredPoint)
+        {
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Resetting scale of previously hovered point at {hoveredPoint.anchoredPosition}");
+                SetPointScale(hoveredPoint, 1f);
+            }
+            
+            hoveredPoint = newHoveredPoint;
+            
+            if (hoveredPoint != null)
+            {
+                Debug.Log($"[CriticalStripRenderer] Setting scale of new hovered point at {hoveredPoint.anchoredPosition} to {hoverScale}");
+                SetPointScale(hoveredPoint, hoverScale);
+            }
+        }
+    }
+
+    /// <summary>
     /// Initializes the critical line at x=0.5
     /// </summary>
     private void InitializeCriticalLine()
@@ -943,5 +1041,66 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Since we're using centered anchors (0.5), the anchoredPosition should be zero
         // This will automatically place it at 50% of the viewport width
         criticalLine.anchoredPosition = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Smoothly animates the viewport to center the current App.Real/App.Index position if possible.
+    /// </summary>
+    public void CenterOnCurrentPosition()
+    {
+        if (!isInitialized || app == null || transform == null) return;
+        float targetIndex = (float)app.Index;
+        float currentRange = transform.MaxIndex - transform.MinIndex;
+        float minAllowed = -1f;
+        float maxAllowed = float.MaxValue; // No explicit upper bound in current logic
+
+        // Compute new min/max to center targetIndex
+        float newMin = targetIndex - currentRange * 0.5f;
+        float newMax = targetIndex + currentRange * 0.5f;
+
+        // Clamp so min >= -1
+        if (newMin < minAllowed)
+        {
+            float adjust = minAllowed - newMin;
+            newMin = minAllowed;
+            newMax += adjust;
+        }
+        // Optionally, clamp newMax if you have a max bound (not present in current code)
+
+        // If already centered (within epsilon), do nothing
+        if (Mathf.Abs(transform.MinIndex - newMin) < 1e-4f && Mathf.Abs(transform.MaxIndex - newMax) < 1e-4f)
+            return;
+
+        // Stop any existing centering animation
+        if (centerCoroutine != null)
+            StopCoroutine(centerCoroutine);
+        centerCoroutine = StartCoroutine(CenterViewportCoroutine(newMin, newMax, centerAnimDuration));
+    }
+
+    private IEnumerator CenterViewportCoroutine(float targetMin, float targetMax, float duration)
+    {
+        float startMin = transform.MinIndex;
+        float startMax = transform.MaxIndex;
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            // Smoothstep for ease-in-out
+            float lerpT = t * t * (3f - 2f * t);
+            float min = Mathf.Lerp(startMin, targetMin, lerpT);
+            float max = Mathf.Lerp(startMax, targetMax, lerpT);
+            transform.SetIndexRange(min, max);
+            UpdateAllPoints();
+            UpdateCurrentPosIndicator();
+            OnViewportChanged?.Invoke();
+            yield return null;
+        }
+        // Final set
+        transform.SetIndexRange(targetMin, targetMax);
+        UpdateAllPoints();
+        UpdateCurrentPosIndicator();
+        OnViewportChanged?.Invoke();
+        centerCoroutine = null;
     }
 } 

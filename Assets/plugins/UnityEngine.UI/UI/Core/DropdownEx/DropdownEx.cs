@@ -34,11 +34,14 @@ namespace UnityEngine.UI
             private RectTransform m_RectTransform;
             [SerializeField]
             private Toggle m_Toggle;
+            [SerializeField]
+            private Image m_ColorSquare;
 
             public Text text { get { return m_Text; } set { m_Text = value; } }
             public Image image { get { return m_Image; } set { m_Image = value; } }
             public RectTransform rectTransform { get { return m_RectTransform; } set { m_RectTransform = value; } }
             public Toggle toggle { get { return m_Toggle; } set { m_Toggle = value; } }
+            public Image colorSquare { get { return m_ColorSquare; } set { m_ColorSquare = value; } }
 
             public virtual void OnPointerEnter(PointerEventData eventData)
             {
@@ -65,6 +68,8 @@ namespace UnityEngine.UI
             private Sprite m_Image;
             [SerializeField]
             private bool m_Selected;
+            [SerializeField]
+            private Color m_Color = Color.white;
 
             /// <summary>
             /// The text associated with the option.
@@ -77,6 +82,8 @@ namespace UnityEngine.UI
             public Sprite image { get { return m_Image; } internal set { m_Image = value; } }
 
             public bool selected { get { return m_Selected; } internal set { m_Selected = value; } }
+
+            public Color color { get { return m_Color; } set { m_Color = value; } }
 
             public OptionData() { }
 
@@ -112,6 +119,12 @@ namespace UnityEngine.UI
                 this.text = text;
                 this.image = image;
                 this.selected = selected;
+            }
+
+            public OptionData(string text, Color color)
+            {
+                this.text = text;
+                this.color = color;
             }
         }
 
@@ -865,6 +878,17 @@ namespace UnityEngine.UI
             item.toggle = itemToggle;
             item.rectTransform = (RectTransform)itemToggle.transform;
 
+            // Automatically assign the color square by name
+            var colorSquareTransform = itemToggle.transform.Find("ColorSquare");
+            if (colorSquareTransform != null)
+            {
+                var colorSquareImage = colorSquareTransform.GetComponent<Image>();
+                if (colorSquareImage != null)
+                {
+                    item.colorSquare = colorSquareImage;
+                }
+            }
+
             Canvas popupCanvas = GetOrAddComponent<Canvas>(templateGo);
             popupCanvas.overrideSorting = true;
             popupCanvas.sortingOrder = 30000;
@@ -1190,6 +1214,11 @@ namespace UnityEngine.UI
             {
                 item.image.sprite = data.image;
                 item.image.enabled = (item.image.sprite != null);
+            }
+            if (item.colorSquare)
+            {
+                item.colorSquare.color = data.color;
+                item.colorSquare.gameObject.SetActive(true);
             }
 
             items.Add(item);

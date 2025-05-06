@@ -1,10 +1,11 @@
 # Point Set File Format:
-# Header: name,color,skipCriticalLine,useOptimization
-# - name: Name of the point set
-# - color: HTML color code (e.g. #FF0000 for red)
-# - skipCriticalLine: Set to false to include points near 0.5
-# - useOptimization: Set to false to load all points without optimization
-IR Theta2 ZeroOne,#5800FF,false,true
+# Settings are specified with #@ prefix followed by name: value
+#@name: IR Theta2 0/1
+#@color: #00FFFF
+#@skipCriticalLine: false
+#@samplingInterval: 2
+# Data format: real,imaginary
+
 0.380575137668186,1.000000000000000
 0.381152131822374,1.000100000000000
 0.381727261013455,1.000200000000000

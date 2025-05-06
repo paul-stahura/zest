@@ -1,4 +1,11 @@
-[1-11] IR Theta2=Zero,#955DE0,false,false
+# Point Set File Format:
+# Settings are specified with #@ prefix followed by name: value
+#@name: [1-11] IR Theta2=Zero
+#@color: #955DE0
+#@skipCriticalLine: false
+#@samplingInterval: 1
+# Data format: real,imaginary
+
 0.435000488281250,1.207199999999980
 0.564999511718750,1.207199999999980
 0.436015625000000,1.207199999999980

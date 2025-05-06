@@ -370,7 +370,7 @@ public class SpiralCalculator : MonoBehaviour
     private void CalcZem(double real, double index)
     {
         var c = new Complex(real, Zeta.IndexToImag(index));
-        _zemPos = Zeta.Zem3(c).ToVector();
+        _zemPos = Zeta.Zem5(c).ToVector();
         UpdateZem?.Invoke(_zemPos);
     }
 
@@ -406,10 +406,16 @@ public class SpiralCalculator : MonoBehaviour
 
     private void CalcForwardBisector()
     {
-        var s = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
-        var links = s.joints;
-        var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
-        _forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        // var s = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+        // var links = s.joints;
+        // var midLink = links[s.middleIndex + 1] - links[s.middleIndex];
+        // _forwardBisector = links[s.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        // UpdateForwardBisector?.Invoke(_forwardBisector);
+
+        var real = GetReal();
+        var index = GetIndex();
+        var imag = Zeta.IndexToImag(index);
+        _forwardBisector = ZpsGeneral.ForwardBisector(real, index, imag, ChiBrian(new Complex(real, imag)));
         UpdateForwardBisector?.Invoke(_forwardBisector);
     }
 
@@ -464,15 +470,17 @@ public class SpiralCalculator : MonoBehaviour
         UpdateChi?.Invoke(_chiSpiral);
     }
 
-    private Vector CalcInverseBisector()
+    private void CalcInverseBisector()
     {
-        var spiral = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
-        var links = GetRsInverseSum();
-        var midLink = links[spiral.middleIndex + 1] - links[spiral.middleIndex];
-        _inverseBisector = links[spiral.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        // var spiral = Mathf.Approximately((float)GetReal(), 0.5f) ? GetZrs() : GetEms();
+        // var links = GetRsInverseSum();
+        // var midLink = links[spiral.middleIndex + 1] - links[spiral.middleIndex];
+        // _inverseBisector = links[spiral.middleIndex] + midLink * (float)BisectorPoint.Djoint(GetIndex());
+        // UpdateInverseBisector?.Invoke(_inverseBisector);
+        
+        var index = GetIndex();
+        _inverseBisector = ZpsGeneral.InverseBisector(GetReal(), index, Zeta.IndexToImag(index), ChiBrian);
         UpdateInverseBisector?.Invoke(_inverseBisector);
-
-        return _inverseBisector;
     }
 
     private Vector CalcInverseReflectedBisector()

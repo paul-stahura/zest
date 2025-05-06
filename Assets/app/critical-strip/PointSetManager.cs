@@ -15,13 +15,11 @@ public class PointSetManager : MonoBehaviour
     [SerializeField] [Range(0.001f, 0.1f)] private float criticalLineSkipTolerance = 0.01f;
     [SerializeField] private CriticalStripStats stats;  // Reference to the Stats component
     
-    [Header("Point Loading Optimization")]
-    [Tooltip("When enabled, reduces the number of loaded points by intelligently skipping points that are too close together")]
-    [SerializeField] private bool enableDownsampling = true;
-    [Tooltip("Minimum world-space distance between points. Points closer than this will be skipped")]
-    [SerializeField] [Range(0.001f, 0.1f)] private float minPointDistance = 0.01f;
-    [Tooltip("Controls how aggressively points are removed. Higher values remove more points")]
-    [SerializeField] [Range(0.1f, 4.0f)] private float downsampleAggressiveness = 1f;
+    [Header("Points Mesh Setup")]
+    [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
+    [SerializeField] private Transform pointsContainer;
+    private Dictionary<PointSet, List<PointsMeshRenderer>> pointsMeshInstances = new Dictionary<PointSet, List<PointsMeshRenderer>>();
+    private Dictionary<PointSet, GameObject> pointSetParents = new Dictionary<PointSet, GameObject>();
     
     private const string POINTS_DIRECTORY = "Resources/CriticalStripPoints";
     private const string FAVORITES_FILE = "favorite-points.csv";
@@ -34,6 +32,12 @@ public class PointSetManager : MonoBehaviour
     private uint previousSelectionValue = 0;  // Add this line to track previous selection
     
     public IReadOnlyList<PointSet> LoadedSets => loadedSets;
+    
+    // Get all active loaded point sets
+    public List<PointSet> GetAllActiveSets()
+    {
+        return loadedSets.Where(s => s.IsActive).ToList();
+    }
     
     private void Awake()
     {
@@ -86,62 +90,92 @@ public class PointSetManager : MonoBehaviour
         }
     }
     
+    // Struct to hold parsed metadata
+    public struct PointSetMetadata
+    {
+        public string Name;
+        public Color Color;
+        public bool SkipCriticalLine;
+        public int SamplingInterval;
+        public float PointSize;
+    }
+
+    // Shared static method to parse metadata from a file
+    public static PointSetMetadata ParsePointSetMetadata(string[] lines, Color defaultColor)
+    {
+        var metadata = new PointSetMetadata
+        {
+            Name = null,
+            Color = defaultColor,
+            SkipCriticalLine = false,
+            SamplingInterval = 1,
+            PointSize = 4f
+        };
+
+        // Parse enhanced header
+        var settings = new Dictionary<string, string>();
+        foreach (var line in lines)
+        {
+            if (!line.StartsWith("#@")) continue;
+            var settingLine = line.Substring(2).Trim();
+            var colonIndex = settingLine.IndexOf(':');
+            if (colonIndex <= 0) continue;
+            var key = settingLine.Substring(0, colonIndex).Trim();
+            var value = settingLine.Substring(colonIndex + 1).Trim();
+            settings[key] = value;
+        }
+        if (settings.ContainsKey("name"))
+            metadata.Name = settings["name"];
+        if (settings.ContainsKey("color") && settings["color"].StartsWith("#"))
+            ColorUtility.TryParseHtmlString(settings["color"], out metadata.Color);
+        if (settings.ContainsKey("skipCriticalLine"))
+            bool.TryParse(settings["skipCriticalLine"], out metadata.SkipCriticalLine);
+        if (settings.ContainsKey("samplingInterval"))
+        {
+            if (!int.TryParse(settings["samplingInterval"], out metadata.SamplingInterval) || metadata.SamplingInterval < 1)
+                metadata.SamplingInterval = 1;
+        }
+        if (settings.ContainsKey("pointSize"))
+        {
+            if (!float.TryParse(settings["pointSize"], out metadata.PointSize) || metadata.PointSize <= 0)
+                metadata.PointSize = 4f;
+        }
+
+        // Parse the first non-comment line for name and color if not already set
+        foreach (var line in lines)
+        {
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) continue;
+            var parts = line.Split(',');
+            if (string.IsNullOrEmpty(metadata.Name) && parts.Length > 0)
+                metadata.Name = parts[0];
+            if (parts.Length > 1 && parts[1].StartsWith("#"))
+                ColorUtility.TryParseHtmlString(parts[1], out metadata.Color);
+            break;
+        }
+        return metadata;
+    }
+    
     private void RefreshPointSetList()
     {
         if (pointSetSelector == null) return;
-        
-        // Get all .csv files in the points directory
         var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
-        
-        // Clear the mapping dictionary
         optionIndexToName.Clear();
-        
-        // Update dropdown options
         var options = new List<DropdownEx.OptionData>();
         uint index = 0;
-        
         foreach (var filePath in files)
         {
-            string displayName = Path.GetFileNameWithoutExtension(filePath); // Default to filename
-            
-            // Try to read the name from the first non-comment line of the file
-            try
-            {
-                using (var reader = new StreamReader(filePath))
-                {
-                    string line;
-                    // Skip comment lines
-                    while ((line = reader.ReadLine()) != null && line.StartsWith("#"))
-                    {
-                        continue;
-                    }
-                    
-                    if (!string.IsNullOrEmpty(line))
-                    {
-                        // The name is everything before the first comma
-                        int commaIndex = line.IndexOf(',');
-                        if (commaIndex > 0)
-                        {
-                            displayName = line.Substring(0, commaIndex);
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning($"Failed to read name from file {filePath}: {e.Message}");
-                // Keep using filename as fallback
-            }
-            
-            options.Add(new DropdownEx.OptionData(displayName));
-            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath); // Keep using filename for internal mapping
+            string[] allLines = File.ReadAllLines(filePath);
+            var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
+            string displayName = metadata.Name ?? Path.GetFileNameWithoutExtension(filePath);
+            Color pointColor = metadata.Color;
+            options.Add(new DropdownEx.OptionData(displayName, pointColor));
+            Debug.Log($"Dropdown option: {displayName}, color: {pointColor} (RGBA: {pointColor.r}, {pointColor.g}, {pointColor.b}, {pointColor.a})");
+            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath);
             index++;
         }
-        
-        // Clear options and add new ones without triggering selection
         pointSetSelector.ClearOptions();
         pointSetSelector.AddOptions(options);
-        pointSetSelector.value = 0;  // Set to "None" option
+        pointSetSelector.value = 0;
     }
     
     private void OnPointSetSelectionChanged(uint selectedIndex)
@@ -234,75 +268,30 @@ public class PointSetManager : MonoBehaviour
                 Debug.LogWarning($"[PointSetManager] Empty file: {filePath}");
                 return;
             }
-
-            // Skip any comment lines to find the header
-            int headerIndex = 0;
-            while (headerIndex < allLines.Length && allLines[headerIndex].StartsWith("#"))
-            {
-                headerIndex++;
-            }
-
-            if (headerIndex >= allLines.Length)
-            {
-                Debug.LogWarning($"[PointSetManager] No header found in file (only comments): {filePath}");
-                return;
-            }
-
-            // Parse header
-            string[] headerParts = allLines[headerIndex].Split(',');
-            if (headerParts.Length < 2)
-            {
-                // Provide helpful message about expected header format
-                Debug.LogWarning($"[PointSetManager] Invalid header format in file: {filePath}\n" +
-                    "Expected header format:\n" +
-                    "# Header format: name,color,skipCriticalLine,useOptimization\n" +
-                    "# - name: required, the name of the point set\n" +
-                    "# - color: optional, HTML color code starting with #\n" +
-                    "# - skipCriticalLine: optional, true/false whether to skip points near critical line\n" +
-                    "# - useOptimization: optional, true/false whether to apply point optimization");
-                return;
-            }
-
-            string pointSetName = headerParts[0];
-            Color pointColor = defaultPointColor;
-            bool skipCriticalLine = false;
-            bool useOptimization = true;  // New flag for controlling optimization
-
-            // Parse color if provided
-            if (headerParts[1].StartsWith("#"))
-            {
-                ColorUtility.TryParseHtmlString(headerParts[1], out pointColor);
-            }
-
-            // Parse skipCriticalLine if provided
-            if (headerParts.Length > 2)
-            {
-                bool.TryParse(headerParts[2], out skipCriticalLine);
-            }
-
-            // Parse useOptimization if provided
-            if (headerParts.Length > 3)
-            {
-                bool.TryParse(headerParts[3], out useOptimization);
-            }
-
-            var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine);
-            int totalPoints = allLines.Length - (headerIndex + 1); // Subtract header and comment lines
+            var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
+            string pointSetName = metadata.Name ?? setName;
+            Color pointColor = metadata.Color;
+            bool skipCriticalLine = metadata.SkipCriticalLine;
+            int samplingInterval = metadata.SamplingInterval;
+            float pointSize = metadata.PointSize;
+            var pointSet = new PointSet(pointSetName, pointColor, skipCriticalLine, pointSize);
+            int totalPoints = 0;
             int loadedPoints = 0;
             int skippedCriticalPoints = 0;
+            int processedPointCount = 0;
             Vector2? lastAddedPoint = null;
 
             // Process each point
-            for (int i = headerIndex + 1; i < allLines.Length; i++)
+            foreach (var line in allLines)
             {
-                // Skip comment lines
-                if (allLines[i].StartsWith("#")) 
+                // Skip comment and empty lines
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#")) 
                 {
-                    totalPoints--; // Adjust total points count for comments
                     continue;
                 }
 
-                string[] parts = allLines[i].Split(',');
+                totalPoints++;
+                string[] parts = line.Split(',');
                 if (parts.Length != 2) continue;
 
                 if (double.TryParse(parts[0], out double real) && 
@@ -322,13 +311,11 @@ public class PointSetManager : MonoBehaviour
                     Vector2 currentPoint = new Vector2((float)real, (float)index);
                     bool shouldAdd = true;
 
-                    // Only apply downsampling if useOptimization is true
-                    if (useOptimization && enableDownsampling && lastAddedPoint.HasValue)
+                    // Apply sampling if configured
+                    if (samplingInterval > 1)
                     {
-                        float distSq = (currentPoint - lastAddedPoint.Value).sqrMagnitude;
-                        float threshold = minPointDistance * (1f + downsampleAggressiveness);
-                        float thresholdSq = threshold * threshold;
-                        shouldAdd = distSq >= thresholdSq;
+                        shouldAdd = processedPointCount % samplingInterval == 0;
+                        processedPointCount++;
                     }
 
                     if (shouldAdd)
@@ -351,7 +338,7 @@ public class PointSetManager : MonoBehaviour
             if (pointSet.Name != setName)
             {
                 var originalSet = pointSet;
-                pointSet = new PointSet(setName, originalSet.Color, originalSet.SkipCriticalLine);
+                pointSet = new PointSet(setName, originalSet.Color, originalSet.SkipCriticalLine, originalSet.PointSize);
                 pointSet.TotalPointsInFile = originalSet.TotalPointsInFile;
                 foreach (var point in originalSet.Points)
                 {
@@ -361,13 +348,100 @@ public class PointSetManager : MonoBehaviour
 
             loadedSets.Add(pointSet);
             
-            if (renderer != null)
+            if (pointsMeshPrefab != null && pointsContainer != null)
             {
-                renderer.AddPointSet(pointSet);
+                // Create a parent group GameObject for this point set
+                GameObject groupObj = new GameObject(pointSet.Name + "_Group", typeof(RectTransform));
+                groupObj.transform.SetParent(pointsContainer, false);
+                RectTransform groupRect = groupObj.GetComponent<RectTransform>();
+                groupRect.anchorMin = Vector2.zero;
+                groupRect.anchorMax = Vector2.one;
+                groupRect.offsetMin = Vector2.zero;
+                groupRect.offsetMax = Vector2.zero;
+                pointSetParents[pointSet] = groupObj;
+                
+                // Add an Image component to the group to handle raycasts
+                Image groupImage = groupObj.AddComponent<Image>();
+                groupImage.color = new Color(0, 0, 0, 0.01f); // Almost transparent, but not completely (for debugging)
+                groupImage.raycastTarget = true; // Make sure it receives pointer events
+                
+                // Add the interaction handler so pointer events on the group are handled for the whole set
+                PointSetInteractionHandler handler = groupObj.AddComponent<PointSetInteractionHandler>();
+                handler.pointSet = pointSet;
+                handler.criticalStripRenderer = renderer;
+                handler.app = app;
+                handler.pointSetManager = this;
+                handler.pointSize = pointSet.PointSize; // Set point size for interaction
+
+                // Create a dedicated hover point object that will be animated for hover effects
+                GameObject hoverPointObj = new GameObject("HoverPoint", typeof(RectTransform), typeof(Image));
+                hoverPointObj.transform.SetParent(groupObj.transform, false);
+                RectTransform hoverPointRect = hoverPointObj.GetComponent<RectTransform>();
+                hoverPointRect.sizeDelta = new Vector2(handler.pointSize, handler.pointSize); // Match handler's point size
+                Image hoverPointImage = hoverPointObj.GetComponent<Image>();
+                hoverPointImage.color = pointSet.Color;
+                hoverPointImage.raycastTarget = false;
+                hoverPointObj.SetActive(false); // Start hidden
+                handler.hoverPoint = hoverPointRect;
+
+                List<Vector2> convertedPoints = new List<Vector2>();
+
+                if (renderer != null && renderer.GetTransform() != null)
+                {
+                    foreach (var pt in pointSet.OriginalPoints)
+                    {
+                        Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                        Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                        convertedPoints.Add(viewportPos);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("CriticalStripRenderer or transform not available - points may not display correctly");
+                    foreach (var pt in pointSet.OriginalPoints)
+                    {
+                        convertedPoints.Add(new Vector2((float)pt.Real, (float)pt.Index));
+                    }
+                }
+
+                // Split the convertedPoints into chunks if they exceed the threshold
+                const int maxPointsPerMesh = 5000;
+                for (int i = 0; i < convertedPoints.Count; i += maxPointsPerMesh)
+                {
+                    int count = Math.Min(maxPointsPerMesh, convertedPoints.Count - i);
+                    List<Vector2> chunk = convertedPoints.GetRange(i, count);
+                    PointsMeshRenderer meshInstance = Instantiate(pointsMeshPrefab, groupObj.transform);
+                    meshInstance.Points = chunk;
+                    meshInstance.color = pointSet.Color;
+                    meshInstance.PointSize = pointSet.PointSize; // Set point size for mesh
+                    meshInstance.Refresh();
+                    // Assign a new material instance to disable UI batching and prevent vertex merging
+                    meshInstance.material = new Material(meshInstance.material);
+                    // Disable raycast target on meshInstance so it does not block pointer events
+                    meshInstance.raycastTarget = false;
+                    // Try to set mesh index format if available through reflection
+                    try {
+                        System.Reflection.MethodInfo method = meshInstance.GetType().GetMethod("GetMesh", 
+                            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+                        if (method != null) {
+                            Mesh mesh = method.Invoke(meshInstance, null) as Mesh;
+                            if (mesh != null) {
+                                mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+                            }
+                        }
+                    } catch (System.Exception ex) {
+                        Debug.LogWarning($"Could not set mesh index format: {ex.Message}");
+                    }
+                    if (!pointsMeshInstances.ContainsKey(pointSet))
+                    {
+                        pointsMeshInstances[pointSet] = new List<PointsMeshRenderer>();
+                    }
+                    pointsMeshInstances[pointSet].Add(meshInstance);
+                }
             }
             else
             {
-                Debug.LogWarning("[PointSetManager] Could not add point set to renderer: renderer is null");
+                Debug.LogWarning("PointsMeshRenderer prefab or container not assigned in PointSetManager");
             }
 
             UpdateStats();
@@ -380,14 +454,26 @@ public class PointSetManager : MonoBehaviour
     
     private void UnloadPointSet(PointSet set)
     {
-        
-        if (renderer != null)
+        // Clean up the meshes dictionary
+        if (pointsMeshInstances.ContainsKey(set))
         {
-            renderer.RemovePointSet(set);
+            // Individual mesh instances will be destroyed when the parent is destroyed
+            pointsMeshInstances.Remove(set);
         }
-        else
+        
+        // Clean up the parent GameObject if it exists
+        if (pointSetParents.ContainsKey(set))
         {
-            Debug.LogWarning("[PointSetManager] Cannot unload point set: renderer is null");
+            GameObject parent = pointSetParents[set];
+            if (parent != null)
+            {
+                Destroy(parent);
+            }
+            pointSetParents.Remove(set);
+        }
+        else 
+        {
+            Debug.LogWarning("No parent GameObject found for point set: " + set.Name);
         }
         
         loadedSets.Remove(set);
@@ -421,12 +507,12 @@ public class PointSetManager : MonoBehaviour
             var fileContents = new List<string>
             {
                 "# Point Set File Format:",
-                "# Header: name,color,skipCriticalLine,useOptimization",
+                "# Header: name,color,skipCriticalLine,samplingInterval",
                 "# - name: Name of the point set",
                 "# - color: HTML color code (e.g. #FF0000 for red)",
                 "# - skipCriticalLine: Set to false to include points near 0.5",
-                "# - useOptimization: Set to false to load all points without optimization",
-                $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)},false,false\n"
+                "# - samplingInterval: Integer value to sample every Nth point (1 = use all points)",
+                $"{FAVORITES_NAME},#{ColorUtility.ToHtmlStringRGBA(defaultPointColor)},false,1\n"
             };
             File.WriteAllLines(filePath, fileContents);
             // Refresh the dropdown to include the new file
@@ -518,6 +604,12 @@ public class PointSetManager : MonoBehaviour
         {
             pointSetSelector.onValueChanged.RemoveListener(OnPointSetSelectionChanged);
         }
+        
+        // Unsubscribe from viewport changes
+        if (renderer != null)
+        {
+            renderer.OnViewportChanged -= UpdatePointPositions;
+        }
     }
     
     private void OnRealChanged(double real)
@@ -528,6 +620,50 @@ public class PointSetManager : MonoBehaviour
     private void OnIndexChanged(double index)
     {
         // Update coordinate display if needed
+    }
+    
+    private void Start()
+    {
+        // Subscribe to viewport changes
+        if (renderer != null)
+        {
+            renderer.OnViewportChanged += UpdatePointPositions;
+        }
+    }
+    
+    private void UpdatePointPositions()
+    {
+        // Skip if we don't have the required components
+        if (renderer == null || renderer.GetTransform() == null) return;
+        
+        const int maxPointsPerMesh = 5000;
+        
+        // Update position of all point mesh instances
+        foreach (var kvp in pointsMeshInstances)
+        {
+            var pointSet = kvp.Key;
+            var meshRenderers = kvp.Value;
+            
+            // Recalculate updated points using the original points
+            List<Vector2> updatedPoints = new List<Vector2>();
+            foreach (var pt in pointSet.OriginalPoints)
+            {
+                Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                updatedPoints.Add(viewportPos);
+            }
+            
+            // Update each mesh renderer with its corresponding chunk
+            for (int i = 0; i < meshRenderers.Count; i++)
+            {
+                int startIndex = i * maxPointsPerMesh;
+                if (startIndex >= updatedPoints.Count) break;
+                int count = Math.Min(maxPointsPerMesh, updatedPoints.Count - startIndex);
+                List<Vector2> chunk = updatedPoints.GetRange(startIndex, count);
+                meshRenderers[i].Points = chunk;
+                meshRenderers[i].Refresh();
+            }
+        }
     }
     
     #if UNITY_EDITOR
@@ -548,10 +684,13 @@ public class PointSetManager : MonoBehaviour
         string filePath = Path.Combine(pointsDirectoryPath, $"{pointSet.Name}.csv");
         
         // Create the header line
-        var lines = new List<string>
+        var lines = new List<string>();
+        // Add enhanced header for pointSize if not default
+        if (pointSet.PointSize != 4f)
         {
-            $"{pointSet.Name},#{ColorUtility.ToHtmlStringRGBA(pointSet.Color)}"
-        };
+            lines.Add($"#@pointSize: {pointSet.PointSize}");
+        }
+        lines.Add($"{pointSet.Name},#{ColorUtility.ToHtmlStringRGBA(pointSet.Color)}");
         
         // Add all points
         foreach (var point in pointSet.Points)

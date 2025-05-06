@@ -62,6 +62,18 @@ public class Zeta
         0.36899182659531622704E-5
     };
 
+    static readonly double[] B_2nList = new double[]
+    {
+        1.0 / 6,
+        -1.0 / 30,
+        1.0 / 42,
+        -1.0 / 30,
+        5.0 / 66,
+        -691.0 / 2730,
+        7.0 / 6,
+        -3617.0 / 510
+    };
+
 
     public static Complex[] EulersProduct(Complex s, int depth)
     {
@@ -212,6 +224,48 @@ public class Zeta
         }
 
         return sum + correctionTerm + additionalCorrection + higherOrderCorrections;
+    }
+
+    public static Complex Zem5(Complex s, int J = 6)
+    {
+        Complex sum = Complex.Zero;
+
+        int n_iteration = (int)Complex.Abs(s);
+        if (n_iteration > MAX_N) n_iteration = MAX_N;
+        if (n_iteration < MIN_N) n_iteration = MIN_N;
+
+        // Sum 1: ∑ 1 / (1+n)^s
+        for (int n = 0; n < n_iteration; n++)
+        {
+            Complex term = 1.0 / Complex.Pow(n + 1, s);
+            sum += term;
+        }
+
+        // Sum 2: (1 + n)^1-s / (s - 1)
+        Complex term2 = Complex.Pow(n_iteration + 1, 1 - s) / (s - 1);
+        sum += term2;
+
+        // Sum 3: (1 + n)^-s / 2
+        Complex term3 = Complex.Pow(n_iteration + 1, -s) / 2.0;
+        sum += term3;
+
+        // Sum 4: correction terms from Bernoulli numbers
+        for (int j = 1; j <= J && j <= B_2nList.Length; j++)
+        {
+            double B = B_2nList[j - 1];
+            double factorial = Factorial(2 * j);
+
+            Complex product = Complex.One;
+            for (int k = 0; k <= 2 * j - 2; k++)
+            {
+                product *= (s + k);
+            }
+
+            Complex correction = B / factorial * product * Complex.Pow(n_iteration + 1, -s - 2 * j + 1);
+            sum += correction;
+        }
+
+        return sum;
     }
 
     // Function to compute factorial
@@ -596,8 +650,13 @@ public class Zeta
                     UpdateEulerMaclauren(realValue, indexValue, useNewImag);
                     break;
 
+                case SpiralFormulas.Zem5:
+                    UpdateZem5(realValue, indexValue);
+                    break;
+
                 case SpiralFormulas.EtaFormula:
                     UpdateEtaFormula(realValue, indexValue, useNewImag);
+                    // UpdateZem5(realValue, indexValue);
                     break;
 
                 case SpiralFormulas.ZetFormula:
@@ -612,6 +671,58 @@ public class Zeta
                     this.zeta = Zeta.ReimannSiegel(new Complex(realValue, Zeta.IndexToImag(indexValue, useNewImag)));
                     break;
             }
+        }
+
+        public void UpdateZem5(double realValue, double indexValue, int n_iteration = 3000, int J = 6)
+        {
+            this.real = realValue;
+            this.index = indexValue;
+            Complex s = new Complex(real, imaginary);
+
+            this.numLinks = (int)SpiralMiddleIndex(index, 0) + 2 + extendSpiralCount; // need to an extra for proper final link tracking
+
+            this.joints = new Vector[numLinks];
+
+            Complex sum = Complex.Zero;
+            joints[0] = sum.ToVector(); // Start at origin
+
+            // Sum 1: ∑ 1 / (1+n)^s
+            for (int n = 0; n < n_iteration; n++)
+            {
+                Complex term = 1.0 / Complex.Pow(n + 1, s);
+                sum += term;
+
+                if(n < numLinks - 1)
+                {
+                    joints[n + 1] = sum.ToVector(); // Store the joint position
+                }
+            }
+
+            // Sum 2: (1 + n)^1-s / (s - 1)
+            Complex term2 = Complex.Pow(n_iteration + 1, 1 - s) / (s - 1);
+            sum += term2;
+
+            // Sum 3: (1 + n)^-s / 2
+            Complex term3 = Complex.Pow(n_iteration + 1, -s) / 2.0;
+            sum += term3;
+
+            // Sum 4: correction terms from Bernoulli numbers
+            for (int j = 1; j <= J && j <= B_2nList.Length; j++)
+            {
+                double B = B_2nList[j - 1];
+                double factorial = Factorial(2 * j);
+
+                Complex product = Complex.One;
+                for (int k = 0; k <= 2 * j - 2; k++)
+                {
+                    product *= (s + k);
+                }
+
+                Complex correction = B / factorial * product * Complex.Pow(n_iteration + 1, -s - 2 * j + 1);
+                sum += correction;
+            }
+
+            this.zeta = sum;
         }
 
         private void UpdateRSInverseSum(double realValue, double indexValue, bool useNewImag)

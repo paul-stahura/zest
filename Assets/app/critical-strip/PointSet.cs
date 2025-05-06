@@ -27,10 +27,11 @@ public class PointSet
     public bool IsActive { get; set; }
     public bool SkipCriticalLine { get; private set; }
     public int TotalPointsInFile { get; set; }  // Total points in the original file before optimization
+    public float PointSize { get; private set; }
     
     private List<Point> points;
     
-    public PointSet(string name, Color color, bool skipCriticalLine = false)
+    public PointSet(string name, Color color, bool skipCriticalLine = false, float pointSize = 4f)
     {
         Name = name;
         Color = color;
@@ -38,6 +39,7 @@ public class PointSet
         SkipCriticalLine = skipCriticalLine;
         points = new List<Point>();
         TotalPointsInFile = 0;
+        PointSize = pointSize;
     }
     
     public void AddPoint(double real, double index)

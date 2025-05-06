@@ -1,4 +1,11 @@
-ThetaLocalMinMax,#8800FF,false,true
+# Point Set File Format:
+# Settings are specified with #@ prefix followed by name: value
+#@name: ThetaLocalMinMax
+#@color: #8800FF
+#@skipCriticalLine: false
+#@samplingInterval: 1
+# Data format: real,imaginary
+
 1.000000000000000,1.274055000001800
 0.000000000000000,1.274085000001800
 1.000000000000000,1.274105000001800

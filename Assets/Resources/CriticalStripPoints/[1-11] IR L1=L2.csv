@@ -1,10 +1,11 @@
 # Point Set File Format:
-# Header: name,color,skipCriticalLine,useOptimization
-# - name: Name of the point set
-# - color: HTML color code (e.g. #FF0000 for red)
-# - skipCriticalLine: Set to false to include points near 0.5
-# - useOptimization: Set to false to load all points without optimization
-[1-11] IR L1=L2,#FF8800,true,true
+# Settings are specified with #@ prefix followed by name: value
+#@name: [1-11] IR L1=L2
+#@color: #FF8800
+#@skipCriticalLine: true
+#@samplingInterval: 1
+# Data format: real,imaginary
+
 0.499999985694885,1.025900000000000
 0.499999985694885,1.026200000000000
 0.499999985694885,1.026300000000000
