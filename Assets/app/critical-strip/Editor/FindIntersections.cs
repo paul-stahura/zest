@@ -92,6 +92,39 @@ public static class FindIntersections
         SaveToCSV(AnglePointsData);
     }
 
+    [MenuItem("Critical Strip/Calculate GreenLegVectorPoints")]
+    public static void CalcGreenLegVectorPoints()
+    {
+        var vectorData = new List<(double real, double index, Vector2 point)>();
+
+        double min = 10.0;
+        double max = 10.10;
+        double step = 0.0001;
+
+        // Then check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((max - min) / step);
+        int currentStep = 0;
+
+        for (double index = min; index <= max; index += step)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding LegVectorPoints",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("LegVectorPoints finding cancelled.");
+                return;
+            }
+
+            FindGreenLegVectorPoints(index, vectorData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(vectorData);
+    }
+
     [MenuItem("Critical Strip/Find ThetaTwo")]
     public static void FindThetaTwo()
     {
@@ -275,6 +308,26 @@ public static class FindIntersections
         FindGramPoints(MIN_INDEX, MAX_INDEX, GramData);
 
         SaveToCSV(GramData);
+    }
+
+    private static void FindGreenLegVectorPoints(double index, List<(double real, double index, Vector2 point)> vectorData)
+    {
+        const int POINTS_PER_REAL = 100;
+        for(int i = 0; i < POINTS_PER_REAL; i++)
+        {
+            double r = (double)i / POINTS_PER_REAL;
+
+            var zeta = RhombusPoints.GetZeta((float)r, (float)index);
+            var greenLeg = RhombusPoints.GetBPReflectedInverse((float)r, (float)index);
+            var redLeg = zeta - greenLeg;
+
+            if(greenLeg.magnitude < redLeg.magnitude)
+            {
+                var pt = new Vector(r, index);
+                vectorData.Add((r, index, pt));
+            }
+        }
+        
     }
 
     private static void FindGramPoints(double minIndex, double maxIndex, List<(double real, double index, Vector2 point)> GramData)

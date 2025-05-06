@@ -24,6 +24,12 @@ public class RhombusPoints : MonoBehaviour
         return SpiralCalculator.InverseReflectedIntersection(real, index);
     }
 
+    public static Vector2 GetZeta(double real, double index)
+    {
+        Zeta.Spiral ems = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, false);
+        return ems.zeta.ToVector2();
+    }
+
     public static Vector2 GetBPSymmetry(double real, double index)
     {
         Zeta.Spiral ems = new Zeta.Spiral(real, index, SpiralFormulas.EulerMaclauren, false);
