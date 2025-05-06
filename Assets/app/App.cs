@@ -408,7 +408,7 @@ public class App : ImmediateModeShapeDrawer
         
         // print("[IR: " + angle + "] [theta: " + theta + "]");
 
-        print(-BisectorPoint.ThetaTwo(Index));
+        // print(-BisectorPoint.ThetaTwo(Index));
     }
 
     public void onClick()

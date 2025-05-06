@@ -433,6 +433,12 @@ public class BisectorPoint : MonoBehaviour
         return theta2;
     }
 
+    public static double ThetaOne(double index)
+    {
+        var bp = BpOneHalf(index);
+        return Math.Atan2(bp.y, bp.x);
+    }
+
     public static Vector RightAngleVertex(Vector bp, double index)
     {
         var theta1 = Math.Atan2(bp.y, bp.x);

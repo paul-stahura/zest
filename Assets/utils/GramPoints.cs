@@ -3,19 +3,24 @@ using System.Collections.Generic;
 
 public class GramPoints : PointList
 {
+    public static double GetGramPoint(int n)
+    {
+        return 2 * Math.PI * Math.Exp((1.0 + lambertw(((8.0 * (double)n) + 1.0) / (8.0 * Math.E))));
+    }
+
     public override double GetValue(int n)
     {
         double value;
         if (!cache.TryGetValue(n, out value))
         {
-            value = 2 * Math.PI * Math.Exp((1.0 + lambertw(((8.0 * (double)n) + 1.0) / (8.0 * Math.E))));
+            value = GetGramPoint(n);
             cache[n] = value;
         }
 
         return cache[n];
     }
 
-    double lambertw(double x)
+    static double lambertw(double x)
     {
         double v = 0.0, w, e, t;
 

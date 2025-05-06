@@ -112,7 +112,35 @@ public static class FindIntersections
                 return;
             }
 
-            FindThetaData(index, thetaData);
+            FindThetaTwoData(index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
+    }
+
+    [MenuItem("Critical Strip/Find ThetaOne")]
+    public static void FindThetaOne()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaOne",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("ThetaOne finding cancelled.");
+                return;
+            }
+
+            FindThetaOneData(index, thetaData);
             currentStep++;
         }
 
@@ -211,7 +239,37 @@ public static class FindIntersections
         SaveToCSV(thetaData);
     }
 
-    private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
+    [MenuItem("Critical Strip/Find GramPoints")]
+    public static void FindGramPoints()
+    {
+        var GramData = new List<(double real, double index, Vector2 point)>();
+
+        FindGramPoints(MIN_INDEX, MAX_INDEX, GramData);
+
+        SaveToCSV(GramData);
+    }
+
+    private static void FindGramPoints(double minIndex, double maxIndex, List<(double real, double index, Vector2 point)> GramData)
+    {
+        double currentIndex = 0;
+        int n = 0;
+        while (currentIndex < maxIndex)
+        {
+            var GramPoint = GramPoints.GetGramPoint(n);
+            var GramIndex = Zeta.SearchImagToIndex(GramPoint);
+
+            currentIndex = GramIndex;
+
+            if(currentIndex > minIndex && currentIndex < maxIndex)
+            {
+                var pt = new Vector(0.5, GramIndex);
+                GramData.Add((0.5, GramIndex, pt));
+            }
+            n++;
+        }
+    }
+
+    private static void FindThetaTwoData(double index, List<(double real, double index, Vector2 point)> thetaData)
     {
         var twoPI = 2.0*Math.PI;
 
@@ -232,6 +290,18 @@ public static class FindIntersections
         // var ThetaTwo = -BisectorPoint.ThetaTwo(index);
 
         var phase = (ThetaTwo % twoPI) / twoPI;
+        var pt = new Vector(phase, index);
+        thetaData.Add((phase, index, pt));
+    }
+
+    private static void FindThetaOneData(double index, List<(double real, double index, Vector2 point)> thetaData)
+    {
+        var twoPI = 2.0*Math.PI;
+
+        // theta formula
+        var ThetaOne = BisectorPoint.ThetaOne(index) + Math.PI;
+
+        var phase = (ThetaOne % twoPI) / twoPI;
         var pt = new Vector(phase, index);
         thetaData.Add((phase, index, pt));
     }
@@ -345,7 +415,13 @@ public static class FindIntersections
     private static void SaveToCSV(List<(double real, double index, Vector2 point)> dataPoints)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("New Data,#8800FF,false,true");
+        csv.AppendLine("# Point Set File Format:");
+        csv.AppendLine("# Settings are specified with #@ prefix followed by name: value");
+        csv.AppendLine("#@name: New Data");
+        csv.AppendLine("#@color: #FF0000");
+        csv.AppendLine("#@skipCriticalLine: false");
+        csv.AppendLine("#@samplingInterval: 1");
+        csv.AppendLine("# Data format: real,imaginary");
         
         foreach (var (real, index, _) in dataPoints)
         {
