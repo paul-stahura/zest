@@ -269,6 +269,18 @@ public class PointSetManager : MonoBehaviour
                 return;
             }
             var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
+            
+            // Check if this is an old-style file that needs conversion
+            bool needsConversion = ShouldConvertToEnhancedFormat(allLines);
+            if (needsConversion)
+            {
+                // Convert and update the file on disk
+                var updatedLines = ConvertToEnhancedFormat(allLines, metadata);
+                File.WriteAllLines(filePath, updatedLines);
+                Debug.Log($"[PointSetManager] Converted {filePath} to enhanced header format");
+                allLines = updatedLines; // Use the updated lines for loading
+            }
+            
             string pointSetName = metadata.Name ?? setName;
             Color pointColor = metadata.Color;
             bool skipCriticalLine = metadata.SkipCriticalLine;
@@ -744,4 +756,76 @@ public class PointSetManager : MonoBehaviour
         RefreshPointSetList();
     }
     #endif
+
+    // Determines if a file should be converted to enhanced format
+    private bool ShouldConvertToEnhancedFormat(string[] lines)
+    {
+        // Consider a file needing conversion if it has no #@ lines
+        bool hasEnhancedHeaders = false;
+        foreach (var line in lines)
+        {
+            if (line.StartsWith("#@"))
+            {
+                hasEnhancedHeaders = true;
+                break;
+            }
+        }
+        
+        if (!hasEnhancedHeaders)
+        {
+            // Additional check: first non-comment line should be a valid header
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                    continue;
+                    
+                // If we found a non-comment line, it should be a header with at least a name
+                string[] parts = line.Split(',');
+                return parts.Length >= 1 && !string.IsNullOrWhiteSpace(parts[0]);
+            }
+        }
+        
+        return false;
+    }
+    
+    // Converts a file with old headers to enhanced format
+    private string[] ConvertToEnhancedFormat(string[] oldLines, PointSetMetadata metadata)
+    {
+        var newLines = new List<string>();
+        
+        // Add file format documentation
+        newLines.Add("# Point Set File Format:");
+        newLines.Add("# Enhanced format with metadata headers starting with #@");
+        
+        // Add enhanced metadata headers
+        newLines.Add($"#@name: {metadata.Name}");
+        newLines.Add($"#@color: #{ColorUtility.ToHtmlStringRGBA(metadata.Color)}");
+        newLines.Add($"#@skipCriticalLine: {metadata.SkipCriticalLine}");
+        newLines.Add($"#@samplingInterval: {metadata.SamplingInterval}");
+        newLines.Add($"#@pointSize: {metadata.PointSize}");
+        
+        // Now add a single header line (backward compatibility)
+        newLines.Add($"{metadata.Name},#{ColorUtility.ToHtmlStringRGBA(metadata.Color)},{metadata.SkipCriticalLine}");
+        
+        // Copy all point data lines (non-comment, non-header)
+        bool headerFound = false;
+        foreach (var line in oldLines)
+        {
+            // Skip comment lines and empty lines
+            if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                continue;
+                
+            if (!headerFound)
+            {
+                // This is the header line, skip it as we added our own above
+                headerFound = true;
+                continue;
+            }
+            
+            // This is a data line, add it
+            newLines.Add(line);
+        }
+        
+        return newLines.ToArray();
+    }
 } 
