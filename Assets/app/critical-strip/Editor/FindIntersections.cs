@@ -148,6 +148,34 @@ public static class FindIntersections
         SaveToCSV(thetaData);
     }
 
+    [MenuItem("Critical Strip/Find Theta")]
+    public static void FindTheta()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding Theta",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            FindThetaData(index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
+    }
+
     [MenuItem("Critical Strip/Find ThetaLocalMinMax")]
     public static void FindThetaLocalMinMax()
     {
@@ -267,6 +295,17 @@ public static class FindIntersections
             }
             n++;
         }
+    }
+
+    private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
+    {
+        var twoPI = 2.0*Math.PI;
+
+        var theta = -BisectorPoint.Theta(Zeta.IndexToImag(index));
+
+        var phase = (theta % twoPI) / twoPI + 1;
+        var pt = new Vector(phase, index);
+        thetaData.Add((phase, index, pt));
     }
 
     private static void FindThetaTwoData(double index, List<(double real, double index, Vector2 point)> thetaData)

@@ -134,7 +134,7 @@ public class BisectorPoint : MonoBehaviour
         return Math.Log(i) * imag - theta - Math.PI * (i * i - 1);
     }
 
-    private static double Theta(double t)
+    public static double Theta(double t)
     {
 
         return (t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 +
