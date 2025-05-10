@@ -98,9 +98,10 @@ public class ZpsGeneral : MonoBehaviour
     /// </summary>
     /// <param name="n">n = index integer part</param>
     /// <param name="t">t = index fractional part</param>
-    public static Vector YinSpecial(int n, double t)
+    /// <param name="useApprox">useApprox = true to use approximations in place of actual PsiDerivatives</param>
+    public static Vector YinSpecial(int n, double t, bool useApprox = false)
     {
-        double yin = Dyin(n, t);
+        double yin = Dyin(n, t, useApprox);
         double beta = Beta(n, t);
 
         Vector pt = new Vector
@@ -112,9 +113,9 @@ public class ZpsGeneral : MonoBehaviour
         return pt;
     }
 
-    private static double Dyin(int n, double t)
+    private static double Dyin(int n, double t, bool useApprox)
     {
-        return -2.0*Square(n, t) * Math.Cos(Beta(n, t)) + (1.0 - 2.0*Square(n, t)) * Math.Sqrt(n+1)*R(t);
+        return -2.0*Square(n, t) * Math.Cos(Beta(n, t)) + (1.0 - 2.0*Square(n, t)) * Math.Sqrt(n+1)* R(t, useApprox);
     }
 
     /// <summary>
@@ -122,9 +123,10 @@ public class ZpsGeneral : MonoBehaviour
     /// </summary>
     /// <param name="n">n = index integer part</param>
     /// <param name="t">t = index fractional part</param>
-    public static Vector YangSpecial(int n, double t)
+    /// <param name="useApprox">useApprox = true to use approximations in place of actual PsiDerivatives</param>
+    public static Vector YangSpecial(int n, double t, bool useApprox = true)
     {
-        double yang = Dyang(n, t);
+        double yang = Dyang(n, t, useApprox);
         double beta = Beta(n, t);
 
         Vector pt = new Vector
@@ -136,9 +138,9 @@ public class ZpsGeneral : MonoBehaviour
         return pt;
     }
 
-    private static double Dyang(int n, double t)
+    private static double Dyang(int n, double t, bool useApprox)
     {
-        return -2*Math.Cos(Beta(n, t)) - Dyin(n, t);
+        return -2*Math.Cos(Beta(n, t)) - Dyin(n, t, useApprox);
     }
 
     private static double Beta(int n, double t)
@@ -160,20 +162,27 @@ public class ZpsGeneral : MonoBehaviour
     }
 
     /// <param name="t">t = index fractional part</param>
-    public static double R(double t)
+    private static double R(double t, bool useApprox)
     {
-        double psi(double x) => Math.Cos(TWO_PI * (x*x - x - (1.0/16.0))) / Math.Cos(TWO_PI * x);
-
         double tPi = Zeta.IndexToImag(t) / TWO_PI;
         double tRoot = Math.Sqrt(tPi);
         double tFrac = tRoot - (int)Math.Floor(tRoot);
 
-        return Math.Pow(tPi, -0.25) * psi(tFrac) - (PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5));
+        double psi = useApprox ? PsiApprox(tFrac, 0) : Psi(tFrac);
+        double psiPrime3 = useApprox ? PsiApprox(tFrac, 3) : PsiPrime3(tFrac);
+
+        return Math.Pow(tPi, -0.25) * psi - (psiPrime3 / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5));
         // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5)
     }
 
     /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
-    public static double PsiPrime3(double t)
+    private static double Psi(double x)
+    {
+        return Math.Cos(TWO_PI * (x*x - x - (1.0/16.0))) / Math.Cos(TWO_PI * x);
+    }
+
+    /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
+    private static double PsiPrime3(double t)
     {
         double twoPiT = TWO_PI * t;
         double fourPiT = 4 * PI * t;
@@ -200,15 +209,13 @@ public class ZpsGeneral : MonoBehaviour
         double result = TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
         return result;
     }
-    #endregion
 
-    #region Yin and Yang Aproximation
     /// <summary>
     /// <param name="maxN">maxN can be at most 20</param>
     /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
     /// <param name="order">order is the order of the derivative</param>
     /// <summary>
-    private static double PsiApprox(double tFrac, int order, int maxN = 12)
+    public static double PsiApprox(double tFrac, int order, int maxN = 12)
     {
         double result = 0.0;
 
@@ -224,40 +231,12 @@ public class ZpsGeneral : MonoBehaviour
                 coeff *= (n - k);
             }
 
-            // Apply the term: coeff * c[n + 1] * (t - 0.5)^(n - order)
-            result += coeff * c[n + 1] * Math.Pow(tFrac - 0.5, n - order);
+            // Apply the term: coeff * c[n] * (t - 0.5)^(n - order)
+            result += coeff * c[n] * Math.Pow(tFrac - 0.5, n - order);
         }
 
         return result;
     }
-    
-    /// <summary>
-    /// /// <param name="t">t = sqrt(imag(index) / 2PI)</param>
-    private static double RApprox(double t)
-    {
-        double tFrac = t - Math.Floor(t);
-        return Math.Pow(t, -0.5) * PsiApprox(tFrac, 0) - PsiApprox(tFrac, 3)*t;
-    }
-
-    private static double YinApprox(double index)
-    {
-        int n = (int)Math.Floor(index);
-        double t = index - n;
-        // return -2 * Square(t) * Math.Cos(Beta())
-        return 0;
-    }
-
-    // private static double PImagFractional(double index)
-    // {
-    //     double real = index - (int)Math.Floor(index);
-    //     double imag = Zeta.IndexToImag(real);
-
-    //     const double TWO_PI = 2 * Math.PI;
-
-    //     double t = Math.Pow(imag / TWO_PI, -0.5);
-
-    //     return t - (int)Math.Floor(t);
-    // }
     #endregion
 
     #region Yin and Yang Numerical Derivative
@@ -275,7 +254,7 @@ public class ZpsGeneral : MonoBehaviour
         return SBisect(linkLength, yang1, yang2, yin1, yin2, yang, yin);
     }
 
-    public static Vector ComputeNormal(Func<double, Vector> func, double point, double epsilon = Fine)
+    private static Vector ComputeNormal(Func<double, Vector> func, double point, double epsilon = Fine)
     {
         var yangDeriv = new Vector(0, 0); // Initialize yangDeriv to zero
 
@@ -328,7 +307,7 @@ public class ZpsGeneral : MonoBehaviour
     }
     #endregion
 
-    public static double B_linkLength(double real, double index, double imag, Complex chi)
+    private static double B_linkLength(double real, double index, double imag, Complex chi)
     {
         (Vector cj1, Vector cj2) = Cj(1 - real, index, imag);
 
@@ -343,7 +322,7 @@ public class ZpsGeneral : MonoBehaviour
         return result.Real * powerTerm;
     }
 
-    public static Vector SBisect(
+    private static Vector SBisect(
         double d,
         Vector O1,
         Vector O2,

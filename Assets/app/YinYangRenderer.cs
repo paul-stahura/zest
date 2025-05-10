@@ -69,7 +69,6 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
             if(_yinYangToggle.isOn) DrawYinYang(_yinPath, _yangPath);
             if(_yinYangLinkToggle.isOn) DrawYinYangLink();
 
-            // might have to invert this as such DrawYinYang(_yangSpecialPath, _yinSpecialPath); since names have switched
             if(_yinYangSpecialToggle.isOn) DrawYinYang(_yinSpecialPath, _yangSpecialPath);
             if(_yinYangSpecialLinkToggle.isOn) DrawYinYangSpecialLink();
             if(_inverseSpecialToggle.isOn) DrawInverseYinYangSpecial();
@@ -291,20 +290,20 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
     private void CalcYinYangPath()
     {
-        print(ZpsGeneral.R(1.2));
-
         int n = _yinYangPathIndex;
         double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
 
         var yinSpecial = ZpsGeneral.YinSpecial(n, first);
         var yangSpecial = ZpsGeneral.YangSpecial(n, first);
+        _yinSpecialPath[0] = yinSpecial;
+        _yangSpecialPath[0] = yangSpecial;
+
         var real = _spiralCalculator.GetReal();
         var chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(first)));
         var yin = ZpsGeneral.Yin(real, first, chi, yinSpecial, yangSpecial);
         _yinPath[0] = yin;
         _yangPath[0] = ZpsGeneral.Yang(real, first, chi, yin, yinSpecial, yangSpecial);
-        _yinSpecialPath[0] = yinSpecial;
-        _yangSpecialPath[0] = yangSpecial;
+        
         for(int i = 1; i < _yinPath.Length - 1; i++)
         {
             var indexFrac = _yinYangPathIndex + ((double)i)/_yangPath.Length;
@@ -313,23 +312,25 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
             yinSpecial = ZpsGeneral.YinSpecial(n, indexFrac);
             yangSpecial = ZpsGeneral.YangSpecial(n, indexFrac);
+            _yinSpecialPath[i] = yinSpecial;
+            _yangSpecialPath[i] = yangSpecial;
+
             chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(indexFrac)));
             yin = ZpsGeneral.Yin(real, indexFrac, chi, yinSpecial, yangSpecial);
             _yinPath[i] = yin;
             _yangPath[i] = ZpsGeneral.Yang(real, indexFrac, chi, yin, yinSpecial, yangSpecial);
-            _yinSpecialPath[i] = yinSpecial;
-            _yangSpecialPath[i] = yangSpecial;
         }
         double last = _yinYangPathIndex + 1 - 0.00001;
 
         yinSpecial = ZpsGeneral.YinSpecial(n, last);
         yangSpecial = ZpsGeneral.YangSpecial(n, last);
+        _yinSpecialPath[_yinPath.Length - 1] = yinSpecial;
+        _yangSpecialPath[_yangPath.Length - 1] = yangSpecial;
+
         chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(last)));
         yin = ZpsGeneral.Yin(real, last, chi, yinSpecial, yangSpecial);
         _yinPath[_yinPath.Length - 1] = yin;
         _yangPath[_yangPath.Length - 1] = ZpsGeneral.Yang(real, last, chi, yin, yinSpecial, yangSpecial);
-        _yinSpecialPath[_yinPath.Length - 1] = yinSpecial;
-        _yangSpecialPath[_yangPath.Length - 1] = yangSpecial;
     }
 
     private void CalcInfPath()
