@@ -7,6 +7,7 @@ using UnityEngine;
 public class ZpsGeneral : MonoBehaviour
 {
     private const double Fine = 1e-4;
+    private const double PI = Math.PI;
     private const double TWO_PI = 2 * Math.PI;
     private static readonly double[] c = 
     {
@@ -97,6 +98,16 @@ public class ZpsGeneral : MonoBehaviour
         int n = (int)Math.Floor(index);
         double t = index - n;
 
+        double yin = Dyin(n, t);
+        double beta = Beta(n, t);
+
+        Vector pt = new Vector
+        (
+            -yin * Math.Cos(beta) - 0.5, 
+            -yin * Math.Sin(beta)
+        );
+
+        return pt;
     }
 
     private static double Dyin(int n, double t)
@@ -106,13 +117,24 @@ public class ZpsGeneral : MonoBehaviour
 
     public static Vector YangSpecial(double index)
     {
-        Vector pt = new Vector(Math.Cos(Beta(index)), Math.Sin(Beta(index)));
-        return pt * Dyangl(index) + new Vector(0.5, 0);
+        int n = (int)Math.Floor(index);
+        double t = index - n;
+
+        double yang = Dyang(n, t);
+        double beta = Beta(n, t);
+
+        Vector pt = new Vector
+        (
+            yang * Math.Cos(beta) + 0.5,
+            yang * Math.Sin(beta)
+        );
+
+        return pt;
     }
 
-    private static double Dyangl(double index)
+    private static double Dyang(int n, double t)
     {
-        return -2*Math.Cos(Beta(index)) - Dyinl(index);
+        return -2*Math.Cos(Beta(n, t)) - Dyin(n, t);
     }
 
     private static double Beta(int n, double t)
@@ -128,21 +150,58 @@ public class ZpsGeneral : MonoBehaviour
 
     private static int Square(int n, double t)
     {
-        return (int)Math.Floor()
-        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index, false)/(2*Math.PI))) - Math.Floor(index));
+        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(t) / TWO_PI)) - n);
     }
 
+    /// <param name="t">t = index fractional part</param>
     private static double R(double t)
     {
-        double psi(double t) => Math.Cos(2.0 * Math.PI * (t*t - t - 1.0 / 16.0)) / Math.Cos(2.0 * Math.PI * t);
+        double psi(double x) => Math.Cos(TWO_PI * (x*x - x - 1.0 / 16.0)) / Math.Cos(TWO_PI * x);
 
-        double tRoot = Math.Sqrt(t / TWO_PI);
-        double tFrac = t - (int)Math.Floor(t);
+        double tRoot = Math.Sqrt(Zeta.IndexToImag(t) / TWO_PI);
+        double tFrac = tRoot - (int)Math.Floor(tRoot);
 
-        return Math.Sqrt(tRoot) * psi(tFrac) - Zeta.PsiThirdDerivative(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot;
-        // C1 == Zeta.PsiThirdDerivative(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot
+        return Math.Sqrt(tRoot) * psi(tFrac) - PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot;
+        // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot
     }
-    
+
+    /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
+    private static double PsiPrime3(double tFrac)
+    {
+        double t2 = tFrac * tFrac;
+        double oneMinus2t = 1.0 - 2.0 * tFrac;
+        double oneMinus2tSq = oneMinus2t * oneMinus2t;
+        double neg1Plus2t = -1.0 + 2.0 * tFrac;
+
+        double twoPiT = TWO_PI * tFrac;
+        double fourPiT = 4.0 * PI * tFrac;
+        double sixPiT = 6.0 * PI * tFrac;
+        double quadTerm = -1.0 / 16.0 - tFrac + t2;
+        double twoPiQuad = TWO_PI * quadTerm;
+
+        // Trig evaluations
+        double cos2PiT = Math.Cos(twoPiT);
+        double sin2PiT = Math.Sin(twoPiT);
+        double cos4PiT = Math.Cos(fourPiT);
+        double sin6PiT = Math.Sin(sixPiT);
+
+        double cosQuad = Math.Cos(twoPiQuad);
+        double sinQuad = Math.Sin(twoPiQuad);
+
+        // Inverses and powers
+        double sec2PiT = 1.0 / cos2PiT;
+        double sec2PiT2 = sec2PiT * sec2PiT;
+        double sec2PiT3 = sec2PiT2 * sec2PiT;
+        double tan2PiT = sin2PiT / cos2PiT;
+
+        // Components
+        double term1 = -TWO_PI * cosQuad * sec2PiT3 * (-23.0 * sin2PiT + sin6PiT);
+        double term2 = 6.0 * TWO_PI * neg1Plus2t * (-3.0 + cos4PiT) * sec2PiT2 * sinQuad;
+        double term3 = 4.0 * PI * neg1Plus2t * (-3.0 * cosQuad + PI * oneMinus2tSq * sinQuad);
+        double term4 = 3.0 * (-4.0 * TWO_PI * oneMinus2tSq * cosQuad - 4.0 * PI * sinQuad) * tan2PiT;
+
+        return TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
+    }
     #endregion
 
     #region Yin and Yang Aproximation
