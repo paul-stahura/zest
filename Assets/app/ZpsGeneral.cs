@@ -93,11 +93,13 @@ public class ZpsGeneral : MonoBehaviour
     }
 
     #region Yin and Yang Calculation
-    public static Vector YinSpecial(double index)
+    /// <summary>
+    /// Yin calculation for the special case where real = 0.5
+    /// </summary>
+    /// <param name="n">n = index integer part</param>
+    /// <param name="t">t = index fractional part</param>
+    public static Vector YinSpecial(int n, double t)
     {
-        int n = (int)Math.Floor(index);
-        double t = index - n;
-
         double yin = Dyin(n, t);
         double beta = Beta(n, t);
 
@@ -112,14 +114,16 @@ public class ZpsGeneral : MonoBehaviour
 
     private static double Dyin(int n, double t)
     {
-        return -2*Square(n, t) * Math.Cos(Beta(n, t)) + (1 - 2*Square(n, t)) * Math.Sqrt(n+1)*R(t);
+        return -2.0*Square(n, t) * Math.Cos(Beta(n, t)) + (1.0 - 2.0*Square(n, t)) * Math.Sqrt(n+1)*R(t);
     }
 
-    public static Vector YangSpecial(double index)
+    /// <summary>
+    /// Yin calculation for the special case where real = 0.5
+    /// </summary>
+    /// <param name="n">n = index integer part</param>
+    /// <param name="t">t = index fractional part</param>
+    public static Vector YangSpecial(int n, double t)
     {
-        int n = (int)Math.Floor(index);
-        double t = index - n;
-
         double yang = Dyang(n, t);
         double beta = Beta(n, t);
 
@@ -140,12 +144,14 @@ public class ZpsGeneral : MonoBehaviour
     private static double Beta(int n, double t)
     {
         double imag = Zeta.IndexToImag(t);
-        return Math.Log(n + 1)*imag - Theta(imag) - Math.PI*(n*n - 2*n);
+        return Math.Log(n + 1)*imag - Theta(imag) - PI*(n*n + 2*n);
     }
 
-    private static double Theta(double t)
+    private static double Theta(double x)
     {
-        return t / 2 * Math.Log(t / (2 * Math.PI)) - t / 2 - Math.PI / 8 + 1 / (48 * t) + 7 / (5760 * Math.Pow(t, 3)) + 31 / (80640 * Math.Pow(t, 5)) + 127 / (430080 * Math.Pow(t, 7)) + 511 / (1216512 * Math.Pow(t, 9));
+        return x / 2 * Math.Log(x / TWO_PI) - (PI / 8) - (x / 2) + (1 / (48 * x));
+        // more terms do not result in significant changes
+        // + (7 / (5760 * Math.Pow(x, 3))) + (31 / (80640 * Math.Pow(x, 5))) + (127 / (430080 * Math.Pow(x, 7))) + (511 / (1216512 * Math.Pow(x, 9)));
     }
 
     private static int Square(int n, double t)
@@ -154,53 +160,45 @@ public class ZpsGeneral : MonoBehaviour
     }
 
     /// <param name="t">t = index fractional part</param>
-    private static double R(double t)
+    public static double R(double t)
     {
-        double psi(double x) => Math.Cos(TWO_PI * (x*x - x - 1.0 / 16.0)) / Math.Cos(TWO_PI * x);
+        double psi(double x) => Math.Cos(TWO_PI * (x*x - x - (1.0/16.0))) / Math.Cos(TWO_PI * x);
 
-        double tRoot = Math.Sqrt(Zeta.IndexToImag(t) / TWO_PI);
+        double tPi = Zeta.IndexToImag(t) / TWO_PI;
+        double tRoot = Math.Sqrt(tPi);
         double tFrac = tRoot - (int)Math.Floor(tRoot);
 
-        return Math.Sqrt(tRoot) * psi(tFrac) - PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot;
-        // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * tRoot
+        return Math.Pow(tPi, -0.25) * psi(tFrac) - (PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5));
+        // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5)
     }
 
     /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
-    private static double PsiPrime3(double tFrac)
+    public static double PsiPrime3(double t)
     {
-        double t2 = tFrac * tFrac;
-        double oneMinus2t = 1.0 - 2.0 * tFrac;
-        double oneMinus2tSq = oneMinus2t * oneMinus2t;
-        double neg1Plus2t = -1.0 + 2.0 * tFrac;
+        double twoPiT = TWO_PI * t;
+        double fourPiT = 4 * PI * t;
+        double sixPiT = 6 * PI * t;
 
-        double twoPiT = TWO_PI * tFrac;
-        double fourPiT = 4.0 * PI * tFrac;
-        double sixPiT = 6.0 * PI * tFrac;
-        double quadTerm = -1.0 / 16.0 - tFrac + t2;
-        double twoPiQuad = TWO_PI * quadTerm;
-
-        // Trig evaluations
         double cos2PiT = Math.Cos(twoPiT);
         double sin2PiT = Math.Sin(twoPiT);
-        double cos4PiT = Math.Cos(fourPiT);
         double sin6PiT = Math.Sin(sixPiT);
-
-        double cosQuad = Math.Cos(twoPiQuad);
-        double sinQuad = Math.Sin(twoPiQuad);
-
-        // Inverses and powers
+        double cos4PiT = Math.Cos(fourPiT);
         double sec2PiT = 1.0 / cos2PiT;
-        double sec2PiT2 = sec2PiT * sec2PiT;
-        double sec2PiT3 = sec2PiT2 * sec2PiT;
-        double tan2PiT = sin2PiT / cos2PiT;
+        double tan2PiT = Math.Tan(twoPiT);
 
-        // Components
-        double term1 = -TWO_PI * cosQuad * sec2PiT3 * (-23.0 * sin2PiT + sin6PiT);
-        double term2 = 6.0 * TWO_PI * neg1Plus2t * (-3.0 + cos4PiT) * sec2PiT2 * sinQuad;
-        double term3 = 4.0 * PI * neg1Plus2t * (-3.0 * cosQuad + PI * oneMinus2tSq * sinQuad);
-        double term4 = 3.0 * (-4.0 * TWO_PI * oneMinus2tSq * cosQuad - 4.0 * PI * sinQuad) * tan2PiT;
+        double exprInner = -1.0 / 16.0 - t + t * t;
+        double angle = TWO_PI * exprInner;
 
-        return TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
+        double cosAngle = Math.Cos(angle);
+        double sinAngle = Math.Sin(angle);
+
+        double term1 = -Math.Pow(PI, 2) * cosAngle * Math.Pow(sec2PiT, 3) * (-23 * sin2PiT + sin6PiT);
+        double term2 = 6 * Math.Pow(PI, 2) * (2 * t - 1) * (-3 + cos4PiT) * Math.Pow(sec2PiT, 2) * sinAngle;
+        double term3 = 4 * PI * (2 * t - 1) * (-3 * cosAngle + PI * Math.Pow(1 - 2 * t, 2) * sinAngle);
+        double term4 = 3 * (-4 * Math.Pow(PI, 2) * Math.Pow(1 - 2 * t, 2) * cosAngle - 4 * PI * sinAngle) * tan2PiT;
+
+        double result = TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
+        return result;
     }
     #endregion
 
@@ -245,7 +243,8 @@ public class ZpsGeneral : MonoBehaviour
     {
         int n = (int)Math.Floor(index);
         double t = index - n;
-        return -2 * Square(t) * Math.Cos(Beta())
+        // return -2 * Square(t) * Math.Cos(Beta())
+        return 0;
     }
 
     // private static double PImagFractional(double index)

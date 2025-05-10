@@ -69,7 +69,8 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
             if(_yinYangToggle.isOn) DrawYinYang(_yinPath, _yangPath);
             if(_yinYangLinkToggle.isOn) DrawYinYangLink();
 
-            if(_yinYangSpecialToggle.isOn) DrawYinYang(_yangSpecialPath, _yinSpecialPath);
+            // might have to invert this as such DrawYinYang(_yangSpecialPath, _yinSpecialPath); since names have switched
+            if(_yinYangSpecialToggle.isOn) DrawYinYang(_yinSpecialPath, _yangSpecialPath);
             if(_yinYangSpecialLinkToggle.isOn) DrawYinYangSpecialLink();
             if(_inverseSpecialToggle.isOn) DrawInverseYinYangSpecial();
 
@@ -290,10 +291,13 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
     private void CalcYinYangPath()
     {
+        print(ZpsGeneral.R(1.2));
+
+        int n = _yinYangPathIndex;
         double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
 
-        var yinSpecial = MiddleLinkTeardrop.Yin(first);
-        var yangSpecial = MiddleLinkTeardrop.Yang(first);
+        var yinSpecial = ZpsGeneral.YinSpecial(n, first);
+        var yangSpecial = ZpsGeneral.YangSpecial(n, first);
         var real = _spiralCalculator.GetReal();
         var chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(first)));
         var yin = ZpsGeneral.Yin(real, first, chi, yinSpecial, yangSpecial);
@@ -303,23 +307,23 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         _yangSpecialPath[0] = yangSpecial;
         for(int i = 1; i < _yinPath.Length - 1; i++)
         {
-            var index = _yinYangPathIndex + ((double)i)/_yangPath.Length;
+            var indexFrac = _yinYangPathIndex + ((double)i)/_yangPath.Length;
             // avoid discontinuity at 0.25 and 0.75
-            if(Mathf.Approximately((float)index, 0.25f) || Mathf.Approximately((float)index, 0.75f)) index += 0.00001f;
+            if(Mathf.Approximately((float)indexFrac, 0.25f) || Mathf.Approximately((float)indexFrac, 0.75f)) indexFrac += 0.00001f;
 
-            yinSpecial = MiddleLinkTeardrop.Yin(index);
-            yangSpecial = MiddleLinkTeardrop.Yang(index);
-            chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(index)));
-            yin = ZpsGeneral.Yin(real, index, chi, yinSpecial, yangSpecial);
+            yinSpecial = ZpsGeneral.YinSpecial(n, indexFrac);
+            yangSpecial = ZpsGeneral.YangSpecial(n, indexFrac);
+            chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(indexFrac)));
+            yin = ZpsGeneral.Yin(real, indexFrac, chi, yinSpecial, yangSpecial);
             _yinPath[i] = yin;
-            _yangPath[i] = ZpsGeneral.Yang(real, index, chi, yin, yinSpecial, yangSpecial);
+            _yangPath[i] = ZpsGeneral.Yang(real, indexFrac, chi, yin, yinSpecial, yangSpecial);
             _yinSpecialPath[i] = yinSpecial;
             _yangSpecialPath[i] = yangSpecial;
         }
         double last = _yinYangPathIndex + 1 - 0.00001;
 
-        yinSpecial = MiddleLinkTeardrop.Yin(last);
-        yangSpecial = MiddleLinkTeardrop.Yang(last);
+        yinSpecial = ZpsGeneral.YinSpecial(n, last);
+        yangSpecial = ZpsGeneral.YangSpecial(n, last);
         chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(last)));
         yin = ZpsGeneral.Yin(real, last, chi, yinSpecial, yangSpecial);
         _yinPath[_yinPath.Length - 1] = yin;

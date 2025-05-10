@@ -670,13 +670,17 @@ public class SpiralCalculator : MonoBehaviour
 
     private void CalcYin(double index, double real)
     {
-        _yin = MiddleLinkTeardrop.Yin(index);
+        int n = (int)Math.Floor(index);
+        double t = index - n;
+        _yin = ZpsGeneral.YinSpecial(n, t);
         UpdateYin?.Invoke(_yin);
     }
 
     private void CalcYang(double index, double real)
     {
-        _yang = MiddleLinkTeardrop.Yang(index);
+        int n = (int)Math.Floor(index);
+        double t = index - n;
+        _yang = ZpsGeneral.YangSpecial(n, t);
         UpdateYang?.Invoke(_yang);
     }
 
