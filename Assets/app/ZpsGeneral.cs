@@ -171,7 +171,7 @@ public class ZpsGeneral : MonoBehaviour
         double psi = useApprox ? PsiApprox(tFrac, 0) : Psi(tFrac);
         double psiPrime3 = useApprox ? PsiApprox(tFrac, 3) : PsiPrime3(tFrac);
 
-        return Math.Pow(tPi, -0.25) * psi - (psiPrime3 / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5));
+        return Math.Pow(tPi, -0.25) * psi - (psiPrime3 / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.75));
         // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5)
     }
 
@@ -209,6 +209,7 @@ public class ZpsGeneral : MonoBehaviour
         double result = TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
         return result;
     }
+    #endregion
 
     /// <summary>
     /// <param name="maxN">maxN can be at most 20</param>
@@ -237,7 +238,6 @@ public class ZpsGeneral : MonoBehaviour
 
         return result;
     }
-    #endregion
 
     #region Yin and Yang Numerical Derivative
     // calculate Yin with numerical derivative
@@ -305,6 +305,9 @@ public class ZpsGeneral : MonoBehaviour
         Vector diff = yin - yang;
         return pYinGen + (diff * linkLength);
     }
+    #endregion
+
+    #region Yin and Yang Symbolic Derivative
     #endregion
 
     private static double B_linkLength(double real, double index, double imag, Complex chi)
