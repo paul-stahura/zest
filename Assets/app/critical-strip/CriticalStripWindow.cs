@@ -9,9 +9,6 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private float width = 300f;
     [SerializeField] private float animationDuration = 0.3f;
     [SerializeField] private RectTransform windowContent;
-    [SerializeField] private Button toggleButton;
-    [SerializeField] private Button closeButton;
-    [SerializeField] private Button saveButton;
     [SerializeField] private Button collapseTab;
     
     private RectTransform rectTransform;
@@ -29,15 +26,6 @@ public class CriticalStripWindow : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
         pointSetManager = FindObjectOfType<PointSetManager>();
         
-        if (toggleButton != null)
-            toggleButton.onClick.AddListener(Toggle);
-            
-        if (closeButton != null)
-            closeButton.onClick.AddListener(() => SetExpanded(false));
-            
-        if (saveButton != null && pointSetManager != null)
-            saveButton.onClick.AddListener(pointSetManager.SaveCurrentPoint);
-
         if (collapseTab != null)
             collapseTab.onClick.AddListener(Toggle);
             

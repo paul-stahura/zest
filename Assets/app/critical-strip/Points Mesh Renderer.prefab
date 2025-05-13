@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 2730369454572311947}
   - component: {fileID: 5248475936234707483}
   - component: {fileID: 4359620960066976828}
-  - component: {fileID: 3288509670483697446}
   m_Layer: 5
   m_Name: Points Mesh Renderer
   m_TagString: Untagged
@@ -69,22 +68,3 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4305123733453873996}
   m_CullTransparentMesh: 1
---- !u!114 &3288509670483697446
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4305123733453873996}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43ccc96d4333a4c66b0df9193d7fa083, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshRenderer: {fileID: 0}
-  hoverPrefab: {fileID: 4212848612960195213, guid: d55772ee7cf6c46c78e4c01436393417,
-    type: 3}
-  hoverThreshold: 10
-  startScale: 1
-  endScale: 4
-  animationDuration: 0.3

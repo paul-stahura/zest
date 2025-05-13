@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections;
+using System;
 
 [RequireComponent(typeof(RectTransform))]
 public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, IPointerMoveHandler, IPointerEnterHandler, IPointerExitHandler
@@ -40,15 +41,18 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         // Get all active point sets
         var activeSets = pointSetManager.GetAllActiveSets();
         
+        var isImaginary = criticalStripRenderer.GetTransform().UseImaginarySpace;
+        
         // Find the closest point across all active sets
         foreach (var activeSet in activeSets)
         {
             foreach (var pt in activeSet.OriginalPoints)
             {
-                Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                var yValue = isImaginary ? Zeta.IndexToImag(pt.Index) : pt.Index;
+                Vector2 stripPos = new Vector2((float)pt.Real, (float)yValue);
                 Vector2 viewportPos = criticalStripRenderer.GetTransform().StripToViewport(stripPos);
                 float dist = Vector2.Distance(localPoint, viewportPos);
-                
+
                 if (dist < closestDist && dist < threshold)
                 {
                     closestDist = dist;
@@ -85,15 +89,18 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         // Get all active point sets
         var activeSets = pointSetManager.GetAllActiveSets();
         
+        var isImaginary = criticalStripRenderer.GetTransform().UseImaginarySpace;
+        
         // Find the closest point across all active sets
         foreach (var activeSet in activeSets)
         {
             foreach (var pt in activeSet.OriginalPoints)
             {
-                Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
+                var yValue = isImaginary ? Zeta.IndexToImag(pt.Index) : pt.Index;
+                Vector2 stripPos = new Vector2((float)pt.Real, (float)yValue);
                 Vector2 viewportPos = criticalStripRenderer.GetTransform().StripToViewport(stripPos);
                 float dist = Vector2.Distance(localPoint, viewportPos);
-                
+
                 if (dist < closestDist && dist < threshold)
                 {
                     closestDist = dist;
@@ -216,4 +223,4 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
             }
         }
     }
-} 
+}

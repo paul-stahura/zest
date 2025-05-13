@@ -206,7 +206,7 @@ public class BandsOverlayRenderer : MaskableGraphic
                 bandEndIndices.Add(previousY);
             }
             
-            Debug.Log($"BandsOverlayRenderer: Processed {bandStartIndices.Count} bands from {dataFileName}");
+            // Debug.Log($"BandsOverlayRenderer: Processed {bandStartIndices.Count} bands from {dataFileName}");
             isDataProcessed = true;
             
             // Force redraw
@@ -272,8 +272,8 @@ public class BandsOverlayRenderer : MaskableGraphic
         
         int vertexIndex = 0;
         
-        float visibleMin = stripTransform.MinIndex;
-        float visibleMax = stripTransform.MaxIndex;
+        float visibleMin = stripTransform.MinValue;
+        float visibleMax = stripTransform.MaxValue;
 
         // --- INVERSE BAND LOGIC ---
         // Drawing bands between regions where X changes direction.
@@ -312,8 +312,21 @@ public class BandsOverlayRenderer : MaskableGraphic
             if (gapEnd <= gapStart) continue;
 
             // Convert indices to viewport Y coordinates
-            Vector2 startPosStrip = new Vector2(0, gapStart);
-            Vector2 endPosStrip = new Vector2(0, gapEnd);
+            // If we're in imaginary space, we need to transform the band indices
+            Vector2 startPosStrip, endPosStrip;
+            
+            if (stripTransform.UseImaginarySpace)
+            {
+                // Band indices are in index space, convert to imaginary space
+                startPosStrip = new Vector2(0, (float)Zeta.IndexToImag(gapStart));
+                endPosStrip = new Vector2(0, (float)Zeta.IndexToImag(gapEnd));
+            }
+            else
+            {
+                // In index space, use directly
+                startPosStrip = new Vector2(0, gapStart);
+                endPosStrip = new Vector2(0, gapEnd);
+            }
 
             Vector2 startPosViewport = stripTransform.StripToViewport(startPosStrip);
             Vector2 endPosViewport = stripTransform.StripToViewport(endPosStrip);

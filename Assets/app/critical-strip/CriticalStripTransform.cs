@@ -4,7 +4,10 @@ public class CriticalStripTransform
 {
     private double minIndex;
     private double maxIndex;
+    private double minImag; // New field for min imaginary value
+    private double maxImag; // New field for max imaginary value
     private RectTransform viewportRect;
+    private bool useImaginarySpace = false; // Default to index space
     
     /// <summary>
     /// The critical line at real = 0.5 is of utmost importance in the Riemann hypothesis.
@@ -32,23 +35,52 @@ public class CriticalStripTransform
     // Calculate threshold based on current viewport width
     public float CriticalValueThreshold => CRITICAL_LINE_PIXELS / viewportRect.rect.width;
     
+    // Property to get/set the space mode
+    public bool UseImaginarySpace
+    {
+        get { return useImaginarySpace; }
+        set 
+        { 
+            if (useImaginarySpace != value)
+            {
+                useImaginarySpace = value;
+                // No need to update bounds here as they're already maintained in parallel
+            }
+        }
+    }
+    
     public CriticalStripTransform(RectTransform viewport, float minIndex = 0f, float maxIndex = 7f)
     {
         this.viewportRect = viewport;
         this.minIndex = minIndex;
         this.maxIndex = maxIndex;
         
+        // Initialize imaginary values
+        this.minImag = Zeta.IndexToImag(minIndex);
+        this.maxImag = Zeta.IndexToImag(maxIndex);
+        
         // Debug.Log($"[CriticalStripTransform] Initialized with viewport width: {viewport.rect.width}, " +
         //           $"critical threshold: {CriticalValueThreshold:F6} ({CRITICAL_LINE_PIXELS} pixels)");
+        // Debug.Log($"[CriticalStripTransform] Index range: [{minIndex}, {maxIndex}], Imag range: [{minImag:F2}, {maxImag:F2}]");
     }
     
-    // Convert from critical strip coordinates (real [0,1], index) to viewport coordinates
+    // Convert from critical strip coordinates (real [0,1], index/imag) to viewport coordinates
     public Vector2 StripToViewport(Vector2 stripPos)
     {
         float x = stripPos.x * viewportRect.rect.width;
         
-        // Use double for index calculations to maintain precision
-        double normalizedY = (stripPos.y - minIndex) / (maxIndex - minIndex);
+        // Use double for calculations to maintain precision
+        double normalizedY;
+        if (useImaginarySpace)
+        {
+            normalizedY = (stripPos.y - minImag) / (maxImag - minImag);
+            // Debug.Log($"[CriticalStripTransform] (imaginary) StripToViewport: {stripPos.y} -> {normalizedY}");
+        }
+        else
+        {
+            normalizedY = (stripPos.y - minIndex) / (maxIndex - minIndex);
+            // Debug.Log($"[CriticalStripTransform] (index) StripToViewport: {stripPos.y} -> {normalizedY}");
+        }
         float y = (float)(normalizedY * viewportRect.rect.height);
         
         // Adjust for viewport position
@@ -79,11 +111,20 @@ public class CriticalStripTransform
             real = Mathf.Clamp01(normalizedX);
         }
         
-        // Use double for index calculations to maintain precision
+        // Use double for y-coordinate calculations to maintain precision
         double normalizedY = adjustedY / viewportRect.rect.height;
-        double index = minIndex + (normalizedY * (maxIndex - minIndex));
+        double value;
         
-        return new Vector2(real, (float)index);
+        if (useImaginarySpace)
+        {
+            value = minImag + (normalizedY * (maxImag - minImag));
+        }
+        else
+        {
+            value = minIndex + (normalizedY * (maxIndex - minIndex));
+        }
+        
+        return new Vector2(real, (float)value);
     }
     
     // Convert from screen coordinates to critical strip coordinates
@@ -102,18 +143,62 @@ public class CriticalStripTransform
         return ViewportToStrip(localPos);
     }
     
-    public void SetIndexRange(float min, float max)
+    // Set the range in the current coordinate space (index or imaginary)
+    public void SetRange(float min, float max)
     {
         if (min >= max)
         {
-            Debug.LogWarning($"[CriticalStripTransform] Invalid index range: [{min}, {max}]");
+            Debug.LogWarning($"[CriticalStripTransform] Invalid range: [{min}, {max}]");
             return;
         }
-        minIndex = min;
-        maxIndex = max;
-        // Debug.Log($"[CriticalStripTransform] Index range updated: [{minIndex}, {maxIndex}]");
+        
+        if (useImaginarySpace)
+        {
+            minImag = min;
+            maxImag = max;
+            
+            // Update corresponding index values
+            minIndex = Zeta.ImagToIndex(minImag);
+            maxIndex = Zeta.ImagToIndex(maxImag);
+        }
+        else
+        {
+            minIndex = min;
+            maxIndex = max;
+            
+            // Update corresponding imaginary values
+            minImag = Zeta.IndexToImag(minIndex);
+            maxImag = Zeta.IndexToImag(maxIndex);
+        }
+        
+        // Debug.Log($"[CriticalStripTransform] Range updated. Index: [{minIndex:F3}, {maxIndex:F3}], Imag: [{minImag:F2}, {maxImag:F2}]");
     }
     
+    // Maintain backward compatibility
+    public void SetIndexRange(float min, float max)
+    {
+        if (useImaginarySpace)
+        {
+            // If in imaginary space, convert the index values to imaginary values
+            double minImag = Zeta.IndexToImag(min);
+            double maxImag = Zeta.IndexToImag(max);
+            SetRange((float)minImag, (float)maxImag);
+        }
+        else
+        {
+            SetRange(min, max);
+        }
+    }
+    
+    // Properties to get min/max values based on current space
+    public float MinValue => (float)(useImaginarySpace ? minImag : minIndex);
+    public float MaxValue => (float)(useImaginarySpace ? maxImag : maxIndex);
+    
+    // Keep original properties for backward compatibility
     public float MinIndex => (float)minIndex;
     public float MaxIndex => (float)maxIndex;
+    
+    // New properties to access imaginary range directly
+    public float MinImag => (float)minImag;
+    public float MaxImag => (float)maxImag;
 } 

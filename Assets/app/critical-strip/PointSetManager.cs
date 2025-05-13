@@ -26,7 +26,7 @@ public class PointSetManager : MonoBehaviour
     private const string FAVORITES_NAME = "Favorites";
     private string pointsDirectoryPath;
     private List<PointSet> loadedSets = new List<PointSet>();
-    private CriticalStripRenderer renderer;
+    private CriticalStripRenderer criticalStripRenderer; // Renamed from 'renderer' to avoid naming conflict with Component.renderer
     private App app;
     private Dictionary<uint, string> optionIndexToName = new Dictionary<uint, string>();
     private uint previousSelectionValue = 0;  // Add this line to track previous selection
@@ -41,10 +41,10 @@ public class PointSetManager : MonoBehaviour
     
     private void Awake()
     {
-        renderer = GetComponentInChildren<CriticalStripRenderer>();
+        criticalStripRenderer = GetComponentInChildren<CriticalStripRenderer>();
         app = FindObjectOfType<App>();
         
-        // Debug.Log($"PointSetManager Awake - Renderer: {(renderer != null ? "Found" : "Not Found")}, App: {(app != null ? "Found" : "Not Found")}");
+        // Debug.Log($"PointSetManager Awake - Renderer: {(criticalStripRenderer != null ? "Found" : "Not Found")}, App: {(app != null ? "Found" : "Not Found")}");
         
         if (app != null)
         {
@@ -169,7 +169,7 @@ public class PointSetManager : MonoBehaviour
             string displayName = metadata.Name ?? Path.GetFileNameWithoutExtension(filePath);
             Color pointColor = metadata.Color;
             options.Add(new DropdownEx.OptionData(displayName, pointColor));
-            Debug.Log($"Dropdown option: {displayName}, color: {pointColor} (RGBA: {pointColor.r}, {pointColor.g}, {pointColor.b}, {pointColor.a})");
+            // Debug.Log($"Dropdown option: {displayName}, color: {pointColor} (RGBA: {pointColor.r}, {pointColor.g}, {pointColor.b}, {pointColor.a})");
             optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath);
             index++;
         }
@@ -363,7 +363,7 @@ public class PointSetManager : MonoBehaviour
             if (pointsMeshPrefab != null && pointsContainer != null)
             {
                 // Create a parent group GameObject for this point set
-                GameObject groupObj = new GameObject(pointSet.Name + "_Group", typeof(RectTransform));
+                GameObject groupObj = new GameObject(pointSet.Name + "_group", typeof(RectTransform));
                 groupObj.transform.SetParent(pointsContainer, false);
                 RectTransform groupRect = groupObj.GetComponent<RectTransform>();
                 groupRect.anchorMin = Vector2.zero;
@@ -380,7 +380,7 @@ public class PointSetManager : MonoBehaviour
                 // Add the interaction handler so pointer events on the group are handled for the whole set
                 PointSetInteractionHandler handler = groupObj.AddComponent<PointSetInteractionHandler>();
                 handler.pointSet = pointSet;
-                handler.criticalStripRenderer = renderer;
+                handler.criticalStripRenderer = criticalStripRenderer;
                 handler.app = app;
                 handler.pointSetManager = this;
                 handler.pointSize = pointSet.PointSize; // Set point size for interaction
@@ -398,12 +398,18 @@ public class PointSetManager : MonoBehaviour
 
                 List<Vector2> convertedPoints = new List<Vector2>();
 
-                if (renderer != null && renderer.GetTransform() != null)
+                if (criticalStripRenderer != null && criticalStripRenderer.GetTransform() != null)
                 {
+                    var transform = criticalStripRenderer.GetTransform();
+                    bool useImaginary = transform.UseImaginarySpace;
+                    
                     foreach (var pt in pointSet.OriginalPoints)
                     {
-                        Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
-                        Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                        float y = useImaginary 
+                            ? (float)Zeta.IndexToImag(pt.Index)
+                            : (float)pt.Index;
+                        Vector2 stripPos = new Vector2((float)pt.Real, y);
+                        Vector2 viewportPos = transform.StripToViewport(stripPos);
                         convertedPoints.Add(viewportPos);
                     }
                 }
@@ -618,9 +624,9 @@ public class PointSetManager : MonoBehaviour
         }
         
         // Unsubscribe from viewport changes
-        if (renderer != null)
+        if (criticalStripRenderer != null)
         {
-            renderer.OnViewportChanged -= UpdatePointPositions;
+            criticalStripRenderer.OnViewportChanged -= UpdatePointPositions;
         }
     }
     
@@ -637,16 +643,16 @@ public class PointSetManager : MonoBehaviour
     private void Start()
     {
         // Subscribe to viewport changes
-        if (renderer != null)
+        if (criticalStripRenderer != null)
         {
-            renderer.OnViewportChanged += UpdatePointPositions;
+            criticalStripRenderer.OnViewportChanged += UpdatePointPositions;
         }
     }
     
     private void UpdatePointPositions()
     {
         // Skip if we don't have the required components
-        if (renderer == null || renderer.GetTransform() == null) return;
+        if (criticalStripRenderer == null || criticalStripRenderer.GetTransform() == null) return;
         
         const int maxPointsPerMesh = 5000;
         
@@ -658,10 +664,16 @@ public class PointSetManager : MonoBehaviour
             
             // Recalculate updated points using the original points
             List<Vector2> updatedPoints = new List<Vector2>();
+            var transform = criticalStripRenderer.GetTransform();
+            bool useImaginary = transform.UseImaginarySpace;
+            
             foreach (var pt in pointSet.OriginalPoints)
             {
-                Vector2 stripPos = new Vector2((float)pt.Real, (float)pt.Index);
-                Vector2 viewportPos = renderer.GetTransform().StripToViewport(stripPos);
+                float y = useImaginary 
+                    ? (float)Zeta.IndexToImag(pt.Index)
+                    : (float)pt.Index;
+                Vector2 stripPos = new Vector2((float)pt.Real, y);
+                Vector2 viewportPos = transform.StripToViewport(stripPos);
                 updatedPoints.Add(viewportPos);
             }
             

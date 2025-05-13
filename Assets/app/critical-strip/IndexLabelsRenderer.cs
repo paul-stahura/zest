@@ -5,12 +5,12 @@ using System.Text;
 using System;
 
 /// <summary>
-/// Renders index labels along the side of the critical strip viewport
+/// Renders labels along the side of the critical strip viewport.
+/// Can display either index or imaginary values based on current mode.
 /// </summary>
 public class IndexLabelsRenderer : MonoBehaviour
 {
     [Header("Label Properties")]
-    [SerializeField] private float labelSpacing = 1.0f;        // Base spacing between labels in strip units
     [SerializeField] private int fontSize = 18;                // Font size for the labels
     [SerializeField] private Color textColor = Color.white;    // Color of the label text
     [SerializeField] private float offsetFromEdge = 10f;      // Distance from the viewport edge in pixels
@@ -32,6 +32,14 @@ public class IndexLabelsRenderer : MonoBehaviour
     [SerializeField] private float thirdDecimalThreshold = 0.05f;
     [Tooltip("Multiplier for spacing between labels. Lower values = more labels")]
     [SerializeField] [Range(1f, 5f)] private float spacingMultiplier = 1.5f;
+    
+    [Header("Imaginary Space Settings")]
+    [Tooltip("Target number of labels to show in imaginary space")]
+    [SerializeField] private float imagTargetLabelCount = 8f;
+    [Tooltip("Whether to use adaptive spacing for imaginary values")]
+    [SerializeField] private bool useAdaptiveSpacing = true;
+    [Tooltip("Label prefix to show in imaginary space")]
+    [SerializeField] private string imagPrefix = "t=";
 
     [Header("Strip Properties")]
     [SerializeField] private Color stripColor = new Color(1, 1, 1, 0.2f);  // Color of the strip background
@@ -46,6 +54,7 @@ public class IndexLabelsRenderer : MonoBehaviour
     private float currentMaxIndex;                            // Current maximum visible index
     private bool isInitialized = false;                       // Whether we've completed initialization
     private StringBuilder logs = new StringBuilder();         // Collects logs for batch output
+    private bool useImaginarySpace = false;                   // Current space mode
 
     private void OnEnable()
     {
@@ -68,7 +77,8 @@ public class IndexLabelsRenderer : MonoBehaviour
         if (!isInitialized || stripTransform == null) return;
         
         logs.AppendLine("Viewport changed, updating labels");
-        UpdateLabels(stripTransform.MinIndex, stripTransform.MaxIndex);
+        // Update using MinValue/MaxValue which automatically uses the correct space
+        UpdateLabels(stripTransform.MinValue, stripTransform.MaxValue);
         EmitLogs("ViewportChanged");
     }
 
@@ -137,11 +147,35 @@ public class IndexLabelsRenderer : MonoBehaviour
         labelPool = new List<Text>();
         InitializeLabels();
 
-        logs.AppendLine($"Initial index range: [{stripTransform.MinIndex}, {stripTransform.MaxIndex}]");
+        // Check if we need to initialize in imaginary space
+        if (stripTransform != null)
+        {
+            useImaginarySpace = stripTransform.UseImaginarySpace;
+        }
+
+        logs.AppendLine($"Initial value range: [{stripTransform.MinValue}, {stripTransform.MaxValue}], space mode: {(useImaginarySpace ? "Imaginary" : "Index")}");
         isInitialized = true;  // Set initialized flag before calling UpdateLabels
-        UpdateLabels(stripTransform.MinIndex, stripTransform.MaxIndex);
+        UpdateLabels(stripTransform.MinValue, stripTransform.MaxValue);
         logs.AppendLine("IndexLabelsRenderer initialization complete");
         EmitLogs("InitializeWhenReady - complete");
+    }
+    
+    /// <summary>
+    /// Set whether to display labels in imaginary space
+    /// </summary>
+    public void SetUseImaginarySpace(bool useImag)
+    {
+        if (useImaginarySpace == useImag) return;
+        
+        useImaginarySpace = useImag;
+        logs.AppendLine($"Space mode changed to: {(useImaginarySpace ? "Imaginary" : "Index")}");
+        
+        if (isInitialized && stripTransform != null)
+        {
+            UpdateLabels(stripTransform.MinValue, stripTransform.MaxValue);
+        }
+        
+        EmitLogs("SetUseImaginarySpace");
     }
     
     /// <summary>
@@ -214,7 +248,7 @@ public class IndexLabelsRenderer : MonoBehaviour
     /// <summary>
     /// Updates the position and text of all labels
     /// </summary>
-    public void UpdateLabels(float minIndex, float maxIndex)
+    public void UpdateLabels(float minValue, float maxValue)
     {
         if (!isInitialized)
         {
@@ -223,46 +257,119 @@ public class IndexLabelsRenderer : MonoBehaviour
             return;
         }
 
-        logs.AppendLine($"UpdateLabels called with range: [{minIndex}, {maxIndex}]");
+        logs.AppendLine($"UpdateLabels called with range: [{minValue}, {maxValue}], space mode: {(useImaginarySpace ? "Imaginary" : "Index")}");
         
-        currentMinIndex = minIndex;
-        currentMaxIndex = maxIndex;
+        currentMinIndex = minValue;
+        currentMaxIndex = maxValue;
         
         // Calculate visible range and determine appropriate spacing and format
-        float visibleRange = maxIndex - minIndex;
-        float idealSpacing = visibleRange / targetLabelCount;
+        float visibleRange = maxValue - minValue;
         
-        // Find the appropriate power of 10 for spacing
-        float log10 = Mathf.Log10(idealSpacing);
-        int power = Mathf.FloorToInt(log10);
+        // Adjust targetLabelCount based on space mode
+        float effectiveTargetCount = useImaginarySpace ? imagTargetLabelCount : targetLabelCount;
+        float idealSpacing = visibleRange / effectiveTargetCount;
         
-        // Never go larger than integer spacing (power > 0)
-        power = Mathf.Min(0, power);
+        float currentSpacing;
+        int decimalPlaces;
         
-        // Calculate actual spacing and number of decimal places
-        float currentSpacing = Mathf.Max(minSpacing, Mathf.Pow(10, power));
-        int decimalPlaces = 0;
-        
-        // Determine decimal places based on visible range
-        if (visibleRange <= thirdDecimalThreshold && maxDecimalPlaces >= 3)
+        if (useImaginarySpace)
         {
-            decimalPlaces = 3;
-            currentSpacing = 0.001f * spacingMultiplier;
-        }
-        else if (visibleRange <= secondDecimalThreshold && maxDecimalPlaces >= 2)
-        {
-            decimalPlaces = 2;
-            currentSpacing = 0.01f * spacingMultiplier;
-        }
-        else if (visibleRange <= firstDecimalThreshold && maxDecimalPlaces >= 1)
-        {
-            decimalPlaces = 1;
-            currentSpacing = 0.1f * spacingMultiplier;
+            // For imaginary space, use different spacing strategy based on range
+            if (useAdaptiveSpacing)
+            {
+                // Use logarithmic spacing for large ranges in imaginary space
+                if (visibleRange > 500)
+                {
+                    currentSpacing = 100f;
+                    decimalPlaces = 0;
+                }
+                else if (visibleRange > 200)
+                {
+                    currentSpacing = 50f;
+                    decimalPlaces = 0;
+                }
+                else if (visibleRange > 100)
+                {
+                    currentSpacing = 20f;
+                    decimalPlaces = 0;
+                }
+                else if (visibleRange > 50)
+                {
+                    currentSpacing = 10f;
+                    decimalPlaces = 0;
+                }
+                else if (visibleRange > 20)
+                {
+                    currentSpacing = 5f;
+                    decimalPlaces = 0;
+                }
+                else if (visibleRange > 10)
+                {
+                    currentSpacing = 2f;
+                    decimalPlaces = 1;
+                }
+                else
+                {
+                    currentSpacing = 1f;
+                    decimalPlaces = 2;
+                }
+            }
+            else
+            {
+                // Find the appropriate power of 10 for spacing
+                float log10 = Mathf.Log10(idealSpacing);
+                int power = Mathf.FloorToInt(log10);
+                
+                // Calculate spacing based on power of 10
+                float magnitude = Mathf.Pow(10, power);
+                
+                // Choose nice round numbers
+                if (idealSpacing >= 5 * magnitude)
+                    currentSpacing = 5 * magnitude;
+                else if (idealSpacing >= 2 * magnitude)
+                    currentSpacing = 2 * magnitude;
+                else
+                    currentSpacing = magnitude;
+                
+                // Determine decimal places inversely to the spacing
+                decimalPlaces = Mathf.Max(0, -power);
+                decimalPlaces = Mathf.Min(decimalPlaces, maxDecimalPlaces);
+            }
         }
         else
         {
+            // Original index space spacing logic
+            float log10 = Mathf.Log10(idealSpacing);
+            int power = Mathf.FloorToInt(log10);
+            
+            // Never go larger than integer spacing (power > 0)
+            power = Mathf.Min(0, power);
+            
+            // Calculate actual spacing and number of decimal places
+            currentSpacing = Mathf.Max(minSpacing, Mathf.Pow(10, power));
             decimalPlaces = 0;
-            currentSpacing = 1f;
+            
+            // Determine decimal places based on visible range
+            if (visibleRange <= thirdDecimalThreshold && maxDecimalPlaces >= 3)
+            {
+                decimalPlaces = 3;
+                currentSpacing = 0.001f * spacingMultiplier;
+            }
+            else if (visibleRange <= secondDecimalThreshold && maxDecimalPlaces >= 2)
+            {
+                decimalPlaces = 2;
+                currentSpacing = 0.01f * spacingMultiplier;
+            }
+            else if (visibleRange <= firstDecimalThreshold && maxDecimalPlaces >= 1)
+            {
+                decimalPlaces = 1;
+                currentSpacing = 0.1f * spacingMultiplier;
+            }
+            else
+            {
+                decimalPlaces = 0;
+                currentSpacing = 1f;
+            }
         }
         
         string format = $"F{decimalPlaces}";
@@ -289,32 +396,52 @@ public class IndexLabelsRenderer : MonoBehaviour
         // Position and activate needed labels
         // Use double for more precise decimal calculations
         double dCurrentSpacing = currentSpacing;
-        double dMinIndex = minIndex;
+        double dMinIndex = minValue;
         double startIndex = Math.Floor(dMinIndex / dCurrentSpacing) * dCurrentSpacing;
         
         int labelIndex = 0;
-        for (double index = startIndex; index <= maxIndex && labelIndex < labelPool.Count; index += dCurrentSpacing)
+        for (double index = startIndex; index <= maxValue && labelIndex < labelPool.Count; index += dCurrentSpacing)
         {
-            // Skip labels below zero
-            if (index < 0) continue;
+            // Skip labels below minimum allowed value
+            if (useImaginarySpace)
+            {
+                // For imaginary space, ensure we don't go below the imaginary value corresponding to index = -1
+                double minAllowedImag = Zeta.IndexToImag(-1);
+                if (index < minAllowedImag) continue;
+            }
+            else
+            {
+                // For index space, ensure we don't go below -1
+                if (index < -1) continue;
+            }
             
-            // Skip if below minIndex (after zero check to ensure we don't miss zero)
+            // Skip if below minValue (after minimum allowed check to ensure we don't miss the first label)
             if (index < dMinIndex) continue;
             
             Text label = labelPool[labelIndex];
             label.gameObject.SetActive(true);
             
-            // Format the number with exact decimal places
-            if (decimalPlaces > 0)
+            // Format the label text based on the space mode
+            if (useImaginarySpace)
             {
-                // Round to avoid floating point errors
-                double roundedIndex = Math.Round(index, decimalPlaces);
-                // Always show all decimal places with zero padding
-                label.text = roundedIndex.ToString($"F{decimalPlaces}");
+                // Format imaginary values with appropriate precision
+                double roundedValue = Math.Round(index, decimalPlaces);
+                label.text = imagPrefix + roundedValue.ToString(format);
             }
             else
             {
-                label.text = Math.Round(index).ToString("F0");
+                // Format index values with original logic
+                if (decimalPlaces > 0)
+                {
+                    // Round to avoid floating point errors
+                    double roundedIndex = Math.Round(index, decimalPlaces);
+                    // Always show all decimal places with zero padding
+                    label.text = roundedIndex.ToString($"F{decimalPlaces}");
+                }
+                else
+                {
+                    label.text = Math.Round(index).ToString("F0");
+                }
             }
             
             // Convert strip coordinates to viewport coordinates

@@ -45,7 +45,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private const float centerAnimDuration = 0.5f; // seconds
     
     // Core components
-    private CriticalStripTransform transform;  // Handles coordinate transformations between strip and viewport
+    private CriticalStripTransform criticalStripTransform;  // Handles coordinate transformations between strip and viewport
     private Dictionary<PointSet, List<RectTransform>> pointObjects;  // Maps point sets to their UI representations
     private RectTransform hoveredPoint;  // Currently hovered point, if any
     [SerializeField] private App app;  // Reference to main app for updating selected coordinates
@@ -72,6 +72,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private bool isUpdating = false;
 
     private bool isInRange = false; // Add this field to track if indicator is in visible range
+
+    [Header("Space Mode")]
+    [SerializeField] private Button spaceToggleButton; // UI button to toggle space mode
+    [SerializeField] private Text spaceModeText; // Optional: Text to display current space mode
+    [SerializeField] private float imagZoomSensitivity = 2.0f; // Increased sensitivity for imaginary space
+    [SerializeField] private float imagScrollSensitivity = 10f; // Increased sensitivity for imaginary space
 
     /// <summary>
     /// Component to store the original point data with each visual point
@@ -161,6 +167,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         {
             centerButton.onClick.AddListener(CenterOnCurrentPosition);
         }
+
+        // Wire up space toggle button if assigned
+        if (spaceToggleButton != null)
+        {
+            spaceToggleButton.onClick.AddListener(ToggleSpaceMode);
+        }
     }
 
     /// <summary>
@@ -174,13 +186,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             if (rectTransform != null)
             {
                 // Debug.Log($"[CriticalStripRenderer] Initializing transform with viewport rect: {rectTransform.rect}");
-                transform = new CriticalStripTransform(rectTransform, 1f, 7f); 
+                criticalStripTransform = new CriticalStripTransform(rectTransform, 1f, 7f); 
                 isInitialized = true;
                 
                 // Apply initial zoom level
-                float currentRange = transform.MaxIndex - transform.MinIndex;
+                float currentRange = criticalStripTransform.MaxIndex - criticalStripTransform.MinIndex;
                 float newRange = currentRange / currentZoom;
-                float center = (transform.MaxIndex + transform.MinIndex) * 0.5f;
+                float center = (criticalStripTransform.MaxIndex + criticalStripTransform.MinIndex) * 0.5f;
                 float newMin = center - (newRange * 0.5f);
                 float newMax = center + (newRange * 0.5f);
                 
@@ -192,7 +204,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                     newMax += adjustment;
                 }
                 
-                transform.SetIndexRange(newMin, newMax);
+                criticalStripTransform.SetIndexRange(newMin, newMax);
                 // Debug.Log("[CriticalStripRenderer] Transform initialized successfully");
             }
             else
@@ -212,7 +224,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             Debug.LogWarning("CriticalStripRenderer: Attempting to set index range before initialization");
             return;
         }
-        transform.SetIndexRange(min, max);
+        criticalStripTransform.SetIndexRange(min, max);
         UpdateAllPoints();
         
         // Update the index labels
@@ -243,6 +255,83 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             return;
         }
 
+        // If we're in imaginary space, check if our current range is appropriate for the new points
+        if (criticalStripTransform.UseImaginarySpace && pointSet.OriginalPoints.Count > 0)
+        {
+            // Calculate the min/max index values in the point set
+            double minPointIndex = double.MaxValue;
+            double maxPointIndex = double.MinValue;
+            
+            foreach (var point in pointSet.OriginalPoints)
+            {
+                minPointIndex = Math.Min(minPointIndex, point.Index);
+                maxPointIndex = Math.Max(maxPointIndex, point.Index);
+            }
+            
+            // Convert to imaginary values
+            double minPointImag = Zeta.IndexToImag(minPointIndex);
+            double maxPointImag = Zeta.IndexToImag(maxPointIndex);
+            
+            // Check if our current range encompasses the point set
+            bool needsRangeAdjustment = false;
+            float newMin = criticalStripTransform.MinImag;
+            float newMax = criticalStripTransform.MaxImag;
+            
+            // If the point range extends beyond our current view, expand the range
+            if (minPointImag < criticalStripTransform.MinImag)
+            {
+                newMin = (float)minPointImag - 50f; // Give some padding
+                needsRangeAdjustment = true;
+            }
+            
+            if (maxPointImag > criticalStripTransform.MaxImag)
+            {
+                newMax = (float)maxPointImag + 50f; // Give some padding
+                needsRangeAdjustment = true;
+            }
+            
+            // If the point range is much smaller than our current view, consider zooming in
+            if ((maxPointImag - minPointImag) < (criticalStripTransform.MaxImag - criticalStripTransform.MinImag) * 0.3f)
+            {
+                // Only zoom in if we have a small number of points or if they're tightly clustered
+                if (pointSet.OriginalPoints.Count < 20)
+                {
+                    newMin = (float)minPointImag - 50f;
+                    newMax = (float)maxPointImag + 50f;
+                    needsRangeAdjustment = true;
+                }
+            }
+            
+            // Apply the new range if needed
+            if (needsRangeAdjustment)
+            {
+                // Ensure minimum imaginary value
+                float minAllowedImag = (float)Zeta.IndexToImag(-1);
+                if (newMin < minAllowedImag)
+                {
+                    newMin = minAllowedImag;
+                }
+                
+                // Set the new range
+                criticalStripTransform.SetRange(newMin, newMax);
+                
+                // Update existing points
+                UpdateAllPoints();
+                
+                // Update the index labels
+                var labelRenderer = GetComponent<IndexLabelsRenderer>();
+                if (labelRenderer != null)
+                {
+                    labelRenderer.UpdateLabels(newMin, newMax);
+                }
+                
+                // Notify listeners
+                OnViewportChanged?.Invoke();
+                
+                Debug.Log($"[CriticalStripRenderer] Adjusted imaginary range for new point set: [{newMin:F2}, {newMax:F2}]");
+            }
+        }
+
         AddPointSetInternal(pointSet);
     }
 
@@ -259,8 +348,18 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Create points for each point in the set
         foreach (var point in pointSet.OriginalPoints)
         {
-            // Create point using original coordinates
-            Vector2 stripPos = new Vector2((float)point.Real, (float)point.Index);
+            // Create point using original coordinates, transforming to imaginary space if needed
+            Vector2 stripPos;
+            if (criticalStripTransform != null && criticalStripTransform.UseImaginarySpace)
+            {
+                // In imaginary space, convert index to imaginary value
+                stripPos = new Vector2((float)point.Real, (float)Zeta.IndexToImag(point.Index));
+            }
+            else
+            {
+                // In index space, use index directly
+                stripPos = new Vector2((float)point.Real, (float)point.Index);
+            }
             CreatePointObject(stripPos, pointSet.Color, points, point);
         }
     }
@@ -360,10 +459,10 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         if (!isInitialized || pointPrefab == null) return;
 
         // Convert strip coordinates to viewport
-        var viewportPos = transform.StripToViewport(stripPos);
+        var viewportPos = criticalStripTransform.StripToViewport(stripPos);
         
         // Get the viewport rect and check if the point (including its size) is within the bounds
-        var rect = transform.ViewportRect.rect;
+        var rect = criticalStripTransform.ViewportRect.rect;
         float halfSize = pointSize * 0.5f;
         
         // Skip points entirely outside the viewport bounds (both x and y)
@@ -374,7 +473,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             return;
         }
 
-        var obj = Instantiate(pointPrefab, viewportPos, Quaternion.identity, transform.ViewportRect);
+        var obj = Instantiate(pointPrefab, viewportPos, Quaternion.identity, criticalStripTransform.ViewportRect);
         var rectTransform = obj.GetComponent<RectTransform>();
         var image = obj.GetComponent<Image>();
         
@@ -422,8 +521,18 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             // Create points for each point in the set
             foreach (var point in originalPoints)
             {
-                // Create point using original coordinates
-                Vector2 stripPos = new Vector2((float)point.Real, (float)point.Index);
+                // Create point using original coordinates, transforming to imaginary space if needed
+                Vector2 stripPos;
+                if (criticalStripTransform != null && criticalStripTransform.UseImaginarySpace)
+                {
+                    // In imaginary space, convert index to imaginary value
+                    stripPos = new Vector2((float)point.Real, (float)Zeta.IndexToImag(point.Index));
+                }
+                else
+                {
+                    // In index space, use index directly
+                    stripPos = new Vector2((float)point.Real, (float)point.Index);
+                }
                 CreatePointObject(stripPos, pointSet.Color, points, point);
             }
         }
@@ -458,7 +567,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             // First check if we clicked directly on a point
             Vector2 viewportMousePos;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                transform.ViewportRect, 
+                criticalStripTransform.ViewportRect, 
                 eventData.position, 
                 null,
                 out viewportMousePos
@@ -496,7 +605,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 // Debug.Log($"[CriticalStripRenderer] Found closest point:");
                 // Debug.Log($"  Original coordinates (double): Real={closestPoint.Real:G17}, Index={closestPoint.Index:G17}");
                 // Debug.Log($"  Visual position (viewport): {closestTransform.anchoredPosition}");
-                Vector2 transformedStripPos = transform.ViewportToStrip(closestTransform.anchoredPosition);
+                Vector2 transformedStripPos = criticalStripTransform.ViewportToStrip(closestTransform.anchoredPosition);
                 // Debug.Log($"  Transformed back to strip: Real={transformedStripPos.x:G17}, Index={transformedStripPos.y:G17}");
                 // Debug.Log($"  Distance from click: {closestDist} pixels (threshold: {hoverThreshold})");
                 // Debug.Log($"  Current zoom level: {currentZoom}");
@@ -525,13 +634,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             }
             
             // If we didn't click on a point, use the strip coordinates from the click position
-            var stripPos = transform.ScreenToStrip(eventData.position);
+            var stripPos = criticalStripTransform.ScreenToStrip(eventData.position);
             
             // Debug.Log($"[CriticalStripRenderer] No point clicked, using strip coordinates: Real={stripPos.x:G17}, Index={stripPos.y:G17}");
             
             // If the click is near the critical line, use the dedicated method
             float distanceFromHalf = Mathf.Abs(stripPos.x - 0.5f);
-            if (distanceFromHalf <= transform.CriticalValueThreshold)
+            if (distanceFromHalf <= criticalStripTransform.CriticalValueThreshold)
             {
                 // Debug.Log($"[CriticalStripRenderer] Click near critical line (distance: {distanceFromHalf:G17}), snapping to 0.5");
                 app.SetToExactCriticalLine();
@@ -541,7 +650,17 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 app.Real = stripPos.x;
             }
             
-            app.Index = stripPos.y;
+            // Convert from imaginary to index if needed
+            if (criticalStripTransform.UseImaginarySpace)
+            {
+                double imag = stripPos.y;
+                double index = Zeta.ImagToIndex(imag);
+                app.Index = index;
+            }
+            else
+            {
+                app.Index = stripPos.y;
+            }
         }
         finally
         {
@@ -702,7 +821,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Convert screen position to viewport coordinates for consistent distance calculations
         Vector2 viewportMousePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            transform.ViewportRect, 
+            criticalStripTransform.ViewportRect, 
             eventData.position, 
             null, // No camera needed for overlay canvas
             out viewportMousePos
@@ -728,7 +847,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 {
                     closestDist = dist;
                     newHoveredPoint = point;
-                    closestPointStripPos = transform.ViewportToStrip(point.anchoredPosition);
+                    closestPointStripPos = criticalStripTransform.ViewportToStrip(point.anchoredPosition);
                 }
             }
         }
@@ -752,14 +871,14 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
     private void InitializeCurrentPosIndicator()
     {
-        if (!isInitialized || transform == null || transform.ViewportRect == null)
+        if (!isInitialized || criticalStripTransform == null || criticalStripTransform.ViewportRect == null)
         {
             Debug.LogError("CriticalStripRenderer: Cannot initialize position indicator before transform is ready");
             return;
         }
 
         // Create the indicator point
-        var obj = Instantiate(pointPrefab, Vector2.zero, Quaternion.identity, transform.ViewportRect);
+        var obj = Instantiate(pointPrefab, Vector2.zero, Quaternion.identity, criticalStripTransform.ViewportRect);
         currentPosIndicator = obj.GetComponent<RectTransform>();
         var image = obj.GetComponent<Image>();
         
@@ -791,15 +910,26 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (!isInitialized || currentPosIndicator == null || app == null) return;
         
-        Vector2 stripPos = new Vector2((float)app.Real, (float)app.Index);
+        Vector2 stripPos;
+        if (criticalStripTransform.UseImaginarySpace)
+        {
+            // In imaginary space, convert index to imaginary
+            float imag = (float)Zeta.IndexToImag(app.Index);
+            stripPos = new Vector2((float)app.Real, imag);
+        }
+        else
+        {
+            // In index space, use index directly
+            stripPos = new Vector2((float)app.Real, (float)app.Index);
+        }
         
-        // Check if the index is within the visible range
-        isInRange = stripPos.y >= transform.MinIndex && stripPos.y <= transform.MaxIndex;
+        // Check if the value is within the visible range
+        isInRange = stripPos.y >= criticalStripTransform.MinValue && stripPos.y <= criticalStripTransform.MaxValue;
         
         // Update position if in range
         if (isInRange)
         {
-            Vector2 viewportPos = transform.StripToViewport(stripPos);
+            Vector2 viewportPos = criticalStripTransform.StripToViewport(stripPos);
             currentPosIndicator.anchoredPosition = viewportPos;
         }
         
@@ -846,17 +976,20 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         lastScrollTime = Time.time;
 
         // Get the mouse position in strip coordinates before zooming
-        var mouseStripPos = transform.ScreenToStrip(eventData.position);
+        var mouseStripPos = criticalStripTransform.ScreenToStrip(eventData.position);
+        
+        // Use appropriate sensitivity based on current space mode
+        float zoomSensitivityToUse = criticalStripTransform.UseImaginarySpace ? imagZoomSensitivity : zoomSensitivity;
         
         // Calculate new zoom level
-        float zoomDelta = eventData.scrollDelta.y * zoomSensitivity;
+        float zoomDelta = eventData.scrollDelta.y * zoomSensitivityToUse;
         float newZoom = Mathf.Clamp(currentZoom * (1f + zoomDelta), minZoom, maxZoom);
         
         if (newZoom != currentZoom)
         {            
             // Calculate the current range and center
-            float currentRange = transform.MaxIndex - transform.MinIndex;
-            float currentCenter = (transform.MaxIndex + transform.MinIndex) * 0.5f;
+            float currentRange = criticalStripTransform.MaxValue - criticalStripTransform.MinValue;
+            float currentCenter = (criticalStripTransform.MaxValue + criticalStripTransform.MinValue) * 0.5f;
             
             // Calculate the new range based on zoom
             float newRange = currentRange * (currentZoom / newZoom);
@@ -864,21 +997,36 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             // Calculate how far the mouse is from the center in normalized coordinates
             float mouseOffset = (mouseStripPos.y - currentCenter) / currentRange;
             
-            // Calculate new min and max indices that keep the mouse position stable
+            // Calculate new min and max values that keep the mouse position stable
             float newCenter = mouseStripPos.y - (mouseOffset * newRange);
             float newMin = newCenter - (newRange * 0.5f);
             float newMax = newCenter + (newRange * 0.5f);
             
-            // Prevent scrolling below -1
-            if (newMin < -1f)
+            // Prevent scrolling below minimum allowed value
+            if (criticalStripTransform.UseImaginarySpace)
             {
-                float adjustment = -1f - newMin;
-                newMin = -1f;
-                newMax += adjustment;
+                // When in imaginary space, use the imaginary equivalent of index = -1
+                float minAllowedImag = (float)Zeta.IndexToImag(-1f);
+                if (newMin < minAllowedImag)
+                {
+                    float adjustment = minAllowedImag - newMin;
+                    newMin = minAllowedImag;
+                    newMax += adjustment;
+                }
+            }
+            else 
+            {
+                // Original index space behavior
+                if (newMin < -1f)
+                {
+                    float adjustment = -1f - newMin;
+                    newMin = -1f;
+                    newMax += adjustment;
+                }
             }
             
-            // Update the transform and current zoom
-            transform.SetIndexRange(newMin, newMax);
+            // Update the transform range
+            criticalStripTransform.SetRange(newMin, newMax);
             currentZoom = newZoom;
             
             // Update all point positions and the current position indicator
@@ -903,32 +1051,45 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         if (!isInitialized || !isDragging) return;
 
-        // Debug.Log($"[CriticalStripRenderer] Dragging from {lastDragPosition} to {eventData.position}");
-
+        // Use appropriate sensitivity based on current space mode
+        float scrollSensitivityToUse = criticalStripTransform.UseImaginarySpace ? imagScrollSensitivity : scrollSensitivity;
+        
         // Calculate the drag delta in screen coordinates
-        Vector2 dragDelta = (eventData.position - lastDragPosition) * scrollSensitivity;
-        // Debug.Log($"[CriticalStripRenderer] Drag delta (with sensitivity {scrollSensitivity}): {dragDelta}");
+        Vector2 dragDelta = (eventData.position - lastDragPosition) * scrollSensitivityToUse;
         lastDragPosition = eventData.position;
         
         // Convert the drag distance to strip space
-        float stripDelta = dragDelta.y / transform.ViewportRect.rect.height * (transform.MaxIndex - transform.MinIndex);
-        // Debug.Log($"[CriticalStripRenderer] Strip space delta: {stripDelta}");
+        float stripDelta = dragDelta.y / criticalStripTransform.ViewportRect.rect.height * (criticalStripTransform.MaxValue - criticalStripTransform.MinValue);
         
         // Update the index range
-        float newMin = transform.MinIndex - stripDelta;
-        float newMax = transform.MaxIndex - stripDelta;
+        float newMin = criticalStripTransform.MinValue - stripDelta;
+        float newMax = criticalStripTransform.MaxValue - stripDelta;
         
-        // Prevent dragging below -1
-        if (newMin < -1f)
+        // Prevent dragging below minimum allowed value
+        if (criticalStripTransform.UseImaginarySpace)
         {
-            float adjustment = -1f - newMin;
-            newMin = -1f;
-            newMax += adjustment;
+            // When in imaginary space, use the imaginary equivalent of index = -1
+            float minAllowedImag = (float)Zeta.IndexToImag(-1f);
+            if (newMin < minAllowedImag)
+            {
+                float adjustment = minAllowedImag - newMin;
+                newMin = minAllowedImag;
+                newMax += adjustment;
+            }
+        }
+        else 
+        {
+            // Original index space behavior
+            if (newMin < -1f)
+            {
+                float adjustment = -1f - newMin;
+                newMin = -1f;
+                newMax += adjustment;
+            }
         }
         
-        // Debug.Log($"[CriticalStripRenderer] New index range: [{newMin}, {newMax}] (current: [{transform.MinIndex}, {transform.MaxIndex}])");
-        
-        transform.SetIndexRange(newMin, newMax);
+        // Update the transform range
+        criticalStripTransform.SetRange(newMin, newMax);
         
         // Update all point positions and the current position indicator
         UpdateAllPoints();
@@ -949,7 +1110,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public CriticalStripTransform GetTransform()
     {
-        return transform;
+        return criticalStripTransform;
     }
 
     /// <summary>
@@ -1025,7 +1186,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         // Create critical line
         GameObject lineObj = new GameObject("CriticalLine");
-        lineObj.transform.SetParent(transform.ViewportRect, false);
+        lineObj.transform.SetParent(criticalStripTransform.ViewportRect, false);
         criticalLine = lineObj.AddComponent<RectTransform>();
         Image lineImage = lineObj.AddComponent<Image>();
         
@@ -1048,11 +1209,10 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public void CenterOnCurrentPosition()
     {
-        if (!isInitialized || app == null || transform == null) return;
+        if (!isInitialized || app == null || criticalStripTransform == null) return;
         float targetIndex = (float)app.Index;
-        float currentRange = transform.MaxIndex - transform.MinIndex;
+        float currentRange = criticalStripTransform.MaxIndex - criticalStripTransform.MinIndex;
         float minAllowed = -1f;
-        float maxAllowed = float.MaxValue; // No explicit upper bound in current logic
 
         // Compute new min/max to center targetIndex
         float newMin = targetIndex - currentRange * 0.5f;
@@ -1068,7 +1228,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Optionally, clamp newMax if you have a max bound (not present in current code)
 
         // If already centered (within epsilon), do nothing
-        if (Mathf.Abs(transform.MinIndex - newMin) < 1e-4f && Mathf.Abs(transform.MaxIndex - newMax) < 1e-4f)
+        if (Mathf.Abs(criticalStripTransform.MinIndex - newMin) < 1e-4f && Mathf.Abs(criticalStripTransform.MaxIndex - newMax) < 1e-4f)
             return;
 
         // Stop any existing centering animation
@@ -1079,8 +1239,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
     private IEnumerator CenterViewportCoroutine(float targetMin, float targetMax, float duration)
     {
-        float startMin = transform.MinIndex;
-        float startMax = transform.MaxIndex;
+        float startMin = criticalStripTransform.MinIndex;
+        float startMax = criticalStripTransform.MaxIndex;
         float elapsed = 0f;
         while (elapsed < duration)
         {
@@ -1090,17 +1250,195 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             float lerpT = t * t * (3f - 2f * t);
             float min = Mathf.Lerp(startMin, targetMin, lerpT);
             float max = Mathf.Lerp(startMax, targetMax, lerpT);
-            transform.SetIndexRange(min, max);
+            criticalStripTransform.SetIndexRange(min, max);
             UpdateAllPoints();
             UpdateCurrentPosIndicator();
             OnViewportChanged?.Invoke();
             yield return null;
         }
         // Final set
-        transform.SetIndexRange(targetMin, targetMax);
+        criticalStripTransform.SetIndexRange(targetMin, targetMax);
         UpdateAllPoints();
         UpdateCurrentPosIndicator();
         OnViewportChanged?.Invoke();
         centerCoroutine = null;
     }
-} 
+
+    /// <summary>
+    /// Force a complete refresh of all point sets in the current space mode.
+    /// This method will re-create all point objects with their correct positions.
+    /// </summary>
+    public void RefreshAllPointSets()
+    {
+        if (!isInitialized) return;
+        
+        // Debug.Log($"[CriticalStripRenderer] Refreshing all point sets in {(criticalStripTransform.UseImaginarySpace ? "imaginary" : "index")} space");
+        
+        // If we're in imaginary space with no points, set a default range
+        if (criticalStripTransform.UseImaginarySpace && (pointObjects.Count == 0 || pointObjects.Values.All(list => list.Count == 0)))
+        {
+            // Set a default range for imaginary space that covers the typical zeros
+            float minImag = (float)Zeta.IndexToImag(0);
+            float maxImag = (float)Zeta.IndexToImag(10);
+            float padding = 40f; // Add some padding
+            
+            // Debug.Log($"[CriticalStripRenderer] Setting default imaginary range: [{minImag-padding}, {maxImag+padding}]");
+            criticalStripTransform.SetRange(minImag - padding, maxImag + padding);
+            
+            // Update the index labels
+            var labelRenderer = GetComponent<IndexLabelsRenderer>();
+            if (labelRenderer != null)
+            {
+                labelRenderer.UpdateLabels(criticalStripTransform.MinValue, criticalStripTransform.MaxValue);
+                if (labelRenderer is IndexLabelsRenderer indexLabels)
+                {
+                    indexLabels.SetUseImaginarySpace(criticalStripTransform.UseImaginarySpace);
+                }
+            }
+            
+            // Notify listeners that the viewport has changed
+            OnViewportChanged?.Invoke();
+        }
+        
+        // Get a copy of the dictionary keys to iterate over
+        var pointSetKeys = new List<PointSet>(pointObjects.Keys);
+        
+        // Remove and re-add each point set
+        foreach (var pointSet in pointSetKeys)
+        {
+            RemovePointSet(pointSet);
+            AddPointSetInternal(pointSet);
+        }
+        
+        // Update position indicator
+        UpdateCurrentPosIndicator();
+        
+        // Notify listeners that the viewport has changed
+        OnViewportChanged?.Invoke();
+    }
+    
+    public void ToggleSpaceMode()
+    {
+        if (!isInitialized || criticalStripTransform == null) return;
+        
+        // Store current viewport center and range before toggling
+        float currentMin = criticalStripTransform.MinValue;
+        float currentMax = criticalStripTransform.MaxValue;
+        float currentRange = currentMax - currentMin;
+        float currentCenter = (currentMax + currentMin) / 2f;
+        
+        // Toggle space mode
+        bool newMode = !criticalStripTransform.UseImaginarySpace;
+        criticalStripTransform.UseImaginarySpace = newMode;
+        
+        // Calculate appropriate range for the new space mode
+        float newMin, newMax;
+        
+        if (newMode) // Switching to imaginary space
+        {
+            // Convert current index range to imaginary range
+            newMin = (float)Zeta.IndexToImag(currentMin);
+            newMax = (float)Zeta.IndexToImag(currentMax);
+            
+            // If range is too small in imaginary space, expand to show more points
+            if (newMax - newMin < 50f) // Minimum useful range in imaginary space
+            {
+                float imagCenter = (newMax + newMin) / 2f;
+                newMin = imagCenter - 200f; // Show a reasonable range centered around current view
+                newMax = imagCenter + 200f;
+                
+                // Ensure we don't go below minimum imaginary value (approx t=14)
+                float minImag = (float)Zeta.IndexToImag(-1);
+                if (newMin < minImag)
+                {
+                    newMin = minImag;
+                    newMax = minImag + 400f; // Keep the same range size
+                }
+            }
+        }
+        else // Switching to index space
+        {
+            // Convert current imaginary range to index range
+            newMin = (float)Zeta.ImagToIndex(currentMin);
+            newMax = (float)Zeta.ImagToIndex(currentMax);
+            
+            // Ensure minimum reasonable range in index space
+            if (newMax - newMin > 25f) // If range too big in index space
+            {
+                float indexCenter = (newMax + newMin) / 2f;
+                newMin = indexCenter - 6f; // Show reasonable index range
+                newMax = indexCenter + 6f;
+            }
+            
+            // Ensure we don't go below -1 index
+            if (newMin < -1f)
+            {
+                newMin = -1f;
+                newMax = Math.Max(newMax, 11f); // Ensure we see at least up to index 11
+            }
+        }
+        
+        // Update UI indicator if available
+        if (spaceModeText != null)
+        {
+            spaceModeText.text = newMode ? "Imag Space" : "Index Space";
+        }
+        
+        // Set the new range
+        criticalStripTransform.SetRange(newMin, newMax);
+        
+        // Force a complete refresh of all point sets
+        RefreshAllPointSets();
+        
+        // Notify listeners (e.g. PointSetManager) that the viewport changed, so mesh points can be recalculated
+        OnViewportChanged?.Invoke();
+        
+        // Update the index labels
+        var labelRenderer = GetComponent<IndexLabelsRenderer>();
+        if (labelRenderer != null)
+        {
+            // Send both the current range and the new space mode
+            labelRenderer.UpdateLabels(newMin, newMax);
+            if (labelRenderer is IndexLabelsRenderer indexLabels)
+            {
+                indexLabels.SetUseImaginarySpace(newMode);
+            }
+        }        
+    }
+
+    // Add these editor tools for testing
+    #if UNITY_EDITOR
+    [UnityEditor.MenuItem("Critical Strip/Toggle Space Mode")]
+    private static void ToggleSpaceModeMenuItem()
+    {
+        var renderer = FindObjectOfType<CriticalStripRenderer>();
+        if (renderer != null)
+        {
+            renderer.ToggleSpaceMode();
+        }
+    }
+
+    [UnityEditor.MenuItem("Critical Strip/Test Index To Imag Conversion")]
+    private static void TestIndexToImagConversion()
+    {
+        Debug.Log("Index to Imaginary Conversion Test:");
+        for (int i = 0; i <= 11; i++)
+        {
+            double imag = Zeta.IndexToImag(i);
+            Debug.Log($"Index {i} → Imag {imag:F2}");
+        }
+    }
+
+    [UnityEditor.MenuItem("Critical Strip/Test Imag To Index Conversion")]
+    private static void TestImagToIndexConversion()
+    {
+        Debug.Log("Imaginary to Index Conversion Test:");
+        double[] imagValues = { 14.13, 21.02, 30.42, 56.45, 75.70, 100.0, 200.0, 500.0, 830.0 };
+        foreach (double imag in imagValues)
+        {
+            double index = Zeta.ImagToIndex(imag);
+            Debug.Log($"Imag {imag:F2} → Index {index:F3}");
+        }
+    }
+    #endif
+}
