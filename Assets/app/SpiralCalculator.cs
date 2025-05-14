@@ -69,11 +69,11 @@ public class SpiralCalculator : MonoBehaviour
     private Vector _rav;
 
 
-    public static Action<Vector> UpdateYin;
-    private Vector _yin;
+    public static Action<(Vector yin, Vector yang)> UpdateYinYangSpecial;
+    private (Vector yin, Vector yang) _yinYangSpecial;
 
-    public static Action<Vector> UpdateYang;
-    private Vector _yang;
+    public static Action<(Vector yin, Vector yang)> UpdateYinYang;
+    private (Vector yin, Vector yang) _yinYang;
 
     public static Action<Vector, Vector> UpdateInfLink;
     private (Vector, Vector) _infLink;
@@ -217,16 +217,16 @@ public class SpiralCalculator : MonoBehaviour
         return _inverseRelfectedBisectorPath;
     }
 
-    public Vector GetYin()
+    public (Vector yin, Vector yang) GetYinYangSpecial()
     {
-        if(_yin == null) CalcYin(_app.Index, _app.Real);
-        return _yin;
+        if(_yinYangSpecial.yin == null) CalcYinYangSpecial(_app.Index);
+        return _yinYangSpecial;
     }
 
-    public Vector GetYang()
+    public (Vector yin, Vector yang) GetYinYang()
     {
-        if(_yang == null) CalcYang(_app.Index, _app.Real);
-        return _yang;
+        if(_yinYang.yin == null) CalcYinYang(_app.Index, _app.Real, GetYinYangSpecial());
+        return _yinYang;
     }
 
     public (Vector, Vector) GetInfLink()
@@ -338,11 +338,11 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateRAV != null) CalcRAV(index);
         else _rav = null;
 
-        if(UpdateYin != null) CalcYin(index, real);
-        else _yin = null;
+        if(UpdateYinYangSpecial != null) CalcYinYangSpecial(index);
+        else _yinYangSpecial = (null, null);
 
-        if(UpdateYang != null) CalcYang(index, real);
-        else _yang = null;
+        if(UpdateYinYang != null) CalcYinYang(index, real, GetYinYangSpecial());
+        else _yinYang = (null, null);
 
         if(UpdateInfLink != null) CalcInfLink(index);
         else _infLink = (null, null);
@@ -668,20 +668,54 @@ public class SpiralCalculator : MonoBehaviour
         UpdateRAV?.Invoke(_rav);
     }
 
-    private void CalcYin(double index, double real)
+    private void CalcYinYangSpecial(double index)
     {
-        int n = (int)Math.Floor(index);
-        double t = index - n;
-        _yin = ZpsGeneral.YinSpecial(n, t);
-        UpdateYin?.Invoke(_yin);
+        _yinYangSpecial = (ZpsGeneral.YinSpecial(index), ZpsGeneral.YangSpecial(index));
+        UpdateYinYangSpecial?.Invoke(_yinYangSpecial);
     }
 
-    private void CalcYang(double index, double real)
+    private void CalcYinYang(double index, double real, (Vector yin, Vector yang) yySpecial)
     {
-        int n = (int)Math.Floor(index);
-        double t = index - n;
-        _yang = ZpsGeneral.YangSpecial(n, t);
-        UpdateYang?.Invoke(_yang);
+        Complex chi = ChiBrian(new Complex(real, Zeta.IndexToImag(index)));
+        _yinYang = ZpsGeneral.YinYang(real, index, chi, yySpecial.yin, yySpecial.yang);
+
+        UpdateYinYang?.Invoke(_yinYang);
+
+        double testreal = 0.8;
+        double testindex = 1.2;
+        var (yin, yang) = ZpsGeneral.YinYang(testreal, testindex, ChiBrian(new Complex(testreal, Zeta.IndexToImag(testindex))), ZpsGeneral.YinSpecial(testindex), ZpsGeneral.YangSpecial(testindex));
+        print("Yin: " + yin);
+        print("Yang: " + yang);
+        // print("YinPrime: " + ZpsGeneral.YinPrime(1.2)); GOOD
+        // print("YinSpecial: " + ZpsGeneral.YinSpecial(1.2)); GOOD
+
+        print("YangSpecial: " + ZpsGeneral.YangSpecial(1.2));
+        
+        // print("Beta: " + ZpsGeneral.Beta(1.2)); GOOD
+        // print("BetaPrime: " + ZpsGeneral.BetaPrime(1.2)); GOOD
+
+
+        print("RPrime: " + ZpsGeneral.RPrime(1.2, true));
+
+        // print("PPrime: " + ZpsGeneral.PPrime(1.2)); GOOD
+
+        // print("imagPrime: " + ZpsGeneral.IndexToImagPrime(1.2)); GOOD
+
+        // print("R: " + ZpsGeneral.R(1.2, true)); GOOD
+
+        // bool useApprox = true;
+        // double psi = useApprox ? ZpsGeneral.PsiApprox(testindex, 0) : ZpsGeneral.Psi(testindex);
+        // double psiPrime = useApprox ? ZpsGeneral.PsiApprox(testindex, 1) : ZpsGeneral.PsiPrime(testindex);
+        // double psiPrime3 = useApprox ? ZpsGeneral.PsiApprox(testindex, 3) : ZpsGeneral.PsiPrime3(testindex);
+        // double psiPrime4 = useApprox ? ZpsGeneral.PsiApprox(testindex, 4) : ZpsGeneral.PsiPrime4(testindex);
+
+        // print("Psi: " + psi); GOOD
+        // print("PsiPrime: " + psiPrime); GOOD
+        // print("PsiPrime3: " + psiPrime3); GOOD
+        // print("PsiPrime4: " + psiPrime4); GOOD
+
+        // print("P: " + ZpsGeneral.P(testindex)); GOOD
+
     }
 
     private void CalcInfLink(double index)

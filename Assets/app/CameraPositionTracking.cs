@@ -321,15 +321,17 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         pt = spiral.joints[spiral.middleIndex] + midLink / 2f;
         _cameraUp = new Vector2(-midLink.y, midLink.x).normalized;
 
+        var yyGen = _spiralCalculator.GetYinYang();
+
         switch(yyTarget)
         {
             case YinYangTarget.Yin:
-                var rotYin = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * _spiralCalculator.GetYin());
+                var rotYin = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * yyGen.yin);
                 pt += rotYin * midLink.magnitude;
                 break;
 
             case YinYangTarget.Yang:
-                var rotYang = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * _spiralCalculator.GetYang());
+                var rotYang = (Vector2)(Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, _cameraUp)) * yyGen.yang);
                 pt += rotYang * midLink.magnitude;
                 break;
         }

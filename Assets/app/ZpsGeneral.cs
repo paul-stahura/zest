@@ -4,11 +4,19 @@ using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
 
+public enum YinYangCalculationMethod
+{
+    Approximate,
+    Symbolic,
+    Numeric
+}
 public class ZpsGeneral : MonoBehaviour
 {
     private const double Fine = 1e-4;
     private const double PI = Math.PI;
     private const double TWO_PI = 2 * Math.PI;
+
+    // needs to be double checked
     private static readonly double[] c = 
     {
         0.382683432365,
@@ -33,18 +41,16 @@ public class ZpsGeneral : MonoBehaviour
         0,
         -0.108642578125
     };
+
     public static Vector ForwardBisector(double real, double index, double imag, Complex chi)
     {
         var (cj1, cj2) = Cj(real, index, imag);
 
-        Vector yin = MiddleLinkTeardrop.Yin(index);
-        Vector yang = MiddleLinkTeardrop.Yang(index);
+        Vector yinSpecial = YinSpecial(index);
+        Vector yangSpecial = YangSpecial(index);
 
-        double linkLength = B_linkLength(real, index, imag, chi);
-
-        Vector p1 = P_yinGenNumericalDerivative(index, yin, yang, linkLength);
-        Vector p2 = P_yangGenNumericalDerivative(p1, yin, yang, linkLength);
-        double djf = L_sectx(p1, p2) + 0.5f;
+        var (yin, yang) = YinYang(real, index, chi, yinSpecial, yangSpecial);
+        double djf = L_sectx(yin, yang) + 0.5f;
 
         return Vector.Lerp(cj1, cj2, djf);
     }
@@ -55,16 +61,15 @@ public class ZpsGeneral : MonoBehaviour
         var (cji1, cji2) = Cji(index, s, chiFunc);
         var chi = chiFunc(s);
 
-        Vector yin = MiddleLinkTeardrop.Yin(index);
-        Vector yang = MiddleLinkTeardrop.Yang(index);
+        Vector yinSpecial = YinSpecial(index);
+        Vector yangSpecial = YangSpecial(index);
 
         double linkLength = B_linkLength(real, index, imag, chi);
 
-        Vector p1 = P_yinGenNumericalDerivative(index, yin, yang, linkLength);
-        Vector p2 = P_yangGenNumericalDerivative(p1, yin, yang, linkLength);
-        double djf = L_sectx(p1, p2) + 0.5f;
+        var (yin, yang) = YinYang(real, index, chi, yinSpecial, yangSpecial);
+        double djf = L_sectx(yin, yang) + 0.5f;
 
-        double dji = Vector.Distance(new Vector (djf - 0.5, 0), p2) / linkLength;
+        double dji = Vector.Distance(new Vector (djf - 0.5, 0), yang) / linkLength;
 
         return Vector.Lerp(cji1.ToVector(), cji2.ToVector(), dji);
     }
@@ -73,36 +78,58 @@ public class ZpsGeneral : MonoBehaviour
     {
         return p1.x - p1.y * ((p2.x - p1.x) / (p2.y - p1.y));
     }
-
-    public static Vector Yin(double real, double index, Complex chi, Vector yinSpecial, Vector yangSpecial)
+    
+    public static (Vector yin, Vector yang) YinYang(double real, double index, Complex chi, Vector yinSpecial, Vector yangSpecial, YinYangCalculationMethod method = YinYangCalculationMethod.Approximate)
     {
         var imag = Zeta.IndexToImag(index);
 
         double linkLength = B_linkLength(real, index, imag, chi);
 
-        return P_yinGenNumericalDerivative(index, yinSpecial, yangSpecial, linkLength);
-    }
+        Vector yinNormal = new Vector(0, 0);
+        Vector yangNormal = new Vector(0, 0);
 
-    public static Vector Yang(double real, double index, Complex chi, Vector yinGen, Vector yinSpecial, Vector yangSpecial)
-    {
-        var imag = Zeta.IndexToImag(index);
+        switch (method)
+        {
+            case YinYangCalculationMethod.Approximate:
+                Vector yinPrimeApprox = YinPrime(index);
+                Vector yangPrimeApprox = YangPrime(index);
+                yinNormal = new Vector(-yinPrimeApprox.y, yinPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yinPrimeApprox.x * yinPrimeApprox.x + yinPrimeApprox.y * yinPrimeApprox.y);
+                yangNormal = new Vector(-yangPrimeApprox.y, yangPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yangPrimeApprox.x * yangPrimeApprox.x + yangPrimeApprox.y * yangPrimeApprox.y);
+                break;
+                
+            case YinYangCalculationMethod.Symbolic:
+                Vector yinPrime = YinPrime(index, false);
+                Vector yangPrime = YangPrime(index, false);
+                yinNormal = new Vector(-yinPrime.y, yinPrime.x) * 0.2 / 2 * Math.Sqrt(yinPrime.x * yinPrime.x + yinPrime.y * yinPrime.y);
+                yangNormal = new Vector(-yangPrime.y, yangPrime.x) * 0.2 / 2 * Math.Sqrt(yangPrime.x * yangPrime.x + yangPrime.y * yangPrime.y);
+                break;
 
-        double linkLength = B_linkLength(real, index, imag, chi);
+            case YinYangCalculationMethod.Numeric:
+                yinNormal = ComputeNormal(MiddleLinkTeardrop.Yin, index) * 0.5;
+                yangNormal = ComputeNormal(MiddleLinkTeardrop.Yang, index) * 0.5;
+                break;
+        }
 
-        return P_yangGenNumericalDerivative(yinGen, yinSpecial, yangSpecial, linkLength);
+        Vector yin1 = yinSpecial + yinNormal;
+        Vector yin2 = yinSpecial - yinNormal;
+        
+        Vector yang1 = yangSpecial + yangNormal;
+        Vector yang2 = yangSpecial - yangNormal;
+
+        Vector yin = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial) + (yinSpecial - yangSpecial) * linkLength;
+        Vector yang = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial);
+        return (yin, yang);
     }
 
     #region Yin and Yang Calculation
     /// <summary>
     /// Yin calculation for the special case where real = 0.5
     /// </summary>
-    /// <param name="n">n = index integer part</param>
-    /// <param name="t">t = index fractional part</param>
     /// <param name="useApprox">useApprox = true to use approximations in place of actual PsiDerivatives</param>
-    public static Vector YinSpecial(int n, double t, bool useApprox = false)
+    public static Vector YinSpecial(double index, bool useApprox = true)
     {
-        double yin = Dyin(n, t, useApprox);
-        double beta = Beta(n, t);
+        double yin = Dyin(index, useApprox);
+        double beta = Beta(index);
 
         Vector pt = new Vector
         (
@@ -113,21 +140,20 @@ public class ZpsGeneral : MonoBehaviour
         return pt;
     }
 
-    private static double Dyin(int n, double t, bool useApprox)
+    private static double Dyin(double index, bool useApprox)
     {
-        return -2.0*Square(n, t) * Math.Cos(Beta(n, t)) + (1.0 - 2.0*Square(n, t)) * Math.Sqrt(n+1)* R(t, useApprox);
+        int n = (int)Math.Floor(index);
+        return -2.0*Square(index) * Math.Cos(Beta(index)) + (1.0 - 2.0*Square(index)) * Math.Sqrt(n+1)* R(index, useApprox);
     }
 
     /// <summary>
-    /// Yin calculation for the special case where real = 0.5
+    /// yang calculation for the special case where real = 0.5
     /// </summary>
-    /// <param name="n">n = index integer part</param>
-    /// <param name="t">t = index fractional part</param>
     /// <param name="useApprox">useApprox = true to use approximations in place of actual PsiDerivatives</param>
-    public static Vector YangSpecial(int n, double t, bool useApprox = true)
+    public static Vector YangSpecial(double index, bool useApprox = true)
     {
-        double yang = Dyang(n, t, useApprox);
-        double beta = Beta(n, t);
+        double yang = Dyang(index, useApprox);
+        double beta = Beta(index);
 
         Vector pt = new Vector
         (
@@ -138,52 +164,107 @@ public class ZpsGeneral : MonoBehaviour
         return pt;
     }
 
-    private static double Dyang(int n, double t, bool useApprox)
+    private static double Dyang(double index, bool useApprox)
     {
-        return -2*Math.Cos(Beta(n, t)) - Dyin(n, t, useApprox);
+        return -2*Math.Cos(Beta(index)) - Dyin(index, useApprox);
     }
 
-    private static double Beta(int n, double t)
+    public static double Beta(double index)
     {
-        double imag = Zeta.IndexToImag(t);
+        int n = (int)Math.Floor(index);
+        double imag = Zeta.IndexToImag(index);
         return Math.Log(n + 1)*imag - Theta(imag) - PI*(n*n + 2*n);
     }
 
-    private static double Theta(double x)
+    private static double Theta(double imag)
     {
-        return x / 2 * Math.Log(x / TWO_PI) - (PI / 8) - (x / 2) + (1 / (48 * x));
+        return imag / 2 * Math.Log(imag / TWO_PI) - (PI / 8) - (imag / 2) + (1 / (48 * imag));
         // more terms do not result in significant changes
         // + (7 / (5760 * Math.Pow(x, 3))) + (31 / (80640 * Math.Pow(x, 5))) + (127 / (430080 * Math.Pow(x, 7))) + (511 / (1216512 * Math.Pow(x, 9)));
     }
 
-    private static int Square(int n, double t)
+    private static int Square(double index)
     {
-        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(t) / TWO_PI)) - n);
+        return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index) / TWO_PI)) - (int)Math.Floor(index));
     }
 
-    /// <param name="t">t = index fractional part</param>
-    private static double R(double t, bool useApprox)
+    public static double R(double index, bool useApprox)
     {
-        double tPi = Zeta.IndexToImag(t) / TWO_PI;
-        double tRoot = Math.Sqrt(tPi);
-        double tFrac = tRoot - (int)Math.Floor(tRoot);
+        double psi = useApprox ? PsiApprox(index, 0) : Psi(index);
+        double psiPrime3 = useApprox ? PsiApprox(index, 3) : PsiPrime3(index);
+        double imag = Zeta.IndexToImag(index);
 
-        double psi = useApprox ? PsiApprox(tFrac, 0) : Psi(tFrac);
-        double psiPrime3 = useApprox ? PsiApprox(tFrac, 3) : PsiPrime3(tFrac);
+        double C1 = -(psiPrime3 / (96 * PI * PI)) * Math.Pow(imag / TWO_PI, -0.5);
 
-        return Math.Pow(tPi, -0.25) * psi - (psiPrime3 / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.75));
-        // C1 == PsiPrime3(tFrac) / (96.0 * Math.Pow(Math.PI, 2.0)) * Math.Pow(tPi, -0.5)
+        return Math.Pow(imag / TWO_PI, -0.25) * (psi + C1);
+    }
+    
+    private static double P(double index)
+    {
+        return Math.Sqrt(Zeta.IndexToImag(index) / TWO_PI) % 1;
+    }
+    #endregion
+
+    #region Psi and Derivatives
+    /// <summary>
+    /// <param name="order">order is the number of derivatives</param>
+    /// <param name="maxN">maxN can be at most 20</param>
+    /// <summary>
+    public static double PsiApprox(double index, int order, int maxN = 12)
+    {
+        double t = P(index);
+
+        double result = 0.0;
+
+        for (int n = 0; n <= maxN; n++)
+        {
+            // Skip terms where the exponent would be negative
+            if (n < order) continue;
+
+            // Compute the coefficient multiplier for the derivative (n * (n-1) * ... * (n - order + 1))
+            double coeff = 1.0;
+            for (int k = 0; k < order; k++)
+            {
+                coeff *= (n - k);
+            }
+
+            // Apply the term: coeff * c[n] * (t - 0.5)^(n - order)
+            result += coeff * c[n] * Math.Pow(t - 0.5, n - order);
+        }
+
+        return result;
     }
 
-    /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
-    private static double Psi(double x)
+    public static double Psi(double index)
     {
-        return Math.Cos(TWO_PI * (x*x - x - (1.0/16.0))) / Math.Cos(TWO_PI * x);
+        double t = P(index);
+
+        return Math.Cos(TWO_PI * (t*t - t - (1.0/16.0))) / Math.Cos(TWO_PI * t);
     }
 
-    /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
-    private static double PsiPrime3(double t)
+    public static double PsiPrime(double index)
     {
+        double t = P(index);
+
+        double v = TWO_PI * (t*t - t - (1.0/16.0));
+
+        double Sec(double x) {
+            double cosX = Math.Cos(x);
+            const double epsilon = 1e-12; // Tolerance for "close to zero"
+            if (Math.Abs(cosX) < epsilon)
+            {
+                return double.PositiveInfinity;
+            }
+            return 1.0 / cosX;
+        }
+
+        return TWO_PI * Sec(TWO_PI * t) * ((1 - 2*t) * Math.Sin(v) + Math.Cos(v) * Math.Tan(TWO_PI * t));
+    }
+
+    public static double PsiPrime3(double index)
+    {
+        double t = P(index);
+
         double twoPiT = TWO_PI * t;
         double fourPiT = 4 * PI * t;
         double sixPiT = 6 * PI * t;
@@ -209,51 +290,138 @@ public class ZpsGeneral : MonoBehaviour
         double result = TWO_PI * sec2PiT * (term1 + term2 + term3 + term4);
         return result;
     }
+
+    public static double PsiPrime4(double index)
+    {
+        double tp = TWO_PI * index;
+        double cosTp = Math.Cos(tp);
+        double sinTp = Math.Sin(tp);
+        double secTp = 1.0 / cosTp;
+        double tanTp = Math.Tan(tp);
+
+        double sec2 = secTp * secTp;
+        double sec3 = sec2 * secTp;
+        double sec4 = sec2 * sec2;
+
+        double cos4pt = Math.Cos(4 * PI * index);
+        double cos8pt = Math.Cos(8 * PI * index);
+        double sin6pt = Math.Sin(6 * PI * index);
+
+        double u = -1.0 / 16.0 - index + index * index;
+        double u2p = TWO_PI * u;
+        double cosU = Math.Cos(u2p);
+        double sinU = Math.Sin(u2p);
+
+        double a = 1 - 2 * index;
+        double a2 = a * a;
+        double a4 = a2 * a2;
+
+        double pi2 = PI * PI;
+
+        double term1 = pi2 * (115 - 76 * cos4pt + cos8pt) * cosU * sec4;
+        double term2 = 8 * pi2 * -a * sec3 * (-23 * sinTp + sin6pt) * sinU;
+        double term3 = -6 * (cos4pt - 3) * sec2 * (-4 * pi2 * a2 * cosU - 4 * PI * sinU);
+        double term4 = 8 * (-3 * cosU + pi2 * a4 * cosU + 6 * PI * a2 * sinU);
+        double term5 = 32 * PI * -a * (-3 * cosU + PI * a2 * sinU) * tanTp;
+
+        return 2 * pi2 * secTp * (term1 + term2 + term3 + term4 + term5);
+    }
     #endregion
 
-    /// <summary>
-    /// <param name="maxN">maxN can be at most 20</param>
-    /// <param name="tFrac">t = sqrt(imag(index) / 2PI), tFrac is the fractional part of t</param>
-    /// <param name="order">order is the order of the derivative</param>
-    /// <summary>
-    public static double PsiApprox(double tFrac, int order, int maxN = 12)
+    #region Yin and Yang Derivatives
+    /// <param name="useApprox">useApprox = true to use approximations in place of symbolic derivatives</param>
+    public static Vector YinPrime(double index, bool useApprox = true)
     {
-        double result = 0.0;
+        double yin = Dyin(index, useApprox);
+        double yinPrime = DyinPrime(index, useApprox);
+        double beta = Beta(index);
+        double betaPrime = BetaPrime(index);
 
-        for (int n = 0; n <= maxN; n++)
-        {
-            // Skip terms where the exponent would be negative
-            if (n < order) continue;
+        Vector pt = new Vector
+        (
+            -yinPrime * Math.Cos(beta) + yin * Math.Sin(beta) * betaPrime, 
+            -yinPrime * Math.Sin(beta) - yin * Math.Cos(beta) * betaPrime
+        );
 
-            // Compute the coefficient multiplier for the derivative (n * (n-1) * ... * (n - order + 1))
-            double coeff = 1.0;
-            for (int k = 0; k < order; k++)
-            {
-                coeff *= (n - k);
-            }
-
-            // Apply the term: coeff * c[n] * (t - 0.5)^(n - order)
-            result += coeff * c[n] * Math.Pow(tFrac - 0.5, n - order);
-        }
-
-        return result;
+        return pt;
     }
+
+    public static double DyinPrime(double index, bool useApprox)
+    {
+        return 2*Square(index) * Math.Sin(Beta(index)) * BetaPrime(index) + (1.0 - 2.0*Square(index)) * Math.Sqrt((int)Math.Floor(index) + 1)* RPrime(index, useApprox);
+    }
+
+    /// <param name="n">n = index integer part</param>
+    /// <param name="t">t = index fractional part</param>
+    /// <param name="useApprox">useApprox = true to use approximations in place of symbolic derivatives</param>
+    private static Vector YangPrime(double index, bool useApprox = true)
+    {
+        double yang = Dyang(index, useApprox);
+        double yangPrime = DyangPrime(index, useApprox);
+        double beta = Beta(index);
+        double betaPrime = BetaPrime(index);
+
+        Vector pt = new Vector
+        (
+            -yang * Math.Sin(beta) * betaPrime + yangPrime * Math.Cos(beta), 
+            yang * Math.Cos(beta) * betaPrime + yangPrime * Math.Sin(beta)
+        );
+
+        return pt;
+    }
+
+    private static double DyangPrime(double index, bool useApprox)
+    {
+        return 2 * Math.Sin(Beta(index)) * BetaPrime(index) - DyinPrime(index, useApprox);
+    }
+
+    public static double BetaPrime(double index)
+    {
+        return (Math.Log((int)Math.Floor(index) + 1) - ThetaPrime(Zeta.IndexToImag(index))) * IndexToImagPrime(index);
+    }
+
+    public static double IndexToImagPrime(double index)
+    {
+        double log = Math.Log(1 + 1/index);
+        return PI * (1 + 2*index + 2*index*(index + 1) * log) / (index * (index + 1) * Math.Pow(log, 2));
+    }
+
+    private static double ThetaPrime(double imag)
+    {
+        return 0.5 * Math.Log(imag / TWO_PI) - (1 / (48 * (imag * imag)));
+    }
+
+    public static double RPrime(double index, bool useApprox)
+    {
+        double psi = useApprox ? PsiApprox(index, 0) : Psi(index);
+        double psiPrime = useApprox ? PsiApprox(index, 1) : PsiPrime(index);
+        double psiPrime3 = useApprox ? PsiApprox(index, 3) : PsiPrime3(index);
+        double psiPrime4 = useApprox ? PsiApprox(index, 4) : PsiPrime4(index);
+
+        double imag = Zeta.IndexToImag(index);
+        double imagPrime = IndexToImagPrime(index);
+
+        double pPrime = PPrime(index);
+
+        double term1 = -(Math.Pow(PI, 0.25) * psi * imagPrime) / (Math.Pow(2, 7.0/4.0) * Math.Pow(imag, 5.0/4.0));
+        double term2 = (psiPrime3 * imagPrime) / (96 * Math.Sqrt(2) * Math.Pow(PI, 3.0/2.0) * Math.Pow(imag, 3.0/2.0));
+        double term3 = (Math.Pow(TWO_PI, 0.25) * psiPrime * pPrime) / Math.Pow(imag, 0.25);
+        double term4 = -(psiPrime4 * pPrime) / (48 * Math.Sqrt(2) * Math.Pow(PI, 3.0/2.0) * Math.Pow(imag, 1.0/2.0));
+
+        return term1 + term2 + term3 + term4;
+    }
+
+    public static double PPrime(double index)
+    {
+        int n = (int)Math.Floor(index);
+        double mod = index % 1;
+        double log = Math.Log(1 + 1 / index);
+        return (1 + 2*index + 2*(n*n + index + 2*n * mod + mod*mod) * log) /
+               (2 * index * (1 + index) * Math.Sqrt((2 + 4*index) / log) * (log * log));
+    }
+    #endregion
 
     #region Yin and Yang Numerical Derivative
-    // calculate Yin with numerical derivative
-    static Vector P_yinGenNumericalDerivative(double index, Vector yin, Vector yang, double linkLength)
-    {
-        Vector yinNormal = ComputeNormal(MiddleLinkTeardrop.Yin, index) * 0.5;
-        Vector yin1 = yin + yinNormal;
-        Vector yin2 = yin - yinNormal;
-
-        Vector yangNormal = ComputeNormal(MiddleLinkTeardrop.Yang, index) * 0.5;
-        Vector yang1 = yang + yangNormal;
-        Vector yang2 = yang - yangNormal;
-
-        return SBisect(linkLength, yang1, yang2, yin1, yin2, yang, yin);
-    }
-
     private static Vector ComputeNormal(Func<double, Vector> func, double point, double epsilon = Fine)
     {
         var yangDeriv = new Vector(0, 0); // Initialize yangDeriv to zero
@@ -298,16 +466,6 @@ public class ZpsGeneral : MonoBehaviour
             yangDeriv.x / magnitude
         );
     }
-
-    // calculate Yang with numerical derivative
-    static Vector P_yangGenNumericalDerivative(Vector pYinGen, Vector yin, Vector yang, double linkLength)
-    {
-        Vector diff = yin - yang;
-        return pYinGen + (diff * linkLength);
-    }
-    #endregion
-
-    #region Yin and Yang Symbolic Derivative
     #endregion
 
     private static double B_linkLength(double real, double index, double imag, Complex chi)
