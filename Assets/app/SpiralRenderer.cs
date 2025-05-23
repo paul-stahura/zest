@@ -21,6 +21,12 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _inverseSpiralToggle;
     [SerializeField] private Color InverseReflectedColor;
     [SerializeField] private Toggle _inverseReflectedToggle;
+
+    [SerializeField] private Color ZakColor;
+    [SerializeField] private Color ZakRemainderColor;
+    [SerializeField] private Toggle _zakLinksToggle;
+    [SerializeField] private Toggle _zakRemainderLinkToggle;
+
     [SerializeField] private Color EtaSpiralColor;
     [SerializeField] private Toggle _etaSpiralToggle;
 
@@ -44,6 +50,10 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _reverseSpiralToggle = GameObject.Find("ReverseSpiralToggle").GetComponent<Toggle>();
         _inverseSpiralToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
+
+        _zakLinksToggle = GameObject.Find("ZakLinksToggle").GetComponent<Toggle>();
+        _zakRemainderLinkToggle = GameObject.Find("ZakRemainderLinkToggle").GetComponent<Toggle>();
+
         _etaSpiralToggle = GameObject.Find("EtaSpiralToggle").GetComponent<Toggle>();
 
         _realPathToggle = GameObject.Find("RealPathToggle").GetComponent<Toggle>();
@@ -79,15 +89,18 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
     private void DrawSpirals()
     {
-        if(_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
-        if(_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
-        if(_reverseSpiralToggle.isOn) DrawReverseSpiral();
-        if(_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
-        if(_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
+        if (_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
+        if (_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
+        if (_reverseSpiralToggle.isOn) DrawReverseSpiral();
+        if (_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
+        if (_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
 
-        if(_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
+        if (_zakLinksToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakLinks(), ZakColor);
+        if (_zakRemainderLinkToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakRemainderLink(), ZakRemainderColor, 3);
 
-        if(_realPathToggle.isOn) DrawRealPath();
+        if (_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
+
+        if (_realPathToggle.isOn) DrawRealPath();
     }
 
     private void SubSpirals()
@@ -95,72 +108,91 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _spiralTransparency.OnOptionChanged += SpiralTransparenyOptionChanged;
         SpiralTransparenyOptionChanged(_spiralTransparency.GetSelectedOption().Item1);
 
-        _emsForwardToggle.onValueChanged.AddListener((value) => {
-            if(value)
+        _emsForwardToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value)
             {
                 SpiralCalculator.UpdateEms += SubEms;
             }
-            else 
+            else
             {
                 SpiralCalculator.UpdateEms -= SubEms;
             }
         });
 
-        _ZrsForwardToggle.onValueChanged.AddListener((value) => {
-            if(value)
+        _ZrsForwardToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value)
             {
                 SpiralCalculator.UpdateZrs += SubZrs;
             }
-            else 
+            else
             {
                 SpiralCalculator.UpdateZrs -= SubZrs;
             }
         });
 
-        _reverseSpiralToggle.onValueChanged.AddListener((value) => {
-            if(value)
+        _reverseSpiralToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value)
             {
                 SpiralCalculator.UpdateEms += SubEms;
                 SpiralCalculator.UpdateZrs += SubZrs;
             }
-            else 
+            else
             {
                 SpiralCalculator.UpdateEms -= SubEms;
                 SpiralCalculator.UpdateZrs -= SubZrs;
             }
         });
 
-        _inverseSpiralToggle.onValueChanged.AddListener((value) => {
-            if(value) SpiralCalculator.UpdateRsInverseSum += SubRsInverseSum;
+        _inverseSpiralToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value) SpiralCalculator.UpdateRsInverseSum += SubRsInverseSum;
             else SpiralCalculator.UpdateRsInverseSum -= SubRsInverseSum;
         });
 
-        _inverseReflectedToggle.onValueChanged.AddListener((value) => {
-            if(value) 
+        _inverseReflectedToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value)
             {
                 SpiralCalculator.UpdateRsInverseSum += SubRsInverseSumReflected;
             }
-            else 
+            else
             {
                 SpiralCalculator.UpdateRsInverseSum -= SubRsInverseSumReflected;
             }
         });
-        
-        _etaSpiralToggle.onValueChanged.AddListener((value) => {
-            if(value) SpiralCalculator.UpdateEta += SubEtaSpiral;
+
+        _zakLinksToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value) SpiralCalculator.UpdateZakLinks += SubZakLinks;
+            else SpiralCalculator.UpdateZakLinks -= SubZakLinks;
+        });
+
+        _zakRemainderLinkToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value) SpiralCalculator.UpdateZakLinks += SubZakLinks;
+            else SpiralCalculator.UpdateZakLinks -= SubZakLinks;
+        });
+
+        _etaSpiralToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value) SpiralCalculator.UpdateEta += SubEtaSpiral;
             else SpiralCalculator.UpdateEta -= SubEtaSpiral;
         });
 
 
-        _realPathToggle.onValueChanged.AddListener((value) => {
-            if(value) SpiralCalculator.UpdateRealPath += SubRealPath;
+        _realPathToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value) SpiralCalculator.UpdateRealPath += SubRealPath;
             else SpiralCalculator.UpdateRealPath -= SubRealPath;
         });
     }
 
     private void SpiralTransparenyOptionChanged(int option)
     {
-        switch(option)
+        switch (option)
         {
             case 0: // Light
                 SetColorTransparency(0.25f);
@@ -184,17 +216,17 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         EtaSpiralColor.a = colorAlpha;
     }
 
-    private void SubEms(Zeta.Spiral spiral){}
+    private void SubEms(Zeta.Spiral spiral) { }
     private void DrawEms(Zeta.Spiral ems)
     {
-        DrawSpiral(ems, ems.joints, EmsColor);
+        DrawSpiral(ems.middleIndex, ems.joints, EmsColor);
     }
 
-     private void ZrsOptionChanged(int option)
+    private void ZrsOptionChanged(int option)
     {
-        if(option > 0)
+        if (option > 0)
         {
-            if(option == 1) 
+            if (option == 1)
             {
                 SpiralCalculator.UpdateZrs += SubZrs;
                 ZrsColor.a = 0.25f;
@@ -209,10 +241,10 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             SpiralCalculator.UpdateZrs -= SubZrs;
         }
     }
-    private void SubZrs(Zeta.Spiral spiral){}
+    private void SubZrs(Zeta.Spiral spiral) { }
     private void DrawZrs(Zeta.Spiral zrs)
     {
-        DrawSpiral(zrs, zrs.joints, ZrsColor);
+        DrawSpiral(zrs.middleIndex, zrs.joints, ZrsColor);
     }
 
     private void DrawReverseSpiral()
@@ -222,21 +254,21 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         var norm = zeta.Normalized();
 
         var newJoints = new Vector[spiral.joints.Length];
-        for(int i = 0; i < spiral.joints.Length; i++)
+        for (int i = 0; i < spiral.joints.Length; i++)
         {
             newJoints[i] = zeta + spiral.joints[i].Reflect(norm);
         }
 
-        DrawSpiral(spiral, newJoints, ReverseSpiralColor);
+        DrawSpiral(spiral.middleIndex, newJoints, ReverseSpiralColor);
     }
 
-    private void SubRsInverseSum(Vector[] links){}
+    private void SubRsInverseSum(Vector[] links) { }
     private void DrawRsInverseSum(Vector[] links)
     {
-        DrawSpiral(_spiralCalculator.GetSpiral(), links, InverseSpiralColor);
+        DrawSpiral((int)Math.Floor(_spiralCalculator.GetIndex()), links, InverseSpiralColor);
     }
 
-    private void SubRsInverseSumReflected(Vector[] links){}
+    private void SubRsInverseSumReflected(Vector[] links) { }
     private void DrawRsInverseSumReflected(Vector[] links)
     {
         var spiral = _spiralCalculator.GetSpiral();
@@ -246,33 +278,35 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         var perp = new Vector(-norm.y, norm.x);
 
         var newJoints = new Vector[links.Length];
-        for(int i = 0; i < newJoints.Length; i++)
+        for (int i = 0; i < newJoints.Length; i++)
         {
             newJoints[i] = zeta + links[i].Reflect(norm).Reflect(perp);
         }
 
-        DrawSpiral(spiral, newJoints, InverseReflectedColor);
+        DrawSpiral(spiral.middleIndex, newJoints, InverseReflectedColor);
     }
 
-    private void SubEtaSpiral(Zeta.Spiral spiral){}
+    private void SubZakLinks(Vector[] links) { }
+
+    private void SubEtaSpiral(Zeta.Spiral spiral) { }
     private void DrawEtaSpiral(Zeta.Spiral eta)
     {
         DrawSpiralLines(eta.joints, EtaSpiralColor);
     }
 
-    private void SubRealPath(List<Vector> pat, int indexOne){}
+    private void SubRealPath(List<Vector> pat, int indexOne) { }
     private void DrawRealPath()
     {
         var realPath = _spiralCalculator.GetRealPath().Item1.ToArray();
         var indexOne = _spiralCalculator.GetRealPath().Item2;
         var realUpToOne = new Vector[indexOne + 1];
-        for(int i = 0; i <= indexOne; i++)
+        for (int i = 0; i <= indexOne; i++)
         {
             realUpToOne[i] = realPath[i];
         }
 
         var afterOne = new Vector[realPath.Length - indexOne];
-        for(int i = 0; i < afterOne.Length; i++)
+        for (int i = 0; i < afterOne.Length; i++)
         {
             afterOne[i] = realPath[i + indexOne];
         }
@@ -280,31 +314,31 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         DrawSpiralLines(afterOne, Color.blue);
     }
 
-    private void DrawSpiral(Zeta.Spiral spiral, Vector[] joints, Color color)
+    private void DrawSpiral(int middleIndex, Vector[] joints, Color color)
     {
         var highlight = _colorLinksToggle.GetSelectedOption().Item1;
         bool colorBisector = highlight > 0;
         bool colorClock = highlight == 2;
-        switch(_linksToDrawDropdown.value)
+        switch (_linksToDrawDropdown.value)
         {
             case 0: // ALL
                 DrawSpiralLines(joints, color);
-                if(colorBisector) HighlightBisectorLink(joints, spiral.middleIndex, color);
-                if(colorClock) HighlighClockArms(joints, spiral.middleIndex, color);
+                if (colorBisector) HighlightBisectorLink(joints, middleIndex, color);
+                if (colorClock) HighlighClockArms(joints, middleIndex, color);
                 break;
             case 1: // up To Bisector Link
                 // create a new joint array that only includes the joints up to the bisector link
-                var partJoints = new Vector[spiral.middleIndex + 2];
-                Array.Copy(joints, partJoints, spiral.middleIndex + 2);
+                var partJoints = new Vector[middleIndex + 2];
+                Array.Copy(joints, partJoints, middleIndex + 2);
                 DrawSpiralLines(partJoints, color);
-                if(colorBisector) HighlightBisectorLink(partJoints, spiral.middleIndex, color);
+                if (colorBisector) HighlightBisectorLink(partJoints, middleIndex, color);
                 break;
             case 2: // Bisector Link
-                HighlightBisectorLink(joints, spiral.middleIndex, color);
+                HighlightBisectorLink(joints, middleIndex, color);
                 break;
             case 3: // Clock
-                HighlightBisectorLink(joints, spiral.middleIndex, color);
-                HighlighClockArms(joints, spiral.middleIndex, color);
+                HighlightBisectorLink(joints, middleIndex, color);
+                HighlighClockArms(joints, middleIndex, color);
                 break;
             case 4: // Last Link
                 HighlightLastLink(joints, color);
@@ -359,12 +393,12 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawSpiralLines(Vector[] points, Color color)
+    private void DrawSpiralLines(Vector[] points, Color color, int thickness = 1)
     {
         using (Draw.StyleScope)
         {
             Draw.Color = color;
-            Draw.Thickness = 1;
+            Draw.Thickness = thickness;
             for (int i = 0; i < points.Length - 1; i++)
             {
                 Draw.Line(points[i], points[i + 1], color);

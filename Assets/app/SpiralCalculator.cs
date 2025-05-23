@@ -20,6 +20,9 @@ public class SpiralCalculator : MonoBehaviour
     private Vector _zemPos;
     public static Action<Zeta.Spiral> UpdateZrs;
     private Zeta.Spiral _zrsSpiral;
+
+    public static Action<Vector[]> UpdateZakLinks;
+    private Vector[] _zakLinks;
     
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
@@ -126,10 +129,24 @@ public class SpiralCalculator : MonoBehaviour
         if(_etaSpiral == null) CalcEta(_app.Real, _app.Index);
         return _etaSpiral;
     }
+    
+    public Vector[] GetZakLinks()
+    {
+        if(_zakLinks == null) CalcZakLinks(_app.Real, _app.Index);
+        return _zakLinks;
+    }
+
+    public Vector[] GetZakRemainderLink()
+    {
+        var index = _app.Index;
+        if (_zakLinks == null) CalcZakLinks(_app.Real, index);
+        int middleIndex = (int)Math.Floor(index);
+        return new Vector[] { _zakLinks[middleIndex], _zakLinks[middleIndex + 1] };
+    }
 
     public Vector[] GetRsInverseSum()
     {
-        if(_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Index, _app.Real);
+        if (_rsInverseSumSpiral == null) CalcRsInverseSum(_app.Index, _app.Real);
         return _rsInverseSumSpiral.joints;
     }
 
@@ -289,8 +306,11 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateZrs != null) CalcZrs(index);
         else _zrsSpiral = null;
+        
+        if(UpdateZakLinks != null) CalcZakLinks(real, index);
+        else _zakLinks = null;
 
-        if(UpdateEta != null) CalcEta(real, index);
+        if (UpdateEta != null) CalcEta(real, index);
         else _etaSpiral = null;
 
         if(UpdateForwardBisector != null) CalcForwardBisector();
@@ -388,10 +408,18 @@ public class SpiralCalculator : MonoBehaviour
         }
         UpdateZrs?.Invoke(_zrsSpiral);
     }
+    
+    private void CalcZakLinks(double real, double index)
+    {
+        _zakLinks = ZakCalculator.CalcZakLinks(real, index);
+        UpdateZakLinks?.Invoke(_zakLinks);
+    }
+
+    
 
     private void CalcEta(double real, double index)
     {
-        if(_etaSpiral == null)
+        if (_etaSpiral == null)
         {
             _etaSpiral = new Zeta.Spiral(real, index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
             _etaSpiral.extendSpiralCount = _app._extendSpiral;
