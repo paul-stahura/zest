@@ -681,42 +681,6 @@ public class SpiralCalculator : MonoBehaviour
         _yinYang = ZpsGeneral.YinYang(real, index, chi, yySpecial.yin, yySpecial.yang);
 
         UpdateYinYang?.Invoke(_yinYang);
-
-        double testreal = 0.8;
-        double testindex = 1.2;
-        var (yin, yang) = ZpsGeneral.YinYang(testreal, testindex, ChiBrian(new Complex(testreal, Zeta.IndexToImag(testindex))), ZpsGeneral.YinSpecial(testindex), ZpsGeneral.YangSpecial(testindex));
-        print("Yin: " + yin);
-        print("Yang: " + yang);
-        // print("YinPrime: " + ZpsGeneral.YinPrime(1.2)); GOOD
-        // print("YinSpecial: " + ZpsGeneral.YinSpecial(1.2)); GOOD
-
-        print("YangSpecial: " + ZpsGeneral.YangSpecial(1.2));
-        
-        // print("Beta: " + ZpsGeneral.Beta(1.2)); GOOD
-        // print("BetaPrime: " + ZpsGeneral.BetaPrime(1.2)); GOOD
-
-
-        print("RPrime: " + ZpsGeneral.RPrime(1.2, true));
-
-        // print("PPrime: " + ZpsGeneral.PPrime(1.2)); GOOD
-
-        // print("imagPrime: " + ZpsGeneral.IndexToImagPrime(1.2)); GOOD
-
-        // print("R: " + ZpsGeneral.R(1.2, true)); GOOD
-
-        // bool useApprox = true;
-        // double psi = useApprox ? ZpsGeneral.PsiApprox(testindex, 0) : ZpsGeneral.Psi(testindex);
-        // double psiPrime = useApprox ? ZpsGeneral.PsiApprox(testindex, 1) : ZpsGeneral.PsiPrime(testindex);
-        // double psiPrime3 = useApprox ? ZpsGeneral.PsiApprox(testindex, 3) : ZpsGeneral.PsiPrime3(testindex);
-        // double psiPrime4 = useApprox ? ZpsGeneral.PsiApprox(testindex, 4) : ZpsGeneral.PsiPrime4(testindex);
-
-        // print("Psi: " + psi); GOOD
-        // print("PsiPrime: " + psiPrime); GOOD
-        // print("PsiPrime3: " + psiPrime3); GOOD
-        // print("PsiPrime4: " + psiPrime4); GOOD
-
-        // print("P: " + ZpsGeneral.P(testindex)); GOOD
-
     }
 
     private void CalcInfLink(double index)

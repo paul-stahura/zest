@@ -6,9 +6,9 @@ using UnityEngine;
 
 public enum YinYangCalculationMethod
 {
-    Approximate,
-    Symbolic,
-    Numeric
+    Approximate = 0,
+    Symbolic = 1,
+    Numeric = 2
 }
 public class ZpsGeneral : MonoBehaviour
 {
@@ -169,7 +169,7 @@ public class ZpsGeneral : MonoBehaviour
         return -2*Math.Cos(Beta(index)) - Dyin(index, useApprox);
     }
 
-    public static double Beta(double index)
+    private static double Beta(double index)
     {
         int n = (int)Math.Floor(index);
         double imag = Zeta.IndexToImag(index);
@@ -188,7 +188,7 @@ public class ZpsGeneral : MonoBehaviour
         return (int)(Math.Floor(Math.Sqrt(Zeta.IndexToImag(index) / TWO_PI)) - (int)Math.Floor(index));
     }
 
-    public static double R(double index, bool useApprox)
+    private static double R(double index, bool useApprox)
     {
         double psi = useApprox ? PsiApprox(index, 0) : Psi(index);
         double psiPrime3 = useApprox ? PsiApprox(index, 3) : PsiPrime3(index);
@@ -210,7 +210,7 @@ public class ZpsGeneral : MonoBehaviour
     /// <param name="order">order is the number of derivatives</param>
     /// <param name="maxN">maxN can be at most 20</param>
     /// <summary>
-    public static double PsiApprox(double index, int order, int maxN = 12)
+    private static double PsiApprox(double index, int order, int maxN = 12)
     {
         double t = P(index);
 
@@ -235,14 +235,14 @@ public class ZpsGeneral : MonoBehaviour
         return result;
     }
 
-    public static double Psi(double index)
+    private static double Psi(double index)
     {
         double t = P(index);
 
         return Math.Cos(TWO_PI * (t*t - t - (1.0/16.0))) / Math.Cos(TWO_PI * t);
     }
 
-    public static double PsiPrime(double index)
+    private static double PsiPrime(double index)
     {
         double t = P(index);
 
@@ -261,7 +261,7 @@ public class ZpsGeneral : MonoBehaviour
         return TWO_PI * Sec(TWO_PI * t) * ((1 - 2*t) * Math.Sin(v) + Math.Cos(v) * Math.Tan(TWO_PI * t));
     }
 
-    public static double PsiPrime3(double index)
+    private static double PsiPrime3(double index)
     {
         double t = P(index);
 
@@ -291,9 +291,11 @@ public class ZpsGeneral : MonoBehaviour
         return result;
     }
 
-    public static double PsiPrime4(double index)
+    private static double PsiPrime4(double index)
     {
-        double tp = TWO_PI * index;
+        double t = P(index);
+
+        double tp = TWO_PI * t;
         double cosTp = Math.Cos(tp);
         double sinTp = Math.Sin(tp);
         double secTp = 1.0 / cosTp;
@@ -303,16 +305,16 @@ public class ZpsGeneral : MonoBehaviour
         double sec3 = sec2 * secTp;
         double sec4 = sec2 * sec2;
 
-        double cos4pt = Math.Cos(4 * PI * index);
-        double cos8pt = Math.Cos(8 * PI * index);
-        double sin6pt = Math.Sin(6 * PI * index);
+        double cos4pt = Math.Cos(4 * PI * t);
+        double cos8pt = Math.Cos(8 * PI * t);
+        double sin6pt = Math.Sin(6 * PI * t);
 
-        double u = -1.0 / 16.0 - index + index * index;
+        double u = -1.0 / 16.0 - t + t * t;
         double u2p = TWO_PI * u;
         double cosU = Math.Cos(u2p);
         double sinU = Math.Sin(u2p);
 
-        double a = 1 - 2 * index;
+        double a = 1 - 2 * t;
         double a2 = a * a;
         double a4 = a2 * a2;
 
@@ -330,7 +332,7 @@ public class ZpsGeneral : MonoBehaviour
 
     #region Yin and Yang Derivatives
     /// <param name="useApprox">useApprox = true to use approximations in place of symbolic derivatives</param>
-    public static Vector YinPrime(double index, bool useApprox = true)
+    private static Vector YinPrime(double index, bool useApprox = true)
     {
         double yin = Dyin(index, useApprox);
         double yinPrime = DyinPrime(index, useApprox);
@@ -346,7 +348,7 @@ public class ZpsGeneral : MonoBehaviour
         return pt;
     }
 
-    public static double DyinPrime(double index, bool useApprox)
+    private static double DyinPrime(double index, bool useApprox)
     {
         return 2*Square(index) * Math.Sin(Beta(index)) * BetaPrime(index) + (1.0 - 2.0*Square(index)) * Math.Sqrt((int)Math.Floor(index) + 1)* RPrime(index, useApprox);
     }
@@ -375,12 +377,12 @@ public class ZpsGeneral : MonoBehaviour
         return 2 * Math.Sin(Beta(index)) * BetaPrime(index) - DyinPrime(index, useApprox);
     }
 
-    public static double BetaPrime(double index)
+    private static double BetaPrime(double index)
     {
         return (Math.Log((int)Math.Floor(index) + 1) - ThetaPrime(Zeta.IndexToImag(index))) * IndexToImagPrime(index);
     }
 
-    public static double IndexToImagPrime(double index)
+    private static double IndexToImagPrime(double index)
     {
         double log = Math.Log(1 + 1/index);
         return PI * (1 + 2*index + 2*index*(index + 1) * log) / (index * (index + 1) * Math.Pow(log, 2));
@@ -391,7 +393,7 @@ public class ZpsGeneral : MonoBehaviour
         return 0.5 * Math.Log(imag / TWO_PI) - (1 / (48 * (imag * imag)));
     }
 
-    public static double RPrime(double index, bool useApprox)
+    private static double RPrime(double index, bool useApprox)
     {
         double psi = useApprox ? PsiApprox(index, 0) : Psi(index);
         double psiPrime = useApprox ? PsiApprox(index, 1) : PsiPrime(index);
@@ -411,7 +413,7 @@ public class ZpsGeneral : MonoBehaviour
         return term1 + term2 + term3 + term4;
     }
 
-    public static double PPrime(double index)
+    private static double PPrime(double index)
     {
         int n = (int)Math.Floor(index);
         double mod = index % 1;

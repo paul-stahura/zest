@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using Shapes;
+using TMPro;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,10 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _yinYangSpecialToggle;
     [SerializeField] private Toggle _yinYangSpecialLinkToggle;
     [SerializeField] private Toggle _inverseSpecialToggle;
+
+    [SerializeField] private TMP_Dropdown _derivativeModeDropdown;
+    private YinYangCalculationMethod _derivativeMode = YinYangCalculationMethod.Approximate;
+
     private int _yinYangPathIndex = 0;
     private Vector2[] _yinPath = new Vector2[200];
     private Vector2[] _yangPath = new Vector2[200];
@@ -34,6 +39,8 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         _yinYangSpecialToggle = GameObject.Find("YinYangSpecial Toggle").GetComponent<Toggle>();
         _yinYangSpecialLinkToggle = GameObject.Find("YinYangSpecial Link Toggle").GetComponent<Toggle>();
         _inverseSpecialToggle = GameObject.Find("Inverse YinYangSpecial Toggle").GetComponent<Toggle>();
+
+        _derivativeModeDropdown = GameObject.Find("YinYang Derivative Mode Dropdown").GetComponent<TMP_Dropdown>();
 
         _infToggle = GameObject.Find("INF YinYang Toggle").GetComponent<Toggle>();
         _infLinkToggle = GameObject.Find("INF Bisector Link Toggle").GetComponent<Toggle>();
@@ -108,11 +115,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         Vector2 linkUp = new Vector2(-midLink.y, midLink.x).normalized;
         Quaternion rot = Quaternion.Euler(0, 0, Vector2.SignedAngle(Vector2.up, linkUp));
 
-        var real = _spiralCalculator.GetReal();
-        var index = _spiralCalculator.GetIndex();
-        var chi = SpiralCalculator.ChiBrian(new Complex(_spiralCalculator.GetReal(), Zeta.IndexToImag(_spiralCalculator.GetIndex())));
-        var yySpecial = _spiralCalculator.GetYinYangSpecial();
-        var (yin, yang) = ZpsGeneral.YinYang(real, index, chi, yySpecial.yin, yySpecial.yang);
+        var (yin, yang) = _spiralCalculator.GetYinYang();
         var yinPt = pt + (Vector2)(rot * yin) * midLink.magnitude;
         var yangPt = pt + (Vector2)(rot * yang) * midLink.magnitude;
         Draw.Line(yinPt, yangPt, Color.magenta);
@@ -203,6 +206,12 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         _yinYangSpecialLinkToggle.onValueChanged.AddListener((v) => SubYinYangSpecial(v));
         _inverseSpecialToggle.onValueChanged.AddListener((v) => SubYinYangSpecial(v));
 
+        _derivativeModeDropdown.onValueChanged.AddListener((v) =>
+        {
+            _derivativeMode = (YinYangCalculationMethod)v;
+            if(_yinYangToggle) CalcYinYangPath(_derivativeMode);
+        });
+
         _infToggle.onValueChanged.AddListener((v) => SubIndexChanged(v));
         _infLinkToggle.onValueChanged.AddListener((v) => SubInf(v));
     }
@@ -214,7 +223,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
             SpiralCalculator.IndexChanged += OnIndexChanged;
             SpiralCalculator.RealChanged += OnRealChanged;
             OnIndexChanged(_spiralCalculator.GetIndex());
-            if(_yinYangToggle) CalcYinYangPath();
+            if(_yinYangToggle) CalcYinYangPath(_derivativeMode);
             if(_infToggle) CalcInfPath();
         }
         else
@@ -230,14 +239,14 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         if(newIndex != _yinYangPathIndex)
         {
             _yinYangPathIndex = newIndex;
-            if(_yinYangToggle) CalcYinYangPath();
+            if(_yinYangToggle) CalcYinYangPath(_derivativeMode);
             if(_infToggle) CalcInfPath();
         }
     }
 
     private void OnRealChanged(double real)
     {
-        if(_yinYangToggle) CalcYinYangPath();
+        if(_yinYangToggle) CalcYinYangPath(_derivativeMode);
     }
 
     private void SubYinYang(bool v)
@@ -299,7 +308,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         }
     }
 
-    private void CalcYinYangPath()
+    private void CalcYinYangPath(YinYangCalculationMethod derivativeMode)
     {
         int n = _yinYangPathIndex;
         double first = (_yinYangPathIndex == 0) ? 0.0025f : _yinYangPathIndex + 0.00001;
@@ -311,7 +320,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
         var real = _spiralCalculator.GetReal();
         var chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(first)));
-        var (yin, yang) = ZpsGeneral.YinYang(real, first, chi, yinSpecial, yangSpecial);
+        var (yin, yang) = ZpsGeneral.YinYang(real, first, chi, yinSpecial, yangSpecial, derivativeMode);
         _yinPath[0] = yin;
         _yangPath[0] = yang;
         
@@ -327,7 +336,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
             _yangSpecialPath[i] = yangSpecial;
 
             chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(indexFrac)));
-            (yin, yang) = ZpsGeneral.YinYang(real, indexFrac, chi, yinSpecial, yangSpecial);
+            (yin, yang) = ZpsGeneral.YinYang(real, indexFrac, chi, yinSpecial, yangSpecial, derivativeMode);
             _yinPath[i] = yin;
             _yangPath[i] = yang;
         }
@@ -339,7 +348,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         _yangSpecialPath[_yangPath.Length - 1] = yangSpecial;
 
         chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(last)));
-        (yin, yang) = ZpsGeneral.YinYang(real, last, chi, yinSpecial, yangSpecial);
+        (yin, yang) = ZpsGeneral.YinYang(real, last, chi, yinSpecial, yangSpecial, derivativeMode);
         _yinPath[_yinPath.Length - 1] = yin;
         _yangPath[_yangPath.Length - 1] = yang;
     }
