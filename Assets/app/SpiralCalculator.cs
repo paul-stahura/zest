@@ -69,11 +69,11 @@ public class SpiralCalculator : MonoBehaviour
     private Vector _rav;
 
 
-    public static Action<Vector> UpdateYin;
-    private Vector _yin;
+    public static Action<(Vector yin, Vector yang)> UpdateYinYangSpecial;
+    private (Vector yin, Vector yang) _yinYangSpecial;
 
-    public static Action<Vector> UpdateYang;
-    private Vector _yang;
+    public static Action<(Vector yin, Vector yang)> UpdateYinYang;
+    private (Vector yin, Vector yang) _yinYang;
 
     public static Action<Vector, Vector> UpdateInfLink;
     private (Vector, Vector) _infLink;
@@ -217,16 +217,16 @@ public class SpiralCalculator : MonoBehaviour
         return _inverseRelfectedBisectorPath;
     }
 
-    public Vector GetYin()
+    public (Vector yin, Vector yang) GetYinYangSpecial()
     {
-        if(_yin == null) CalcYin(_app.Index, _app.Real);
-        return _yin;
+        if(_yinYangSpecial.yin == null) CalcYinYangSpecial(_app.Index);
+        return _yinYangSpecial;
     }
 
-    public Vector GetYang()
+    public (Vector yin, Vector yang) GetYinYang()
     {
-        if(_yang == null) CalcYang(_app.Index, _app.Real);
-        return _yang;
+        if(_yinYang.yin == null) CalcYinYang(_app.Index, _app.Real, GetYinYangSpecial());
+        return _yinYang;
     }
 
     public (Vector, Vector) GetInfLink()
@@ -338,11 +338,11 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateRAV != null) CalcRAV(index);
         else _rav = null;
 
-        if(UpdateYin != null) CalcYin(index, real);
-        else _yin = null;
+        if(UpdateYinYangSpecial != null) CalcYinYangSpecial(index);
+        else _yinYangSpecial = (null, null);
 
-        if(UpdateYang != null) CalcYang(index, real);
-        else _yang = null;
+        if(UpdateYinYang != null) CalcYinYang(index, real, GetYinYangSpecial());
+        else _yinYang = (null, null);
 
         if(UpdateInfLink != null) CalcInfLink(index);
         else _infLink = (null, null);
@@ -479,7 +479,8 @@ public class SpiralCalculator : MonoBehaviour
         // UpdateInverseBisector?.Invoke(_inverseBisector);
         
         var index = GetIndex();
-        _inverseBisector = ZpsGeneral.InverseBisector(GetReal(), index, Zeta.IndexToImag(index), ChiBrian);
+        var real = GetReal();
+        _inverseBisector = ZpsGeneral.InverseBisector(real, index, Zeta.IndexToImag(index), ChiBrian);
         UpdateInverseBisector?.Invoke(_inverseBisector);
     }
 
@@ -668,16 +669,18 @@ public class SpiralCalculator : MonoBehaviour
         UpdateRAV?.Invoke(_rav);
     }
 
-    private void CalcYin(double index, double real)
+    private void CalcYinYangSpecial(double index)
     {
-        _yin = MiddleLinkTeardrop.Yin(index);
-        UpdateYin?.Invoke(_yin);
+        _yinYangSpecial = (ZpsGeneral.YinSpecial(index), ZpsGeneral.YangSpecial(index));
+        UpdateYinYangSpecial?.Invoke(_yinYangSpecial);
     }
 
-    private void CalcYang(double index, double real)
+    private void CalcYinYang(double index, double real, (Vector yin, Vector yang) yySpecial)
     {
-        _yang = MiddleLinkTeardrop.Yang(index);
-        UpdateYang?.Invoke(_yang);
+        Complex chi = ChiBrian(new Complex(real, Zeta.IndexToImag(index)));
+        _yinYang = ZpsGeneral.YinYang(real, index, chi, yySpecial.yin, yySpecial.yang);
+
+        UpdateYinYang?.Invoke(_yinYang);
     }
 
     private void CalcInfLink(double index)
