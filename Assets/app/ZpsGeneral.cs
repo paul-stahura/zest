@@ -50,7 +50,7 @@ public class ZpsGeneral : MonoBehaviour
         Vector yangSpecial = YangSpecial(index);
 
         var (yin, yang) = YinYang(real, index, chi, yinSpecial, yangSpecial);
-        double djf = L_sectx(yin, yang) + 0.5f;
+        double djf = L_sectx(yang, yin) + 0.5f;
 
         return Vector.Lerp(cj1, cj2, djf);
     }
@@ -67,9 +67,9 @@ public class ZpsGeneral : MonoBehaviour
         double linkLength = B_linkLength(real, index, imag, chi);
 
         var (yin, yang) = YinYang(real, index, chi, yinSpecial, yangSpecial);
-        double djf = L_sectx(yin, yang) + 0.5f;
 
-        double dji = Vector.Distance(new Vector (djf - 0.5, 0), yang) / linkLength;
+        var l = L_sectx(yang, yin) + 0.5;
+        double dji = Vector.Distance(new Vector(l - 0.5, 0), yin) / linkLength;
 
         return Vector.Lerp(cji1.ToVector(), cji2.ToVector(), dji);
     }

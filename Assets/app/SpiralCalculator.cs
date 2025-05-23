@@ -479,7 +479,8 @@ public class SpiralCalculator : MonoBehaviour
         // UpdateInverseBisector?.Invoke(_inverseBisector);
         
         var index = GetIndex();
-        _inverseBisector = ZpsGeneral.InverseBisector(GetReal(), index, Zeta.IndexToImag(index), ChiBrian);
+        var real = GetReal();
+        _inverseBisector = ZpsGeneral.InverseBisector(real, index, Zeta.IndexToImag(index), ChiBrian);
         UpdateInverseBisector?.Invoke(_inverseBisector);
     }
 
