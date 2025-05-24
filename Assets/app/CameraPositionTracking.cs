@@ -30,6 +30,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         ZetaPS,
         Zps,
         Zrs,
+        Zak,
         Eta
     }
 
@@ -37,11 +38,12 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     [SerializeField] private TMP_Dropdown _symmetryTargetDropdown;
     private enum SymmetryTarget
     {
-        Auto = 0,
-        BisectorLink = 1,
-        SymmetryPoint = 2,
-        BpOneHalf = 3,
-        ForwardBisector = 4,
+        Auto,
+        BisectorLink,
+        ZakRemainder,
+        SymmetryPoint,
+        BpOneHalf,
+        ForwardBisector,
     }
 
     [Header("YinYang Target")]
@@ -199,7 +201,11 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 zTarget = ZetaTarget.Zrs;
             }
-            else if(SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
+            else if(SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0)
+            {
+                zTarget = ZetaTarget.Zak;
+            }
+            else if (SpiralCalculator.UpdateEta != null && SpiralCalculator.UpdateEta.GetInvocationList().Length > 0)
             {
                 zTarget = ZetaTarget.Eta;
             }
@@ -217,6 +223,10 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 return _spiralCalculator.GetZps();
             case ZetaTarget.Zrs:
                 return _spiralCalculator.GetZrs().zeta.ToVector2();
+            case ZetaTarget.Zak:
+                var zak = _spiralCalculator.GetZakLinks();
+                var lastZak = zak[zak.Length - 1];
+                return lastZak;
             case ZetaTarget.Eta:
                 return _spiralCalculator.GetEta().zeta.ToVector2();
             default:
@@ -235,23 +245,27 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         }
 
         SymmetryTarget sTarget = (SymmetryTarget)_symmetryTargetDropdown.value;
-        if(sTarget == SymmetryTarget.Auto)
+        if (sTarget == SymmetryTarget.Auto)
         {
-            if(SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
+            if (SpiralCalculator.UpdateEms != null && SpiralCalculator.UpdateEms.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.BisectorLink;
             }
-            else if(SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
+            else if (SpiralCalculator.UpdateZrs != null && SpiralCalculator.UpdateZrs.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.BisectorLink;
             }
-            else if(SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
+            else if (SpiralCalculator.UpdateZps != null && SpiralCalculator.UpdateZps.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.BpOneHalf;
             }
-            else if(SpiralCalculator.UpdateZetaPS != null && SpiralCalculator.UpdateZetaPS.GetInvocationList().Length > 0)
+            else if (SpiralCalculator.UpdateZetaPS != null && SpiralCalculator.UpdateZetaPS.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.ForwardBisector;
+            }
+            else if(SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.ZakRemainder;
             }
         }
 
@@ -266,6 +280,14 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 target = spiral.joints[spiral.middleIndex];
                 target += midLink / 2f;
                 newUP = new Vector2(-midLink.y, midLink.x).normalized;
+                break;
+
+            case SymmetryTarget.ZakRemainder:
+                var zakRemainder = _spiralCalculator.GetZakRemainderLink();
+                // get center of link
+                var remainderLink = (zakRemainder[1] - zakRemainder[0]).ToVector2();
+                target = zakRemainder[0] + remainderLink / 2.0f;
+                newUP = new Vector2(-remainderLink.y, remainderLink.x).normalized;
                 break;
 
             case SymmetryTarget.SymmetryPoint:
