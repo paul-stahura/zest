@@ -92298,7 +92298,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: '[Links to Spirals] a tool emphasizing the symmetry between the first
+  description: '[Links to Links] a tool emphasizing the symmetry between the first
     few links and the positions of the spirals. Most prominent at sigma = 1/2'
 --- !u!114 &2027847379
 MonoBehaviour:
@@ -92320,7 +92320,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Links to Spirals
+  m_text: Links to Links
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -92347,7 +92347,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 14.7
+  m_fontSize: 16.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
