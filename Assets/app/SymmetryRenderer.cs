@@ -156,17 +156,18 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawLinksToSpirals()
     {
-        var spiral = Mathf.Approximately((float)_spiralCalculator.GetReal(), 0.5f) ? _spiralCalculator.GetZrs() : _spiralCalculator.GetEms();
+        var middleIndex = (int)Math.Floor(_spiralCalculator.GetIndex());
+        var zakLinks = _spiralCalculator.GetZakLinks();
 
         using (Draw.StyleScope)
         {
             Draw.Color = _linksToSpiralsColor;
             Draw.Thickness = 1f;
 
-            for (int i = 0; i < spiral.spirals.Length; i++)
+            for (int i = 0; i <= middleIndex; i++)
             {
-                var from = spiral.joints[i];
-                var to = spiral.spirals[i];
+                var from = zakLinks[i];
+                var to = zakLinks[zakLinks.Length - 1 - i];
                 Draw.Line(from, to);
             }
         }
