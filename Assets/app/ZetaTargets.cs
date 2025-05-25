@@ -219,7 +219,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
         if(_ravToggle.isOn) DrawRav();
 
-        if(_drawOrigin.isOn) DrawOrigin();
+        //DrawMiddlePoint();
+
+        if (_drawOrigin.isOn) DrawOrigin();
 
         if(_camTargetColor.a > 0.05f) DrawCamTarget();
     }
@@ -275,6 +277,25 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             ShapesUtils.DrawCross45(_spiralCalculator.GetRAV(), 0.08f);
         }
     }
+    
+    private void DrawMiddlePoint()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _zrsColor;
+            Draw.Thickness = 1f;
+            var Bf = _spiralCalculator.GetForwardBisector();
+            var Bi = _spiralCalculator.GetInverseBisector();
+            var Zps = Bf + Bi;
+            var midPoint = Zps / 2.0;
+            Draw.Ring(midPoint, 0.02f);
+            ShapesUtils.DrawCross(midPoint, 0.03f);
+
+            Draw.UseDashes = true;
+            Draw.Line(Bf, Bi);
+            Draw.Line(Vector2.zero, Zps);
+        }
+    }
 
     private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)
     {
@@ -282,7 +303,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         {
             DrawZ(pos.ToVector2(), color);
 
-            if(posText != null) posText.text = $"({pos.Real:F6}, {pos.Imaginary:F6})";
+            if (posText != null) posText.text = $"({pos.Real:F6}, {pos.Imaginary:F6})";
 
             if (_traceToggle.isOn)
             {

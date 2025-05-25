@@ -56,6 +56,7 @@ public class ZpsGeneral : MonoBehaviour
 
 
     #region Remainder Bisectors
+
     private static Vector RemainderForwardBisector(double real, double index)
     {
         var imag = Zeta.IndexToImag(index);
