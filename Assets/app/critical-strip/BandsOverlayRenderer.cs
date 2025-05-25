@@ -13,7 +13,6 @@ using System.Linq;
 public class BandsOverlayRenderer : MaskableGraphic
 {
     [Header("Band Settings")]
-    [SerializeField] private string dataFileName = "Theta2 0.5.csv";
     [SerializeField] [Range(0, 1)] private float bandOpacity = 0.15f;
     [SerializeField] private Color bandColor = new Color(0.3f, 0.3f, 0.3f);
     
@@ -113,22 +112,14 @@ public class BandsOverlayRenderer : MaskableGraphic
         bandStartIndices.Clear();
         bandEndIndices.Clear();
         
-        string filePath = Path.Combine(Application.dataPath, "Resources/CriticalStripPoints", dataFileName);
-        
-        if (!File.Exists(filePath))
-        {
-            Debug.LogError($"BandsOverlayRenderer: Data file not found at {filePath}");
-            return;
-        }
-        
         try
         {
             // Read all lines from the file
-            string[] allLines = File.ReadAllLines(filePath);
-            
+            string[] allLines = File.ReadAllLines("Assets/data/Theta2 NoMod.csv");
+
             // Skip header and comment lines
             int dataStartLine = 0;
-            while (dataStartLine < allLines.Length && 
+            while (dataStartLine < allLines.Length &&
                   (allLines[dataStartLine].StartsWith("#") || allLines[dataStartLine].Contains(",")))
             {
                 // If it's the header line with metadata, skip it
@@ -137,31 +128,31 @@ public class BandsOverlayRenderer : MaskableGraphic
                     dataStartLine++;
                     break;
                 }
-                
+
                 dataStartLine++;
             }
-            
+
             // Process data points to find direction changes
             float previousX = 0;
             float previousY = 0;
             bool isIncreasing = false;
             bool firstPoint = true;
             bool bandActive = false;
-            
+
             for (int i = dataStartLine; i < allLines.Length; i++)
             {
                 string line = allLines[i];
                 if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
                     continue;
-                
+
                 string[] parts = line.Split(',');
-                if (parts.Length != 2) 
+                if (parts.Length != 2)
                     continue;
-                
-                if (!float.TryParse(parts[0], out float currentX) || 
+
+                if (!float.TryParse(parts[0], out float currentX) ||
                     !float.TryParse(parts[1], out float currentY))
                     continue;
-                
+
                 if (firstPoint)
                 {
                     // Initialize with first point
@@ -170,10 +161,10 @@ public class BandsOverlayRenderer : MaskableGraphic
                     firstPoint = false;
                     continue;
                 }
-                
+
                 // Determine if X is increasing or decreasing
                 bool currentIncreasing = currentX > previousX;
-                
+
                 // Detect direction change and mark band start/end
                 if (!bandActive && i > dataStartLine + 1) // Skip first comparison
                 {
@@ -193,22 +184,22 @@ public class BandsOverlayRenderer : MaskableGraphic
                         bandActive = false;
                     }
                 }
-                
+
                 // Update for next iteration
                 isIncreasing = currentIncreasing;
                 previousX = currentX;
                 previousY = currentY;
             }
-            
+
             // If we ended with an active band, close it with the last point
             if (bandActive && bandStartIndices.Count > bandEndIndices.Count)
             {
                 bandEndIndices.Add(previousY);
             }
-            
+
             // Debug.Log($"BandsOverlayRenderer: Processed {bandStartIndices.Count} bands from {dataFileName}");
             isDataProcessed = true;
-            
+
             // Force redraw
             SetVerticesDirty();
         }
@@ -275,41 +266,21 @@ public class BandsOverlayRenderer : MaskableGraphic
         float visibleMin = stripTransform.MinValue;
         float visibleMax = stripTransform.MaxValue;
 
-        // --- INVERSE BAND LOGIC ---
-        // Drawing bands between regions where X changes direction.
-        // This means:
-        //   - From the bottom of the visible range up to the first band start
-        //   - Between each band end and the next band start
-        //   - From the last band end to the top of the visible range
+        // --- ORIGINAL BAND LOGIC ---
+        // Drawing bands directly on regions where X changes direction.
+        // Each band represents a region between bandStartIndices[i] and bandEndIndices[i]
+        // where the X coordinate is changing direction.
         //
-        // This loop builds and draws those intervals as filled rectangles.
-        float prev = visibleMin;
-        for (int i = 0; i <= bandStartIndices.Count; i++)
+        // This loop draws the actual direction change regions as filled rectangles.
+        for (int i = 0; i < bandStartIndices.Count && i < bandEndIndices.Count; i++)
         {
-            float gapStart, gapEnd;
-            if (i == 0)
-            {
-                // Before the first band (bottom of view to first band start)
-                gapStart = visibleMin;
-                gapEnd = (bandStartIndices.Count > 0) ? bandStartIndices[0] : visibleMax;
-            }
-            else if (i == bandStartIndices.Count)
-            {
-                // After the last band (last band end to top of view)
-                gapStart = bandEndIndices[bandEndIndices.Count - 1];
-                gapEnd = visibleMax;
-            }
-            else
-            {
-                // Between bands (end of previous band to start of next)
-                gapStart = bandEndIndices[i - 1];
-                gapEnd = bandStartIndices[i];
-            }
+            float bandStart = bandStartIndices[i];
+            float bandEnd = bandEndIndices[i];
 
             // Clamp to visible range
-            gapStart = Mathf.Max(gapStart, visibleMin);
-            gapEnd = Mathf.Min(gapEnd, visibleMax);
-            if (gapEnd <= gapStart) continue;
+            bandStart = Mathf.Max(bandStart, visibleMin);
+            bandEnd = Mathf.Min(bandEnd, visibleMax);
+            if (bandEnd <= bandStart) continue;
 
             // Convert indices to viewport Y coordinates
             // If we're in imaginary space, we need to transform the band indices
@@ -318,14 +289,14 @@ public class BandsOverlayRenderer : MaskableGraphic
             if (stripTransform.UseImaginarySpace)
             {
                 // Band indices are in index space, convert to imaginary space
-                startPosStrip = new Vector2(0, (float)Zeta.IndexToImag(gapStart));
-                endPosStrip = new Vector2(0, (float)Zeta.IndexToImag(gapEnd));
+                startPosStrip = new Vector2(0, (float)Zeta.IndexToImag(bandStart));
+                endPosStrip = new Vector2(0, (float)Zeta.IndexToImag(bandEnd));
             }
             else
             {
                 // In index space, use directly
-                startPosStrip = new Vector2(0, gapStart);
-                endPosStrip = new Vector2(0, gapEnd);
+                startPosStrip = new Vector2(0, bandStart);
+                endPosStrip = new Vector2(0, bandEnd);
             }
 
             Vector2 startPosViewport = stripTransform.StripToViewport(startPosStrip);
@@ -359,11 +330,11 @@ public class BandsOverlayRenderer : MaskableGraphic
     /// <summary>
     /// Set the data file to use and reload
     /// </summary>
-    public void SetDataFile(string fileName)
-    {
-        dataFileName = fileName;
-        ProcessDataFile();
-    }
+    // public void SetDataFile(string fileName)
+    // {
+    //     dataFileName = fileName;
+    //     ProcessDataFile();
+    // }
     
     /// <summary>
     /// Set the visibility of the bands (used by UI toggle)
