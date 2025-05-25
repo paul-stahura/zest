@@ -17,7 +17,7 @@ public class ZpsGeneral : MonoBehaviour
     private const double TWO_PI = 2 * Math.PI;
 
     // needs to be double checked
-    private static readonly double[] c = 
+    private static readonly double[] c =
     {
         0.382683432365,
         0,
@@ -42,9 +42,175 @@ public class ZpsGeneral : MonoBehaviour
         -0.108642578125
     };
 
-    public static Vector ForwardBisector(double real, double index, double imag, Complex chi)
+    public static Vector ForwardBisector(double real, double index)
     {
+        return RemainderForwardBisector(real, index);
+        // return YinYangForwardBisector(real, index, imag, chi);
+    }
+
+    public static Vector InverseBisector(double real, double index)
+    {
+        return RemainderInverseBisector(real, index);
+        // return YinYangInverseBisector(real, index, imag, chiFunc);
+    }
+
+
+    #region Remainder Bisectors
+    private static Vector RemainderForwardBisector(double real, double index)
+    {
+        var imag = Zeta.IndexToImag(index);
         var (cj1, cj2) = Cj(real, index, imag);
+        var (ci1, ci2) = Ci(real, index, imag);
+        var Rak = ZakCalculator.Rak(real, index);
+        var Rf = cj1 + Rak;
+        var Pr2 = cj1 + Rak + ci1 - ci2;
+
+        return Intersect(Rf, Pr2, cj1, cj2).ToVector();
+    }
+
+    private static Vector RemainderInverseBisector(double real, double index)
+    {
+        var imag = Zeta.IndexToImag(index);
+
+        var (cj1, cj2) = Cj(real, index, imag);
+        var (ci1, ci2) = Ci(real, index, imag);
+        var Rak = ZakCalculator.Rak(real, index);
+        var Ri = ci1 + Rak;
+        var Po2 = cj1 + Rak + ci1 - cj2;
+
+        return Intersect(Ri, Po2, ci1, ci2).ToVector();
+    }
+
+    private static (Complex, Complex) Cj(double real, double index, double imag)
+    {
+        int upperLimit = (int)Math.Floor(index) + 1;
+        Complex cj1 = Complex.Zero;
+        Complex cj2 = Complex.Zero;
+        double realSum = 0.0;
+        double imagSum = 0.0;
+
+        for (int n = 1; n <= upperLimit; n++)
+        {
+            double logN = Math.Log(n);
+            double denominator = Math.Pow(n, real);
+            double angle = imag * logN;
+
+            realSum += Math.Cos(angle) / denominator;
+            imagSum += Math.Sin(angle) / denominator;
+
+            if (n == upperLimit - 1)
+            {
+                cj1 = new Complex(realSum, -imagSum);
+            }
+            else if (n == upperLimit)
+            {
+                cj2 = new Complex(realSum, -imagSum);
+            }
+        }
+
+        return (cj1, cj2);
+    }
+
+    private static (Complex, Complex) Ci(double real, double index, double imag)
+    {
+        int upperLimit = (int)Math.Floor(index) + 1;
+        var chiVal = SpiralCalculator.ChiBrian(new Complex(real, imag));
+        Complex ci1 = Complex.Zero;
+        Complex ci2 = Complex.Zero;
+        double realSum = 0.0;
+        double imagSum = 0.0;
+
+        for (int n = 1; n <= upperLimit; n++)
+        {
+            double logN = Math.Log(n);
+            double denominator = Math.Pow(n, 1 - real);
+            double angle = imag * logN;
+
+            realSum += Math.Cos(angle) / denominator;
+            imagSum += Math.Sin(angle) / denominator;
+
+            if (n == upperLimit - 1)
+            {
+                ci1 = chiVal * new Complex(realSum, imagSum);
+            }
+            else if (n == upperLimit)
+            {
+                ci2 = chiVal * new Complex(realSum, imagSum);
+            }
+        }
+
+        return (ci1, ci2);
+    }
+
+    private static Complex Intersect(Complex a, Complex b, Complex c, Complex d)
+    {
+        Complex abConj = a * Complex.Conjugate(b) - Complex.Conjugate(a) * b;
+        Complex cdConj = c * Complex.Conjugate(d) - Complex.Conjugate(c) * d;
+
+        Complex ab = a - b;
+        Complex cd = c - d;
+
+        Complex numerator = abConj * cd - cdConj * ab;
+        Complex denominator = (Complex.Conjugate(b) - Complex.Conjugate(a)) * cd -
+                              (Complex.Conjugate(d) - Complex.Conjugate(c)) * ab;
+
+        // Handle potential divide by zero
+        if (denominator == Complex.Zero)
+        {
+            Debug.LogWarning("Denominator is zero in Intersect calculation.");
+            return Complex.Zero;
+        }
+
+        return numerator / denominator;
+    }
+    #endregion
+
+    #region YY
+    public static (Vector yin, Vector yang) YinYang(double real, double index, Complex chi, Vector yinSpecial, Vector yangSpecial, YinYangCalculationMethod method = YinYangCalculationMethod.Approximate)
+    {
+        var imag = Zeta.IndexToImag(index);
+
+        double linkLength = B_linkLength(real, index, imag, chi);
+
+        Vector yinNormal = new Vector(0, 0);
+        Vector yangNormal = new Vector(0, 0);
+
+        switch (method)
+        {
+            case YinYangCalculationMethod.Approximate:
+                Vector yinPrimeApprox = YinPrime(index);
+                Vector yangPrimeApprox = YangPrime(index);
+                yinNormal = new Vector(-yinPrimeApprox.y, yinPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yinPrimeApprox.x * yinPrimeApprox.x + yinPrimeApprox.y * yinPrimeApprox.y);
+                yangNormal = new Vector(-yangPrimeApprox.y, yangPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yangPrimeApprox.x * yangPrimeApprox.x + yangPrimeApprox.y * yangPrimeApprox.y);
+                break;
+
+            case YinYangCalculationMethod.Symbolic:
+                Vector yinPrime = YinPrime(index, false);
+                Vector yangPrime = YangPrime(index, false);
+                yinNormal = new Vector(-yinPrime.y, yinPrime.x) * 0.2 / 2 * Math.Sqrt(yinPrime.x * yinPrime.x + yinPrime.y * yinPrime.y);
+                yangNormal = new Vector(-yangPrime.y, yangPrime.x) * 0.2 / 2 * Math.Sqrt(yangPrime.x * yangPrime.x + yangPrime.y * yangPrime.y);
+                break;
+
+            case YinYangCalculationMethod.Numeric:
+                yinNormal = ComputeNormal(MiddleLinkTeardrop.Yin, index) * 0.5;
+                yangNormal = ComputeNormal(MiddleLinkTeardrop.Yang, index) * 0.5;
+                break;
+        }
+
+        Vector yin1 = yinSpecial + yinNormal;
+        Vector yin2 = yinSpecial - yinNormal;
+
+        Vector yang1 = yangSpecial + yangNormal;
+        Vector yang2 = yangSpecial - yangNormal;
+
+        Vector yin = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial) + (yinSpecial - yangSpecial) * linkLength;
+        Vector yang = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial);
+        return (yin, yang);
+    }
+
+    private static Vector YinYangForwardBisector(double real, double index, double imag, Complex chi)
+    {
+        var (cj1, cj2) = yyCj(real, index, imag);
 
         Vector yinSpecial = YinSpecial(index);
         Vector yangSpecial = YangSpecial(index);
@@ -55,10 +221,10 @@ public class ZpsGeneral : MonoBehaviour
         return Vector.Lerp(cj1, cj2, djf);
     }
 
-    public static Vector InverseBisector(double real, double index, double imag, Func<Complex, Complex> chiFunc)
+    public static Vector YinYangInverseBisector(double real, double index, double imag, Func<Complex, Complex> chiFunc)
     {
         var s = new Complex(real, imag);
-        var (cji1, cji2) = Cji(index, s, chiFunc);
+        var (cji1, cji2) = yyCji(index, s, chiFunc);
         var chi = chiFunc(s);
 
         Vector yinSpecial = YinSpecial(index);
@@ -78,48 +244,6 @@ public class ZpsGeneral : MonoBehaviour
     {
         return p1.x - p1.y * ((p2.x - p1.x) / (p2.y - p1.y));
     }
-    
-    public static (Vector yin, Vector yang) YinYang(double real, double index, Complex chi, Vector yinSpecial, Vector yangSpecial, YinYangCalculationMethod method = YinYangCalculationMethod.Approximate)
-    {
-        var imag = Zeta.IndexToImag(index);
-
-        double linkLength = B_linkLength(real, index, imag, chi);
-
-        Vector yinNormal = new Vector(0, 0);
-        Vector yangNormal = new Vector(0, 0);
-
-        switch (method)
-        {
-            case YinYangCalculationMethod.Approximate:
-                Vector yinPrimeApprox = YinPrime(index);
-                Vector yangPrimeApprox = YangPrime(index);
-                yinNormal = new Vector(-yinPrimeApprox.y, yinPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yinPrimeApprox.x * yinPrimeApprox.x + yinPrimeApprox.y * yinPrimeApprox.y);
-                yangNormal = new Vector(-yangPrimeApprox.y, yangPrimeApprox.x) * 0.2 / 2 * Math.Sqrt(yangPrimeApprox.x * yangPrimeApprox.x + yangPrimeApprox.y * yangPrimeApprox.y);
-                break;
-                
-            case YinYangCalculationMethod.Symbolic:
-                Vector yinPrime = YinPrime(index, false);
-                Vector yangPrime = YangPrime(index, false);
-                yinNormal = new Vector(-yinPrime.y, yinPrime.x) * 0.2 / 2 * Math.Sqrt(yinPrime.x * yinPrime.x + yinPrime.y * yinPrime.y);
-                yangNormal = new Vector(-yangPrime.y, yangPrime.x) * 0.2 / 2 * Math.Sqrt(yangPrime.x * yangPrime.x + yangPrime.y * yangPrime.y);
-                break;
-
-            case YinYangCalculationMethod.Numeric:
-                yinNormal = ComputeNormal(MiddleLinkTeardrop.Yin, index) * 0.5;
-                yangNormal = ComputeNormal(MiddleLinkTeardrop.Yang, index) * 0.5;
-                break;
-        }
-
-        Vector yin1 = yinSpecial + yinNormal;
-        Vector yin2 = yinSpecial - yinNormal;
-        
-        Vector yang1 = yangSpecial + yangNormal;
-        Vector yang2 = yangSpecial - yangNormal;
-
-        Vector yin = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial) + (yinSpecial - yangSpecial) * linkLength;
-        Vector yang = SBisect(linkLength, yang1, yang2, yin1, yin2, yangSpecial, yinSpecial);
-        return (yin, yang);
-    }
 
     #region Yin and Yang Calculation
     /// <summary>
@@ -133,7 +257,7 @@ public class ZpsGeneral : MonoBehaviour
 
         Vector pt = new Vector
         (
-            -yin * Math.Cos(beta) - 0.5, 
+            -yin * Math.Cos(beta) - 0.5,
             -yin * Math.Sin(beta)
         );
 
@@ -143,7 +267,7 @@ public class ZpsGeneral : MonoBehaviour
     private static double Dyin(double index, bool useApprox)
     {
         int n = (int)Math.Floor(index);
-        return -2.0*Square(index) * Math.Cos(Beta(index)) + (1.0 - 2.0*Square(index)) * Math.Sqrt(n+1)* R(index, useApprox);
+        return -2.0 * Square(index) * Math.Cos(Beta(index)) + (1.0 - 2.0 * Square(index)) * Math.Sqrt(n + 1) * R(index, useApprox);
     }
 
     /// <summary>
@@ -166,14 +290,14 @@ public class ZpsGeneral : MonoBehaviour
 
     private static double Dyang(double index, bool useApprox)
     {
-        return -2*Math.Cos(Beta(index)) - Dyin(index, useApprox);
+        return -2 * Math.Cos(Beta(index)) - Dyin(index, useApprox);
     }
 
     private static double Beta(double index)
     {
         int n = (int)Math.Floor(index);
         double imag = Zeta.IndexToImag(index);
-        return Math.Log(n + 1)*imag - Theta(imag) - PI*(n*n + 2*n);
+        return Math.Log(n + 1) * imag - Theta(imag) - PI * (n * n + 2 * n);
     }
 
     private static double Theta(double imag)
@@ -198,7 +322,7 @@ public class ZpsGeneral : MonoBehaviour
 
         return Math.Pow(imag / TWO_PI, -0.25) * (psi + C1);
     }
-    
+
     private static double P(double index)
     {
         return Math.Sqrt(Zeta.IndexToImag(index) / TWO_PI) % 1;
@@ -239,16 +363,17 @@ public class ZpsGeneral : MonoBehaviour
     {
         double t = P(index);
 
-        return Math.Cos(TWO_PI * (t*t - t - (1.0/16.0))) / Math.Cos(TWO_PI * t);
+        return Math.Cos(TWO_PI * (t * t - t - (1.0 / 16.0))) / Math.Cos(TWO_PI * t);
     }
 
     private static double PsiPrime(double index)
     {
         double t = P(index);
 
-        double v = TWO_PI * (t*t - t - (1.0/16.0));
+        double v = TWO_PI * (t * t - t - (1.0 / 16.0));
 
-        double Sec(double x) {
+        double Sec(double x)
+        {
             double cosX = Math.Cos(x);
             const double epsilon = 1e-12; // Tolerance for "close to zero"
             if (Math.Abs(cosX) < epsilon)
@@ -258,7 +383,7 @@ public class ZpsGeneral : MonoBehaviour
             return 1.0 / cosX;
         }
 
-        return TWO_PI * Sec(TWO_PI * t) * ((1 - 2*t) * Math.Sin(v) + Math.Cos(v) * Math.Tan(TWO_PI * t));
+        return TWO_PI * Sec(TWO_PI * t) * ((1 - 2 * t) * Math.Sin(v) + Math.Cos(v) * Math.Tan(TWO_PI * t));
     }
 
     private static double PsiPrime3(double index)
@@ -341,7 +466,7 @@ public class ZpsGeneral : MonoBehaviour
 
         Vector pt = new Vector
         (
-            -yinPrime * Math.Cos(beta) + yin * Math.Sin(beta) * betaPrime, 
+            -yinPrime * Math.Cos(beta) + yin * Math.Sin(beta) * betaPrime,
             -yinPrime * Math.Sin(beta) - yin * Math.Cos(beta) * betaPrime
         );
 
@@ -350,7 +475,7 @@ public class ZpsGeneral : MonoBehaviour
 
     private static double DyinPrime(double index, bool useApprox)
     {
-        return 2*Square(index) * Math.Sin(Beta(index)) * BetaPrime(index) + (1.0 - 2.0*Square(index)) * Math.Sqrt((int)Math.Floor(index) + 1)* RPrime(index, useApprox);
+        return 2 * Square(index) * Math.Sin(Beta(index)) * BetaPrime(index) + (1.0 - 2.0 * Square(index)) * Math.Sqrt((int)Math.Floor(index) + 1) * RPrime(index, useApprox);
     }
 
     /// <param name="n">n = index integer part</param>
@@ -365,7 +490,7 @@ public class ZpsGeneral : MonoBehaviour
 
         Vector pt = new Vector
         (
-            -yang * Math.Sin(beta) * betaPrime + yangPrime * Math.Cos(beta), 
+            -yang * Math.Sin(beta) * betaPrime + yangPrime * Math.Cos(beta),
             yang * Math.Cos(beta) * betaPrime + yangPrime * Math.Sin(beta)
         );
 
@@ -384,8 +509,8 @@ public class ZpsGeneral : MonoBehaviour
 
     private static double IndexToImagPrime(double index)
     {
-        double log = Math.Log(1 + 1/index);
-        return PI * (1 + 2*index + 2*index*(index + 1) * log) / (index * (index + 1) * Math.Pow(log, 2));
+        double log = Math.Log(1 + 1 / index);
+        return PI * (1 + 2 * index + 2 * index * (index + 1) * log) / (index * (index + 1) * Math.Pow(log, 2));
     }
 
     private static double ThetaPrime(double imag)
@@ -405,10 +530,10 @@ public class ZpsGeneral : MonoBehaviour
 
         double pPrime = PPrime(index);
 
-        double term1 = -(Math.Pow(PI, 0.25) * psi * imagPrime) / (Math.Pow(2, 7.0/4.0) * Math.Pow(imag, 5.0/4.0));
-        double term2 = (psiPrime3 * imagPrime) / (96 * Math.Sqrt(2) * Math.Pow(PI, 3.0/2.0) * Math.Pow(imag, 3.0/2.0));
+        double term1 = -(Math.Pow(PI, 0.25) * psi * imagPrime) / (Math.Pow(2, 7.0 / 4.0) * Math.Pow(imag, 5.0 / 4.0));
+        double term2 = (psiPrime3 * imagPrime) / (96 * Math.Sqrt(2) * Math.Pow(PI, 3.0 / 2.0) * Math.Pow(imag, 3.0 / 2.0));
         double term3 = (Math.Pow(TWO_PI, 0.25) * psiPrime * pPrime) / Math.Pow(imag, 0.25);
-        double term4 = -(psiPrime4 * pPrime) / (48 * Math.Sqrt(2) * Math.Pow(PI, 3.0/2.0) * Math.Pow(imag, 1.0/2.0));
+        double term4 = -(psiPrime4 * pPrime) / (48 * Math.Sqrt(2) * Math.Pow(PI, 3.0 / 2.0) * Math.Pow(imag, 1.0 / 2.0));
 
         return term1 + term2 + term3 + term4;
     }
@@ -418,8 +543,8 @@ public class ZpsGeneral : MonoBehaviour
         int n = (int)Math.Floor(index);
         double mod = index % 1;
         double log = Math.Log(1 + 1 / index);
-        return (1 + 2*index + 2*(n*n + index + 2*n * mod + mod*mod) * log) /
-               (2 * index * (1 + index) * Math.Sqrt((2 + 4*index) / log) * (log * log));
+        return (1 + 2 * index + 2 * (n * n + index + 2 * n * mod + mod * mod) * log) /
+               (2 * index * (1 + index) * Math.Sqrt((2 + 4 * index) / log) * (log * log));
     }
     #endregion
 
@@ -430,7 +555,7 @@ public class ZpsGeneral : MonoBehaviour
 
         // get the first digit of point
         int firstDigit = (int)Math.Floor(point);
-        if((int)Math.Floor(point - epsilon) != firstDigit)
+        if ((int)Math.Floor(point - epsilon) != firstDigit)
         {
             // Compute the gradient using one small step forward
             Vector now = func(point);
@@ -440,7 +565,7 @@ public class ZpsGeneral : MonoBehaviour
                 (next.y - now.y) / epsilon   // Gradient in y-direction
             );
         }
-        else if((int)Math.Floor(point + epsilon) != firstDigit)
+        else if ((int)Math.Floor(point + epsilon) != firstDigit)
         {
             // Compute the gradient using one small step backward
             Vector now = func(point);
@@ -461,7 +586,7 @@ public class ZpsGeneral : MonoBehaviour
 
         // Calculate the magnitude (or norm) of the vector
         double magnitude = Math.Sqrt(yangDeriv.x * yangDeriv.x + yangDeriv.y * yangDeriv.y);
-        
+
         // Return the normalized vector as N_ormalYang(t)
         return new Vector(
             -yangDeriv.y / magnitude,
@@ -472,7 +597,7 @@ public class ZpsGeneral : MonoBehaviour
 
     private static double B_linkLength(double real, double index, double imag, Complex chi)
     {
-        (Vector cj1, Vector cj2) = Cj(1 - real, index, imag);
+        (Vector cj1, Vector cj2) = yyCj(1 - real, index, imag);
 
         Complex delta = cj2 - cj1; // Calculate the difference
 
@@ -512,15 +637,15 @@ public class ZpsGeneral : MonoBehaviour
 
         return new Vector(x, y);
     }
-
-    private static (Vector cj1, Vector cj2) Cj(double real, double index, double imag)
+    
+    private static (Vector cj1, Vector cj2) yyCj(double real, double index, double imag)
     {
         Vector p1 = new Vector(0, 0);
         Vector p2 = new Vector(0, 0);
         int nLimit = (int)Math.Ceiling(index);
         for (int n = 1; n <= nLimit; n++)
         {
-            if(n != nLimit)
+            if (n != nLimit)
             {
                 p1.x += (float)(Math.Cos(-imag * Math.Log(n)) / Math.Pow(n, real));
                 p1.y += (float)(Math.Sin(-imag * Math.Log(n)) / Math.Pow(n, real));
@@ -535,7 +660,7 @@ public class ZpsGeneral : MonoBehaviour
         return (p1, p2);
     }
 
-    private static (Complex cji1, Complex cji2) Cji(double index, Complex s, Func<Complex, Complex> chifunc)
+    private static (Complex cji1, Complex cji2) yyCji(double index, Complex s, Func<Complex, Complex> chifunc)
     {
         Complex p1 = Complex.Zero;
         Complex p2 = Complex.Zero;
@@ -556,4 +681,5 @@ public class ZpsGeneral : MonoBehaviour
 
         return (p1, p2);
     }
+    #endregion
 }
