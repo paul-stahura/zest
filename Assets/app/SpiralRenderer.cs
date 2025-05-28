@@ -15,6 +15,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _emsForwardToggle;
     [SerializeField] private Color ZrsColor;
     [SerializeField] private Toggle _ZrsForwardToggle;
+    [SerializeField] private Toggle _forwardReflectedToggle;
     [SerializeField] private Color ReverseSpiralColor;
     [SerializeField] private Toggle _reverseSpiralToggle;
     [SerializeField] private Color InverseSpiralColor;
@@ -47,6 +48,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         _emsForwardToggle = GameObject.Find("EmsForwardToggle").GetComponent<Toggle>();
         _ZrsForwardToggle = GameObject.Find("ZrsForwardToggle").GetComponent<Toggle>();
+        _forwardReflectedToggle = GameObject.Find("forwardReflectedToggle").GetComponent<Toggle>();
         _reverseSpiralToggle = GameObject.Find("ReverseSpiralToggle").GetComponent<Toggle>();
         _inverseSpiralToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
@@ -91,6 +93,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         if (_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
         if (_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
+        if (_forwardReflectedToggle.isOn) DrawSpiralLines(_spiralCalculator.GetForwardReflected(), EmsColor);
         if (_reverseSpiralToggle.isOn) DrawReverseSpiral();
         if (_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
         if (_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
@@ -129,6 +132,18 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
             else
             {
                 SpiralCalculator.UpdateZrs -= SubZrs;
+            }
+        });
+
+        _forwardReflectedToggle.onValueChanged.AddListener((value) =>
+        {
+            if (value)
+            {
+                SpiralCalculator.UpdateForwardReflected += SubForwardReflected;
+            }
+            else
+            {
+                SpiralCalculator.UpdateForwardReflected -= SubForwardReflected;
             }
         });
 
@@ -246,6 +261,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         DrawSpiral(zrs.middleIndex, zrs.joints, ZrsColor);
     }
+
+    private void SubForwardReflected(Vector[] links) { }
 
     private void DrawReverseSpiral()
     {

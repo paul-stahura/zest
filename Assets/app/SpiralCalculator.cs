@@ -21,6 +21,9 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Zeta.Spiral> UpdateZrs;
     private Zeta.Spiral _zrsSpiral;
 
+    public static Action<Vector[]> UpdateForwardReflected;
+    private Vector[] _forwardReflectedLinks;
+
     public static Action<Vector[]> UpdateZakLinks;
     private Vector[] _zakLinks;
     
@@ -50,6 +53,9 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Vector[]> UpdateChi;
     private Vector[] _chiSpiral;
     #endregion
+
+    public static Action<Vector> UpdateMidPoint;
+    private Vector _midPoint;
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
@@ -123,10 +129,16 @@ public class SpiralCalculator : MonoBehaviour
         if(_zrsSpiral == null) CalcZrs(_app.Index);
         return _zrsSpiral;
     }
+    
+    public Vector[] GetForwardReflected()
+    {
+        if(_forwardReflectedLinks == null) CalcForwardReflected();
+        return _forwardReflectedLinks;
+    }
 
     public Zeta.Spiral GetEta()
     {
-        if(_etaSpiral == null) CalcEta(_app.Real, _app.Index);
+        if (_etaSpiral == null) CalcEta(_app.Real, _app.Index);
         return _etaSpiral;
     }
     
@@ -222,9 +234,15 @@ public class SpiralCalculator : MonoBehaviour
         return _inverseBisectorPath;
     }
 
+    public Complex GetMidPoint()
+    {
+        if(_midPoint == null) CalcMidPoint(GetReal(), GetIndex());
+        return _midPoint;
+    }
+
     public Vector GetInverseReflectedBisector()
     {
-        if(_inverseReflectedBisector == null) CalcInverseReflectedBisector();
+        if (_inverseReflectedBisector == null) CalcInverseReflectedBisector();
         return _inverseReflectedBisector;
     }
 
@@ -277,8 +295,13 @@ public class SpiralCalculator : MonoBehaviour
             _zrsSpiral.extendSpiralCount = extendSpiral;
             _zrsSpiral.Update(0.5, _app.Index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
         }
+        
+        if(_forwardReflectedLinks != null)
+        {
+            CalcForwardReflected();
+        }
 
-        if(_etaSpiral != null)
+        if (_etaSpiral != null)
         {
             _etaSpiral.extendSpiralCount = extendSpiral;
             _etaSpiral.Update(_app.Real, _app.Index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
@@ -307,7 +330,10 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateZrs != null) CalcZrs(index);
         else _zrsSpiral = null;
         
-        if(UpdateZakLinks != null) CalcZakLinks(real, index);
+        if(UpdateForwardReflected != null) CalcForwardReflected();
+        else _forwardReflectedLinks = null;
+        
+        if (UpdateZakLinks != null) CalcZakLinks(real, index);
         else _zakLinks = null;
 
         if (UpdateEta != null) CalcEta(real, index);
@@ -318,8 +344,11 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateForwardBisectorPath != null) CalcForwardBisectorPath();
         else _forwardBisectorPath = null;
+        
+        if(UpdateMidPoint != null) CalcMidPoint(real, index);
+        else _midPoint = null;
 
-        if(UpdateRsInverseSum != null) CalcRsInverseSum(index, real);
+        if (UpdateRsInverseSum != null) CalcRsInverseSum(index, real);
         else _rsInverseSumSpiral = null;
 
         if(UpdateInverseBisector != null) CalcInverseBisector();
@@ -407,6 +436,25 @@ public class SpiralCalculator : MonoBehaviour
             _zrsSpiral.Update(0.5, index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
         }
         UpdateZrs?.Invoke(_zrsSpiral);
+    }
+
+    private void CalcMidPoint(double real, double index)
+    {
+        _midPoint = ZpsGeneral.GetMidPoint(real, index);
+        UpdateMidPoint?.Invoke(_midPoint);
+    }
+
+    private void CalcForwardReflected()
+    {
+        Zeta.Spiral s = GetSpiral();
+        _forwardReflectedLinks = new Vector[s.numLinks];
+        var mid2 = ZpsGeneral.GetMidPoint(GetReal(), GetIndex()) * 2.0;
+        for (int i = 0; i < s.numLinks; i++)
+        {
+            _forwardReflectedLinks[i] = mid2 - s.joints[i];
+        }
+
+        UpdateForwardReflected?.Invoke(_forwardReflectedLinks);
     }
     
     private void CalcZakLinks(double real, double index)

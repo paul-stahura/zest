@@ -54,6 +54,15 @@ public class ZpsGeneral : MonoBehaviour
         // return YinYangInverseBisector(real, index, imag, chiFunc);
     }
 
+    public static Vector GetMidPoint(double real, double index)
+    {
+        var imag = Zeta.IndexToImag(index);
+        var (cj1, cj2) = Cj(real, index, imag);
+        var (ci1, ci2) = Ci(real, index, imag);
+        var Rak = ZakCalculator.Rak(real, index);
+        return ((cj1 + Rak + ci1) / 2.0).ToVector();
+    }
+
 
     #region Remainder Bisectors
 
@@ -67,6 +76,9 @@ public class ZpsGeneral : MonoBehaviour
         var Pr2 = cj1 + Rak + ci1 - ci2;
 
         return Intersect(Rf, Pr2, cj1, cj2).ToVector();
+        
+        // return (cj2 + (Pr2 - cj2) / 2.0).ToVector();
+        // return (cj1 + (Rf - cj1) / 2.0).ToVector(); // mid point of Remainder
     }
 
     private static Vector RemainderInverseBisector(double real, double index)
@@ -80,6 +92,9 @@ public class ZpsGeneral : MonoBehaviour
         var Po2 = cj1 + Rak + ci1 - cj2;
 
         return Intersect(Ri, Po2, ci1, ci2).ToVector();
+
+        // return (ci2 + (Po2 - ci2) / 2.0).ToVector();
+        // return (ci1 + (Ri - ci1) / 2.0).ToVector(); // mid point of Remainder
     }
 
     private static (Complex, Complex) Cj(double real, double index, double imag)
