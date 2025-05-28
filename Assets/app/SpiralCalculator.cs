@@ -234,7 +234,7 @@ public class SpiralCalculator : MonoBehaviour
         return _inverseBisectorPath;
     }
 
-    public Complex GetMidPoint()
+    public Vector GetMidPoint()
     {
         if(_midPoint == null) CalcMidPoint(GetReal(), GetIndex());
         return _midPoint;

@@ -304,7 +304,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             var Bf = _spiralCalculator.GetForwardBisector();
             var Bi = _spiralCalculator.GetInverseBisector();
             var Zps = Bf + Bi;
-            var midPoint = _spiralCalculator.GetMidPoint().ToVector();
+            var midPoint = _spiralCalculator.GetMidPoint();
             Draw.Ring(midPoint, 0.02f);
             ShapesUtils.DrawCross(midPoint, 0.03f);
 

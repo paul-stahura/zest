@@ -41,6 +41,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         Auto,
         BisectorLink,
         ZakRemainder,
+        MidPoint,
         SymmetryPoint,
         BpOneHalf,
         ForwardBisector,
@@ -263,9 +264,13 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 sTarget = SymmetryTarget.ForwardBisector;
             }
-            else if(SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0)
+            else if (SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.ZakRemainder;
+            }
+            else if (SpiralCalculator.UpdateMidPoint != null && SpiralCalculator.UpdateMidPoint.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.MidPoint;
             }
         }
 
@@ -288,6 +293,14 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 var remainderLink = (zakRemainder[1] - zakRemainder[0]).ToVector2();
                 target = zakRemainder[0] + remainderLink / 2.0f;
                 newUP = new Vector2(-remainderLink.y, remainderLink.x).normalized;
+                break;
+
+            case SymmetryTarget.MidPoint:
+                var remainder = _spiralCalculator.GetZakRemainderLink();
+                // get center of link
+                var rLink = (remainder[1] - remainder[0]).ToVector2();
+                target = _spiralCalculator.GetMidPoint().ToVector2();
+                newUP = new Vector2(-rLink.y, rLink.x).normalized;
                 break;
 
             case SymmetryTarget.SymmetryPoint:
