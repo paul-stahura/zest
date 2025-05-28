@@ -61,6 +61,10 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private Vector2[] _etaPath = new Vector2[_traceLength];
     private int _etaPathIndex = 0;
 
+    [SerializeField] private Toggle _midPointToggle;
+    private Vector2[] _midPointPath = new Vector2[_traceLength];
+    private int _midPointIndex = 0;
+
     private SpiralCalculator _spiralCalculator;
     private CameraPositionTracking _cameraPositionTracking;
     private Coroutine _camTargetFade;
@@ -87,6 +91,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
         _etaToggle = GameObject.Find("Eta Zeta Toggle").GetComponent<Toggle>();
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
+
+        _midPointToggle = GameObject.Find("Mid Point Toggle").GetComponent<Toggle>();
 
         _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
 
@@ -155,6 +161,12 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             else SpiralCalculator.UpdateEta -= UpdateEta; 
         });
 
+        _midPointToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateMidPoint += UpdateMidPoint;
+            else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
+        });
+
         _ravToggle.onValueChanged.AddListener((bool value) => 
         { 
             if(value) SpiralCalculator.UpdateRAV += UpdateRAV;
@@ -166,14 +178,14 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     private void UpdateZrs(Zeta.Spiral zrs)
     {
-        UpdateTargetPos(zrs.zeta, ref _zrsPath, ref _zrsPathIndex);
+        UpdateTargetPos(zrs.zeta.ToVector2(), ref _zrsPath, ref _zrsPathIndex);
     }
 
     private void UpdateZak(Vector[] zakLinks)
     {
         var zak = _spiralCalculator.GetZakLinks();
         var lastZak = zak[zak.Length - 1].ToComplex();
-        UpdateTargetPos(lastZak, ref _zakPath, ref _zakPathIndex);
+        UpdateTargetPos(lastZak.ToVector2(), ref _zakPath, ref _zakPathIndex);
     }
 
     private void UpdateZps(Vector zps)
@@ -188,7 +200,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     private void UpdateEms(Zeta.Spiral ems)
     {
-        UpdateTargetPos(ems.zeta, ref _emsPath, ref _emsPathIndex);
+        UpdateTargetPos(ems.zeta.ToVector2(), ref _emsPath, ref _emsPathIndex);
     }
 
     private void UpdateZem(Vector zem) 
@@ -198,10 +210,15 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     private void UpdateEta(Zeta.Spiral eta)
     {
-        UpdateTargetPos(eta.zeta, ref _etaPath, ref _etaPathIndex);
+        UpdateTargetPos(eta.zeta.ToVector2(), ref _etaPath, ref _etaPathIndex);
+    }
+    
+    private void UpdateMidPoint(Vector midPoint)
+    {
+        UpdateTargetPos(midPoint, ref _midPointPath, ref _midPointIndex);
     }
 
-    private void UpdateRAV(Vector rav) {}
+    private void UpdateRAV(Vector rav) { }
 
     private void DrawTargets()
     {
@@ -217,9 +234,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_zemToggle, _zemPos, _spiralCalculator.GetZem(), _zemPath, _zemPathIndex, _zemColor);
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
-        if(_ravToggle.isOn) DrawRav();
-
-        //DrawMiddlePoint();
+        if (_ravToggle.isOn) DrawRav();
+        
+        if (_midPointToggle.isOn) DrawMiddlePoint();
 
         if (_drawOrigin.isOn) DrawOrigin();
 
@@ -277,7 +294,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             ShapesUtils.DrawCross45(_spiralCalculator.GetRAV(), 0.08f);
         }
     }
-    
+
     private void DrawMiddlePoint()
     {
         using (Draw.StyleScope)
@@ -287,13 +304,18 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             var Bf = _spiralCalculator.GetForwardBisector();
             var Bi = _spiralCalculator.GetInverseBisector();
             var Zps = Bf + Bi;
-            var midPoint = Zps / 2.0;
+            var midPoint = _spiralCalculator.GetMidPoint();
             Draw.Ring(midPoint, 0.02f);
             ShapesUtils.DrawCross(midPoint, 0.03f);
 
             Draw.UseDashes = true;
             Draw.Line(Bf, Bi);
             Draw.Line(Vector2.zero, Zps);
+        }
+        
+        if (_traceToggle.isOn)
+        {
+            DrawPath(_midPointPath, _midPointIndex, _zrsColor);
         }
     }
 
@@ -345,18 +367,18 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void UpdateTargetPos(Complex complex, ref Vector2[] targetPath, ref int targetPathIndex)
+    private void UpdateTargetPos(Vector2 pos, ref Vector2[] targetPath, ref int targetPathIndex)
     {
-        UpdatePath(ref targetPath, ref targetPathIndex, complex);
+        UpdatePath(ref targetPath, ref targetPathIndex, pos);
     }
 
-    private void UpdatePath(ref Vector2[] path, ref int pathIndex, Complex complex)
+    private void UpdatePath(ref Vector2[] path, ref int pathIndex, Vector2 pos)
     {
         var prevIndex = (pathIndex - 1 + _traceLength) % _traceLength;
-        if(Math.Abs(path[prevIndex].magnitude - complex.ToVector2().magnitude) > _traceInterval)
+        if(Math.Abs(path[prevIndex].magnitude - pos.magnitude) > _traceInterval)
         {
             pathIndex = (pathIndex + 1) % _traceLength;
         }
-        path[pathIndex] = complex.ToVector2();
+        path[pathIndex] = pos;
     }
 }

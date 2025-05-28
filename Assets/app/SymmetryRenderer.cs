@@ -33,9 +33,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _inverseReflectedZetaCircleToggle;
     [SerializeField] private Color _inverseReflectedColor;
 
-    [SerializeField] private Toggle _linksToSpiralsToggle;
-    [SerializeField] private Color _linksToSpiralsColor;
-
     [SerializeField] private SpiralCalculator _spiralCalculator;
     [SerializeField] private CameraPositionTracking _cam;
 
@@ -48,7 +45,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _symmeytryToggle = GameObject.Find("SymmetryToggle").GetComponent<Toggle>();
         _symmetryRealPathToggle = GameObject.Find("SymmetryRealPathToggle").GetComponent<Toggle>();
         _reverseLinkToggle = GameObject.Find("ReverseLinkToggle").GetComponent<Toggle>();
-        _linksToSpiralsToggle = GameObject.Find("LinksToSpiralsToggle").GetComponent<Toggle>();
         
         _ForwardLegsToggle = GameObject.Find("ForwardLegsOptionToggle").GetComponent<MultiOptionToggle>();
         _ForwardLegsPathToggle = GameObject.Find("ForwardLegsPathToggle").GetComponent<Toggle>();
@@ -91,7 +87,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(_symmeytryToggle.isOn) DrawSymmetryPoint();
         if(_symmetryRealPathToggle.isOn) DrawSymmetryPath();
         if(_reverseLinkToggle.isOn) DrawBisectorLink();
-        if(_linksToSpiralsToggle.isOn) DrawLinksToSpirals();
 
         DrawForwardLegs(_ForwardLegsToggle.GetSelectedOption().Item1);
         if(_ForwardLegsPathToggle.isOn) DrawForwardLegsPath();
@@ -151,25 +146,6 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Color = _reverseLinkColor;
             Draw.Line(yin, yang);
-        }
-    }
-
-    private void DrawLinksToSpirals()
-    {
-        var middleIndex = (int)Math.Floor(_spiralCalculator.GetIndex());
-        var zakLinks = _spiralCalculator.GetZakLinks();
-
-        using (Draw.StyleScope)
-        {
-            Draw.Color = _linksToSpiralsColor;
-            Draw.Thickness = 1f;
-
-            for (int i = 0; i <= middleIndex; i++)
-            {
-                var from = zakLinks[i];
-                var to = zakLinks[zakLinks.Length - 1 - i];
-                Draw.Line(from, to);
-            }
         }
     }
 
