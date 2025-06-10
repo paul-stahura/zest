@@ -42,15 +42,15 @@ public class ZpsGeneral : MonoBehaviour
         -0.108642578125
     };
 
-    public static Vector ForwardBisector(double real, double index)
+    public static Vector ForwardBisector(double real, double index, bool useR2 = false)
     {
-        return RemainderForwardBisector(real, index);
+        return RemainderForwardBisector(real, index, useR2);
         // return YinYangForwardBisector(real, index, imag, chi);
     }
 
-    public static Vector InverseBisector(double real, double index)
+    public static Vector InverseBisector(double real, double index, bool useR2 = false)
     {
-        return RemainderInverseBisector(real, index);
+        return RemainderInverseBisector(real, index, useR2);
         // return YinYangInverseBisector(real, index, imag, chiFunc);
     }
 
@@ -66,7 +66,7 @@ public class ZpsGeneral : MonoBehaviour
 
     #region Remainder Bisectors
 
-    private static Vector RemainderForwardBisector(double real, double index)
+    private static Vector RemainderForwardBisector(double real, double index, bool useR2 = false)
     {
         var imag = Zeta.IndexToImag(index);
         var (cj1, cj2) = Cj(real, index, imag);
@@ -75,13 +75,20 @@ public class ZpsGeneral : MonoBehaviour
         var Rf = cj1 + Rak;
         var Pr2 = cj1 + Rak + ci1 - ci2;
 
-        return Intersect(Rf, Pr2, cj1, cj2).ToVector();
-        
+        if (useR2)
+        {
+            return (cj1 + (Rf - cj1) / 2.0).ToVector(); // mid point of Remainder
+        }
+        else
+        {
+            return Intersect(Rf, Pr2, cj1, cj2).ToVector();
+        }
+
         // return (cj2 + (Pr2 - cj2) / 2.0).ToVector();
         // return (cj1 + (Rf - cj1) / 2.0).ToVector(); // mid point of Remainder
     }
 
-    private static Vector RemainderInverseBisector(double real, double index)
+    private static Vector RemainderInverseBisector(double real, double index, bool useR2 = false)
     {
         var imag = Zeta.IndexToImag(index);
 
@@ -91,7 +98,16 @@ public class ZpsGeneral : MonoBehaviour
         var Ri = ci1 + Rak;
         var Po2 = cj1 + Rak + ci1 - cj2;
 
-        return Intersect(Ri, Po2, ci1, ci2).ToVector();
+        if (useR2)
+        {
+            return (ci1 + (Ri - ci1) / 2.0).ToVector(); // mid point of Remainder
+
+        }
+        else
+        {
+            return Intersect(Ri, Po2, ci1, ci2).ToVector();
+        }
+        
 
         // return (ci2 + (Po2 - ci2) / 2.0).ToVector();
         // return (ci1 + (Ri - ci1) / 2.0).ToVector(); // mid point of Remainder

@@ -18,6 +18,11 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _reverseLinkToggle;
     [SerializeField] private Color _reverseLinkColor;
     [SerializeField] private Color _reverseLinkPointsColor;
+
+    [SerializeField] private MultiOptionToggle _remainderForwardLegsToggle;
+    [SerializeField] private Toggle _remainderForwardLegsPathToggle;
+    [SerializeField] private MultiOptionToggle _remainderInverseLegsToggle;
+    [SerializeField] private Toggle _remainderInverseLegsPathToggle;
     
     [SerializeField] private MultiOptionToggle _ForwardLegsToggle;
     [SerializeField] private Toggle _tempForwardToZetaToggle;
@@ -45,7 +50,12 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _symmeytryToggle = GameObject.Find("SymmetryToggle").GetComponent<Toggle>();
         _symmetryRealPathToggle = GameObject.Find("SymmetryRealPathToggle").GetComponent<Toggle>();
         _reverseLinkToggle = GameObject.Find("ReverseLinkToggle").GetComponent<Toggle>();
-        
+
+        _remainderForwardLegsToggle = GameObject.Find("R2 Forward Legs").GetComponent<MultiOptionToggle>();
+        _remainderForwardLegsPathToggle = GameObject.Find("R2 Forward Path").GetComponent<Toggle>();
+        _remainderInverseLegsToggle = GameObject.Find("R2 Inverse Legs").GetComponent<MultiOptionToggle>();
+        _remainderInverseLegsPathToggle = GameObject.Find("R2 Inverse Path").GetComponent<Toggle>();
+
         _ForwardLegsToggle = GameObject.Find("ForwardLegsOptionToggle").GetComponent<MultiOptionToggle>();
         _ForwardLegsPathToggle = GameObject.Find("ForwardLegsPathToggle").GetComponent<Toggle>();
         _ForwardLegsZetaCircleToggle = GameObject.Find("ForwardLegsBPToZetaCircleToggle").GetComponent<Toggle>();
@@ -87,6 +97,11 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         if(_symmeytryToggle.isOn) DrawSymmetryPoint();
         if(_symmetryRealPathToggle.isOn) DrawSymmetryPath();
         if(_reverseLinkToggle.isOn) DrawBisectorLink();
+
+        DrawRemainderForwardLegs(_remainderForwardLegsToggle.GetSelectedOption().Item1);
+        if(_remainderForwardLegsPathToggle.isOn) DrawRemainderForwardLegsPath();
+        DrawRemainderInverseLegs(_remainderInverseLegsToggle.GetSelectedOption().Item1);
+        if(_remainderInverseLegsPathToggle.isOn) DrawRemainderInverseLegsPath();
 
         DrawForwardLegs(_ForwardLegsToggle.GetSelectedOption().Item1);
         if(_ForwardLegsPathToggle.isOn) DrawForwardLegsPath();
@@ -236,9 +251,32 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     }
 
     #region Forward
+    private void DrawRemainderForwardLegs(int numToDraw)
+    {
+        if (numToDraw == 0) return;
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _forwardLegsColor;
+            Draw.Thickness = 1f;
+
+            var pt = _spiralCalculator.GetRemainderForwardBisector();
+
+            ShapesUtils.DrawCross45(pt, 0.08f);
+
+            Draw.Line(Vector2.zero, pt, Color.green);
+            if (numToDraw == 2) Draw.Line(pt, pt + _spiralCalculator.GetRemainderInverseBisector(), Color.red);
+        }
+    }
+
+    private void DrawRemainderForwardLegsPath()
+    {
+        DrawPath(_spiralCalculator.GetRemainderForwardBisectorPath(), _symmetryColor);
+    }
+    
     private void DrawForwardLegs(int numToDraw)
     {
-        if(numToDraw == 0) return;
+        if (numToDraw == 0) return;
         using (Draw.StyleScope)
         {
             Draw.Color = _forwardLegsColor;
@@ -250,7 +288,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.green);
-            if(numToDraw == 2) Draw.Line(pt, pt + inversePt, Color.red);
+            if (numToDraw == 2) Draw.Line(pt, pt + inversePt, Color.red);
         }
     }
 
@@ -267,9 +305,32 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     }
     #endregion
     #region Inverse
+    private void DrawRemainderInverseLegs(int numToDraw)
+    {
+        if (numToDraw == 0) return;
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _inverseLegsColor;
+            Draw.Thickness = 1f;
+
+            var pt = _spiralCalculator.GetRemainderInverseBisector();
+
+            ShapesUtils.DrawCross45(pt, 0.08f);
+
+            Draw.Line(Vector2.zero, pt, Color.red);
+            if (numToDraw == 2) Draw.Line(pt, pt + _spiralCalculator.GetRemainderForwardBisector(), Color.green);
+        }
+    }
+
+    private void DrawRemainderInverseLegsPath()
+    {
+        DrawPath(_spiralCalculator.GetRemainderInverseBisectorPath(), _symmetryColor);
+    }
+
     private void DrawInverseLegs(int numToDraw)
     {
-        if(numToDraw == 0) return;
+        if (numToDraw == 0) return;
 
         using (Draw.StyleScope)
         {
@@ -282,7 +343,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.red);
-            if(numToDraw == 2) Draw.Line(pt, pt + forwardPt, Color.green);
+            if (numToDraw == 2) Draw.Line(pt, pt + forwardPt, Color.green);
         }
     }
 
@@ -410,6 +471,30 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
             }
         });
 
+        _remainderForwardLegsToggle.OnOptionChanged += SubRemainderForwardOptionBisector;
+        _remainderForwardLegsPathToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateRemainderForwardBisectorPath += SubRemainderForwardPath;
+            }
+            else
+            {
+                SpiralCalculator.UpdateRemainderForwardBisectorPath -= SubRemainderForwardPath;
+            }
+        });
+
+        _remainderInverseLegsToggle.OnOptionChanged += SubRemainderInverseOptionBisector;
+        _remainderInverseLegsPathToggle.onValueChanged.AddListener((value) => {
+            if (value)
+            {
+                SpiralCalculator.UpdateRemainderInverseBisectorPath += SubRemainderInversePath;
+            }
+            else
+            {
+                SpiralCalculator.UpdateRemainderInverseBisectorPath -= SubRemainderInversePath;
+            }
+        });
+
         _ForwardLegsToggle.OnOptionChanged += SubForwardOptionBisector;
 
         _ForwardLegsPathToggle.onValueChanged.AddListener((value) => {
@@ -428,11 +513,11 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _inverseLegsPathToggle.onValueChanged.AddListener((value) => {
             if (value)
             {
-                SpiralCalculator.UpdateInverseSumPath += SubInversePath;
+                SpiralCalculator.UpdateInverseBisectorPath += SubInversePath;
             }
             else
             {
-                SpiralCalculator.UpdateInverseSumPath -= SubInversePath;
+                SpiralCalculator.UpdateInverseBisectorPath -= SubInversePath;
             }
         });
 
@@ -486,9 +571,42 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     private void SubEms(Zeta.Spiral emsSpiral) {}
     private void SubSymmetryPoint(Vector symmetryPoint) {}
     private void SubSymmetryPath(Vector2[] symmetryPath) {}
-    private void SubForwardOptionBisector(int option) 
+    
+    private void SubRemainderForwardOptionBisector(int option)
     {
-        if(option == 0)
+        if (option == 0)
+        {
+            SpiralCalculator.UpdateRemainderForwardBisector -= SubRemainderForwardBisector;
+            SpiralCalculator.UpdateRemainderInverseBisector -= SubRemainderInverseBisector;
+        }
+        else
+        {
+            SpiralCalculator.UpdateRemainderForwardBisector += SubRemainderForwardBisector;
+            SpiralCalculator.UpdateRemainderInverseBisector += SubRemainderInverseBisector;
+        }
+    }
+    private void SubRemainderForwardBisector(Vector forwardPt) {}
+    private void SubRemainderForwardPath(Vector2[] forwardPath) {}
+
+    private void SubRemainderInverseOptionBisector(int option)
+    {
+        if (option == 0)
+        {
+            SpiralCalculator.UpdateRemainderForwardBisector -= SubRemainderForwardBisector;
+            SpiralCalculator.UpdateRemainderInverseBisector -= SubRemainderInverseBisector;
+        }
+        else
+        {
+            SpiralCalculator.UpdateRemainderForwardBisector += SubRemainderForwardBisector;
+            SpiralCalculator.UpdateRemainderInverseBisector += SubRemainderInverseBisector;
+        }
+    }
+    private void SubRemainderInverseBisector(Vector inversePt) {}
+    private void SubRemainderInversePath(Vector2[] inversePath) {}
+
+    private void SubForwardOptionBisector(int option)
+    {
+        if (option == 0)
         {
             SpiralCalculator.UpdateForwardBisector -= SubForwardBisector;
             SpiralCalculator.UpdateInverseBisector -= SubInverseBisector;
@@ -503,7 +621,7 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
     private void SubForwardPath(Vector2[] forwardPath) {}
     private void SubInverseOptionBisector(int option) 
     {
-        if(option == 0)
+        if (option == 0)
         {
             SpiralCalculator.UpdateForwardBisector -= SubForwardBisector;
             SpiralCalculator.UpdateInverseBisector -= SubInverseBisector;

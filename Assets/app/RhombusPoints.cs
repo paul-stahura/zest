@@ -3,23 +3,23 @@ using UnityEngine;
 public class RhombusPoints : MonoBehaviour
 {
     // the intersection of bpForward and bpSymmetry = rhombus
-    public static Vector2 GetBPForward(double real, double index)
+    public static Vector2 GetBPForward(double real, double index, bool useR2 = false)
     {
         // (Vector2 p1, Vector2 p2) = BisectorPoint.BisectorLink(real, index);
         // var link = p2 - p1;
         // return p1 + link * (float)BisectorPoint.Djoint(index);
 
-        return ZpsGeneral.ForwardBisector(real, index);
+        return ZpsGeneral.ForwardBisector(real, index, useR2);
     }
 
     // when bpForward and bpInverse are opposites (bpF.x == -bpI.x && bpF.y == -bpI.y), we have a zero!
-    public static Vector2 GetBPInverse(double real, double index)
+    public static Vector2 GetBPInverse(double real, double index, bool useR2 = false)
     {
         // (Vector2 p1, Vector2 p2) = NewRiemmanSeigalFormulaSums.InverseBisectorLink(real, index);
         // var link = p2 - p1;
         // return p1 + link * (float)BisectorPoint.Djoint(index);
 
-        return ZpsGeneral.InverseBisector(real, index);
+        return ZpsGeneral.InverseBisector(real, index, useR2);
     }
 
     // intersection of foraward and inverse reflected bisector links

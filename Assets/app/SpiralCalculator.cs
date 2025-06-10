@@ -39,12 +39,11 @@ public class SpiralCalculator : MonoBehaviour
     #region Inverse
     public static Action<Vector[]> UpdateRsInverseSum;
     private Zeta.Spiral _rsInverseSumSpiral;
-    public static Action<Vector2[]> UpdateInverseSumPath;
-    private Vector2[] _inverseSumPath;
-    public static Action<Vector> UpdateInverseBisector;
-    private Vector _inverseBisector;
     public static Action<Vector2[]> UpdateInverseBisectorPath;
     private Vector2[] _inverseBisectorPath;
+    public static Action<Vector> UpdateInverseBisector;
+    private Vector _inverseBisector;
+    
     public static Action<Vector> UpdateInverseReflectedBisector;
     private Vector _inverseReflectedBisector;
     public static Action<Vector2[]> UpdateInverseReflectedBisectorPath;
@@ -54,8 +53,19 @@ public class SpiralCalculator : MonoBehaviour
     private Vector[] _chiSpiral;
     #endregion
 
+    #region Remainder/2
+    public static Action<Vector> UpdateRemainderForwardBisector;
+    private Vector _remainderForwardBisector;
+    public static Action<Vector2[]> UpdateRemainderForwardBisectorPath;
+    private Vector2[] _remainderForwardBisectorPath;
+    public static Action<Vector> UpdateRemainderInverseBisector;
+    private Vector _remainderInverseBisector;
+    public static Action<Vector2[]> UpdateRemainderInverseBisectorPath;
+    private Vector2[] _remainderInverseBisectorPath;
+
     public static Action<Vector> UpdateMidPoint;
     private Vector _midPoint;
+    #endregion
 
     public static Action<Vector> UpdateZps;
     private Vector _zpsPos;
@@ -209,10 +219,34 @@ public class SpiralCalculator : MonoBehaviour
         if(_rav == null) CalcRAV(_app.Index);
         return _rav;
     }
+    
+    public Vector GetRemainderForwardBisector()
+    {
+        if (_remainderForwardBisector == null) CalcRemainderForwardBisector();
+        return _remainderForwardBisector;
+    }
+
+    public Vector2[] GetRemainderForwardBisectorPath()
+    {
+        if(_remainderForwardBisectorPath == null) CalcRemainderForwardBisectorPath();
+        return _remainderForwardBisectorPath;
+    }
+
+    public Vector GetRemainderInverseBisector()
+    {
+        if(_remainderInverseBisector == null) CalcRemainderInverseBisector();
+        return _remainderInverseBisector;
+    }
+
+    public Vector2[] GetRemainderInverseBisectorPath()
+    {
+        if(_remainderInverseBisectorPath == null) CalcRemainderInverseBisectorPath();
+        return _remainderInverseBisectorPath;
+    }
 
     public Vector GetForwardBisector()
     {
-        if(_forwardBisector == null) CalcForwardBisector();
+        if (_forwardBisector == null) CalcForwardBisector();
         return _forwardBisector;
     }
 
@@ -344,8 +378,18 @@ public class SpiralCalculator : MonoBehaviour
 
         if(UpdateForwardBisectorPath != null) CalcForwardBisectorPath();
         else _forwardBisectorPath = null;
+
+        if (UpdateRemainderForwardBisector != null) CalcRemainderForwardBisector();
+        else _remainderForwardBisector = null;
+        if (UpdateRemainderForwardBisectorPath != null) CalcRemainderForwardBisectorPath();
+        else _remainderForwardBisectorPath = null;
+
+        if (UpdateRemainderInverseBisector != null) CalcRemainderInverseBisector();
+        else _remainderInverseBisector = null;
+        if (UpdateRemainderInverseBisectorPath != null) CalcRemainderInverseBisectorPath();
+        else _remainderInverseBisectorPath = null;
         
-        if(UpdateMidPoint != null) CalcMidPoint(real, index);
+        if (UpdateMidPoint != null) CalcMidPoint(real, index);
         else _midPoint = null;
 
         if (UpdateRsInverseSum != null) CalcRsInverseSum(index, real);
@@ -354,8 +398,8 @@ public class SpiralCalculator : MonoBehaviour
         if(UpdateInverseBisector != null) CalcInverseBisector();
         else _inverseBisector = null;
 
-        if(UpdateInverseSumPath != null) CalcInverseBisectorPath();
-        else _inverseSumPath = null;
+        if(UpdateInverseBisectorPath != null) CalcInverseBisectorPath();
+        else _inverseBisectorPath = null;
 
         if(UpdateInverseReflectedBisector != null) CalcInverseReflectedBisector();
         else _inverseReflectedBisector = null;
@@ -436,6 +480,48 @@ public class SpiralCalculator : MonoBehaviour
             _zrsSpiral.Update(0.5, index, SpiralFormulas.ReimannSiegel, _app.usingPolyImag);
         }
         UpdateZrs?.Invoke(_zrsSpiral);
+    }
+
+    private void CalcRemainderForwardBisector()
+    {
+        var real = GetReal();
+        var index = GetIndex();
+        _remainderForwardBisector = ZpsGeneral.ForwardBisector(real, index, useR2: true);
+        UpdateRemainderForwardBisector?.Invoke(_remainderForwardBisector);
+    }
+
+    private void CalcRemainderForwardBisectorPath()
+    {
+        _remainderForwardBisectorPath = new Vector2[RealPathLength];
+        var pathlength = _remainderForwardBisectorPath.Length;
+        for(int i = 0; i < pathlength - 1; i++)
+        {
+            var r = (float)i/pathlength;
+            _remainderForwardBisectorPath[i] = RhombusPoints.GetBPForward(r, GetIndex(), useR2: true);
+        }
+        _remainderForwardBisectorPath[RealPathLength - 1] = RhombusPoints.GetBPForward(1.0, GetIndex(), useR2: true);
+        UpdateRemainderForwardBisectorPath?.Invoke(_remainderForwardBisectorPath);
+    }
+
+    private void CalcRemainderInverseBisector()
+    {
+        var real = GetReal();
+        var index = GetIndex();
+        _remainderInverseBisector = ZpsGeneral.InverseBisector(real, index, useR2: true);
+        UpdateRemainderInverseBisector?.Invoke(_remainderInverseBisector);
+    }
+
+    private void CalcRemainderInverseBisectorPath()
+    {
+        _remainderInverseBisectorPath = new Vector2[RealPathLength];
+        var pathlength = _remainderInverseBisectorPath.Length;
+        for(int i = 0; i < pathlength - 1; i++)
+        {
+            var r = (float)i/pathlength;
+            _remainderInverseBisectorPath[i] = RhombusPoints.GetBPInverse(r, GetIndex(), useR2: true);
+        }
+        _remainderInverseBisectorPath[RealPathLength - 1] = RhombusPoints.GetBPInverse(1.0, GetIndex(), useR2: true);
+        UpdateRemainderInverseBisectorPath?.Invoke(_remainderInverseBisectorPath);
     }
 
     private void CalcMidPoint(double real, double index)
@@ -589,7 +675,7 @@ public class SpiralCalculator : MonoBehaviour
             _inverseBisectorPath[i] = RhombusPoints.GetBPInverse(r, index);
         }
         _inverseBisectorPath[RealPathLength - 1] = RhombusPoints.GetBPInverse(1.0, index);
-        UpdateInverseSumPath?.Invoke(_inverseBisectorPath);
+        UpdateInverseBisectorPath?.Invoke(_inverseBisectorPath);
     }
 
     public static Vector InverseReflectedIntersection(double r, double index)
