@@ -12,12 +12,14 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _inverseLinksToForwardReflectedLinksToggle;
     [SerializeField] private Color _linksToLinksColor;
 
-    // right angle links
-    [SerializeField] private Toggle _reflectedLinksToggle;
+    // "right" angle links
+    [SerializeField] private Toggle _forwardToInverseToggle;
+    [SerializeField] private Toggle _forwardReflectedToInverseReflectedToggle;
     [SerializeField] private Color _reflectedLinksColor;
 
     // links through Mid
-    [SerializeField] private Toggle _ReflectedThroughMidToggle;
+    [SerializeField] private Toggle _forwardToReflectedLinksToggle;
+    [SerializeField] private Toggle _inverseToReflectedLinksToggle;
     [SerializeField] private Color _reflectedThroughMidColor;
 
 
@@ -29,8 +31,11 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
         _forwardLinksToInverseReflectedLinksToggle = GameObject.Find("FtIR_Links").GetComponent<Toggle>();
         _inverseLinksToForwardReflectedLinksToggle = GameObject.Find("ItFR_Links").GetComponent<Toggle>();
 
-        _reflectedLinksToggle = GameObject.Find("FtI_FRtIR_Links").GetComponent<Toggle>();
-        _ReflectedThroughMidToggle = GameObject.Find("FtFR_ItIR_Links").GetComponent<Toggle>();
+        _forwardToInverseToggle = GameObject.Find("ForwardToInverseToggle").GetComponent<Toggle>();
+        _forwardReflectedToInverseReflectedToggle = GameObject.Find("ForwardReflectedToInverseReflectedToggle").GetComponent<Toggle>();
+        
+        _forwardToReflectedLinksToggle = GameObject.Find("ForwardToForwardReflectedToggle").GetComponent<Toggle>();
+        _inverseToReflectedLinksToggle = GameObject.Find("InverseToInverseReflectedToggle").GetComponent<Toggle>();
 
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
@@ -54,8 +59,8 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
     {
         if (_forwardLinksToInverseReflectedLinksToggle.isOn) DrawLinksToLinks();
         if (_inverseLinksToForwardReflectedLinksToggle.isOn) DrawInverseLinksToForwardReflectedLinks();
-        if (_reflectedLinksToggle.isOn) DrawReflectedLinks();
-        if (_ReflectedThroughMidToggle.isOn) DrawReflectedThroughMidLinks();
+        if (_forwardReflectedToInverseReflectedToggle.isOn || _forwardToInverseToggle.isOn)DrawReflectedLinks();
+        if (_forwardToReflectedLinksToggle.isOn || _inverseToReflectedLinksToggle.isOn) DrawReflectedThroughMidLinks();
     }
 
     private void DrawLinksToLinks()
@@ -110,13 +115,20 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
 
             for (int i = 0; i <= middleIndex; i++)
             {
-                var from = zakLinks[i];
-                var to = mid2 - zakLinks[zakLinks.Length - 1 - i];
-                Draw.Line(from, to);
-
-                from = zakLinks[zakLinks.Length - 1 - i];
-                to = mid2 - zakLinks[i];
-                Draw.Line(from, to);
+                if(_forwardToInverseToggle.isOn)
+                {
+                    var from = zakLinks[i];
+                    var to = mid2 - zakLinks[zakLinks.Length - 1 - i];
+                    Draw.Line(from, to);
+                }
+                
+                if (_forwardReflectedToInverseReflectedToggle.isOn)
+                {
+                    var from = zakLinks[zakLinks.Length - 1 - i];
+                    var to = mid2 - zakLinks[i];
+                    Draw.Line(from, to);
+                }
+                
             }
         }
     }
@@ -134,13 +146,19 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
 
             for (int i = 0; i <= middleIndex; i++)
             {
-                var from = zakLinks[i];
-                var to = mid2 - zakLinks[i];
-                Draw.Line(from, to);
+                if (_forwardToReflectedLinksToggle.isOn)
+                {
+                    var from = zakLinks[i];
+                    var to = mid2 - zakLinks[i];
+                    Draw.Line(from, to);
+                }
 
-                from = zakLinks[zakLinks.Length - 1 - i];
-                to = mid2 - zakLinks[zakLinks.Length - 1 - i];
-                Draw.Line(from, to);
+                if (_inverseToReflectedLinksToggle.isOn)
+                {
+                    var from = zakLinks[zakLinks.Length - 1 - i];
+                    var to = mid2 - zakLinks[zakLinks.Length - 1 - i];
+                    Draw.Line(from, to);
+                }
             }
         }
     }
