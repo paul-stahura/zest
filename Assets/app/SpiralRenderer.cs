@@ -93,7 +93,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         if (_emsForwardToggle.isOn) DrawEms(_spiralCalculator.GetEms());
         if (_ZrsForwardToggle.isOn) DrawZrs(_spiralCalculator.GetZrs());
-        if (_forwardReflectedToggle.isOn) DrawSpiralLines(_spiralCalculator.GetForwardReflected(), EmsColor);
+        if (_forwardReflectedToggle.isOn) DrawSpiral((int)Math.Floor(_spiralCalculator.GetIndex()), _spiralCalculator.GetForwardReflected(), EmsColor);
         if (_reverseSpiralToggle.isOn) DrawReverseSpiral();
         if (_inverseSpiralToggle.isOn) DrawRsInverseSum(_spiralCalculator.GetRsInverseSum());
         if (_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());

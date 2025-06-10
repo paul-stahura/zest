@@ -62,6 +62,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private int _etaPathIndex = 0;
 
     [SerializeField] private Toggle _midPointToggle;
+    [SerializeField] private Toggle _r2MidPointToggle;
     private Vector2[] _midPointPath = new Vector2[_traceLength];
     private int _midPointIndex = 0;
 
@@ -93,6 +94,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
 
         _midPointToggle = GameObject.Find("Mid Point Toggle").GetComponent<Toggle>();
+        _r2MidPointToggle = GameObject.Find("R2 Mid Point Toggle").GetComponent<Toggle>();
 
         _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
 
@@ -162,6 +164,12 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         });
 
         _midPointToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateMidPoint += UpdateMidPoint;
+            else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
+        });
+
+        _r2MidPointToggle.onValueChanged.AddListener((bool value) => 
         { 
             if(value) SpiralCalculator.UpdateMidPoint += UpdateMidPoint;
             else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
@@ -237,6 +245,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         if (_ravToggle.isOn) DrawRav();
         
         if (_midPointToggle.isOn) DrawMiddlePoint();
+        if (_r2MidPointToggle.isOn) DrawMiddlePoint(true);
 
         if (_drawOrigin.isOn) DrawOrigin();
 
@@ -295,14 +304,14 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawMiddlePoint()
+    private void DrawMiddlePoint(bool useR2 = false)
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = _zrsColor;
+            Draw.Color = useR2 ? _zrsColor : _zpsColor;
             Draw.Thickness = 1f;
-            var Bf = _spiralCalculator.GetForwardBisector();
-            var Bi = _spiralCalculator.GetInverseBisector();
+            var Bf = useR2 ? _spiralCalculator.GetRemainderForwardBisector() : _spiralCalculator.GetForwardBisector();
+            var Bi = useR2 ? _spiralCalculator.GetRemainderInverseBisector() : _spiralCalculator.GetInverseBisector();
             var Zps = Bf + Bi;
             var midPoint = _spiralCalculator.GetMidPoint();
             Draw.Ring(midPoint, 0.02f);
