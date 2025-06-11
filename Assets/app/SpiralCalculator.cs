@@ -26,6 +26,8 @@ public class SpiralCalculator : MonoBehaviour
 
     public static Action<Vector[]> UpdateZakLinks;
     private Vector[] _zakLinks;
+    public static Action<Vector[]> UpdateZakInverseLinks;
+    private Vector[] _zakInverseLinks;
     
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
@@ -164,6 +166,20 @@ public class SpiralCalculator : MonoBehaviour
         if (_zakLinks == null) CalcZakLinks(_app.Real, index);
         int middleIndex = (int)Math.Floor(index);
         return new Vector[] { _zakLinks[middleIndex], _zakLinks[middleIndex + 1] };
+    }
+
+    public Vector[] GetZakInverseLinks()
+    {
+        if(_zakInverseLinks == null) CalcZakInverseLinks(_app.Real, _app.Index);
+        return _zakInverseLinks;
+    }
+
+    public Vector[] GetZakInverseRemainderLink()
+    {
+        var index = _app.Index;
+        if (_zakInverseLinks == null) CalcZakInverseLinks(_app.Real, index);
+        int middleIndex = (int)Math.Floor(index);
+        return new Vector[] { _zakInverseLinks[middleIndex], _zakInverseLinks[middleIndex + 1] };
     }
 
     public Vector[] GetRsInverseSum()
@@ -370,6 +386,9 @@ public class SpiralCalculator : MonoBehaviour
         if (UpdateZakLinks != null) CalcZakLinks(real, index);
         else _zakLinks = null;
 
+        if (UpdateZakInverseLinks != null) CalcZakInverseLinks(real, index);
+        else _zakInverseLinks = null;
+
         if (UpdateEta != null) CalcEta(real, index);
         else _etaSpiral = null;
 
@@ -549,6 +568,11 @@ public class SpiralCalculator : MonoBehaviour
         UpdateZakLinks?.Invoke(_zakLinks);
     }
 
+    private void CalcZakInverseLinks(double real, double index)
+    {
+        _zakInverseLinks = ZakCalculator.CalcZakInverseLinks(real, index);
+        UpdateZakInverseLinks?.Invoke(_zakInverseLinks);
+    }
     
 
     private void CalcEta(double real, double index)
