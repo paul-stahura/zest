@@ -243,13 +243,15 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
         if (_ravToggle.isOn) DrawRav();
-        
+
         if (_midPointToggle.isOn) DrawMiddlePoint();
         if (_r2MidPointToggle.isOn) DrawMiddlePoint(true);
 
         if (_drawOrigin.isOn) DrawOrigin();
 
-        if(_camTargetColor.a > 0.05f) DrawCamTarget();
+        if (_camTargetColor.a > 0.05f) DrawCamTarget();
+
+        // DrawRemainderToForwardBisectorLine();
     }
 
     private void FlashCamTarget()
@@ -304,6 +306,27 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
+    private void DrawRemainderToForwardBisectorLine()
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = _zakColor;
+            Draw.Thickness = 1f;
+            var Bf = _spiralCalculator.GetForwardBisector();
+            var Br = _spiralCalculator.GetRemainderForwardBisector();
+            var Bi = _spiralCalculator.GetInverseBisector();
+            var FtR = (Br - Bf).Normalized();
+
+            var Bri = _spiralCalculator.GetRemainderInverseBisector();
+            var ItR = (Bri - Bi).Normalized();
+
+            var rtr = (Br - Bri).Length / 2;
+
+            Draw.Line(Br + FtR * rtr, Br - FtR * rtr);
+            Draw.Line(Bri + ItR * rtr, Bri - ItR * rtr);
+        }
+    }
+
     private void DrawMiddlePoint(bool useR2 = false)
     {
         using (Draw.StyleScope)
@@ -321,7 +344,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Line(Bf, Bi);
             Draw.Line(Vector2.zero, Zps);
         }
-        
+
         if (_traceToggle.isOn)
         {
             DrawPath(_midPointPath, _midPointIndex, _zrsColor);

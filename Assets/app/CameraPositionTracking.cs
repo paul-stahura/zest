@@ -41,6 +41,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         Auto,
         BisectorLink,
         ZakRemainder,
+        ZakInverseRemainder,
         MidPoint,
         SymmetryPoint,
         BpOneHalf,
@@ -202,7 +203,8 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 zTarget = ZetaTarget.Zrs;
             }
-            else if(SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0)
+            else if((SpiralCalculator.UpdateZakLinks != null && SpiralCalculator.UpdateZakLinks.GetInvocationList().Length > 0) ||
+                    (SpiralCalculator.UpdateZakInverseLinks != null && SpiralCalculator.UpdateZakInverseLinks.GetInvocationList().Length > 0))
             {
                 zTarget = ZetaTarget.Zak;
             }
@@ -268,6 +270,10 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
             {
                 sTarget = SymmetryTarget.ZakRemainder;
             }
+            else if (SpiralCalculator.UpdateZakInverseLinks != null && SpiralCalculator.UpdateZakInverseLinks.GetInvocationList().Length > 0)
+            {
+                sTarget = SymmetryTarget.ZakInverseRemainder;
+            }
             else if (SpiralCalculator.UpdateMidPoint != null && SpiralCalculator.UpdateMidPoint.GetInvocationList().Length > 0)
             {
                 sTarget = SymmetryTarget.MidPoint;
@@ -293,6 +299,14 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 var remainderLink = (zakRemainder[1] - zakRemainder[0]).ToVector2();
                 target = zakRemainder[0] + remainderLink / 2.0f;
                 newUP = new Vector2(-remainderLink.y, remainderLink.x).normalized;
+                break;
+            
+            case SymmetryTarget.ZakInverseRemainder:
+                var zakInverseRemainder = _spiralCalculator.GetZakInverseRemainderLink();
+                // get center of link
+                var inverseRemainderLink = (zakInverseRemainder[1] - zakInverseRemainder[0]).ToVector2();
+                target = zakInverseRemainder[0] + inverseRemainderLink / 2.0f;
+                newUP = new Vector2(-inverseRemainderLink.y, inverseRemainderLink.x).normalized;
                 break;
 
             case SymmetryTarget.MidPoint:

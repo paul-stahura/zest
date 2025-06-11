@@ -53,16 +53,96 @@ public class ZakCalculator : MonoBehaviour
 
     private static Complex I2(double r, double t) => Complex.Conjugate(I1(1 - r, t));
 
-    public static Complex Rak(double r, double t)
+    public static Complex Rak(double real, double index)
     {
-        double floorT = Math.Floor(t);
+        double floorT = Math.Floor(index);
 
-        Complex chi = SpiralCalculator.ChiBrian(new Complex(r, Zeta.IndexToImag(t)));
+        Complex chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(index)));
 
-        return -0.5 * Math.Pow(-1, floorT) * (I1(r, t) + chi * I2(r, t));
+        return -0.5 * Math.Pow(-1, floorT) * (I1(real, index) + chi * I2(real, index));
     }
 
     public static Vector[] CalcZakLinks(double real, double index)
+    {
+        // forward links
+        double imag = Zeta.IndexToImag(index);
+
+        int maxJ = (int)Math.Floor(index);
+
+        var forwardLinks = new Vector[maxJ + 1];
+        for (int j = 0; j <= maxJ; j++)
+        {
+            double sumX = 0.0;
+            double sumY = 0.0;
+
+            for (int n = 1; n <= j; n++)
+            {
+                double logn = Math.Log(n);
+                double angle = imag * logn;
+                double denominator = Math.Pow(n, real);
+
+                sumX += Math.Cos(angle) / denominator;
+                sumY += Math.Sin(angle) / denominator;
+            }
+
+            forwardLinks[j] = new Vector(sumX, -sumY);
+        }
+
+        // remainder link
+        var remainderLink = Rak(real, index).ToVector();
+
+        // inverse links
+        var inverseLinks = new Vector[maxJ + 1];
+
+        Complex z = new Complex(real, imag);
+        Complex chiVal = SpiralCalculator.ChiBrian(z);
+
+        for (int j = 0; j <= maxJ; j++)
+        {
+            double realSum = 0;
+            double imagSum = 0;
+
+            for (int n = 1; n <= j; n++)
+            {
+                double lnN = Math.Log(n);
+                double denom = Math.Pow(n, 1 - real);
+                realSum += Math.Cos(imag * lnN) / denom;
+                imagSum += Math.Sin(imag * lnN) / denom;
+            }
+
+            Complex seriesSum = new Complex(realSum, imagSum);
+            inverseLinks[j] = (chiVal * seriesSum).ToVector();
+        }
+
+        // Combine forward, remainder, and inverse links
+        var prevInverse = new Vector(0, 0);
+
+        var zakLinks = new Vector[forwardLinks.Length + inverseLinks.Length];
+        for (int i = 0; i < zakLinks.Length; i++)
+        {
+            if (i < forwardLinks.Length)
+            {
+                zakLinks[i] = forwardLinks[i];
+            }
+            else if (i < forwardLinks.Length + 1)
+            {
+                zakLinks[i] = zakLinks[forwardLinks.Length - 1] + remainderLink;
+            }
+            else
+            {
+                // add in reverse order
+                int startLink = inverseLinks.Length - 1 - (i - forwardLinks.Length - 1);
+                int endLink = inverseLinks.Length - 2 - (i - forwardLinks.Length - 1);
+                var inverseLink = inverseLinks[startLink] - inverseLinks[endLink];
+                prevInverse += inverseLink;
+                zakLinks[i] = zakLinks[forwardLinks.Length] + prevInverse;
+            }
+        }
+
+        return zakLinks;
+    }
+    
+    public static Vector[] CalcZakInverseLinks(double real, double index)
     {
         // forward links
         double imag = Zeta.IndexToImag(index);
@@ -122,7 +202,8 @@ public class ZakCalculator : MonoBehaviour
         {
             if (i < forwardLinks.Length)
             {
-                zakLinks[i] = forwardLinks[i];
+                // zakLinks[i] = forwardLinks[i];
+                zakLinks[i] = inverseLinks[i];
             }
             else if (i < forwardLinks.Length + 1)
             {
@@ -131,14 +212,14 @@ public class ZakCalculator : MonoBehaviour
             else
             {
                 // add in reverse order
-                int startLink = inverseLinks.Length - 1 - (i - forwardLinks.Length - 1);
-                int endLink = inverseLinks.Length - 2 - (i - forwardLinks.Length - 1);
-                var inverseLink = inverseLinks[startLink] - inverseLinks[endLink];
+                int startLink = forwardLinks.Length - 1 - (i - forwardLinks.Length - 1);
+                int endLink = forwardLinks.Length - 2 - (i - forwardLinks.Length - 1);
+                var inverseLink = forwardLinks[startLink] - forwardLinks[endLink];
                 prevInverse += inverseLink;
                 zakLinks[i] = zakLinks[forwardLinks.Length] + prevInverse;
             }
         }
-        
+
         return zakLinks;
     }
 }

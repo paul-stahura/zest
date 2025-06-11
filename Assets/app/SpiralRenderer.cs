@@ -27,6 +27,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color ZakRemainderColor;
     [SerializeField] private Toggle _zakLinksToggle;
     [SerializeField] private Toggle _zakRemainderLinkToggle;
+    [SerializeField] private Toggle _zakInverseLinksToggle;
+    [SerializeField] private Toggle _zakInverseRemainderLinkToggle;
 
     [SerializeField] private Color EtaSpiralColor;
     [SerializeField] private Toggle _etaSpiralToggle;
@@ -55,6 +57,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         _zakLinksToggle = GameObject.Find("ZakLinksToggle").GetComponent<Toggle>();
         _zakRemainderLinkToggle = GameObject.Find("ZakRemainderLinkToggle").GetComponent<Toggle>();
+
+        _zakInverseLinksToggle = GameObject.Find("ZakInverseLinksToggle").GetComponent<Toggle>();
+        _zakInverseRemainderLinkToggle = GameObject.Find("ZakInverseRemainderLinkToggle").GetComponent<Toggle>();
 
         _etaSpiralToggle = GameObject.Find("EtaSpiralToggle").GetComponent<Toggle>();
 
@@ -100,6 +105,9 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         if (_zakLinksToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakLinks(), ZakColor);
         if (_zakRemainderLinkToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakRemainderLink(), ZakRemainderColor, 3);
+
+        if (_zakInverseLinksToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakInverseLinks(), ZakColor);
+        if (_zakInverseRemainderLinkToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakInverseRemainderLink(), ZakRemainderColor, 3);
 
         if (_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
 
