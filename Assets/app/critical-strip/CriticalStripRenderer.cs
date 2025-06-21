@@ -40,10 +40,20 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
     
     [Header("Centering")]
-    [SerializeField] private Button centerButton; // UI button to center on current position
+    [SerializeField] private Button centerButton;
+    [SerializeField] private float longPressDuration = 1f;
+    [Tooltip("Animation duration for a single click of the center button.")]
+    [SerializeField] private float centerAnimDuration = 0.5f;
+    [Tooltip("Animation duration when centering is locked. A smaller value means a tighter, faster follow.")]
+    [SerializeField] private float lockedCenterAnimDuration = 0.1f;
+    [SerializeField] private Image lockedStateImage; // Image to show when locked (can be null)
+    private bool isLocked = false; // Whether auto-centering is locked on
+    private bool isPressingButton = false; // Whether button is currently being pressed
+    private float buttonPressTime = 0f; // How long button has been pressed
+    private bool longPressHandled = false; // Flag to prevent click after long press
+    private Image defaultButtonImage; // Reference to the default button image
     private Coroutine centerCoroutine;
-    private const float centerAnimDuration = 0.5f; // seconds
-    
+
     // Core components
     private CriticalStripTransform criticalStripTransform;  // Handles coordinate transformations between strip and viewport
     private Dictionary<PointSet, List<RectTransform>> pointObjects;  // Maps point sets to their UI representations
@@ -165,7 +175,12 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Wire up center button if assigned
         if (centerButton != null)
         {
-            centerButton.onClick.AddListener(CenterOnCurrentPosition);
+            centerButton.onClick.AddListener(OnCenterButtonClick);
+            SetupCenterButtonEventHandlers();
+            if (lockedStateImage == null)
+            {
+                Debug.LogWarning("[CriticalStripRenderer] lockedStateImage is not assigned in the Inspector, so lock state changes will not be visible.");
+            }
         }
 
         // Wire up space toggle button if assigned
@@ -899,11 +914,23 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private void OnIndexChanged(double index)
     {
         UpdateCurrentPosIndicator();
+        
+        // If locked, auto-center on position changes
+        if (isLocked)
+        {
+            CenterOnCurrentPosition();
+        }
     }
 
     private void OnRealChanged(double real)
     {
         UpdateCurrentPosIndicator();
+        
+        // If locked, auto-center on position changes
+        if (isLocked)
+        {
+            CenterOnCurrentPosition();
+        }
     }
 
     private void UpdateCurrentPosIndicator()
@@ -956,6 +983,20 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 blinkTimer = 0f;
                 isVisible = !isVisible;
                 UpdateIndicatorVisibility();
+            }
+        }
+        
+        // Handle long press detection
+        if (isPressingButton)
+        {
+            buttonPressTime += Time.deltaTime;
+            if (buttonPressTime >= longPressDuration && !isLocked)
+            {
+                Debug.Log("[CriticalStripRenderer] Long press detected, setting lock state to true.");
+                // Long press detected, activate lock
+                SetLockedState(true);
+                isPressingButton = false; // Stop checking for long press
+                longPressHandled = true; // Set flag to consume the upcoming click event
             }
         }
     }
@@ -1205,6 +1246,120 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     }
 
     /// <summary>
+    /// Sets up event handlers for long press detection on the center button
+    /// </summary>
+    private void SetupCenterButtonEventHandlers()
+    {
+        // Get reference to the default button image
+        defaultButtonImage = centerButton.GetComponent<Image>();
+        if (defaultButtonImage == null)
+        {
+            Debug.LogError("[CriticalStripRenderer] Center button is missing its Image component.");
+        }
+        
+        // Add event triggers for pointer down/up
+        EventTrigger trigger = centerButton.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null)
+        {
+            trigger = centerButton.gameObject.AddComponent<EventTrigger>();
+        }
+        
+        // Pointer down event
+        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+        pointerDown.eventID = EventTriggerType.PointerDown;
+        pointerDown.callback.AddListener((data) => OnButtonPointerDown());
+        trigger.triggers.Add(pointerDown);
+        
+        // Pointer up event
+        EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+        pointerUp.eventID = EventTriggerType.PointerUp;
+        pointerUp.callback.AddListener((data) => OnButtonPointerUp());
+        trigger.triggers.Add(pointerUp);
+        
+        // Pointer exit event (in case user drags off button)
+        EventTrigger.Entry pointerExit = new EventTrigger.Entry();
+        pointerExit.eventID = EventTriggerType.PointerExit;
+        pointerExit.callback.AddListener((data) => OnButtonPointerUp());
+        trigger.triggers.Add(pointerExit);
+    }
+
+    /// <summary>
+    /// Called when center button is pressed down
+    /// </summary>
+    private void OnButtonPointerDown()
+    {
+        Debug.Log("[CriticalStripRenderer] Center button pointer down.");
+        isPressingButton = true;
+        buttonPressTime = 0f;
+        longPressHandled = false; // Reset the flag on each new press
+    }
+
+    /// <summary>
+    /// Called when center button is released or pointer exits
+    /// </summary>
+    private void OnButtonPointerUp()
+    {
+        Debug.Log("[CriticalStripRenderer] Center button pointer up.");
+        isPressingButton = false;
+        buttonPressTime = 0f;
+    }
+
+    /// <summary>
+    /// Handles center button click - toggles lock state if already locked, otherwise centers once
+    /// </summary>
+    private void OnCenterButtonClick()
+    {
+        Debug.Log("[CriticalStripRenderer] Center button clicked.");
+        // If a long press was just handled, do nothing on the subsequent click event
+        if (longPressHandled)
+        {
+            Debug.Log("[CriticalStripRenderer] Click ignored because a long press was just handled.");
+            return;
+        }
+
+        if (isLocked)
+        {
+            Debug.Log("[CriticalStripRenderer] Is locked, so unlocking.");
+            // If locked, unlock it
+            SetLockedState(false);
+        }
+        else
+        {
+            Debug.Log("[CriticalStripRenderer] Is not locked, so centering once.");
+            // If not locked, just center once (normal behavior)
+            CenterOnCurrentPosition();
+        }
+    }
+
+    /// <summary>
+    /// Sets the locked state and updates UI accordingly
+    /// </summary>
+    private void SetLockedState(bool locked)
+    {
+        isLocked = locked;
+        Debug.Log($"[CriticalStripRenderer] Setting locked state to {locked}.");
+        
+        // Update button image based on state
+        if (defaultButtonImage != null && lockedStateImage != null)
+        {
+            Debug.Log($"[CriticalStripRenderer] Updating button visuals. Default enabled: {!locked}, Locked active: {locked}.");
+            defaultButtonImage.enabled = !locked;
+            lockedStateImage.gameObject.SetActive(locked);
+        }
+        else
+        {
+            if (defaultButtonImage == null) Debug.LogWarning("[CriticalStripRenderer] defaultButtonImage is null.");
+            if (lockedStateImage == null) Debug.LogWarning("[CriticalStripRenderer] lockedStateImage is null.");
+        }
+        
+        // If locking, center immediately
+        if (locked)
+        {
+            CenterOnCurrentPosition();
+        }
+    }
+
+    /// <summary>
     /// Smoothly animates the viewport to center the current App.Real/App.Index position if possible.
     /// </summary>
     public void CenterOnCurrentPosition()
@@ -1231,10 +1386,13 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         if (Mathf.Abs(criticalStripTransform.MinIndex - newMin) < 1e-4f && Mathf.Abs(criticalStripTransform.MaxIndex - newMax) < 1e-4f)
             return;
 
+        // Determine the animation duration based on the lock state
+        float duration = isLocked ? lockedCenterAnimDuration : centerAnimDuration;
+
         // Stop any existing centering animation
         if (centerCoroutine != null)
             StopCoroutine(centerCoroutine);
-        centerCoroutine = StartCoroutine(CenterViewportCoroutine(newMin, newMax, centerAnimDuration));
+        centerCoroutine = StartCoroutine(CenterViewportCoroutine(newMin, newMax, duration));
     }
 
     private IEnumerator CenterViewportCoroutine(float targetMin, float targetMax, float duration)
