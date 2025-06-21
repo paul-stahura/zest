@@ -13856,6 +13856,8 @@ MonoBehaviour:
   ZakRemainderColor: {r: 1, g: 0.6508097, b: 0, a: 0.49019608}
   _zakLinksToggle: {fileID: 0}
   _zakRemainderLinkToggle: {fileID: 0}
+  _zakInverseLinksToggle: {fileID: 0}
+  _zakInverseRemainderLinkToggle: {fileID: 0}
   EtaSpiralColor: {r: 1, g: 0.8955007, b: 0, a: 1}
   _etaSpiralToggle: {fileID: 0}
   _realPathToggle: {fileID: 0}
@@ -39042,8 +39044,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577174951}
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
-  m_Value: 0.99999976
-  m_Size: 0.71341455
+  m_Value: 1
+  m_Size: 0.7134147
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -72157,7 +72159,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0.000000000000000
+  m_Text: 0.00000000000000
 --- !u!222 &1512771992
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -78630,7 +78632,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0.000000000000000
+  m_Text: 0.00000000000000
 --- !u!222 &1609120646
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -100419,7 +100421,7 @@ MonoBehaviour:
   currentZoom: 0.8
   centerButton: {fileID: 391449874}
   app: {fileID: 338235377}
-  spaceToggleButton: {fileID: 0}
+  spaceToggleButton: {fileID: 1886747997}
   spaceModeText: {fileID: 0}
   imagZoomSensitivity: 2
   imagScrollSensitivity: 10

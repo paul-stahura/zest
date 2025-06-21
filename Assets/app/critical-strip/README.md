@@ -1,77 +1,98 @@
 # Critical Strip Visualization System (Revised)
 
 ## Overview
-The Critical Strip Visualization System is a Unity-based tool designed to render and interact with points defined in the Riemann Zeta function's critical strip. This revised version features a refactored architecture that ensures optimal performance and smooth user interactions, even with large point datasets.
 
-Key improvements include:
-- Decoupled rendering and interaction logic
-- Optimized mesh-based point rendering with advanced performance optimizations
-- Enhanced coordinate transformations with high precision and snap-to-grid behavior
-- A streamlined UI with a collapsible critical strip window and smooth animations
-- A new interaction handler that centralizes user input events
+The Critical Strip Visualization System is a Unity-based tool designed to render and interact with points from the Riemann Zeta function's critical strip. This revised version features a completely refactored, high-performance architecture that separates interaction logic from the rendering pipeline, ensuring smooth and responsive visualization of very large point datasets.
+
+The system is built on a modular architecture where each component has a clear responsibility:
+-   **View & Interaction Control (`CriticalStripRenderer`)**: Manages the viewport, user input for pan & zoom, and drawing auxiliary graphics like the critical line and position indicator.
+-   **Data & Rendering Pipeline (`PointSetManager`, `PointsMeshRenderer`)**: Handles loading point set files and orchestrates the efficient, mesh-based rendering of millions of points.
+-   **Point-Specific Interaction (`PointSetInteractionHandler`)**: Captures mouse events like clicks and hovers for the otherwise non-interactive rendered mesh.
+
+A key feature of this system is its **dual-coordinate space**, allowing the user to seamlessly toggle the vertical axis between traditional **Index** values and the corresponding **Imaginary** `t` values of the zeta function zeros.
 
 ## Core Components
 
-### 1. CriticalStripWindow
-Manages the UI container (collapsible window) for the critical strip display.
-- Provides smooth expand/collapse animations using easing curves.
-- Integrates updated UI controls and event handling, decoupled from rendering logic for improved responsiveness.
+### 1. PointSetManager
+The central coordinator of the visualization. It is responsible for:
+-   Loading and parsing point set data from `.csv` files.
+-   Managing the lifecycle of all active point sets.
+-   Orchestrating the rendering pipeline by creating and managing `PointsMeshRenderer` instances for each point set.
+-   Chunking large point sets (over 5,000 points) into multiple mesh renderers to stay within Unity's vertex limits.
+-   Attaching a `PointSetInteractionHandler` to each set to enable user interaction.
 
-### 2. CriticalStripTransform
-Handles conversions between coordinate spaces:
-- **Critical Strip Space:** (real [0,1], index)
-- **Viewport Space:** Local UI coordinates
-- **Screen Space:** Mouse/touch input coordinates
+### 2. PointsMeshRenderer
+This is a highly optimized, custom UI component that renders a list of points as a single mesh.
+-   Inherits from `MaskableGraphic` to generate mesh geometry directly via the `OnPopulateMesh` method.
+-   Renders thousands of points in a single draw call, providing excellent performance.
+-   Performs its own view frustum culling to avoid generating vertices for off-screen points.
+-   It is a pure renderer and does not handle any input itself.
 
-Features include high-precision arithmetic and a snap-to-grid behavior for points near the critical line (real = 0.5) with dynamically configurable thresholds.
-
-### 3. PointSet
-Represents a collection of points loaded from CSV files.
-- Supports a metadata header (set name, color in #RRGGBBAA format, and a skipCriticalLine flag) to boost performance.
-- Enhanced error handling with robust CSV parsing and high-precision coordinate management.
+### 3. PointSetInteractionHandler
+This component enables user interaction for the otherwise non-interactive meshes created by `PointsMeshRenderer`.
+-   It's attached to a transparent UI object that overlays its corresponding point set.
+-   It captures all pointer events (click, move, enter, exit).
+-   On user interaction, it searches through the raw data of **all active point sets** to find the nearest point to the cursor.
+-   For hover effects, it manages a single, dedicated "hover point" GameObject, which it moves to the position of the hovered data point and animates. This avoids costly mesh regeneration.
 
 ### 4. CriticalStripRenderer
-The core component responsible for rendering points using advanced mesh-based techniques:
-- Efficiently generates custom meshes for high-density point rendering.
-- Separates rendering operations from user input logic to improve performance and maintainability.
-- Supports smooth panning, zooming, and real-time point selection with optimized culling and batching.
+This component now acts as the primary **View Controller**. Its previous role of rendering points via prefabs is legacy and no longer used by the `PointSetManager`. Its current responsibilities include:
+-   Handling all user input for **panning** (drag) and **zooming** (scroll) the viewport.
+-   Owning and providing access to the `CriticalStripTransform`.
+-   Emitting an `OnViewportChanged` event that other components (like `PointSetManager` and `IndexLabelsRenderer`) subscribe to.
+-   Rendering auxiliary UI elements:
+    -   A vertical line at the critical line (real = 0.5).
+    -   A blinking indicator for the current position selected in the app.
 
-### 5. PointSetManager
-Manages the loading, saving, and organization of multiple point sets.
-- Integrates with CSV file formats including metadata for color coding and optimization flags.
-- Implements filtering and batch processing to handle large datasets effectively.
-- Provides multi-select options and dynamic toggling of point set visibility.
+### 5. CriticalStripTransform
+A non-MonoBehaviour class that handles all coordinate space conversions.
+-   **Dual-Space Y-Axis**: Converts between `Index` and `Imaginary` `t`-values for the y-axis.
+-   **Coordinate Systems**: Manages transformations between:
+    -   **Critical Strip Space**: The logical coordinates (real `[0,1]`, and `index` or `imaginary` `y`).
+    -   **Viewport Space**: The local pixel coordinates of the UI `RectTransform`.
+    -   **Screen Space**: The global pixel coordinates from mouse/touch input.
+-   **Snap-to-Line**: Snaps any click or selection within a 3-pixel threshold of the critical line to `real = 0.5` for ease of use.
 
-### 6. PointsMeshRenderer
-Handles optimized mesh generation for point visualization:
-- Dynamically adjusts point size and color based on zoom and other parameters.
-- Implements off-screen culling and batching techniques to ensure smooth performance during interactions.
+### 6. IndexLabelsRenderer
+Renders dynamically-scaled labels for the vertical axis of the viewport.
+-   Subscribes to `CriticalStripRenderer.OnViewportChanged` to redraw labels on pan or zoom.
+-   Intelligently adjusts label density and decimal precision based on the visible range.
+-   Supports both **Index** and **Imaginary** space, displaying the correct labels (e.g., with a "t=" prefix for imaginary values).
 
-### 7. PointsMeshHoverOverlay
-Manages hover interactions over rendered points:
-- Detects and animates hover effects with configurable thresholds.
-- Implements snap-to-grid behavior for more precise point selection, especially near the critical line.
-- Provides real-time coordinate updates during hover events.
+### 7. PointSet
+A data class representing a collection of points loaded from a file.
+-   Stores metadata like `Name`, `Color`, `PointSize`, and optimization flags.
+-   Holds the original point data using `double` precision for accuracy.
 
-### 8. IndexLabelsRenderer
-Renders dynamically-scaled index labels aligned with the point sets:
-- Automatically adjusts label density and formatting based on the current zoom level.
-- Ensures clear visual context by aligning labels with their corresponding points.
+### 8. CriticalStripWindow
+Manages the collapsible UI panel that contains the entire visualization.
+-   Provides smooth expand/collapse animations with easing.
 
 ### 9. CriticalStripStats
-Displays real-time statistics about the rendered points:
-- Shows totals for points rendered and other active metrics useful for debugging and performance monitoring.
+A simple UI component that displays real-time statistics, such as the total number of points loaded.
 
-### 10. PointSetInteractionHandler
-A newly integrated component dedicated to managing user input:
-- Centralizes mouse, touch, and keyboard interactions (clicks, drags, zooming, and keyboard shortcuts).
-- Decouples interaction logic from rendering components, ensuring a cleaner and more maintainable codebase.
+## File Management
+Point set data is managed via `.csv` files located in `Assets/Resources/CriticalStripPoints/`. The system uses an enhanced file format that includes metadata directly in the file.
 
-## Interaction and Event Handling
+### Enhanced Header Format
+The system recognizes special `#@` comment lines as metadata keys.
+-   `#@name`: The display name of the set.
+-   `#@color`: The color in `#RRGGBBAA` hex format.
+-   `#@skipCriticalLine`: `true`/`false`. If true, points very close to the critical line will not be loaded to improve performance.
+-   `#@samplingInterval`: An integer `N`. Loads only every Nth point from the file.
+-   `#@pointSize`: A float defining the rendered size of the points.
 
-- User actions (hover, click, drag, keyboard input) are managed by the PointSetInteractionHandler, which translates these events into coordinate adjustments via the CriticalStripTransform.
-- The CriticalStripRenderer and PointsMeshHoverOverlay respond to these updates, providing immediate visual feedback through smooth animations and snap-to-grid selections.
-- Integration with the main App.cs enables bidirectional event flow (e.g., RealChanged, IndexChanged), ensuring the visualization state remains synchronized with the overall application.
+The `PointSetManager` can automatically detect and convert older, simpler `.csv` files to this enhanced format on load.
+
+## Interaction and Data Flow
+1.  **Pan/Zoom**: The user interacts with the `CriticalStripRenderer`'s `RectTransform`. `CriticalStripRenderer` updates the view range in `CriticalStripTransform` and fires `OnViewportChanged`.
+2.  **View Update**: `PointSetManager` and `IndexLabelsRenderer` listen for `OnViewportChanged`.
+    -   `PointSetManager` recalculates the viewport positions of all points and updates the vertices in each `PointsMeshRenderer`.
+    -   `IndexLabelsRenderer` redraws its labels based on the new visible range.
+3.  **Hover/Click**: The user's mouse interacts with the `PointSetInteractionHandler`'s transparent `RectTransform`.
+    -   The handler finds the closest point in the data.
+    -   On **click**, it notifies the main `App` of the selected coordinates.
+    -   On **hover**, it activates and animates its `hoverPoint` GameObject at the correct position.
 
 ## Performance Optimizations
 
