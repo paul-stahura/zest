@@ -5,6 +5,7 @@
 [Bb]uilds/
 [Ll]ogs/
 
+
 .DS_Store
 .vscode
 .vsconfig
@@ -55,3 +56,5 @@ crashlytics-build.properties
 # Critical Strip Points
 Assets/Resources/CriticalStripPoints/favorite-points.csv
 Assets/Resources/CriticalStripPoints/favorite-points.csv.meta
+
+claude.md
