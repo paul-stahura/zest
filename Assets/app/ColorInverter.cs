@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class ColorInverter : MonoBehaviour
 {
     [SerializeField] private SpiralRenderer _spiralRenderer;
+    private CriticalStripRenderer _criticalStripRenderer;
     private Button _invertButton;
     private Camera _cam;
 
@@ -13,6 +14,7 @@ public class ColorInverter : MonoBehaviour
         _cam = Camera.main;
 
         _spiralRenderer = FindObjectOfType<SpiralRenderer>();
+        _criticalStripRenderer = FindObjectOfType<CriticalStripRenderer>();
 
         _invertButton = GetComponent<Button>();
         _invertButton.onClick.AddListener(Invert);
@@ -22,6 +24,11 @@ public class ColorInverter : MonoBehaviour
     {
         _cam.backgroundColor = InvertColor(_cam.backgroundColor);
         _spiralRenderer.InvertColors();
+        
+        if (_criticalStripRenderer != null)
+        {
+            _criticalStripRenderer.InvertColors();
+        }
     }
 
     // takes a color and returns the inverse

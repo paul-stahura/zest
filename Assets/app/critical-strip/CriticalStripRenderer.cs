@@ -29,7 +29,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [Header("Current Position Indicator")]
     [SerializeField] private float currentPosSize = 8;        // Size of the current position indicator
     [SerializeField] private float blinkRate = 0.5f;            // How fast the indicator blinks (in seconds)
-    [SerializeField] private Color indicatorColor = new Color(1f, 0f, 1f, .8f); // Fuchsia color
+    [SerializeField] private Color indicatorColor = new Color(1f, 1f, 1f, .8f); // Fuchsia color
     
     [Header("Zoom and Scroll Properties")]
     [SerializeField] private float zoomSensitivity = 0.1f;  // How fast to zoom with mouse wheel
@@ -997,6 +997,24 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 SetLockedState(true);
                 isPressingButton = false; // Stop checking for long press
                 longPressHandled = true; // Set flag to consume the upcoming click event
+            }
+        }
+    }
+
+    /// <summary>
+    /// Inverts the color of the current position indicator for better visibility when scene colors are inverted
+    /// </summary>
+    public void InvertColors()
+    {
+        indicatorColor = ColorInverter.InvertColor(indicatorColor);
+        
+        // Update the actual indicator's color if it exists
+        if (currentPosIndicator != null)
+        {
+            var image = currentPosIndicator.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = indicatorColor;
             }
         }
     }
