@@ -25,7 +25,7 @@ using System;
 public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
-    private const double MAX_INDEX = 11.0;
+    private const double MAX_INDEX = 20.0;
     private const double INDEX_STEP = 0.0001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
@@ -120,9 +120,141 @@ public static class FindIntersections
         SaveToCSV(thetaData);
     }
 
+    [MenuItem("Critical Strip/Find Equal Leg Lengths")]
+    public static void FindEqualLegLengths()
+    {
+        var equalLegsData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        var prevTheta = -BisectorPoint.ThetaTwo(MIN_INDEX);
+        
+        bool IsFractionalPartInRange(double value, double min, double max)
+        {
+            double frac = value - Math.Floor(value);
+            return frac >= min && frac <= max;
+        }
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding Equal Leg Lengths",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Equal leg lengths finding cancelled.");
+                return;
+            }
+
+            bool OneForth = IsFractionalPartInRange(index, 0.25, 0.26);
+            bool ThreeForths = IsFractionalPartInRange(index, 0.75, 0.76);
+
+            var currentTheta = -BisectorPoint.ThetaTwo(index);
+            // if currentTheta is less than the previous theta, we are close to counterflux / window point
+            if (currentTheta < prevTheta || Math.Abs(currentTheta - prevTheta) < 0.003f)
+            {
+                FindEqualLegLengths(index, equalLegsData);
+            }
+            prevTheta = currentTheta;
+
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(equalLegsData);
+    }
+
+    [MenuItem("Critical Strip/Find Equal Leg Lengths Around Critical Index")]
+    public static void FindEqualLegLengthsAroundCriticalIndex()
+    {
+        var equalLegsData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+        
+        bool IsFractionalPartInRange(double value, double min, double max)
+        {
+            double frac = value - Math.Floor(value);
+            return frac >= min && frac <= max;
+        }
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding Equal Leg Lengths",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Equal leg lengths finding cancelled.");
+                return;
+            }
+
+            bool OneForth = IsFractionalPartInRange(index, 0.25, 0.26);
+            bool ThreeForths = IsFractionalPartInRange(index, 0.75, 0.76);
+
+            // if currentTheta is less than the previous theta, we are close to counterflux / window point
+            if (OneForth || ThreeForths)
+            {
+                FindEqualLegLengths(index, equalLegsData);
+            }
+
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(equalLegsData);
+    }
+
+    private static void FindEqualLegLengths(double index, List<(double real, double index, Vector2 point)> equalLegsData)
+    {
+        const int realResolution = 1000;
+        double dt = 1.0 / realResolution;
+        double[] distances = new double[realResolution];
+        double[] ts = new double[realResolution];
+
+        for (int i = 0; i < realResolution; i++)
+        {
+            double t = i * dt;
+            ts[i] = t;
+            distances[i] = ZpsGeneral.ForwardBisector(t, index).Length - ZpsGeneral.InverseBisector(t, index).Length;
+        }
+
+        // find when the distance changes sign
+        for (int i = 0; i < realResolution - 1; i++)
+        {
+            double d0 = distances[i];
+            double d1 = distances[i + 1];
+            // Check if the distance is crossing zero
+            if ((d0 > 0 && d1 < 0) || (d0 < 0 && d1 > 0))
+            {
+                // We have a crossing, find the exact point
+                double low = ts[i];
+                double high = ts[i + 1];
+                for (int iter = 0; iter < 20; iter++)
+                {
+                    double mid = (low + high) / 2.0;
+                    double midDist = ZpsGeneral.ForwardBisector(mid, index).Length - ZpsGeneral.InverseBisector(mid, index).Length;
+                    if (Math.Abs(midDist) < 1e-6) { low = mid; high = mid; break; } // found zero distance
+                    if (midDist > 0)
+                        low = mid;
+                    else
+                        high = mid;
+                }
+
+                double refinedT = (low + high) / 2.0;
+                equalLegsData.Add((refinedT, index, new Vector(refinedT, index)));
+            }
+        }
+    }
+
     private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
     {
-        var twoPI = 2.0*Math.PI;
+        var twoPI = 2.0 * Math.PI;
         var ThetaTwo = -BisectorPoint.ThetaTwo(index);
         var phase = (ThetaTwo % twoPI) / twoPI;
         var pt = new Vector(phase, index);
