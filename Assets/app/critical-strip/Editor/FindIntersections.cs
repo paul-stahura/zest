@@ -26,7 +26,7 @@ public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 20.0;
-    private const double INDEX_STEP = 0.0001;
+    private const double INDEX_STEP = 0.000001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
     
@@ -232,6 +232,12 @@ public static class FindIntersections
             // Check if the distance is crossing zero
             if ((d0 > 0 && d1 < 0) || (d0 < 0 && d1 > 0))
             {
+                if (Vector3.Dot(ZpsGeneral.ForwardBisector(ts[i], index).Normalized(), ZpsGeneral.ForwardBisector(ts[i+1], index).Normalized()) < 0)
+                {
+                    continue; // we flipped the intersection side, skip this point
+                }
+
+
                 // We have a crossing, find the exact point
                 double low = ts[i];
                 double high = ts[i + 1];
@@ -247,6 +253,7 @@ public static class FindIntersections
                 }
 
                 double refinedT = (low + high) / 2.0;
+
                 equalLegsData.Add((refinedT, index, new Vector(refinedT, index)));
             }
         }
