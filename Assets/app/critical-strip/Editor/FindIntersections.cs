@@ -26,7 +26,7 @@ public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 20.0;
-    private const double INDEX_STEP = 0.0001;
+    private const double INDEX_STEP = 0.00001;
     
     private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
     
@@ -129,14 +129,6 @@ public static class FindIntersections
         int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
         int currentStep = 0;
 
-        var prevTheta = -BisectorPoint.ThetaTwo(MIN_INDEX);
-        
-        bool IsFractionalPartInRange(double value, double min, double max)
-        {
-            double frac = value - Math.Floor(value);
-            return frac >= min && frac <= max;
-        }
-
         for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
         {
             if (EditorUtility.DisplayCancelableProgressBar(
@@ -149,16 +141,7 @@ public static class FindIntersections
                 return;
             }
 
-            bool OneForth = IsFractionalPartInRange(index, 0.25, 0.26);
-            bool ThreeForths = IsFractionalPartInRange(index, 0.75, 0.76);
-
-            var currentTheta = -BisectorPoint.ThetaTwo(index);
-            // if currentTheta is less than the previous theta, we are close to counterflux / window point
-            if (currentTheta < prevTheta || Math.Abs(currentTheta - prevTheta) < 0.003f)
-            {
-                FindEqualLegLengths(index, equalLegsData);
-            }
-            prevTheta = currentTheta;
+            FindEqualLegLengths(index, equalLegsData);
 
             currentStep++;
         }
@@ -193,8 +176,10 @@ public static class FindIntersections
                 Debug.Log("Equal leg lengths finding cancelled.");
                 return;
             }
-
+            
             bool OneForth = IsFractionalPartInRange(index, 0.25, 0.26);
+            if(index < 3.0) OneForth = IsFractionalPartInRange(index, 0.25, 0.27);
+
             bool ThreeForths = IsFractionalPartInRange(index, 0.75, 0.76);
 
             // if currentTheta is less than the previous theta, we are close to counterflux / window point
@@ -212,7 +197,7 @@ public static class FindIntersections
 
     private static void FindEqualLegLengths(double index, List<(double real, double index, Vector2 point)> equalLegsData)
     {
-        const int realResolution = 1000;
+        const int realResolution = 100 + 1; // even numbers run into issues at real = 1/2
         double dt = 1.0 / realResolution;
         double[] distances = new double[realResolution];
         double[] ts = new double[realResolution];
@@ -224,6 +209,7 @@ public static class FindIntersections
             distances[i] = ZpsGeneral.ForwardBisector(t, index).Length - ZpsGeneral.InverseBisector(t, index).Length;
         }
 
+        List<int> crossings = new List<int>();
         // find when the distance changes sign
         for (int i = 0; i < realResolution - 1; i++)
         {
@@ -232,24 +218,59 @@ public static class FindIntersections
             // Check if the distance is crossing zero
             if ((d0 > 0 && d1 < 0) || (d0 < 0 && d1 > 0))
             {
-                // We have a crossing, find the exact point
-                double low = ts[i];
-                double high = ts[i + 1];
-                for (int iter = 0; iter < 20; iter++)
-                {
-                    double mid = (low + high) / 2.0;
-                    double midDist = ZpsGeneral.ForwardBisector(mid, index).Length - ZpsGeneral.InverseBisector(mid, index).Length;
-                    if (Math.Abs(midDist) < 1e-6) { low = mid; high = mid; break; } // found zero distance
-                    if (midDist > 0)
-                        low = mid;
-                    else
-                        high = mid;
-                }
-
-                double refinedT = (low + high) / 2.0;
-                equalLegsData.Add((refinedT, index, new Vector(refinedT, index)));
+                crossings.Add(i);
             }
         }
+        
+        // sanity check
+        if (crossings.Count != 1 && crossings.Count != 3)
+        {
+            Debug.LogWarning($"Unexpected number of crossings: {crossings.Count} at index {index:F15}");
+        }
+
+        if (crossings.Count == 1)
+        {
+            return; //skip only 0.5 crossing
+        }
+        
+        for (int i = 0; i < crossings.Count - 1; i++)
+        {
+            if (i == 1 && crossings.Count == 3)
+            {
+                i += 1; // skip 0.5 crossing
+            }
+            
+            int crossingIndex = crossings[i];
+            double real = ts[crossingIndex];
+            double realNext = ts[crossingIndex + 1];
+
+            if (Vector3.Dot(ZpsGeneral.ForwardBisector(real, index).Normalized(), ZpsGeneral.ForwardBisector(realNext, index).Normalized()) < 0)
+            {
+                continue; // we flipped the intersection side, skip this point
+            }
+
+            // We have a crossing, find the exact point
+            double low = real;
+            double high = realNext;
+            for (int iter = 0; iter < 20; iter++)
+            {
+                double mid = (low + high) / 2.0;
+                double midDist = ZpsGeneral.ForwardBisector(mid, index).Length - ZpsGeneral.InverseBisector(mid, index).Length;
+                if (Math.Abs(midDist) < 1e-6) { low = mid; high = mid; break; } // found zero distance
+
+                // Use the sign of the distance at the endpoints to determine which side to keep
+                double lowDist = ZpsGeneral.ForwardBisector(low, index).Length - ZpsGeneral.InverseBisector(low, index).Length;
+                if (Math.Sign(midDist) == Math.Sign(lowDist))
+                    low = mid;
+                else
+                    high = mid;
+            }
+
+            double refinedT = (low + high) / 2.0;
+
+            equalLegsData.Add((refinedT, index, new Vector(refinedT, index)));
+        }
+
     }
 
     private static void FindThetaData(double index, List<(double real, double index, Vector2 point)> thetaData)
@@ -370,7 +391,14 @@ public static class FindIntersections
     private static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
     {
         var csv = new StringBuilder();
-        csv.AppendLine("Pseudo Zeros,#8800FF");
+        // csv.AppendLine("Pseudo Zeros,#8800FF");
+        csv.AppendLine("# Point Set File Format:");
+        csv.AppendLine("# Settings are specified with #@ prefix followed by name: value");
+        csv.AppendLine("#@name: intersections");
+        csv.AppendLine("#@color:#ffffff");
+        csv.AppendLine("#@skipCriticalLine: false");
+        csv.AppendLine("#@samplingInterval: 1");
+        csv.AppendLine("# Data format: real,imaginary");
         
         foreach (var (real, index, _) in intersections)
         {

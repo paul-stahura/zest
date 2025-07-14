@@ -13852,8 +13852,8 @@ MonoBehaviour:
   _inverseSpiralToggle: {fileID: 0}
   InverseReflectedColor: {r: 0.8117648, g: 0, b: 0.4784314, a: 1}
   _inverseReflectedToggle: {fileID: 0}
-  ZakColor: {r: 0, g: 0, b: 0, a: 0}
-  ZakRemainderColor: {r: 0, g: 0, b: 0, a: 0}
+  ZakColor: {r: 0.60784316, g: 0, b: 1, a: 1}
+  ZakRemainderColor: {r: 1, g: 0.8941177, b: 0, a: 1}
   _zakLinksToggle: {fileID: 0}
   _zakRemainderLinkToggle: {fileID: 0}
   _zakInverseLinksToggle: {fileID: 0}
@@ -65281,7 +65281,7 @@ MonoBehaviour:
   _zrsColor: {r: 0.9607844, g: 0.6901961, b: 0.33333334, a: 1}
   _zrsToggle: {fileID: 0}
   _zrsPos: {fileID: 0}
-  _zakColor: {r: 0, g: 0, b: 0, a: 0}
+  _zakColor: {r: 0.60784316, g: 0, b: 1, a: 1}
   _zakToggle: {fileID: 0}
   _zakPos: {fileID: 0}
   _zpsColor: {r: 0, g: 0.8117648, b: 0.94509804, a: 1}
@@ -100441,7 +100441,7 @@ MonoBehaviour:
   longPressDuration: 1
   centerAnimDuration: 0.5
   lockedCenterAnimDuration: 0.1
-  lockedStateImage: {fileID: 0}
+  lockedStateImage: {fileID: 507223419}
   app: {fileID: 338235377}
   spaceToggleButton: {fileID: 0}
   spaceModeText: {fileID: 0}
