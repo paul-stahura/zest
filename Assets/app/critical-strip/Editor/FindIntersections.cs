@@ -178,7 +178,7 @@ public static class FindIntersections
             }
             
             bool OneForth = IsFractionalPartInRange(index, 0.25, 0.26);
-            if(index < 2.0) OneForth = IsFractionalPartInRange(index, 0.26, 0.27);
+            if(index < 3.0) OneForth = IsFractionalPartInRange(index, 0.25, 0.27);
 
             bool ThreeForths = IsFractionalPartInRange(index, 0.75, 0.76);
 
@@ -257,7 +257,10 @@ public static class FindIntersections
                 double mid = (low + high) / 2.0;
                 double midDist = ZpsGeneral.ForwardBisector(mid, index).Length - ZpsGeneral.InverseBisector(mid, index).Length;
                 if (Math.Abs(midDist) < 1e-6) { low = mid; high = mid; break; } // found zero distance
-                if (midDist < 0)
+
+                // Use the sign of the distance at the endpoints to determine which side to keep
+                double lowDist = ZpsGeneral.ForwardBisector(low, index).Length - ZpsGeneral.InverseBisector(low, index).Length;
+                if (Math.Sign(midDist) == Math.Sign(lowDist))
                     low = mid;
                 else
                     high = mid;
