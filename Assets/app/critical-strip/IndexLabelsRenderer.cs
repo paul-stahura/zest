@@ -72,10 +72,20 @@ public class IndexLabelsRenderer : MonoBehaviour
         }
     }
 
+    public void InvertColor()
+    {
+        // Invert the text color for all labels in the pool
+        Color invertedColor = ColorInverter.InvertColor(labelPool[0].color);
+        foreach (var label in labelPool)
+        {
+            label.color = invertedColor;
+        }
+    }
+
     private void HandleViewportChanged()
     {
         if (!isInitialized || stripTransform == null) return;
-        
+
         logs.AppendLine("Viewport changed, updating labels");
         // Update using MinValue/MaxValue which automatically uses the correct space
         UpdateLabels(stripTransform.MinValue, stripTransform.MaxValue);
