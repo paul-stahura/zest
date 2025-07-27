@@ -28,7 +28,7 @@ public static class FindIntersections
     private const double MAX_INDEX = 20.0;
     private const double INDEX_STEP = 0.00001;
     
-    private const int POINTS_PER_PATH = 10000; // 100x more points than BPSymmetryRenderer
+    private const int POINTS_PER_PATH = 1000000;
     
     // Known critical value that should have exactly 3 intersections
     private static readonly double CRITICAL_INDEX = 5.108561515808110;
@@ -90,6 +90,50 @@ public static class FindIntersections
 
         EditorUtility.ClearProgressBar();
         SaveToCSV(AnglePointsData);
+    }
+
+    [MenuItem("Critical Strip/ThetaTwo Angle PI by Real")]
+    public static void FindThetaTwoAnglePIByReal()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        int realCount = 21; // Number of real values to sample
+        double realStep = 0.5/(realCount - 1); // Step size for real values
+
+        bool[] prevThetaCross = new bool[realCount];
+        for (int i = 0; i < prevThetaCross.Length; i++)
+        {
+            // get the direction of the previous theta crossing
+            prevThetaCross[i] = Vector3.Cross(
+                ZpsGeneral.ForwardBisector(i * realStep, MIN_INDEX).Normalized(),
+                ZpsGeneral.InverseBisector(i * realStep, MIN_INDEX).Normalized()
+            ).z > 0 ? true : false;
+        }
+
+
+        for (double index = MIN_INDEX + INDEX_STEP; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaTwo Angle Zero",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            // For each real value, find the theta data
+            FindThetaTwoAnglePI(ref prevThetaCross, index, thetaData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveToCSV(thetaData);
     }
 
     [MenuItem("Critical Strip/Find ThetaTwo")]
@@ -194,6 +238,80 @@ public static class FindIntersections
         EditorUtility.ClearProgressBar();
         SaveToCSV(equalLegsData);
     }
+    
+    private static void FindThetaTwoAnglePI(ref bool[] prevThetaCross, double index, List<(double real, double index, Vector2 point)> thetaData)
+    {
+        int realCount = prevThetaCross.Length;
+        double realStep = 0.5/(realCount - 1); // Step size for real values
+        
+        for (int i = 0; i < prevThetaCross.Length; i++)
+        {
+            double real = i * realStep;
+            if(i == prevThetaCross.Length - 1) real = 0.5; // ensure we always check the 0.5 point
+
+            Vector forwardBisector = ZpsGeneral.ForwardBisector(real, index);
+            Vector inverseBisector = ZpsGeneral.InverseBisector(real, index);
+            bool currentThetaCross = Vector3.Cross(
+                forwardBisector.Normalized(),
+                inverseBisector.Normalized()
+            ).z > 0;
+
+            if (currentThetaCross != prevThetaCross[i])
+            {
+                // check that the crossing is on the 180 side
+                if (Vector3.Dot(forwardBisector.Normalized(), inverseBisector.Normalized()) > 0.5)
+                {
+                    prevThetaCross[i] = currentThetaCross;
+                    continue;
+                }
+
+                // We have a crossing, now find max angle
+                double low = index - INDEX_STEP;
+                double high = index;
+                for (int iter = 0; iter < 21; iter++)
+                {
+                    // find the max angle
+                    double mid = (low + high) / 2.0;
+                    Vector midForward = ZpsGeneral.ForwardBisector(real, mid);
+                    Vector midInverse = ZpsGeneral.InverseBisector(real, mid);
+                    double angle = Vector2.Angle(midForward.Normalized(), midInverse.Normalized());
+                    if (iter == 20 || Math.Abs(angle - 180) < 1e-6)
+                    {
+                        low = mid; high = mid; break;
+                    }
+
+                    // Use the angle at the endpoints to determine which side to keep
+                    double lowAngle = Vector2.Angle(
+                        ZpsGeneral.ForwardBisector(real, low).Normalized(),
+                        ZpsGeneral.InverseBisector(real, low).Normalized()
+                    );
+
+                    // use the larger angle to determine which side to keep
+                    if (Math.Abs(lowAngle - 180) < Math.Abs(angle - 180))
+                        low = mid;
+                    else
+                        high = mid;
+                }
+
+                double refinedIndex = (low + high) / 2.0;
+                Vector midForwardFinal = ZpsGeneral.ForwardBisector(real, refinedIndex);
+                Vector midInverseFinal = ZpsGeneral.InverseBisector(real, refinedIndex);
+                double finalAngle = Vector2.Angle(midForwardFinal.Normalized(), midInverseFinal.Normalized());
+                Vector2 point = new Vector(real, refinedIndex);
+
+                thetaData.Add((real, refinedIndex, point));
+
+                // add the symmetric point as well
+                if (i != prevThetaCross.Length - 1)
+                {
+                    point = new Vector(1.0 - real, refinedIndex);
+                    thetaData.Add((1.0 - real, refinedIndex, point));
+                }
+            }
+
+            prevThetaCross[i] = currentThetaCross;
+        }
+    }
 
     private static void FindEqualLegLengths(double index, List<(double real, double index, Vector2 point)> equalLegsData)
     {
@@ -221,7 +339,7 @@ public static class FindIntersections
                 crossings.Add(i);
             }
         }
-        
+
         // sanity check
         if (crossings.Count != 1 && crossings.Count != 3)
         {
@@ -232,14 +350,14 @@ public static class FindIntersections
         {
             return; //skip only 0.5 crossing
         }
-        
+
         for (int i = 0; i < crossings.Count - 1; i++)
         {
             if (i == 1 && crossings.Count == 3)
             {
                 i += 1; // skip 0.5 crossing
             }
-            
+
             int crossingIndex = crossings[i];
             double real = ts[crossingIndex];
             double realNext = ts[crossingIndex + 1];
@@ -286,7 +404,7 @@ public static class FindIntersections
     {
         var path1 = new Vector2[POINTS_PER_PATH];
         var path2 = new Vector2[POINTS_PER_PATH];
-        
+
         // Generate paths with higher resolution
         for (int i = 0; i < POINTS_PER_PATH; i++)
         {
@@ -294,16 +412,16 @@ public static class FindIntersections
             path1[i] = RhombusPoints.GetBPSymmetry((float)r, (float)index);
             path2[i] = RhombusPoints.GetBPForward((float)r, (float)index);
         }
-        
+
         var intersections = FindPathIntersections(path1, path2);
         Debug.Log($"Found {intersections.Length} intersections for index {index:F15}");
-        
+
         foreach (var intersection in intersections)
         {
             // Find closest point in either path to get real value
             double closestDist = double.MaxValue;
             double closestReal = 0.0;
-            
+
             for (int i = 0; i < path1.Length; i++)
             {
                 double dist = Vector2.Distance(path1[i], intersection);
@@ -313,7 +431,7 @@ public static class FindIntersections
                     closestReal = (double)i / POINTS_PER_PATH;
                 }
             }
-            
+
             for (int i = 0; i < path2.Length; i++)
             {
                 double dist = Vector2.Distance(path2[i], intersection);
@@ -323,7 +441,7 @@ public static class FindIntersections
                     closestReal = (double)i / POINTS_PER_PATH;
                 }
             }
-            
+
             intersectionData.Add((closestReal, index, intersection));
         }
     }
