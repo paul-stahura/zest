@@ -35,6 +35,11 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _etaToggle;
     [SerializeField] private TMP_Text _etaPos;
 
+    [SerializeField] private Toggle _fwdBisectorToggle;
+    [SerializeField] private Color _fwdBisectorColor;
+    [SerializeField] private Toggle _invBisectorToggle;
+    [SerializeField] private Color _invBisectorColor;
+
     [SerializeField] private Toggle _ravToggle;
     [SerializeField] private Color _ravColor;
 
@@ -95,6 +100,11 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
         _midPointToggle = GameObject.Find("Mid Point Toggle").GetComponent<Toggle>();
         _r2MidPointToggle = GameObject.Find("R2 Mid Point Toggle").GetComponent<Toggle>();
+
+        _fwdBisectorToggle = GameObject.Find("Fwd Bisector Target Toggle").GetComponent<Toggle>();
+
+        _invBisectorToggle = GameObject.Find("Inv Bisector Target Toggle").GetComponent<Toggle>();
+
 
         _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
 
@@ -175,6 +185,18 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
         });
 
+        _fwdBisectorToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateForwardBisector += UpdateFwdBisectorTarget;
+            else SpiralCalculator.UpdateForwardBisector -= UpdateFwdBisectorTarget; 
+        });
+
+        _invBisectorToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateInverseBisector += UpdateInverseBisector;
+            else SpiralCalculator.UpdateInverseBisector -= UpdateInverseBisector; 
+        });
+
         _ravToggle.onValueChanged.AddListener((bool value) => 
         { 
             if(value) SpiralCalculator.UpdateRAV += UpdateRAV;
@@ -226,6 +248,10 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(midPoint, ref _midPointPath, ref _midPointIndex);
     }
 
+    private void UpdateFwdBisectorTarget(Vector fwdBisector) { }
+
+    private void UpdateInverseBisector(Vector invBisector) { }
+
     private void UpdateRAV(Vector rav) { }
 
     private void DrawTargets()
@@ -241,6 +267,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
         DrawZetaTarget(_zemToggle, _zemPos, _spiralCalculator.GetZem(), _zemPath, _zemPathIndex, _zemColor);
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
+
+        if (_fwdBisectorToggle.isOn) DrawBisectorTarget(_spiralCalculator.GetForwardBisector(), _fwdBisectorColor);
+        if (_invBisectorToggle.isOn) DrawBisectorTarget(_spiralCalculator.GetInverseBisector(), _invBisectorColor);
 
         if (_ravToggle.isOn) DrawRav();
 
@@ -293,6 +322,16 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Ring(Vector2.zero, 0.032f);
             ShapesUtils.DrawCross(Vector2.zero, 0.05f);
+        }
+    }
+
+    private void DrawBisectorTarget(Vector2 bisector, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = color;
+            Draw.Thickness = 1f;
+            ShapesUtils.DrawCross45(bisector, 0.08f);
         }
     }
 

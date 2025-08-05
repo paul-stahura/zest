@@ -77,6 +77,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     public float minZoom = 0.0001f;
     public float maxZoom = 10f;
     [SerializeField] private float _zoomLevel = 4f;
+    private float _targetBisectorZoomRatio;
 
     void Awake()
     {
@@ -84,6 +85,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         _camTrackingDropdown.onValueChanged.AddListener((int v) => OnTargetChanged(v));
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+        SpiralCalculator.RealChanged += HoldZoomToBisector;
 
         _refocusButton = GameObject.Find("CamRefocusButton").GetComponent<Button>();
         _refocusButton.onClick.AddListener(() =>
@@ -482,13 +484,13 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
 
     private void HandleZooming()
     {
-        if(IsPointerOverUIElement()) return;
+        if (IsPointerOverUIElement()) return;
 
         float sensitivity = _scrollSensitivity;
-        #if UNITY_EDITOR_WIN
+#if UNITY_EDITOR_WIN
         // Scrolling on Windows seems way less sensitive than the Mac trackpad
         sensitivity *= -5;
-        #endif
+#endif
         float scroll = Input.GetAxis("Mouse ScrollWheel") * sensitivity;
 
         float zoomFactor = 1f - scroll;
@@ -496,7 +498,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         _zoomLevel = Mathf.Clamp(_zoomLevel * dynamicZoomFactor, minZoom, maxZoom);
 
         // zoom to mouse position
-        if(!Input.GetKey(KeyCode.LeftShift) && !Mathf.Approximately(_zoomLevel, minZoom) && !Mathf.Approximately(_zoomLevel, maxZoom))
+        if (!Input.GetKey(KeyCode.LeftShift) && !Mathf.Approximately(_zoomLevel, minZoom) && !Mathf.Approximately(_zoomLevel, maxZoom))
         {
             Vector2 mousePosition = Input.mousePosition;
             Vector2 viewportPoint = _cam.ScreenToViewportPoint(mousePosition);
@@ -504,8 +506,21 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
 
             _cameraTrackingOffset -= zoomCenter * (1f - 1f / dynamicZoomFactor) * _zoomLevel;
         }
+
+        var s = _spiralCalculator.GetEms();
+        float vectorLength = ((Vector2)(s.joints[s.middleIndex] - s.joints[s.middleIndex + 1])).magnitude;
+        _targetBisectorZoomRatio = vectorLength / _zoomLevel;
     }
 
+    private void HoldZoomToBisector(double real)
+    {
+        if (Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl))
+        {
+            var s = _spiralCalculator.GetEms();
+            float vectorLength = ((Vector2)(s.joints[s.middleIndex] - s.joints[s.middleIndex + 1])).magnitude;
+            _zoomLevel = vectorLength / _targetBisectorZoomRatio;
+        }
+    }
     private void UpdateProjectionMatrix()
     {
         // Create a new orthographic projection matrix with fine-tuned control

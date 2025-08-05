@@ -280,12 +280,12 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         using (Draw.StyleScope)
         {
             Draw.Color = _forwardLegsColor;
-            Draw.Thickness = 1f;
+            Draw.Thickness = 2f;
 
             var pt = _spiralCalculator.GetForwardBisector();
             var inversePt = _spiralCalculator.GetInverseBisector();
 
-            ShapesUtils.DrawCross45(pt, 0.08f);
+            // ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.green);
             if (numToDraw == 2) Draw.Line(pt, pt + inversePt, Color.red);
@@ -335,12 +335,12 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         using (Draw.StyleScope)
         {
             Draw.Color = _inverseLegsColor;
-            Draw.Thickness = 1f;
+            Draw.Thickness = 2f;
 
             var pt = _spiralCalculator.GetInverseBisector();
             var forwardPt = _spiralCalculator.GetForwardBisector();
 
-            ShapesUtils.DrawCross45(pt, 0.08f);
+            // ShapesUtils.DrawCross45(pt, 0.08f);
 
             Draw.Line(Vector2.zero, pt, Color.red);
             if (numToDraw == 2) Draw.Line(pt, pt + forwardPt, Color.green);

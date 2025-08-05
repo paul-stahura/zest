@@ -85,12 +85,12 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
         Point closestOriginalPoint = null;
         Vector2 closestViewportPos = Vector2.zero;
         Color closestPointColor = pointSet != null ? pointSet.Color : Color.white;
-        
+
         // Get all active point sets
         var activeSets = pointSetManager.GetAllActiveSets();
-        
+
         var isImaginary = criticalStripRenderer.GetTransform().UseImaginarySpace;
-        
+
         // Find the closest point across all active sets
         foreach (var activeSet in activeSets)
         {
@@ -110,7 +110,7 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
                 }
             }
         }
-        
+
         // Handle hover animation locally instead of via CriticalStripRenderer
         if (closestOriginalPoint != null)
         {
@@ -128,15 +128,15 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
                         hoverImage.color = closestPointColor;
                     }
                 }
-                
+
                 lastHoverPosition = closestViewportPos;
                 hoverPoint.anchoredPosition = closestViewportPos;
-                
+
                 if (!isHovered)
                 {
                     isHovered = true;
                     hoverPoint.gameObject.SetActive(true);
-                    
+
                     // Start the hover animation
                     if (hoverAnimation != null)
                     {
@@ -153,13 +153,41 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
             {
                 isHovered = false;
                 hoverPoint.gameObject.SetActive(false);
-                
+
                 if (hoverAnimation != null)
                 {
                     StopCoroutine(hoverAnimation);
                     hoverAnimation = null;
                 }
             }
+        }
+
+        if (Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl))
+        {
+            closestDist = float.MaxValue;
+            foreach (var activeSet in activeSets)
+            {
+                foreach (var pt in activeSet.OriginalPoints)
+                {
+                    var yValue = isImaginary ? Zeta.IndexToImag(pt.Index) : pt.Index;
+                    Vector2 stripPos = new Vector2((float)pt.Real, (float)yValue);
+                    // sclae stripPos to find closest index
+                    stripPos.x = stripPos.x < 0.5f ? 0 : 1;
+                    Vector2 viewportPos = criticalStripRenderer.GetTransform().StripToViewport(stripPos);
+                    float dist = Vector2.Distance(localPoint, viewportPos);
+
+                    if (dist < closestDist)
+                    {
+                        closestDist = dist;
+                        closestOriginalPoint = pt;
+                        closestViewportPos = viewportPos;
+                        closestPointColor = activeSet.Color; // Store the color of the set this point belongs to
+                    }
+                }
+            }
+            
+            app.Real = closestOriginalPoint.Real;
+            app.Index = closestOriginalPoint.Index;
         }
     }
 
