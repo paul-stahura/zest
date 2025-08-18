@@ -30,7 +30,7 @@ public class ZakCalculator : MonoBehaviour
         new Complex(1.353030558654668162533, -1.252503278108132307164)
     };
 
-    private static Complex I1(double r, double t)
+    public static Complex I1(double r, double t)
     {
         double floorT = Math.Floor(t);
         double halfPlusT = floorT + 0.5;
@@ -51,7 +51,7 @@ public class ZakCalculator : MonoBehaviour
         return Complex.Exp(baseExp) * sum;
     }
 
-    private static Complex I2(double r, double t) => Complex.Conjugate(I1(1 - r, t));
+    public static Complex I2(double r, double t) => Complex.Conjugate(I1(1 - r, t));
 
     public static Complex Rak(double real, double index)
     {
