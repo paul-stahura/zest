@@ -21,12 +21,15 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System;
+using System.Numerics;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 public static class FindIntersections
 {
     private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 20.0;
-    private const double INDEX_STEP = 0.00001;
+    private const double INDEX_STEP = 0.0001;
     
     private const int POINTS_PER_PATH = 1000000;
     
@@ -194,6 +197,36 @@ public static class FindIntersections
         SaveToCSV(equalLegsData);
     }
 
+    [MenuItem("Critical Strip/Find Rak1 Zeros")]
+    public static void FindZakZeros()
+    {
+        var zeroData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding Rak1 Zeros",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Cancelled");
+                return;
+            }
+
+            FindRakZeros(index, zeroData);
+
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveRakZerosToCSV(zeroData);
+    }
+
     [MenuItem("Critical Strip/Find Equal Leg Lengths Around Critical Index")]
     public static void FindEqualLegLengthsAroundCriticalIndex()
     {
@@ -311,6 +344,44 @@ public static class FindIntersections
 
             prevThetaCross[i] = currentThetaCross;
         }
+    }
+
+    private static void FindRakZeros(double index, List<(double real, double index, Vector2 point)> zerosData)
+    {
+        static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
+        static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
+
+        // const int realResolution = 1000 + 1;
+        // double dt = 1.0 / realResolution;
+
+        // for (int i = 0; i < realResolution; i++)
+        // {
+        //     double t = i * dt;
+        //     Complex v = Rak1(t, index) + Sum1(t, index);
+        //     if (v.Magnitude < 0.01) // found a zero
+        //     {
+        //         zerosData.Add((t, index, new Vector(t, index)));
+        //         continue;
+        //     }
+        // }
+
+        // Accepts a real range and step size
+        double realMin = -10.0;
+        double realMax = -1.0;
+        double realStep = 0.01;
+        double tolerance = 0.01; // Magnitude threshold to consider as zero
+
+        for (double t = realMin; t <= realMax; t += realStep)
+        {
+            Complex v = Rak1(t, index) + Sum1(t, index);
+            double mag = Math.Pow(index, t) * v.Magnitude;
+            if (mag < tolerance) // found a zero
+            {
+                zerosData.Add((t, index, new Vector(t, index)));
+                continue;
+            }
+        }
+        
     }
 
     private static void FindEqualLegLengths(double index, List<(double real, double index, Vector2 point)> equalLegsData)
@@ -528,6 +599,44 @@ public static class FindIntersections
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
         Debug.Log($"[FindIntersections] Saved intersections to {path}");
+    }
+
+    private static void SaveRakZerosToCSV(List<(double real, double index, Vector2 point)> zeros)
+    {
+        var csv = new StringBuilder();
+        csv.AppendLine("Sigma, Rak1 Index Zeros");
+
+        // create a new data structure with a real axis and all the index zeros on that axis
+        var zerosByReal = new Dictionary<string, List<string>>();
+        foreach (var (real, index, _) in zeros)
+        {
+            // convert real into string rounded to 3 decimal places
+            string realStr = real.ToString("F2");
+
+            if (!zerosByReal.ContainsKey(realStr))
+                zerosByReal[realStr] = new List<string>();
+
+            // before adding, check if this index is already in the list (to avoid duplicates)
+            // round the index to 3 decimal places for comparison
+            string indexString = index.ToString("F3");
+            if (!zerosByReal[realStr].Contains(indexString))
+                zerosByReal[realStr].Add(indexString);
+        }
+
+        // Write as a 2D array: each line is real, followed by all index zeros for that real
+        foreach (var kvp in zerosByReal)
+        {
+            var line = new StringBuilder();
+            line.Append($"{kvp.Key}");
+            foreach (var idx in kvp.Value)
+                line.Append($",{idx}");
+            csv.AppendLine(line.ToString());
+        }
+        
+        string path = "Assets/Resources/DataPoints/rak1_zeros.csv";
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllText(path, csv.ToString());
+        AssetDatabase.Refresh();
     }
 
     [MenuItem("Critical Strip/Test Known values for intersection")]

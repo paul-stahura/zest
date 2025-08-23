@@ -91,29 +91,29 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
     private void DrawSymmetry()
     {
-        if(_zpsBisectorToggle.isOn) DrawZpsBisector();
-        if(_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
+        if (_zpsBisectorToggle.isOn) DrawZpsBisector();
+        if (_zpsBPToZetaCirlceToggle.isOn) DrawZpsBPToZetaCircle();
 
-        if(_symmeytryToggle.isOn) DrawSymmetryPoint();
-        if(_symmetryRealPathToggle.isOn) DrawSymmetryPath();
-        if(_reverseLinkToggle.isOn) DrawBisectorLink();
+        if (_symmeytryToggle.isOn) DrawSymmetryPoint();
+        if (_symmetryRealPathToggle.isOn) DrawSymmetryPath();
+        if (_reverseLinkToggle.isOn) DrawBisectorLink();
 
         DrawRemainderForwardLegs(_remainderForwardLegsToggle.GetSelectedOption().Item1);
-        if(_remainderForwardLegsPathToggle.isOn) DrawRemainderForwardLegsPath();
+        if (_remainderForwardLegsPathToggle.isOn) DrawRemainderForwardLegsPath();
         DrawRemainderInverseLegs(_remainderInverseLegsToggle.GetSelectedOption().Item1);
-        if(_remainderInverseLegsPathToggle.isOn) DrawRemainderInverseLegsPath();
+        if (_remainderInverseLegsPathToggle.isOn) DrawRemainderInverseLegsPath();
 
         DrawForwardLegs(_ForwardLegsToggle.GetSelectedOption().Item1);
-        if(_ForwardLegsPathToggle.isOn) DrawForwardLegsPath();
-        if(_ForwardLegsZetaCircleToggle.isOn) DrawForwardLegsZetaCircle();
+        if (_ForwardLegsPathToggle.isOn) DrawForwardLegsPath();
+        if (_ForwardLegsZetaCircleToggle.isOn) DrawForwardLegsZetaCircle();
         DrawInverseLegs(_inverseLegsToggle.GetSelectedOption().Item1);
-        if(_inverseLegsPathToggle.isOn) DrawInverseLegsPath();
-        if(_inverseLegsZetaCircleToggle.isOn) DrawInverseLegsZetaCircle();
-        if(_inverseReflectedLegsToggle.isOn) DrawInverseReflectedLegs();
-        if(_inverseReflectedLegsPathToggle.isOn) DrawInverseReflectedLegsPath();
-        if(_inverseReflectedZetaCircleToggle.isOn) DrawInverseReflectedZetaCircle();
+        if (_inverseLegsPathToggle.isOn) DrawInverseLegsPath();
+        if (_inverseLegsZetaCircleToggle.isOn) DrawInverseLegsZetaCircle();
+        if (_inverseReflectedLegsToggle.isOn) DrawInverseReflectedLegs();
+        if (_inverseReflectedLegsPathToggle.isOn) DrawInverseReflectedLegsPath();
+        if (_inverseReflectedZetaCircleToggle.isOn) DrawInverseReflectedZetaCircle();
 
-        if(_tempForwardToZetaToggle.isOn)
+        if (_tempForwardToZetaToggle.isOn)
         {
             using (Draw.StyleScope)
             {
@@ -142,21 +142,21 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
 
             var rad = _cam.GetZoomLevel() * 0.03f;
 
-            Draw.Rectangle(yin - new Vector2(rad/2, rad/2), new Rect
+            Draw.Rectangle(yin - new Vector2(rad / 2, rad / 2), new Rect
             {
                 width = rad,
                 height = rad
             });
 
             Draw.Color = new Color(_reverseLinkPointsColor.r, _reverseLinkPointsColor.g, _reverseLinkPointsColor.b, 1);
-            ShapesUtils.DrawCross(yin, rad + rad/4);
+            ShapesUtils.DrawCross(yin, rad + rad / 4);
 
             Draw.Color = _reverseLinkPointsColor;
-            Draw.Pie(yang, rad*0.75f, 0, Mathf.PI / 2);
-            Draw.Pie(yang, rad*0.75f, Mathf.PI, 1.5f * Mathf.PI);
+            Draw.Pie(yang, rad * 0.75f, 0, Mathf.PI / 2);
+            Draw.Pie(yang, rad * 0.75f, Mathf.PI, 1.5f * Mathf.PI);
 
             Draw.Color = new Color(_reverseLinkPointsColor.r, _reverseLinkPointsColor.g, _reverseLinkPointsColor.b, 1);
-            ShapesUtils.DrawCross(yang, rad + rad/4);
+            ShapesUtils.DrawCross(yang, rad + rad / 4);
 
             Draw.Thickness = 1f;
             Draw.Color = _reverseLinkColor;

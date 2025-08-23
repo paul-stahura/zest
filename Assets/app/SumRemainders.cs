@@ -4,6 +4,31 @@ using UnityEngine;
 
 public class SumRemainders : MonoBehaviour
 {
+    #region Sums
+    public static Complex CalcForwardSumUpToBisector(double real, double index)
+    {
+        Complex input = new Complex(real, Zeta.IndexToImag(index));
+        Complex sum = Complex.Zero;
+        for (double n = 1; n <= Math.Floor(index); n++)
+        {
+            sum += 1.0 / Complex.Pow(n, input);
+        }
+        return sum;
+    }
+
+    public static Complex CalcInverseSumUpToBisector(double real, double index)
+    {
+        Complex input = new Complex(real, Zeta.IndexToImag(index));
+        Complex chi = SpiralCalculator.ChiBrian(input);
+        Complex sum = Complex.Zero;
+        for (double n = 1; n <= Math.Floor(index); n++)
+        {
+            sum += Complex.Pow(n, input - 1) * chi;
+        }
+        return sum;
+    }
+    #endregion
+
     #region ZpsRemainders
     public static Complex CalcZpsR1(double real, double index)
     {

@@ -6,6 +6,7 @@ using Shapes;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Vector2 = UnityEngine.Vector2;
 
 public class SpiralRenderer : ImmediateModeShapeDrawer
 {
@@ -112,6 +113,57 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         if (_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
 
         if (_realPathToggle.isOn) DrawRealPath();
+
+        // DrawDifSpiral();
+    }
+
+    private void DrawDifSpiral()
+    {
+        var real = _spiralCalculator.GetReal();
+        var index = _spiralCalculator.GetIndex();
+
+        var sForward = _spiralCalculator.GetEms();
+        var sInverse = _spiralCalculator.GetRsInverseSum();
+
+        int bisectorIndex = (int)Math.Floor(index) + 1;
+        var sDif = new Vector[bisectorIndex + 1];
+
+        // add up to bisector
+        for (int i = 0; i < bisectorIndex; i++)
+        {
+            sDif[i] = (sForward.joints[i] + sInverse[i]) / 2;
+        }
+
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.yellow;
+            Draw.Thickness = 2;
+        }
+
+        // add dist from joint
+        Vector r1 = SumRemainders.CalcZpsR1(real, index).ToVector();
+        Vector r2 = SumRemainders.CalcZpsR2(real, index).ToVector();
+        r1 += sForward.joints[bisectorIndex - 1];
+        r2 += sInverse[bisectorIndex - 1];
+
+        sDif[bisectorIndex] = (r1 + r2) / 2;
+
+        // draw the dif between each sum of links
+        DrawSpiralLines(sDif, Color.cyan, 1);
+        using (Draw.StyleScope)
+        {
+            Draw.Color = Color.red;
+            Draw.Thickness = 2;
+            // draw the bisector link
+            ShapesUtils.DrawCross(sDif[bisectorIndex], 0.03f);
+        }
+
+        // draw line between dif links
+        using (Draw.StyleScope)
+        {
+            Draw.Thickness = 1;
+            Draw.Line(Vector2.zero, r1 + r2, Color.yellow);
+        }
     }
 
     private void SubSpirals()
