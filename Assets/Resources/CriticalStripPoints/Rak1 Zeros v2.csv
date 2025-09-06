@@ -1,4 +1,10 @@
-Sigma, Rak1 Index Zero
+# Point Set File Format:
+# Settings are specified with #@ prefix followed by name: value
+#@name: Rak1 Zeros V2
+#@color:#ffffff
+#@skipCriticalLine: false
+#@samplingInterval: 1
+# Data format: real,index
 0.329473684210526,2.06973166315835
 0.0163157894736835,2.31681395789681
 0.358210526315789,2.58952562105649

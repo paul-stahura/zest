@@ -87,4 +87,36 @@ public class SumRemainders : MonoBehaviour
         return -0.5 * Math.Pow(-1, Math.Floor(index)) * ZakCalculator.I2(real, index) * chi;
     }
     #endregion
+    
+    // at any point there can be at most three instances where rak1 == sum1. this function will find one of them
+    public static Vector ZeroRak1Magnitude(Vector currentStep, double realMin, double realMax, double magTolerance)
+    {
+        // Use a binary search to find the real value where rak1 and sum1 magnitudes are equal
+        double left = realMin;
+        double right = realMax;
+        Vector result = currentStep;
+
+        while (right - left > magTolerance)
+        {
+            double mid = (left + right) / 2.0;
+            Complex rak1 = CalcZakR1(mid, currentStep.y);
+            Complex sum1 = CalcForwardSumUpToBisector(mid, currentStep.y);
+
+            double diff = rak1.Magnitude - sum1.Magnitude;
+
+            if (Math.Abs(diff) < magTolerance)
+            {
+                result.x = mid;
+                return result;
+            }
+
+            if (diff > 0)
+                left = mid;
+            else
+                right = mid;
+        }
+
+        result.x = (left + right) / 2.0;
+        return result;
+    }
 }
