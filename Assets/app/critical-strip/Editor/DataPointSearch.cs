@@ -19,7 +19,7 @@ public static class DataPointSearch
 {
     private const double MIN_INDEX = 1.0;
     private const double MAX_INDEX = 40.0;
-    private const double INDEX_STEP = 0.0001;
+    private const double INDEX_STEP = 0.00001;
 
     static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
     static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
@@ -42,7 +42,7 @@ public static class DataPointSearch
         int currentStep = 0;
 
         double real = -1.5;
-        
+
         double Rak1Mag(double r, double i) => Math.Pow(i, r) * (Rak1(r, i) + Sum1(r, i)).Magnitude;
         double RIndexMin(double i) => Rak1Mag(real, i);
 
@@ -51,7 +51,7 @@ public static class DataPointSearch
         // double v = Math.PI * (1.0 / Math.Sqrt(2.0) - Math.Log(2));
         // // double nZero (int n) => n + v * Math.Log(n) + 0.5 - v * M; // far right
         // double nZero (int n) => n + v + 0.5 - v * M; // far left
-        double nZero (int n) => n + 0.5;
+        double nZero(int n) => n + 0.5;
 
         for (double index = MIN_INDEX; index <= MAX_INDEX; index += 1)
         {
@@ -110,7 +110,7 @@ public static class DataPointSearch
         {
             csv.AppendLine($"{real},{index}");
         }
-        
+
         string path = "Assets/Resources/DataPoints/rak1_first_zeros.csv";
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
@@ -133,16 +133,16 @@ public static class DataPointSearch
         {
             double grad = Derivative(f, x);
             if (Math.Abs(grad) < tol)
-            return x;
+                return x;
             // Use backtracking line search for adaptive step size
             double t = step;
             double fx = f(x);
             while (f(x - t * grad) > fx - 0.5 * t * grad * grad && t > 1e-8)
-            t *= 0.5;
+                t *= 0.5;
             prevX = x;
             x -= t * grad;
             if (Math.Abs(x - prevX) < tol)
-            return x;
+                return x;
         }
         return x;
     }
@@ -245,7 +245,7 @@ public static class DataPointSearch
                 // last we need to check if rak1 has just passed sum1 in magnitude
                 if (isRakGreaterThanSum != isLastRakGreaterThanSum || magTolerance > Math.Abs(rak1.Magnitude - sum1.Magnitude))
                 {
-                    currentStep = RefineZero(currentStep.y - indexStep, currentStep.y + 0.001, currentStep.x, currentStep.x + 0.3);
+                    currentStep = RefineZeroRak1(currentStep.y - indexStep, currentStep.y + 0.001, currentStep.x, currentStep.x + 0.3);
                     passedZero = true;
                 }
             }
@@ -259,7 +259,7 @@ public static class DataPointSearch
         return currentStep;
     }
 
-    public static Vector RefineZero(double indexMin, double indexMax,
+    public static Vector RefineZeroRak1(double indexMin, double indexMax,
                                 double realMin, double realMax,
                                 int gridR = 20, int gridI = 20,
                                 int averageCount = 5,
@@ -401,5 +401,446 @@ public static class DataPointSearch
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
+    }
+
+    [MenuItem("RakZero/Find Rak1 Zero or Zeta")]
+    public static void FindRak1ZeroOrZeta()
+    {
+        var zeroData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        int realCount = 20; // Number of real values to sample
+        double realStep = 0.5 / (realCount - 1);
+        LastDotResult lastDotResult = new LastDotResult(false, false, 0, 0); // last real where a cross was found
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding FindRak1ZeroOrZeta",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            // For each real value, find the theta data
+            FindRak1ZeroOrZeta(ref lastDotResult, realCount, realStep, index, zeroData, findZero: false);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        FindIntersections.SaveToCSV(zeroData);
+    }
+
+    private struct LastDotResult
+    {
+        public bool found;
+        public bool sign;
+        public double real;
+        public double index;
+
+        public LastDotResult(bool found, bool sign, double real, double index)
+        {
+            this.found = found;
+            this.sign = sign;
+            this.real = real;
+            this.index = index;
+        }
+    }
+
+    private static void FindRak1ZeroOrZeta(ref LastDotResult lastDotResult, int realCount, double realStep, double index, List<(double real, double index, Vector2 point)> zeroData, bool findZero)
+    {
+        List<LastDotResult> currentDots = new List<LastDotResult>();
+
+        bool[] currentThetaCross = new bool[realCount];
+        for (int i = 0; i < realCount; i++)
+        {
+            // calc current cross
+            double real = 0.5 + i * realStep;
+            currentThetaCross[i] = Vector3.Cross(
+                RakForward(real, index).Normalized(),
+                RakInverse(real, index).Normalized()
+            ).z > 0;
+        }
+
+        // check the current theta cross for changes
+        for (int i = 1; i < currentThetaCross.Length; i++)
+        {
+            // if the cross has changed sign, we have a theta pi point between the two reals
+            if (currentThetaCross[i - 1] != currentThetaCross[i])
+            {
+                double prevReal = 0.5 + (i - 1) * realStep;
+                double real = 0.5 + i * realStep;
+                bool prevTheta = currentThetaCross[i - 1];
+
+                // use a binary search to find the real value where the cross changes sign
+                double mid = BinaryRealCrossSearch(prevReal, real, index, prevTheta);
+
+                // save the dot product sign at this point
+                bool dotSign = Vector2.Dot(
+                    RakForward(mid, index).Normalized(),
+                    RakInverse(mid, index).Normalized()
+                ) > 0;
+
+                currentDots.Add(new LastDotResult(true, dotSign, mid, index));
+            }
+        }
+
+        // check if we passed a cross between the last and current index
+        // check critical line cross
+        bool critCross = Vector3.Cross(
+            RakForward(0.5, index - INDEX_STEP).Normalized(),
+            RakInverse(0.5, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (critCross != currentThetaCross[0])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 0.5, critCross);
+
+            bool dotSign = Vector2.Dot(
+                RakForward(0.5, mid).Normalized(),
+                RakInverse(0.5, mid).Normalized()
+            ) > 0;
+
+            currentDots.Add(new LastDotResult(true, dotSign, 0.5, mid));
+        }
+
+        // check bounds cross
+        bool boundsCross = Vector3.Cross(
+            RakForward(1.0, index - INDEX_STEP).Normalized(),
+            RakInverse(1.0, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (boundsCross != currentThetaCross[realCount - 1])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 1.0, boundsCross);
+
+            bool dotSign = Vector2.Dot(
+                RakForward(1.0, mid).Normalized(),
+                RakInverse(1.0, mid).Normalized()
+            ) > 0;
+
+            currentDots.Add(new LastDotResult(true, dotSign, 1.0, mid));
+        }
+
+        // add the last dot result if it exists
+        if (lastDotResult.found && currentDots.Count > 0)
+        {
+            currentDots.Add(lastDotResult);
+        }
+        // sort the current dots by index value
+        currentDots.Sort((a, b) => a.index.CompareTo(b.index));
+
+        // check the current dots for changes
+        for (int i = 1; i < currentDots.Count; i++)
+        {
+            // if the dot has changed sign, we have a zero or zeta point between the two reals
+            if (currentDots[i - 1].sign != currentDots[i].sign)
+            {
+                double realLeft = currentDots[i - 1].real;
+                double realRight = currentDots[i].real;
+                double indexLeft = currentDots[i - 1].index;
+                double indexRight = currentDots[i].index;
+
+                // use a grid search to find the exact point where the dot changes sign
+                Vector zeroResult = GridMinimize(RakForward, realLeft, realRight, indexLeft, indexRight, gridR: 10, gridI: 10, averageCount: 3, passes: 4, shrinkFactor: 0.3);
+                Vector zetaResult = GridMinimize(RakInverse, realLeft, realRight, indexLeft, indexRight, gridR: 10, gridI: 10, averageCount: 3, passes: 4, shrinkFactor: 0.3);
+
+                // determine if the result is a zero or zeta
+                bool isZero = RakForward(zeroResult.x, zeroResult.y).Length < RakInverse(zetaResult.x, zetaResult.y).Length;
+
+                if (isZero)
+                {
+                    // if its a zero, and we are looking for zeros, add it
+                    if (findZero)
+                    {
+                        zeroData.Add((zeroResult.x, zeroResult.y, new Vector2((float)zeroResult.x, (float)zeroResult.y)));
+                    }
+                    // if we wanted a zeta we need to reflect it across the critical line
+                    else
+                    {
+                        zeroData.Add((1.0 - zeroResult.x, zeroResult.y, new Vector2((float)(1.0 - zeroResult.x), (float)zeroResult.y)));
+                    }
+                }
+                else
+                {
+                    // if its a zeta, and we are looking for zetas, add it
+                    if (!findZero)
+                    {
+                        zeroData.Add((zetaResult.x, zetaResult.y, new Vector2((float)zetaResult.x, (float)zetaResult.y)));
+                    }
+                    // if we wanted a zero we need to reflect it across the critical line
+                    else
+                    {
+                        zeroData.Add((1.0 - zetaResult.x, zetaResult.y, new Vector2((float)(1.0 - zetaResult.x), (float)zetaResult.y)));
+                    }
+                }
+            }
+        }
+
+        // save the last dot result for the next index step
+        if (currentDots.Count > 0)
+        {
+            lastDotResult = currentDots[currentDots.Count - 1];
+        }
+        else
+        {
+            lastDotResult = new LastDotResult(false, false, 0, 0);
+        }
+    }
+
+    [MenuItem("RakZero/Find Rak1 Angle PI")]
+    public static void FindThetaTwoAnglePIByReal()
+    {
+        var thetaData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        // calc inital cross
+        // static Vector forward(double r, double i) => SumRemainders.CalcRak1Forward(r, i).ToVector();
+        // static Vector inverse(double r, double i) => SumRemainders.CalcRak2Inverse(r, i).ToVector();
+
+        int realCount = 20; // Number of real values to sample
+        double realStep = 0.5 / (realCount - 1);
+
+        // bool[] prevThetaCross = new bool[realCount];
+        // for (int i = 0; i < realCount; i++)
+        // {
+        //     double real = 0.5 + i * realStep;
+        //     if (i == realCount - 1) real = 1.0; // ensure we always check 1.0
+        //     prevThetaCross[i] = Vector3.Cross(
+        //         forward(real, MIN_INDEX - INDEX_STEP).Normalized(),
+        //         inverse(real, MIN_INDEX - INDEX_STEP).Normalized()
+        //     ).z > 0;
+        // }
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding ThetaTwo Angle Zero",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            // For each real value, find the theta data
+            FindRakAnglePI(realCount, realStep, index, thetaData, findAnglePI: false);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        FindIntersections.SaveToCSV(thetaData);
+    }
+
+    private struct CrossData
+    {
+        public double real;
+        public double index;
+        public bool cross;
+    }
+    
+    static Vector RakForward(double r, double i) => SumRemainders.CalcRak1Forward(r, i).ToVector();
+    static Vector RakInverse(double r, double i) => SumRemainders.CalcRak2Inverse(r, i).ToVector();
+
+    private static void FindRakAnglePI(int realCount, double realStep, double index, List<(double real, double index, Vector2 point)> thetaData, bool findAnglePI = true)
+    {
+        bool[] currentThetaCross = new bool[realCount];
+        for (int i = 0; i < realCount; i++)
+        {
+            // calc current cross
+            double real = 0.5 + i * realStep;
+            currentThetaCross[i] = Vector3.Cross(
+                RakForward(real, index).Normalized(),
+                RakInverse(real, index).Normalized()
+            ).z > 0;
+        }
+
+        // check the current theta cross for changes
+        for (int i = 1; i < currentThetaCross.Length; i++)
+        {
+            // if the cross has changed sign, we have a theta pi point between the two reals
+            if (currentThetaCross[i - 1] != currentThetaCross[i])
+            {
+                double prevReal = 0.5 + (i - 1) * realStep;
+                double real = 0.5 + i * realStep;
+                bool prevTheta = currentThetaCross[i - 1];
+
+                // use a binary search to find the real value where the cross changes sign
+                double mid = BinaryRealCrossSearch(prevReal, real, index, prevTheta);
+
+                bool isAnglePi = Vector2.Dot(
+                    RakForward(mid, index).Normalized(),
+                    RakInverse(mid, index).Normalized()
+                ) > 0;
+
+                if (isAnglePi == findAnglePI)
+                {
+                    thetaData.Add((mid, index, new Vector2((float)mid, (float)index)));
+                    thetaData.Add((1.0 - mid, index, new Vector2((float)(1.0 - mid), (float)index)));
+                }
+            }
+        }
+
+        // check if we passed a cross between the last and current index
+        // check critical line cross
+        bool critCross = Vector3.Cross(
+            RakForward(0.5, index - INDEX_STEP).Normalized(),
+            RakInverse(0.5, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (critCross != currentThetaCross[0])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 0.5, critCross);
+
+            bool isPi = Vector2.Dot(
+                RakForward(0.5, mid).Normalized(),
+                RakInverse(0.5, mid).Normalized()
+            ) > 0;
+
+            if (isPi == findAnglePI)
+            {
+                thetaData.Add((0.5, mid, new Vector2(0.5f, (float)mid)));
+            }
+        }
+
+        // check bounds cross
+        bool boundsCross = Vector3.Cross(
+            RakForward(1.0, index - INDEX_STEP).Normalized(),
+            RakInverse(1.0, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (boundsCross != currentThetaCross[realCount - 1])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 1.0, boundsCross);
+
+            bool isPi = Vector2.Dot(
+                RakForward(1.0, mid).Normalized(),
+                RakInverse(1.0, mid).Normalized()
+            ) > 0;
+
+            if (isPi == findAnglePI)
+            {
+                thetaData.Add((1.0, mid, new Vector2(1.0f, (float)mid)));
+                thetaData.Add((0.0, mid, new Vector2(0.0f, (float)mid)));
+            }
+        }
+    }
+
+    private static double BinaryIndexCrossSearch(double left, double right, double real, bool crossSign)
+    {
+        double mid = 0;
+        while (right - left > 1e-10)
+        {
+            mid = (left + right) / 2.0;
+            bool midTheta = Vector3.Cross(
+                RakForward(real, mid).Normalized(),
+                RakInverse(real, mid).Normalized()
+            ).z > 0;
+
+            if (midTheta == crossSign)
+                left = mid;
+            else
+                right = mid;
+        }
+
+        return mid;
+    }
+
+    private static double BinaryRealCrossSearch(double left, double right, double index, bool crossSign)
+    {
+        double mid = 0;
+        while (right - left > 1e-10)
+        {
+            mid = (left + right) / 2.0;
+            bool midTheta = Vector3.Cross(
+                RakForward(mid, index).Normalized(),
+                RakInverse(mid, index).Normalized()
+            ).z > 0;
+
+            if (midTheta == crossSign)
+                left = mid;
+            else
+                right = mid;
+        }
+
+        return mid;
+    }
+
+    // Optimized grid-based minimization for 2D functions
+    public static Vector GridMinimize(Func<double, double, Vector> f,
+                                double realMin, double realMax,
+                                double indexMin, double indexMax,
+                                int gridR = 20, int gridI = 20,
+                                int averageCount = 5,
+                                int passes = 3,
+                                double shrinkFactor = 0.2)
+    {
+        double magTolerance = 1e-10;
+
+        double rMin = realMin;
+        double rMax = realMax;
+        double iMin = indexMin;
+        double iMax = indexMax;
+
+        var finalTop = new List<(double mag, double r, double i)>();
+
+        for (int pass = 0; pass < passes; pass++)
+        {
+            var candidates = new List<(double mag, double r, double i)>();
+
+            for (int ri = 0; ri < gridR; ri++)
+            {
+                double r = rMin + (rMax - rMin) * ri / (gridR - 1);
+                for (int ii = 0; ii < gridI; ii++)
+                {
+                    double idx = iMin + (iMax - iMin) * ii / (gridI - 1);
+                    double mag = f(r, idx).Length;
+                    candidates.Add((mag, r, idx));
+                }
+            }
+
+            // sort by magnitude
+            candidates.Sort((a, b) => a.mag.CompareTo(b.mag));
+
+            // store top few for next centering
+            finalTop = candidates.Take(Math.Min(averageCount, candidates.Count)).ToList();
+
+            // average top few to center new box
+            double avgR = finalTop.Average(x => x.r);
+            double avgI = finalTop.Average(x => x.i);
+
+            // build new zoomed box centered at average
+            double rHalfSpan = (rMax - rMin) * shrinkFactor * 0.5;
+            double iHalfSpan = (iMax - iMin) * shrinkFactor * 0.5;
+
+            rMin = avgR - rHalfSpan;
+            rMax = avgR + rHalfSpan;
+            iMin = avgI - iHalfSpan;
+            iMax = avgI + iHalfSpan;
+
+            // early exit
+            if (finalTop[0].mag < magTolerance)
+                break;
+        }
+
+        // return the center of the best region from the last refined grid
+        double finalR = finalTop.Average(x => x.r);
+        double finalI = finalTop.Average(x => x.i);
+
+        return new Vector(finalR, finalI);
     }
 }

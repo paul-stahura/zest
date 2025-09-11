@@ -577,7 +577,7 @@ public static class FindIntersections
         return d1 + d2 >= lineLength - buffer && d1 + d2 <= lineLength + buffer;
     }
 
-    private static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
+    public static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
     {
         var csv = new StringBuilder();
         // csv.AppendLine("Pseudo Zeros,#8800FF");

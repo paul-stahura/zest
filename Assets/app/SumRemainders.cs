@@ -86,8 +86,18 @@ public class SumRemainders : MonoBehaviour
 
         return -0.5 * Math.Pow(-1, Math.Floor(index)) * ZakCalculator.I2(real, index) * chi;
     }
+
+    public static Complex CalcRak1Forward(double real, double index)
+    {
+        return CalcZakR1(real, index) + CalcForwardSumUpToBisector(real, index);
+    }
+
+    public static Complex CalcRak2Inverse(double real, double index)
+    {
+        return CalcZakR2(real, index) +  CalcInverseSumUpToBisector(real, index);
+    }
     #endregion
-    
+
     // at any point there can be at most three instances where rak1 == sum1. this function will find one of them
     public static Vector ZeroRak1Magnitude(Vector currentStep, double realMin, double realMax, double magTolerance)
     {

@@ -1,7 +1,7 @@
 # Point Set File Format:
 # Settings are specified with #@ prefix followed by name: value
 #@name: Rak1 Zeros V2
-#@color:#ffffff
+#@color:#00FF00
 #@skipCriticalLine: false
 #@samplingInterval: 1
 # Data format: real,index

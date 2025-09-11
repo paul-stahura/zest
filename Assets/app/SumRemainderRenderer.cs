@@ -14,6 +14,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color _zakR1Color = Color.green;
     [SerializeField] private Toggle _zakR2Toggle;
     [SerializeField] private Color _zakR2Color = Color.green;
+    [SerializeField] private Toggle _zakLegsToggle;
     [SerializeField] private Toggle _zpsR1Toggle;
     [SerializeField] private Color _zpsR1Color = Color.red;
     [SerializeField] private Toggle _zpsR2Toggle;
@@ -211,6 +212,9 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _zakR2Toggle = GameObject.Find("ZakR2Toggle").GetComponent<Toggle>();
         _zakR2Toggle.onValueChanged.AddListener((value) => UpdateRs());
 
+        _zakLegsToggle = GameObject.Find("ZakLegsToggle").GetComponent<Toggle>();
+        // _zakLegsToggle.onValueChanged.AddListener((value) => UpdateRs());
+
         _zpsR1Toggle = GameObject.Find("ZpsR1Toggle").GetComponent<Toggle>();
         _zpsR1Toggle.onValueChanged.AddListener((value) => UpdateRs());
 
@@ -250,7 +254,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
     private void DrawRemainders()
     {
-        // DrawTests();
+        if(_zakLegsToggle.isOn) DrawZakLegs();
 
         if (_zakR1Toggle.isOn) DrawZakR1();
         if (_zakR2Toggle.isOn) DrawZakR2();
@@ -290,42 +294,21 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawTests()
+    private void DrawZakLegs()
     {
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1f;
-            Draw.Color = Color.yellow;
+            Vector forward = SumRemainders.CalcRak1Forward(_real, _index).ToVector();
+            Vector inverse = SumRemainders.CalcRak2Inverse(_real, _index).ToVector();
 
-            // Draw forward sum
-            var sum = SumRemainders.CalcForwardSumUpToBisector(_real, _index).ToVector2();
-            Draw.Line(Vector2.zero, sum);
+            Draw.Line(Vector2.zero, forward, Color.green);
+            Draw.Line(forward, forward + inverse, Color.red);
+            Draw.Line(Vector2.zero, forward + inverse, Color.cyan);
 
-            // draw a circle at the end of the sum
             Draw.UseDashes = true;
-            Draw.Ring(Vector2.zero, sum.magnitude);
-            Draw.UseDashes = false;
-
-            // draw zakR1
-            var zakR1 = SumRemainders.CalcZakR1(_real, _index).ToVector2();
-            Draw.Color = Color.cyan;
-            Draw.Line(Vector2.zero, zakR1);
-
-            // draw a circle at the end of the sum
-            Draw.UseDashes = true;
-            Draw.Ring(Vector2.zero, zakR1.magnitude);
-            Draw.UseDashes = false;
-
-
-            Draw.Color = Color.red;
-            Draw.Line(sum, zakR1);
-
-            Draw.Color = Color.magenta;
-            Draw.UseDashes = true;
-            Draw.Line(new Vector2(0.5f, 50), new Vector2(0.5f, -50));
-            Draw.Line(new Vector2(0, 50), new Vector2(0, -50));
-            
-            Draw.Line(Vector2.zero, _spiralCalculator.GetEms().zeta.ToVector2());
+            Draw.Ring(forward, (float)forward.Length, Color.green);
+            Draw.Ring(forward, (float)inverse.Length, Color.red);
         }
     }
 
