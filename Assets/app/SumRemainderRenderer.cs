@@ -14,7 +14,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color _zakR1Color = Color.green;
     [SerializeField] private Toggle _zakR2Toggle;
     [SerializeField] private Color _zakR2Color = Color.green;
-    [SerializeField] private Toggle _zakLegsToggle;
+    [SerializeField] private MultiOptionToggle _zakLegsToggle;
     [SerializeField] private Toggle _zpsR1Toggle;
     [SerializeField] private Color _zpsR1Color = Color.red;
     [SerializeField] private Toggle _zpsR2Toggle;
@@ -212,8 +212,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _zakR2Toggle = GameObject.Find("ZakR2Toggle").GetComponent<Toggle>();
         _zakR2Toggle.onValueChanged.AddListener((value) => UpdateRs());
 
-        _zakLegsToggle = GameObject.Find("ZakLegsToggle").GetComponent<Toggle>();
-        // _zakLegsToggle.onValueChanged.AddListener((value) => UpdateRs());
+        _zakLegsToggle = GameObject.Find("ZakLegsToggle").GetComponent<MultiOptionToggle>();
 
         _zpsR1Toggle = GameObject.Find("ZpsR1Toggle").GetComponent<Toggle>();
         _zpsR1Toggle.onValueChanged.AddListener((value) => UpdateRs());
@@ -254,7 +253,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
     private void DrawRemainders()
     {
-        if(_zakLegsToggle.isOn) DrawZakLegs();
+        DrawZakLegs(_zakLegsToggle.GetSelectedOption().Item1);
 
         if (_zakR1Toggle.isOn) DrawZakR1();
         if (_zakR2Toggle.isOn) DrawZakR2();
@@ -294,8 +293,10 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawZakLegs()
+    private void DrawZakLegs(int state)
     {
+        if (state == 0) return;
+
         using (Draw.StyleScope)
         {
             Draw.Thickness = 1f;
@@ -304,11 +305,15 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
             Draw.Line(Vector2.zero, forward, Color.green);
             Draw.Line(forward, forward + inverse, Color.red);
-            Draw.Line(Vector2.zero, forward + inverse, Color.cyan);
 
-            Draw.UseDashes = true;
-            Draw.Ring(forward, (float)forward.Length, Color.green);
-            Draw.Ring(forward, (float)inverse.Length, Color.red);
+            if (state == 2)
+            {
+                Draw.Line(Vector2.zero, forward + inverse, Color.cyan);
+
+                Draw.UseDashes = true;
+                Draw.Ring(forward, (float)forward.Length, Color.green);
+                Draw.Ring(forward, (float)inverse.Length, Color.red);
+            }
         }
     }
 
