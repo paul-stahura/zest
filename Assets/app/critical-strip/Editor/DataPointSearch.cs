@@ -18,8 +18,8 @@ using System.Linq;
 public static class DataPointSearch
 {
     private const double MIN_INDEX = 1.0;
-    private const double MAX_INDEX = 40.0;
-    private const double INDEX_STEP = 0.00001;
+    private const double MAX_INDEX = 6.0;
+    private const double INDEX_STEP = 0.0001;
 
     static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
     static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
@@ -397,7 +397,7 @@ public static class DataPointSearch
             csv.AppendLine($"{real},{index}");
         }
 
-        string path = "Assets/Resources/DataPoints/rak1_zeros.csv";
+        string path = "Assets/Resources/DataPoints/Rak1_Negative_Zeros.csv";
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
@@ -429,7 +429,7 @@ public static class DataPointSearch
             }
 
             // For each real value, find the theta data
-            FindRak1ZeroOrZeta(ref lastDotResult, realCount, realStep, index, zeroData, findZero: false);
+            FindRak1ZeroOrZeta(ref lastDotResult, realCount, realStep, index, zeroData, findZero: true);
             currentStep++;
         }
 
@@ -581,6 +581,166 @@ public static class DataPointSearch
                     {
                         zeroData.Add((1.0 - zetaResult.x, zetaResult.y, new Vector2((float)(1.0 - zetaResult.x), (float)zetaResult.y)));
                     }
+                }
+            }
+        }
+
+        // save the last dot result for the next index step
+        if (currentDots.Count > 0)
+        {
+            lastDotResult = currentDots[currentDots.Count - 1];
+        }
+        else
+        {
+            lastDotResult = new LastDotResult(false, false, 0, 0);
+        }
+    }
+
+    [MenuItem("RakZero/Find Rak1 Negative Zeros")]
+    public static void FindRak1NegativeZeros()
+    {
+        var zeroData = new List<(double real, double index, Vector2 point)>();
+
+        // Check the range with regular steps
+        int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
+        int currentStep = 0;
+
+        int minReal = -20;
+        int perRealSample = 1;
+        double realStep = 1.0 / perRealSample;
+        LastDotResult lastDotResult = new LastDotResult(false, false, 0, 0); // last real where a cross was found
+
+        for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
+        {
+            if (EditorUtility.DisplayCancelableProgressBar(
+                "Finding FindRak1ZeroOrZeta",
+                $"Processing index {index:F15}",
+                (float)currentStep / totalSteps))
+            {
+                EditorUtility.ClearProgressBar();
+                Debug.Log("Theta finding cancelled.");
+                return;
+            }
+
+            // For each real value, find the theta data
+            FindRak1NegativeZeros(ref lastDotResult, minReal, realStep, index, zeroData);
+            currentStep++;
+        }
+
+        EditorUtility.ClearProgressBar();
+        SaveRakZerosToCSV(zeroData);
+    }
+
+    private static void FindRak1NegativeZeros(ref LastDotResult lastDotResult, int minReal, double realStep, double index, List<(double real, double index, Vector2 point)> zeroData)
+    {
+        List<LastDotResult> currentDots = new List<LastDotResult>();
+
+        int realCount = (int)(Math.Abs(minReal) * realStep);
+        bool[] currentThetaCross = new bool[realCount];
+        for (int i = 0; i < realCount; i++)
+        {
+            // calc current cross
+            double real = i * -realStep;
+            currentThetaCross[i] = Vector3.Cross(
+                RakForward(real, index).Normalized(),
+                RakInverse(real, index).Normalized()
+            ).z > 0;
+        }
+
+        // check the current theta cross for changes
+        for (int i = 1; i < currentThetaCross.Length; i++)
+        {
+            // if the cross has changed sign, we have a theta pi point between the two reals
+            if (currentThetaCross[i - 1] != currentThetaCross[i])
+            {
+                double prevReal = (i - 1) * -realStep;
+                double real = i * -realStep;
+                bool prevTheta = currentThetaCross[i - 1];
+
+                // use a binary search to find the real value where the cross changes sign
+                double mid = BinaryRealCrossSearch(real, prevReal, index, prevTheta);
+
+                // save the dot product sign at this point
+                bool dotSign = Vector2.Dot(
+                    RakForward(mid, index).Normalized(),
+                    RakInverse(mid, index).Normalized()
+                ) > 0;
+
+                currentDots.Add(new LastDotResult(true, dotSign, mid, index));
+            }
+        }
+
+        // check if we passed a cross between the last and current index
+        bool minCross = Vector3.Cross(
+            RakForward(minReal, index - INDEX_STEP).Normalized(),
+            RakInverse(minReal, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (minCross != currentThetaCross[0])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, minReal, minCross);
+
+            bool dotSign = Vector2.Dot(
+                RakForward(minReal, mid).Normalized(),
+                RakInverse(minReal, mid).Normalized()
+            ) > 0;
+
+            currentDots.Add(new LastDotResult(true, dotSign, minReal, mid));
+        }
+
+        // check bounds cross
+        bool boundsCross = Vector3.Cross(
+            RakForward(0.0, index - INDEX_STEP).Normalized(),
+            RakInverse(0.0, index - INDEX_STEP).Normalized()
+        ).z > 0;
+
+        if (boundsCross != currentThetaCross[realCount - 1])
+        {
+            // use a binary search to find the index value where the cross changes sign
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 0.0, boundsCross);
+
+            bool dotSign = Vector2.Dot(
+                RakForward(0.0, mid).Normalized(),
+                RakInverse(0.0, mid).Normalized()
+            ) > 0;
+
+            currentDots.Add(new LastDotResult(true, dotSign, 0.0, mid));
+        }
+
+        // add the last dot result if it exists
+        if (lastDotResult.found && currentDots.Count > 0)
+        {
+            currentDots.Add(lastDotResult);
+        }
+        // sort the current dots by index value
+        currentDots.Sort((a, b) => a.index.CompareTo(b.index));
+
+        // check the current dots for changes
+        for (int i = 1; i < currentDots.Count; i++)
+        {
+            // if the dot has changed sign, we have a zero between the two reals
+            if (currentDots[i - 1].sign != currentDots[i].sign)
+            {
+                double realLeft = currentDots[i - 1].real;
+                double realRight = currentDots[i].real;
+                double indexLeft = currentDots[i - 1].index;
+                double indexRight = currentDots[i].index;
+
+                // use a grid search to find the exact point where the dot changes sign
+                Vector zeroResult = GridMinimize(RakForward, realLeft, realRight, indexLeft, indexRight, gridR: 10, gridI: 10, averageCount: 3, passes: 4, shrinkFactor: 0.3);
+                Vector zetaResult = GridMinimize(RakInverse, realLeft, realRight, indexLeft, indexRight, gridR: 10, gridI: 10, averageCount: 3, passes: 4, shrinkFactor: 0.3);
+
+                // determine if the result is a zero or zeta
+                bool isZero = RakForward(zeroResult.x, zeroResult.y).Length < RakInverse(zetaResult.x, zetaResult.y).Length;
+
+                if (isZero)
+                {
+                    zeroData.Add((zeroResult.x, zeroResult.y, new Vector2((float)zeroResult.x, (float)zeroResult.y)));
+                }
+                else
+                {
+                    // if its a zeta, the zero will be positive real, and outside our search range
                 }
             }
         }
