@@ -32,7 +32,16 @@ public class SpiralCalculator : MonoBehaviour
     public static Action<Zeta.Spiral> UpdateEta;
     private Zeta.Spiral _etaSpiral;
 
+    #region R1ak/R2ak
+    public static Action<Complex> UpdateR1ak;
+    private Complex? _r1ak;
+    public static Action<Complex> UpdateR2ak;
+    private Complex? _r2ak;
+    #endregion
+
     #region Forward
+    public static Action<Complex> UpdateSum1;
+    private Complex? _sum1;
     public static Action<Vector> UpdateForwardBisector;
     private Vector _forwardBisector;
     public static Action<Vector2[]> UpdateForwardBisectorPath;
@@ -180,6 +189,24 @@ public class SpiralCalculator : MonoBehaviour
         if (_zakInverseLinks == null) CalcZakInverseLinks(_app.Real, index);
         int middleIndex = (int)Math.Floor(index);
         return new Vector[] { _zakInverseLinks[middleIndex], _zakInverseLinks[middleIndex + 1] };
+    }
+
+    public Complex GetR1ak()
+    {
+        if(_r1ak == null) CalculateR1ak(_app.Real, _app.Index);
+        return (Complex)_r1ak;
+    }
+
+    public Complex GetR2ak()
+    {
+        if(_r2ak == null) CalculateR2ak(_app.Real, _app.Index);
+        return (Complex)_r2ak;
+    }
+
+    public Complex GetSum1()
+    {
+        if(_sum1 == null) CalcSum1();
+        return (Complex)_sum1;
     }
 
     public Vector[] GetRsInverseSum()
@@ -391,8 +418,16 @@ public class SpiralCalculator : MonoBehaviour
 
         if (UpdateEta != null) CalcEta(real, index);
         else _etaSpiral = null;
+        
+        if (UpdateR1ak != null) CalculateR1ak(real, index);
+        else _r1ak = null;
+        if (UpdateR2ak != null) CalculateR2ak(real, index);
+        else _r2ak = null;
 
-        if(UpdateForwardBisector != null) CalcForwardBisector();
+        if (UpdateSum1 != null) CalcSum1();
+        else _sum1 = null;
+
+        if (UpdateForwardBisector != null) CalcForwardBisector();
         else _forwardBisector = null;
 
         if(UpdateForwardBisectorPath != null) CalcForwardBisectorPath();
@@ -588,6 +623,25 @@ public class SpiralCalculator : MonoBehaviour
             _etaSpiral.Update(real, index, SpiralFormulas.EtaFormula, _app.usingPolyImag);
         }
         UpdateEta?.Invoke(_etaSpiral);
+    }
+
+    private void CalculateR1ak(double real, double index)
+    {
+        _r1ak = SumRemainders.CalcRak1Forward(real, index);
+        UpdateR1ak?.Invoke((Complex)_r1ak);
+    }
+
+    private void CalculateR2ak(double real, double index)
+    {
+        _r2ak = SumRemainders.CalcRak2Inverse(real, index);
+        UpdateR2ak?.Invoke((Complex)_r2ak);
+    }
+
+    private void CalcSum1()
+    {
+        var ems = GetEms();
+        _sum1 = ems.joints[ems.middleIndex];
+        UpdateSum1?.Invoke((Complex)_sum1);
     }
 
     private void CalcForwardBisector()

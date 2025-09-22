@@ -395,7 +395,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         var highlight = _colorLinksToggle.GetSelectedOption().Item1;
         bool colorBisector = highlight > 0;
-        bool colorClock = highlight == 2;
+        bool colorClock = highlight == 3;
         switch (_linksToDrawDropdown.value)
         {
             case 0: // ALL
@@ -403,21 +403,27 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
                 if (colorBisector) HighlightBisectorLink(joints, middleIndex, color);
                 if (colorClock) HighlighClockArms(joints, middleIndex, color);
                 break;
-            case 1: // up To Bisector Link
+            case 1: // up to Sum1
                 // create a new joint array that only includes the joints up to the bisector link
-                var partJoints = new Vector[middleIndex + 2];
+                var partJoints = new Vector[middleIndex + 1];
+                Array.Copy(joints, partJoints, middleIndex + 1);
+                DrawSpiralLines(partJoints, color);
+                break;
+            case 2: // up To Bisector Link
+                // create a new joint array that only includes the joints up to the bisector link
+                partJoints = new Vector[middleIndex + 2];
                 Array.Copy(joints, partJoints, middleIndex + 2);
                 DrawSpiralLines(partJoints, color);
                 if (colorBisector) HighlightBisectorLink(partJoints, middleIndex, color);
                 break;
-            case 2: // Bisector Link
+            case 3: // Bisector Link
                 HighlightBisectorLink(joints, middleIndex, color);
                 break;
-            case 3: // Clock
+            case 4: // Clock
                 HighlightBisectorLink(joints, middleIndex, color);
                 HighlighClockArms(joints, middleIndex, color);
                 break;
-            case 4: // Last Link
+            case 5: // Last Link
                 HighlightLastLink(joints, color);
                 break;
         }
