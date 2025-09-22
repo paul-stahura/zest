@@ -35,6 +35,14 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     [SerializeField] private Toggle _etaToggle;
     [SerializeField] private TMP_Text _etaPos;
 
+    [SerializeField] private Toggle _R1akToggle;
+    [SerializeField] private Color _R1akColor;
+    [SerializeField] private Toggle _R2akToggle;
+    [SerializeField] private Color _R2akColor;
+
+    [SerializeField] private Toggle _sum1Toggle;
+    [SerializeField] private Color _sum1Color;
+
     [SerializeField] private Toggle _fwdBisectorToggle;
     [SerializeField] private Color _fwdBisectorColor;
     [SerializeField] private Toggle _invBisectorToggle;
@@ -65,6 +73,18 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private int _zemPathIndex = 0;
     private Vector2[] _etaPath = new Vector2[_traceLength];
     private int _etaPathIndex = 0;
+
+    private Vector2[] _r1akPath = new Vector2[_traceLength];
+    private int _r1akPathIndex = 0;
+    private Vector2[] _r2akPath = new Vector2[_traceLength];
+    private int _r2akPathIndex = 0;
+    private Vector2[] _sum1Path = new Vector2[_traceLength];
+    private int _sum1PathIndex = 0;
+
+    private Vector2[] _fwdBisectorPath = new Vector2[_traceLength];
+    private int _fwdBisectorPathIndex = 0;
+    private Vector2[] _invBisectorPath = new Vector2[_traceLength];
+    private int _invBisectorPathIndex = 0;
 
     [SerializeField] private Toggle _midPointToggle;
     [SerializeField] private Toggle _r2MidPointToggle;
@@ -101,8 +121,11 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         _midPointToggle = GameObject.Find("Mid Point Toggle").GetComponent<Toggle>();
         _r2MidPointToggle = GameObject.Find("R2 Mid Point Toggle").GetComponent<Toggle>();
 
-        _fwdBisectorToggle = GameObject.Find("Fwd Bisector Target Toggle").GetComponent<Toggle>();
+        _R1akToggle = GameObject.Find("R1ak Target Toggle").GetComponent<Toggle>();
+        _R2akToggle = GameObject.Find("R2ak Target Toggle").GetComponent<Toggle>();
+        _sum1Toggle = GameObject.Find("Sum1 Target Toggle").GetComponent<Toggle>();
 
+        _fwdBisectorToggle = GameObject.Find("Fwd Bisector Target Toggle").GetComponent<Toggle>();
         _invBisectorToggle = GameObject.Find("Inv Bisector Target Toggle").GetComponent<Toggle>();
 
 
@@ -185,6 +208,24 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
         });
 
+        _R1akToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateR1ak += UpdateR1akTarget;
+            else SpiralCalculator.UpdateR1ak -= UpdateR1akTarget; 
+        });
+
+        _R2akToggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateR2ak += UpdateR2akTarget;
+            else SpiralCalculator.UpdateR2ak -= UpdateR2akTarget; 
+        });
+
+        _sum1Toggle.onValueChanged.AddListener((bool value) => 
+        { 
+            if(value) SpiralCalculator.UpdateSum1 += UpdateSum1Target;
+            else SpiralCalculator.UpdateSum1 -= UpdateSum1Target;
+        });
+
         _fwdBisectorToggle.onValueChanged.AddListener((bool value) => 
         { 
             if(value) SpiralCalculator.UpdateForwardBisector += UpdateFwdBisectorTarget;
@@ -248,9 +289,28 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(midPoint, ref _midPointPath, ref _midPointIndex);
     }
 
-    private void UpdateFwdBisectorTarget(Vector fwdBisector) { }
+    private void UpdateR1akTarget(Complex r1ak)
+    {
+        UpdateTargetPos(r1ak.ToVector2(), ref _r1akPath, ref _r1akPathIndex);
+    }
+    private void UpdateR2akTarget(Complex r2ak)
+    {
+        UpdateTargetPos(r2ak.ToVector2(), ref _r2akPath, ref _r2akPathIndex);
+    }
+    private void UpdateSum1Target(Complex sum1)
+    {
+        UpdateTargetPos(sum1.ToVector2(), ref _sum1Path, ref _sum1PathIndex);
+    }
 
-    private void UpdateInverseBisector(Vector invBisector) { }
+    private void UpdateFwdBisectorTarget(Vector fwdBisector)
+    {
+        UpdateTargetPos(fwdBisector, ref _fwdBisectorPath, ref _fwdBisectorPathIndex);
+    }
+
+    private void UpdateInverseBisector(Vector invBisector)
+    {
+        UpdateTargetPos(invBisector, ref _invBisectorPath, ref _invBisectorPathIndex);
+    }
 
     private void UpdateRAV(Vector rav) { }
 
@@ -268,8 +328,12 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_zemToggle, _zemPos, _spiralCalculator.GetZem(), _zemPath, _zemPathIndex, _zemColor);
         DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
 
-        if (_fwdBisectorToggle.isOn) DrawBisectorTarget(_spiralCalculator.GetForwardBisector(), _fwdBisectorColor);
-        if (_invBisectorToggle.isOn) DrawBisectorTarget(_spiralCalculator.GetInverseBisector(), _invBisectorColor);
+        DrawZetaTarget(_R1akToggle, null, _spiralCalculator.GetR1ak(), _r1akPath, _r1akPathIndex, _R1akColor, false);
+        DrawZetaTarget(_R2akToggle, null, _spiralCalculator.GetR2ak(), _r2akPath, _r2akPathIndex, _R2akColor, false);
+        DrawZetaTarget(_sum1Toggle, null, _spiralCalculator.GetSum1(), _sum1Path, _sum1PathIndex, _sum1Color, false);
+
+        DrawZetaTarget(_fwdBisectorToggle, null, _spiralCalculator.GetForwardBisector().ToComplex(), _fwdBisectorPath, _fwdBisectorPathIndex, _fwdBisectorColor, false);
+        DrawZetaTarget(_invBisectorToggle, null, _spiralCalculator.GetInverseBisector().ToComplex(), _invBisectorPath, _invBisectorPathIndex, _invBisectorColor, false);
 
         if (_ravToggle.isOn) DrawRav();
 
@@ -322,16 +386,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Ring(Vector2.zero, 0.032f);
             ShapesUtils.DrawCross(Vector2.zero, 0.05f);
-        }
-    }
-
-    private void DrawBisectorTarget(Vector2 bisector, Color color)
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Color = color;
-            Draw.Thickness = 1f;
-            ShapesUtils.DrawCross45(bisector, 0.08f);
         }
     }
 
@@ -390,11 +444,23 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color)
+    private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color, bool drawZ = true)
     {
         if (toggle.isOn)
         {
-            DrawZ(pos.ToVector2(), color);
+            if (drawZ)
+            {
+                DrawZ(pos.ToVector2(), color);
+            }
+            else
+            {
+                using (Draw.StyleScope)
+                {
+                    Draw.Color = color;
+                    Draw.Thickness = 1f;
+                    ShapesUtils.DrawCross(pos.ToVector2(), 0.05f);
+                }
+            }
 
             if (posText != null) posText.text = $"({pos.Real:F6}, {pos.Imaginary:F6})";
 
@@ -403,7 +469,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
                 DrawPath(pathList, pathIndex, color);
             }
         }
-        else
+        else if (posText != null)
         {
             posText.text = "";
         }
