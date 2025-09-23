@@ -106696,9 +106696,9 @@ MonoBehaviour:
   longPressDuration: 1
   centerAnimDuration: 0.5
   lockedCenterAnimDuration: 0.1
-  lockedStateImage: {fileID: 0}
+  lockedStateImage: {fileID: 507223419}
   app: {fileID: 338235377}
-  spaceToggleButton: {fileID: 0}
+  spaceToggleButton: {fileID: 1886747997}
   spaceModeText: {fileID: 0}
   imagZoomSensitivity: 2
   imagScrollSensitivity: 10
