@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CriticalStripTransform
 {
@@ -67,7 +68,19 @@ public class CriticalStripTransform
     // Convert from critical strip coordinates (real [0,1], index/imag) to viewport coordinates
     public Vector2 StripToViewport(Vector2 stripPos)
     {
-        float x = stripPos.x * viewportRect.rect.width;
+        int range = CriticalStripRenderer.realRange;
+        float x;
+        if (range == 0)
+        {
+            // real [0,1]
+            x = stripPos.x * viewportRect.rect.width;
+        }
+        else
+        {
+            // Shift the real axis so that 0.5 is at the center, then map [-realScale, realScale] to [0, viewportRect.rect.width]
+            float shiftedX = stripPos.x - 0.5f;
+            x = ((shiftedX + range) / (2f * range)) * viewportRect.rect.width;
+        }
         
         // Use double for calculations to maintain precision
         double normalizedY;

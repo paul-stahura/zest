@@ -38,6 +38,10 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float scrollSensitivity = 1f;  // How fast to scroll when dragging
     [SerializeField] private float currentZoom = 0.8f;
 
+    [Header("Range Properties")]
+    // 0 = [0,1], 1 = [-1,1], 2 = [-2,2], etc.
+    [SerializeField] public static int realRange = 2; 
+
     
     [Header("Centering")]
     [SerializeField] private Button centerButton;
