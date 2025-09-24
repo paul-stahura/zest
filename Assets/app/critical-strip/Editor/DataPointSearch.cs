@@ -773,8 +773,9 @@ public static class DataPointSearch
         // double realStep = 0.5 / (realCount - 1);
 
         int realCount = 20; // Number of real values to sample
-        double realStep = 2.0 / (realCount - 1);
-        double realMax = 2.0 + 0.5; // max real to check
+        double realRange = 5.0;
+        double realStep = realRange / (realCount - 1);
+        double realMax = realRange + 0.5; // max real to check
 
         // bool[] prevThetaCross = new bool[realCount];
         // for (int i = 0; i < realCount; i++)
@@ -899,7 +900,7 @@ public static class DataPointSearch
             if (isPi == findAnglePI)
             {
                 thetaData.Add((realMax, mid, new Vector2((float)realMax, (float)mid)));
-                thetaData.Add((-realMax, mid, new Vector2(-(float)realMax, (float)mid)));
+                thetaData.Add((-realMax + 1.0, mid, new Vector2((float)(-realMax + 1.0), (float)mid)));
             }
         }
     }

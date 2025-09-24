@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System;
 using System.Linq;
+using UnityEngine.PlayerLoop;
 
 /// <summary>
 /// Renders and manages interactive points in the critical strip visualization.
@@ -39,8 +40,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float currentZoom = 0.8f;
 
     [Header("Range Properties")]
-    // 0 = [0,1], 1 = [-1,1], 2 = [-2,2], etc.
-    [SerializeField] public static int realRange = 2; 
+    // 0 = [0,1], 1 = [-0.5,1.5], 2 = [-1.5,2.5], etc.
+    [SerializeField] public static int realRange = 0;
 
     
     [Header("Centering")]
@@ -256,6 +257,16 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Notify listeners that the viewport has changed
         OnViewportChanged?.Invoke();
     }
+
+    /// <summary>
+    /// Sets the visible real range in the strip
+    /// </summary>
+    public void SetRealRange(int range)
+    {
+        realRange = Mathf.Max(0, range);
+        // refresh / remake all points
+        // Update all points dosnt seem to cut it.
+    }
     
     /// <summary>
     /// Adds a new set of points to the visualization
@@ -280,35 +291,35 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             // Calculate the min/max index values in the point set
             double minPointIndex = double.MaxValue;
             double maxPointIndex = double.MinValue;
-            
+
             foreach (var point in pointSet.OriginalPoints)
             {
                 minPointIndex = Math.Min(minPointIndex, point.Index);
                 maxPointIndex = Math.Max(maxPointIndex, point.Index);
             }
-            
+
             // Convert to imaginary values
             double minPointImag = Zeta.IndexToImag(minPointIndex);
             double maxPointImag = Zeta.IndexToImag(maxPointIndex);
-            
+
             // Check if our current range encompasses the point set
             bool needsRangeAdjustment = false;
             float newMin = criticalStripTransform.MinImag;
             float newMax = criticalStripTransform.MaxImag;
-            
+
             // If the point range extends beyond our current view, expand the range
             if (minPointImag < criticalStripTransform.MinImag)
             {
                 newMin = (float)minPointImag - 50f; // Give some padding
                 needsRangeAdjustment = true;
             }
-            
+
             if (maxPointImag > criticalStripTransform.MaxImag)
             {
                 newMax = (float)maxPointImag + 50f; // Give some padding
                 needsRangeAdjustment = true;
             }
-            
+
             // If the point range is much smaller than our current view, consider zooming in
             if ((maxPointImag - minPointImag) < (criticalStripTransform.MaxImag - criticalStripTransform.MinImag) * 0.3f)
             {
@@ -320,7 +331,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                     needsRangeAdjustment = true;
                 }
             }
-            
+
             // Apply the new range if needed
             if (needsRangeAdjustment)
             {
@@ -330,23 +341,23 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 {
                     newMin = minAllowedImag;
                 }
-                
+
                 // Set the new range
                 criticalStripTransform.SetRange(newMin, newMax);
-                
+
                 // Update existing points
                 UpdateAllPoints();
-                
+
                 // Update the index labels
                 var labelRenderer = GetComponent<IndexLabelsRenderer>();
                 if (labelRenderer != null)
                 {
                     labelRenderer.UpdateLabels(newMin, newMax);
                 }
-                
+
                 // Notify listeners
                 OnViewportChanged?.Invoke();
-                
+
                 Debug.Log($"[CriticalStripRenderer] Adjusted imaginary range for new point set: [{newMin:F2}, {newMax:F2}]");
             }
         }
