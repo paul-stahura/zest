@@ -7742,6 +7742,7 @@ GameObject:
   - component: {fileID: 148540865}
   - component: {fileID: 148540864}
   - component: {fileID: 148540863}
+  - component: {fileID: 148540866}
   m_Layer: 5
   m_Name: Extend
   m_TagString: Untagged
@@ -7852,6 +7853,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 148540861}
   m_CullTransparentMesh: 1
+--- !u!114 &148540866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 148540861}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Extend critical strip range from [0, 1] to [-4.5, 5.5]
 --- !u!1 &149596929
 GameObject:
   m_ObjectHideFlags: 0
@@ -14710,6 +14724,7 @@ GameObject:
   - component: {fileID: 332602939}
   - component: {fileID: 332602938}
   - component: {fileID: 332602937}
+  - component: {fileID: 332602940}
   m_Layer: 5
   m_Name: Collapse
   m_TagString: Untagged
@@ -14820,6 +14835,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 332602935}
   m_CullTransparentMesh: 1
+--- !u!114 &332602940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 332602935}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Open / Close Critical Strip Window
 --- !u!1 &333548227
 GameObject:
   m_ObjectHideFlags: 0
@@ -18346,6 +18374,7 @@ GameObject:
   - component: {fileID: 391449876}
   - component: {fileID: 391449874}
   - component: {fileID: 391449877}
+  - component: {fileID: 391449878}
   m_Layer: 5
   m_Name: Scroll Into View Btn
   m_TagString: Untagged
@@ -18457,6 +18486,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &391449878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 391449872}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Click to focus the critical strip window on the current index. Click
+    and Hold to lock the window to follow the current index.
 --- !u!1 &393982726
 GameObject:
   m_ObjectHideFlags: 0
@@ -98068,6 +98111,7 @@ GameObject:
   - component: {fileID: 1886747999}
   - component: {fileID: 1886747998}
   - component: {fileID: 1886747997}
+  - component: {fileID: 1886748000}
   m_Layer: 5
   m_Name: Coordinate Space Toggle Btn
   m_TagString: Untagged
@@ -98178,6 +98222,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1886747995}
   m_CullTransparentMesh: 1
+--- !u!114 &1886748000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886747995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5f9c654352933842abc3be8ebe7393a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  description: Toggle between Index and Imaginary units
 --- !u!1 &1892035733
 GameObject:
   m_ObjectHideFlags: 0

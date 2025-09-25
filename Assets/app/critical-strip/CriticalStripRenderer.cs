@@ -264,8 +264,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     public void SetRealRange(int range)
     {
         realRange = Mathf.Max(0, range);
-        // refresh / remake all points
-        // Update all points dosnt seem to cut it.
+        RefreshAllPointSets();
     }
     
     /// <summary>
