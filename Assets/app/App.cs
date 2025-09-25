@@ -49,6 +49,8 @@ public class App : ImmediateModeShapeDrawer
     public Slider realPartSlider;
     public FineTuneSlider realPartFineTune;
     public TMP_Dropdown spiralFormula;
+    public Button extendRealRangeButton;
+    [SerializeField] private bool isRealRangeExtended = false;
 
     // public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1, true);
@@ -268,6 +270,8 @@ public class App : ImmediateModeShapeDrawer
             Real = value;
         });
 
+        extendRealRangeButton.onClick.AddListener(ToggleExtendRealRange);
+
         spiralFormula.onValueChanged.AddListener(value =>
         {
             if (spiralFormula.value != (int)SpiralFormulas.EulerMaclauren)
@@ -407,13 +411,26 @@ public class App : ImmediateModeShapeDrawer
         SceneManager.LoadScene(nextScene);
     }
 
-    private void UpdateActiveSceneOnStart(string startScene) {
+    private void ToggleExtendRealRange()
+    {
+        isRealRangeExtended = !isRealRangeExtended;
+        ExtendRealRange(isRealRangeExtended);
+    }
+
+    private void ExtendRealRange(bool isExtended)
+    {
+        realPartSlider.minValue = isExtended ? -4.5f : 0f;
+        realPartSlider.maxValue = isExtended ? 5.5f : 1f;
+    }
+
+    private void UpdateActiveSceneOnStart(string startScene)
+    {
         PlayerPrefs.SetString("ActiveSceneOnStart", startScene);
         PlayerPrefs.SetInt("AppSpiralFormula", spiralFormula.value);
 
         PlayerPrefs.Save();
         SceneChange?.Invoke();
-        
+
         SceneManager.LoadScene("~Input-Output");
     }
 

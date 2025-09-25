@@ -769,8 +769,13 @@ public static class DataPointSearch
         // static Vector forward(double r, double i) => SumRemainders.CalcRak1Forward(r, i).ToVector();
         // static Vector inverse(double r, double i) => SumRemainders.CalcRak2Inverse(r, i).ToVector();
 
+        // int realCount = 20; // Number of real values to sample
+        // double realStep = 0.5 / (realCount - 1);
+
         int realCount = 20; // Number of real values to sample
-        double realStep = 0.5 / (realCount - 1);
+        double realRange = 5.0;
+        double realStep = realRange / (realCount - 1);
+        double realMax = realRange + 0.5; // max real to check
 
         // bool[] prevThetaCross = new bool[realCount];
         // for (int i = 0; i < realCount; i++)
@@ -796,7 +801,7 @@ public static class DataPointSearch
             }
 
             // For each real value, find the theta data
-            FindRakAnglePI(realCount, realStep, index, thetaData, findAnglePI: false);
+            FindRakAnglePI(realCount, realStep, realMax, index, thetaData, findAnglePI: false);
             currentStep++;
         }
 
@@ -814,7 +819,7 @@ public static class DataPointSearch
     static Vector RakForward(double r, double i) => SumRemainders.CalcRak1Forward(r, i).ToVector();
     static Vector RakInverse(double r, double i) => SumRemainders.CalcRak2Inverse(r, i).ToVector();
 
-    private static void FindRakAnglePI(int realCount, double realStep, double index, List<(double real, double index, Vector2 point)> thetaData, bool findAnglePI = true)
+    private static void FindRakAnglePI(int realCount, double realStep, double realMax, double index, List<(double real, double index, Vector2 point)> thetaData, bool findAnglePI = true)
     {
         bool[] currentThetaCross = new bool[realCount];
         for (int i = 0; i < realCount; i++)
@@ -878,24 +883,24 @@ public static class DataPointSearch
 
         // check bounds cross
         bool boundsCross = Vector3.Cross(
-            RakForward(1.0, index - INDEX_STEP).Normalized(),
-            RakInverse(1.0, index - INDEX_STEP).Normalized()
+            RakForward(realMax, index - INDEX_STEP).Normalized(),
+            RakInverse(realMax, index - INDEX_STEP).Normalized()
         ).z > 0;
 
         if (boundsCross != currentThetaCross[realCount - 1])
         {
             // use a binary search to find the index value where the cross changes sign
-            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 1.0, boundsCross);
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, realMax, boundsCross);
 
             bool isPi = Vector2.Dot(
-                RakForward(1.0, mid).Normalized(),
-                RakInverse(1.0, mid).Normalized()
+                RakForward(realMax, mid).Normalized(),
+                RakInverse(realMax, mid).Normalized()
             ) > 0;
 
             if (isPi == findAnglePI)
             {
-                thetaData.Add((1.0, mid, new Vector2(1.0f, (float)mid)));
-                thetaData.Add((0.0, mid, new Vector2(0.0f, (float)mid)));
+                thetaData.Add((realMax, mid, new Vector2((float)realMax, (float)mid)));
+                thetaData.Add((-realMax + 1.0, mid, new Vector2((float)(-realMax + 1.0), (float)mid)));
             }
         }
     }
