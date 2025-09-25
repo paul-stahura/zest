@@ -17,15 +17,15 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private CriticalStripRenderer criticalStripRenderer;
     
     private RectTransform rectTransform;
-    private bool isExpanded = true;
-    private bool isExtended = false;
+    private static bool isExpanded = true;
+    private static bool isExtended = false;
     private float targetX;
     private float currentX;
     private PointSetManager pointSetManager;
     private float animationTime;
     
-    public bool IsExpanded => isExpanded;
-    public bool IsExtended => isExtended;
+    public static bool IsExpanded => isExpanded;
+    public static bool IsExtended => isExtended;
     public float Width => width;
 
     private void Awake()
