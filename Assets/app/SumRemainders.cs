@@ -29,8 +29,8 @@ public class SumRemainders : MonoBehaviour
     }
     #endregion
 
-    #region ZpsRemainders
-    public static Complex CalcZpsR1(double real, double index)
+    #region Rps
+    public static Complex CalcRps1(double real, double index)
     {
         double imag = Zeta.IndexToImag(index);
         Complex R = ZakCalculator.Rak(real, index);
@@ -46,7 +46,7 @@ public class SumRemainders : MonoBehaviour
         return val;
     }
 
-    public static Complex CalcZpsR2(double real, double index)
+    public static Complex CalcRps2(double real, double index)
     {
         double imag = Zeta.IndexToImag(index);
         Complex R = ZakCalculator.Rak(real, index);
@@ -75,12 +75,12 @@ public class SumRemainders : MonoBehaviour
     #endregion
 
     #region ZakRemainders
-    public static Complex CalcZakR1(double real, double index)
+    public static Complex CalcRak1(double real, double index)
     {
         return -0.5 * Math.Pow(-1, Math.Floor(index)) * ZakCalculator.I1(real, index);
     }
 
-    public static Complex CalcZakR2(double real, double index)
+    public static Complex CalcRak2(double real, double index)
     {
         Complex chi = SpiralCalculator.ChiBrian(new Complex(real, Zeta.IndexToImag(index)));
 
@@ -89,12 +89,12 @@ public class SumRemainders : MonoBehaviour
 
     public static Complex CalcRak1Forward(double real, double index)
     {
-        return CalcZakR1(real, index) + CalcForwardSumUpToBisector(real, index);
+        return CalcRak1(real, index) + CalcForwardSumUpToBisector(real, index);
     }
 
     public static Complex CalcRak2Inverse(double real, double index)
     {
-        return CalcZakR2(real, index) +  CalcInverseSumUpToBisector(real, index);
+        return CalcRak2(real, index) +  CalcInverseSumUpToBisector(real, index);
     }
     #endregion
 
@@ -109,7 +109,7 @@ public class SumRemainders : MonoBehaviour
         while (right - left > magTolerance)
         {
             double mid = (left + right) / 2.0;
-            Complex rak1 = CalcZakR1(mid, currentStep.y);
+            Complex rak1 = CalcRak1(mid, currentStep.y);
             Complex sum1 = CalcForwardSumUpToBisector(mid, currentStep.y);
 
             double diff = rak1.Magnitude - sum1.Magnitude;

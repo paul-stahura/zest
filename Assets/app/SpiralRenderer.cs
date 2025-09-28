@@ -27,9 +27,7 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     [SerializeField] private Color ZakColor;
     [SerializeField] private Color ZakRemainderColor;
     [SerializeField] private Toggle _zakLinksToggle;
-    [SerializeField] private Toggle _zakRemainderLinkToggle;
     [SerializeField] private Toggle _zakInverseLinksToggle;
-    [SerializeField] private Toggle _zakInverseRemainderLinkToggle;
 
     [SerializeField] private Color EtaSpiralColor;
     [SerializeField] private Toggle _etaSpiralToggle;
@@ -57,10 +55,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         _inverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
 
         _zakLinksToggle = GameObject.Find("ZakLinksToggle").GetComponent<Toggle>();
-        _zakRemainderLinkToggle = GameObject.Find("ZakRemainderLinkToggle").GetComponent<Toggle>();
 
         _zakInverseLinksToggle = GameObject.Find("ZakInverseLinksToggle").GetComponent<Toggle>();
-        _zakInverseRemainderLinkToggle = GameObject.Find("ZakInverseRemainderLinkToggle").GetComponent<Toggle>();
 
         _etaSpiralToggle = GameObject.Find("EtaSpiralToggle").GetComponent<Toggle>();
 
@@ -105,10 +101,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         if (_inverseReflectedToggle.isOn) DrawRsInverseSumReflected(_spiralCalculator.GetRsInverseSum());
 
         if (_zakLinksToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakLinks(), ZakColor);
-        if (_zakRemainderLinkToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakRemainderLink(), ZakRemainderColor, 3);
 
         if (_zakInverseLinksToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakInverseLinks(), ZakColor);
-        if (_zakInverseRemainderLinkToggle.isOn) DrawSpiralLines(_spiralCalculator.GetZakInverseRemainderLink(), ZakRemainderColor, 3);
 
         if (_etaSpiralToggle.isOn) DrawEtaSpiral(_spiralCalculator.GetEta());
 
@@ -141,8 +135,8 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         }
 
         // add dist from joint
-        Vector r1 = SumRemainders.CalcZpsR1(real, index).ToVector();
-        Vector r2 = SumRemainders.CalcZpsR2(real, index).ToVector();
+        Vector r1 = SumRemainders.CalcRps1(real, index).ToVector();
+        Vector r2 = SumRemainders.CalcRps2(real, index).ToVector();
         r1 += sForward.joints[bisectorIndex - 1];
         r2 += sInverse[bisectorIndex - 1];
 
@@ -240,12 +234,6 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
         });
 
         _zakLinksToggle.onValueChanged.AddListener((value) =>
-        {
-            if (value) SpiralCalculator.UpdateZakLinks += SubZakLinks;
-            else SpiralCalculator.UpdateZakLinks -= SubZakLinks;
-        });
-
-        _zakRemainderLinkToggle.onValueChanged.AddListener((value) =>
         {
             if (value) SpiralCalculator.UpdateZakLinks += SubZakLinks;
             else SpiralCalculator.UpdateZakLinks -= SubZakLinks;
@@ -409,21 +397,28 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
                 Array.Copy(joints, partJoints, middleIndex + 1);
                 DrawSpiralLines(partJoints, color);
                 break;
-            case 2: // up To Bisector Link
+            case 2: // up to Sum1 as Vector
+                // draw only the vector sum
+                var vectorSum = new Vector[2];
+                vectorSum[0] = joints[0];
+                vectorSum[1] = joints[middleIndex];
+                DrawSpiralLines(vectorSum, color);
+                break;
+            case 3: // up To Bisector Link
                 // create a new joint array that only includes the joints up to the bisector link
                 partJoints = new Vector[middleIndex + 2];
                 Array.Copy(joints, partJoints, middleIndex + 2);
                 DrawSpiralLines(partJoints, color);
                 if (colorBisector) HighlightBisectorLink(partJoints, middleIndex, color);
                 break;
-            case 3: // Bisector Link
+            case 4: // Bisector Link
                 HighlightBisectorLink(joints, middleIndex, color);
                 break;
-            case 4: // Clock
+            case 5: // Clock
                 HighlightBisectorLink(joints, middleIndex, color);
                 HighlighClockArms(joints, middleIndex, color);
                 break;
-            case 5: // Last Link
+            case 6: // Last Link
                 HighlightLastLink(joints, color);
                 break;
         }

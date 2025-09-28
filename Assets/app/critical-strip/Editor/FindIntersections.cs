@@ -348,7 +348,7 @@ public static class FindIntersections
 
     private static void FindRakZeros(double index, List<(double real, double index, Vector2 point)> zerosData)
     {
-        static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
+        static Complex Rak1(double r, double i) => SumRemainders.CalcRak1(r, i);
         static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
 
         // const int realResolution = 1000 + 1;
