@@ -10,27 +10,56 @@ using System.Linq;
 
 public class SumRemainderRenderer : ImmediateModeShapeDrawer
 {
-    [SerializeField] private Toggle _zakR1Toggle;
-    [SerializeField] private Color _zakR1Color = Color.green;
-    [SerializeField] private Toggle _zakR2Toggle;
-    [SerializeField] private Color _zakR2Color = Color.green;
-    [SerializeField] private MultiOptionToggle _zakLegsToggle;
-    [SerializeField] private Toggle _zpsR1Toggle;
-    [SerializeField] private Color _zpsR1Color = Color.red;
-    [SerializeField] private Toggle _zpsR2Toggle;
-    [SerializeField] private Color _zpsR2Color = Color.red;
+    private struct remainder
+    {
+        public Vector2 r1;
+        public Vector2 r2;
+        public Color color1;
+        public Color color2;
+        public Toggle toggle1;
+        public MultiOptionToggle toggle2;
+        public MultiOptionToggle legsToggle;
+        public MultiOptionToggle pathToggle;
+        public List<Vector2> path;
+        public int active;
+
+        public remainder(Color c1, Color c2)
+        {
+            r1 = Vector2.zero;
+            r2 = Vector2.zero;
+            color1 = c1;
+            color2 = c2;
+            toggle1 = null;
+            toggle2 = null;
+            legsToggle = null;
+            pathToggle = null;
+            path = new List<Vector2>();
+            active = 0;
+        }
+    }
+
+    [Header("R/2")]
+    private remainder _r;
+    [SerializeField] private Color _r1Color = Color.yellow;
+    [SerializeField] private Color _r2Color = Color.yellow;
+
+    [Header("Rps")]
+    private remainder _rps;
+    [SerializeField] private Color _rps1Color = Color.cyan;
+    [SerializeField] private Color _rps2Color = Color.cyan;
+
+    [Header("Rak")]
+    private remainder _rak;
+    [SerializeField] private Color _rak1Color = Color.green;
+    [SerializeField] private Color _rak2Color = Color.red;
+
+    private Vector2 _sum1;
+    private Vector2 _sum2;
 
     private App _app;
     private static double _real;
     private static double _index;
     private static bool _remaindersUpdated = false;
-
-    private Vector2 _zakR1;
-    private Vector2 _zakR2;
-    private Vector2 _zpsR1;
-    private Vector2 _zpsR2;
-
-    private SpiralCalculator _spiralCalculator;
 
     void Awake()
     {
@@ -55,7 +84,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         // }
     }
     
-    static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
+    static Complex Rak1(double r, double i) => SumRemainders.CalcRak1(r, i);
     static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
     static double Magnitude(double r, double i) => (Rak1(r, i) + Sum1(r, i)).Magnitude;
 
@@ -204,21 +233,47 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
     void Start()
     {
-        _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+        _r = new remainder(_r1Color, _r2Color);
+        _rps = new remainder(_rps1Color, _rps2Color);
+        _rak = new remainder(_rak1Color, _rak2Color);
 
-        _zakR1Toggle = GameObject.Find("ZakR1Toggle").GetComponent<Toggle>();
-        _zakR1Toggle.onValueChanged.AddListener((value) => UpdateRs());
-        
-        _zakR2Toggle = GameObject.Find("ZakR2Toggle").GetComponent<Toggle>();
-        _zakR2Toggle.onValueChanged.AddListener((value) => UpdateRs());
+        _r.toggle1 = GameObject.Find("R/2_R1_Toggle").GetComponent<Toggle>();
+        _r.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _r.active, v));
+        _r.toggle2 = GameObject.Find("R/2_R2_Toggle").GetComponent<MultiOptionToggle>();
+        _r.toggle2.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
+        _r.legsToggle = GameObject.Find("R/2_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _r.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
+        _r.pathToggle = GameObject.Find("R/2_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _r.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _r.active, option); _remaindersUpdated = false; };
 
-        _zakLegsToggle = GameObject.Find("ZakLegsToggle").GetComponent<MultiOptionToggle>();
+        _rps.toggle1 = GameObject.Find("Rps_R1_Toggle").GetComponent<Toggle>();
+        _rps.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _rps.active, v));
+        _rps.toggle2 = GameObject.Find("Rps_R2_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.toggle2.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
+        _rps.legsToggle = GameObject.Find("Rps_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
+        _rps.pathToggle = GameObject.Find("Rps_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _rps.active, option); _remaindersUpdated = false; };
 
-        _zpsR1Toggle = GameObject.Find("ZpsR1Toggle").GetComponent<Toggle>();
-        _zpsR1Toggle.onValueChanged.AddListener((value) => UpdateRs());
+        _rak.toggle1 = GameObject.Find("Rak_R1_Toggle").GetComponent<Toggle>();
+        _rak.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _rak.active, v));
+        _rak.toggle2 = GameObject.Find("Rak_R2_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.toggle2.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
+        _rak.legsToggle = GameObject.Find("Rak_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
+        _rak.pathToggle = GameObject.Find("Rak_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _rak.active, option); _remaindersUpdated = false; };
+    }
 
-        _zpsR2Toggle = GameObject.Find("ZpsR2Toggle").GetComponent<Toggle>();
-        _zpsR2Toggle.onValueChanged.AddListener((value) => UpdateRs());
+    private static void UpdateActive(ref int active, bool isOn) => UpdateActive(ref active, isOn ? 1 : 0);
+    private static void UpdateActive(ref int active, int option)
+    {
+        if (option == 1)
+        {
+            active += 1;
+            _remaindersUpdated = false;
+        }
+        else if (option == 0) active -= 1;
     }
 
     public override void DrawShapes(Camera cam)
@@ -231,131 +286,223 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             // set static parameter to draw in the local space of this object
             Draw.Matrix = transform.localToWorldMatrix;
 
-            if(!_remaindersUpdated)
+            if (!_remaindersUpdated)
             {
-                UpdateRs();
+                UpdateRemainders();
             }
+
             DrawRemainders();
         }
     }
 
-    private void UpdateRs()
+    private void UpdateRemainders()
     {
-        Zeta.Spiral s = _spiralCalculator.GetEms();
-        Vector sum = s.joints[s.middleIndex];
-        if (_zakR1Toggle.isOn) _zakR1 = sum + SumRemainders.CalcZakR1(_real, _index).ToVector2();
-        if (_zakR2Toggle.isOn) _zakR2 = sum + SumRemainders.CalcZakR2(_real, _index).ToVector2();
-        if (_zpsR1Toggle.isOn) _zpsR1 = sum + SumRemainders.CalcZpsR1(_real, _index).ToVector2();
-        if (_zpsR2Toggle.isOn) _zpsR2 = sum + SumRemainders.CalcZpsR2(_real, _index).ToVector2();
+        if (_r.active == 0 && _rps.active == 0 && _rak.active == 0)
+        {
+            _remaindersUpdated = true;
+            return;
+        }
+
+        _sum1 = SumRemainders.CalcForwardSumUpToBisector(_real, _index).ToVector2();
+        _sum2 = SumRemainders.CalcInverseSumUpToBisector(_real, _index).ToVector2();
+
+        UpdateRps();
+        UpdateRak();
+
+        // last since we use Rak for R
+        UpdateR();
 
         _remaindersUpdated = true;
     }
 
+    private void UpdateRps()
+    {
+        if (_rps.active == 0) return;
+
+        _rps.r1 = SumRemainders.CalcRps1(_real, _index).ToVector2();
+        _rps.r2 = SumRemainders.CalcRps2(_real, _index).ToVector2();
+
+        // build path
+        CalcPath(_rps.path, (r, i) => SumRemainders.CalcRps1(r, i), _rps.pathToggle.GetSelectedOption().Item1);
+    }
+
+    private void UpdateRak()
+    {
+        if (_rak.active == 0) return;
+
+        _rak.r1 = SumRemainders.CalcRak1(_real, _index).ToVector2();
+        _rak.r2 = SumRemainders.CalcRak2(_real, _index).ToVector2();
+
+        // build path
+        CalcPath(_rak.path, (r, i) => SumRemainders.CalcRak1(r, i), _rak.pathToggle.GetSelectedOption().Item1);
+    }
+
+    private void UpdateR()
+    {
+        if (_r.active == 0) return;
+
+        if (_rak.active != 0)
+        {
+            _r.r1 = _rak.r1 + _rak.r2;
+            _r.r1 /= 2.0f;
+            _r.r2 = _r.r1;
+        }
+        else
+        {
+            _r.r1 = ZakCalculator.Rak(_real, _index).ToVector2() / 2.0f;
+            _r.r2 = _r.r1;
+        }
+
+        // build path
+        CalcPath(_r.path, (r, i) => ZakCalculator.Rak(r, i) / 2.0, _r.pathToggle.GetSelectedOption().Item1);
+    }
+
+    private void CalcPath(List<Vector2> path, Func<double, double, Complex> calcFunc, int option)
+    {
+        if (option == 0) return;
+        path.Clear();
+
+        float pathRange;
+        switch (option)
+        {
+            case 1: pathRange = 0.001f; break;
+            case 2: pathRange = 0.01f; break;
+            case 3: pathRange = 0.1f; break;
+            case 4: pathRange = 0.5f; break;
+            default: pathRange = 0f; break;
+        }
+        int steps = 20 * (option * option); // more steps for larger paths
+        for (int s = 0; s <= steps; s++)
+        {
+            double idx = _index - pathRange + 2 * pathRange * s / steps;
+            Vector2 r = calcFunc(_real, idx).ToVector2() + SumRemainders.CalcForwardSumUpToBisector(_real, idx).ToVector2();
+            path.Add(r);
+        }
+    }
+
     private void DrawRemainders()
     {
-        DrawZakLegs(_zakLegsToggle.GetSelectedOption().Item1);
+        DrawR(_r);
+        DrawR(_rps);
+        DrawR(_rak);
+    }
 
-        if (_zakR1Toggle.isOn) DrawZakR1();
-        if (_zakR2Toggle.isOn) DrawZakR2();
-        if (_zakR1Toggle.isOn && _zakR2Toggle.isOn)
+    private void DrawR(remainder r)
+    {
+        if (r.active == 0) return;
+
+        var l1 = _sum1 + r.r1;
+        var l2 = _sum1 + _sum2 + r.r1 + r.r2;
+
+        using (Draw.StyleScope)
         {
-            using (Draw.StyleScope)
+            Draw.Thickness = 2f;
+            Draw.Color = r.color1;
+
+            if (r.toggle1.isOn) Draw.Line(_sum1, l1, r.color1);
+
+            int option = r.toggle2.GetSelectedOption().Item1;
+            switch (option)
+            {
+                case 1:
+                    Draw.Line(l1, l1 + r.r2, r.color2);
+                    if (r.toggle1.isOn) Draw.Line(l1, l1, 5f, r.color1);
+                    break;
+                case 2:
+                    Draw.Line(_sum1, _sum1 + r.r2, r.color2);
+                    break;
+                case 3:
+                    Draw.Line(_sum1, _sum1 + r.r2, r.color2);
+                    Draw.UseDashes = true;
+                    var rDir = r.r2 - r.r1;
+                    if (Mathf.Approximately(rDir.magnitude, 0f))
+                    {
+                        // take perpendicular instead
+                        rDir = new Vector2(-r.r1.y, r.r1.x);
+                    }
+                    rDir = rDir.normalized;
+                    Draw.Line(_sum1 + r.r1 - (rDir * 2), _sum1 + r.r2 + (rDir * 2));
+                    Draw.UseDashes = false;
+                    break;
+                case 4:
+                    Draw.Line(_sum2, _sum2 + r.r2, r.color2);
+                    break;
+                case 5:
+                    Draw.Line(_sum2, _sum2 + r.r2, r.color2);
+                    Draw.UseDashes = true;
+                    var dir = ((_sum2 + r.r2) - (_sum1 + r.r1)).normalized;
+                    Draw.Line(_sum1 + r.r1 - (dir * 2), _sum2 + r.r2 + (dir * 2));
+                    Draw.UseDashes = false;
+                    break;
+            }
+
+            option = r.legsToggle.GetSelectedOption().Item1;
+            if (option > 0)
+            {
+                Draw.Line(Vector2.zero, l1, color: Color.green);
+                if (option > 1) Draw.Line(l1, l2, color: Color.red);
+                if (option > 2)
+                {
+                    Draw.Line(Vector2.zero, l2, color: Color.cyan);
+                    Draw.UseDashes = true;
+                    Draw.Ring(l1, l1.magnitude, Color.green);
+                    Draw.Ring(l1, (l2 - l1).magnitude, Color.red);
+                    Draw.UseDashes = false;
+                }
+            }
+
+            option = r.pathToggle.GetSelectedOption().Item1;
+            if (option > 0 && r.path.Count > 1)
             {
                 Draw.Thickness = 1f;
-                Draw.UseDashes = true;
-                Draw.Color = Color.yellow;
-                Vector2 dir = (_zakR2 - _zakR1).normalized;
-                Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
-                Vector2 projectedZeta = Vector2.Dot(zeta - _zakR1, dir) * dir;
-                projectedZeta += projectedZeta.normalized;
-                Draw.Line(_zakR1 + projectedZeta, _zakR2 - projectedZeta);
-                Draw.UseDashes = false;
-            }
-        }
-
-        if (_zpsR1Toggle.isOn) DrawZpsR1();
-        if (_zpsR2Toggle.isOn) DrawZpsR2();
-        if (_zpsR1Toggle.isOn && _zpsR2Toggle.isOn)
-        {
-            using (Draw.StyleScope)
-            {
-                Draw.Thickness = 1f;
-                Draw.UseDashes = true;
-                Draw.Color = Color.cyan;
-                Vector2 dir = (_zpsR2 - _zpsR1).normalized;
-                // project _zpsR1 to Zeta onto the line between _zpsR1 and _zpsR2
-                Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
-                Vector2 projectedZeta = Vector2.Dot(zeta - _zpsR1, dir) * dir;
-                projectedZeta += projectedZeta.normalized;
-                Draw.Line(_zpsR1 + projectedZeta, _zpsR2 - projectedZeta);
-                Draw.UseDashes = false;
+                Draw.Color = r.color1;
+                for (int p = 0; p < r.path.Count - 1; p++)
+                {
+                    Draw.Line(r.path[p], r.path[p + 1]);
+                }
             }
         }
     }
 
-    private void DrawZakLegs(int state)
-    {
-        if (state == 0) return;
+    // private void DrawRemainders()
+    // {
+    //     DrawZakLegs(_zakLegsToggle.GetSelectedOption().Item1);
 
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 1f;
-            Vector forward = SumRemainders.CalcRak1Forward(_real, _index).ToVector();
-            Vector inverse = SumRemainders.CalcRak2Inverse(_real, _index).ToVector();
+    //     if (_zakR1Toggle.isOn) DrawZakR1();
+    //     if (_zakR2Toggle.isOn) DrawZakR2();
+    //     if (_zakR1Toggle.isOn && _zakR2Toggle.isOn)
+    //     {
+    //         using (Draw.StyleScope)
+    //         {
+    //             Draw.Thickness = 1f;
+    //             Draw.UseDashes = true;
+    //             Draw.Color = Color.yellow;
+    //             Vector2 dir = (_zakR2 - _zakR1).normalized;
+    //             Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
+    //             Vector2 projectedZeta = Vector2.Dot(zeta - _zakR1, dir) * dir;
+    //             projectedZeta += projectedZeta.normalized;
+    //             Draw.Line(_zakR1 + projectedZeta, _zakR2 - projectedZeta);
+    //             Draw.UseDashes = false;
+    //         }
+    //     }
 
-            Draw.Line(Vector2.zero, forward, Color.green);
-            Draw.Line(forward, forward + inverse, Color.red);
-
-            if (state == 2)
-            {
-                Draw.Line(Vector2.zero, forward + inverse, Color.cyan);
-
-                Draw.UseDashes = true;
-                Draw.Ring(forward, (float)forward.Length, Color.green);
-                Draw.Ring(forward, (float)inverse.Length, Color.red);
-            }
-        }
-    }
-
-    private void DrawZakR1()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 3f;
-            Draw.Color = _zakR1Color;
-            Zeta.Spiral s = _spiralCalculator.GetEms();
-            Draw.Line(s.joints[s.middleIndex], _zakR1);
-        }
-    }
-    private void DrawZakR2()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 3f;
-            Draw.Color = _zakR2Color;
-            Zeta.Spiral s = _spiralCalculator.GetEms();
-            Draw.Line(s.joints[s.middleIndex], _zakR2);
-        }
-    }
-
-    private void DrawZpsR1()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 3f;
-            Draw.Color = _zpsR1Color;
-            Zeta.Spiral s = _spiralCalculator.GetEms();
-            Draw.Line(s.joints[s.middleIndex], _zpsR1);
-        }
-    }
-    private void DrawZpsR2()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 3f;
-            Draw.Color = _zpsR2Color;
-            Zeta.Spiral s = _spiralCalculator.GetEms();
-            Draw.Line(s.joints[s.middleIndex], _zpsR2);
-        }
-    }
+    //     if (_zpsR1Toggle.isOn) DrawZpsR1();
+    //     if (_zpsR2Toggle.isOn) DrawZpsR2();
+    //     if (_zpsR1Toggle.isOn && _zpsR2Toggle.isOn)
+    //     {
+    //         using (Draw.StyleScope)
+    //         {
+    //             Draw.Thickness = 1f;
+    //             Draw.UseDashes = true;
+    //             Draw.Color = Color.cyan;
+    //             Vector2 dir = (_zpsR2 - _zpsR1).normalized;
+    //             // project _zpsR1 to Zeta onto the line between _zpsR1 and _zpsR2
+    //             Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
+    //             Vector2 projectedZeta = Vector2.Dot(zeta - _zpsR1, dir) * dir;
+    //             projectedZeta += projectedZeta.normalized;
+    //             Draw.Line(_zpsR1 + projectedZeta, _zpsR2 - projectedZeta);
+    //             Draw.UseDashes = false;
+    //         }
+    //     }
+    // }
 }

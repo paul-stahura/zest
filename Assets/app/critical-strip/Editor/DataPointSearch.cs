@@ -21,7 +21,7 @@ public static class DataPointSearch
     private const double MAX_INDEX = 6.0;
     private const double INDEX_STEP = 0.0001;
 
-    static Complex Rak1(double r, double i) => SumRemainders.CalcZakR1(r, i);
+    static Complex Rak1(double r, double i) => SumRemainders.CalcRak1(r, i);
     static Complex Sum1(double r, double i) => SumRemainders.CalcForwardSumUpToBisector(r, i);
 
     [MenuItem("RakZero/Find Rak1 FirstFam Zeros")]
