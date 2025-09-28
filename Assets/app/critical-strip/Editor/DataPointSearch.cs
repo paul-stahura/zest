@@ -412,8 +412,11 @@ public static class DataPointSearch
         int totalSteps = (int)System.Math.Ceiling((MAX_INDEX - MIN_INDEX) / INDEX_STEP);
         int currentStep = 0;
 
+        // Modify these for search
         int realCount = 20; // Number of real values to sample
-        double realStep = 0.5 / (realCount - 1);
+        double realRange = 5.0;
+        double realStep = realRange / (realCount - 1);
+        double realMax = realRange + 0.5; // max real to check
         LastDotResult lastDotResult = new LastDotResult(false, false, 0, 0); // last real where a cross was found
 
         for (double index = MIN_INDEX; index <= MAX_INDEX; index += INDEX_STEP)
@@ -429,7 +432,7 @@ public static class DataPointSearch
             }
 
             // For each real value, find the theta data
-            FindRak1ZeroOrZeta(ref lastDotResult, realCount, realStep, index, zeroData, findZero: true);
+            FindRak1ZeroOrZeta(ref lastDotResult, realCount, realStep, realMax, index, zeroData, findZero: false);
             currentStep++;
         }
 
@@ -453,7 +456,7 @@ public static class DataPointSearch
         }
     }
 
-    private static void FindRak1ZeroOrZeta(ref LastDotResult lastDotResult, int realCount, double realStep, double index, List<(double real, double index, Vector2 point)> zeroData, bool findZero)
+    private static void FindRak1ZeroOrZeta(ref LastDotResult lastDotResult, int realCount, double realStep, double realMax, double index, List<(double real, double index, Vector2 point)> zeroData, bool findZero)
     {
         List<LastDotResult> currentDots = new List<LastDotResult>();
 
@@ -513,21 +516,21 @@ public static class DataPointSearch
 
         // check bounds cross
         bool boundsCross = Vector3.Cross(
-            RakForward(1.0, index - INDEX_STEP).Normalized(),
-            RakInverse(1.0, index - INDEX_STEP).Normalized()
+            RakForward(realMax, index - INDEX_STEP).Normalized(),
+            RakInverse(realMax, index - INDEX_STEP).Normalized()
         ).z > 0;
 
         if (boundsCross != currentThetaCross[realCount - 1])
         {
             // use a binary search to find the index value where the cross changes sign
-            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, 1.0, boundsCross);
+            double mid = BinaryIndexCrossSearch(index - INDEX_STEP, index, realMax, boundsCross);
 
             bool dotSign = Vector2.Dot(
-                RakForward(1.0, mid).Normalized(),
-                RakInverse(1.0, mid).Normalized()
+                RakForward(realMax, mid).Normalized(),
+                RakInverse(realMax, mid).Normalized()
             ) > 0;
 
-            currentDots.Add(new LastDotResult(true, dotSign, 1.0, mid));
+            currentDots.Add(new LastDotResult(true, dotSign, realMax, mid));
         }
 
         // add the last dot result if it exists
@@ -772,6 +775,7 @@ public static class DataPointSearch
         // int realCount = 20; // Number of real values to sample
         // double realStep = 0.5 / (realCount - 1);
 
+        // Modify these for search
         int realCount = 20; // Number of real values to sample
         double realRange = 5.0;
         double realStep = realRange / (realCount - 1);
@@ -801,7 +805,7 @@ public static class DataPointSearch
             }
 
             // For each real value, find the theta data
-            FindRakAnglePI(realCount, realStep, realMax, index, thetaData, findAnglePI: false);
+            FindRakAnglePI(realCount, realStep, realMax, index, thetaData, findAnglePI: true);
             currentStep++;
         }
 

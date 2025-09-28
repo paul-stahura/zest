@@ -1,7 +1,7 @@
 # Point Set File Format:
 # Settings are specified with #@ prefix followed by name: value
-#@name: intersections
-#@color:#ffffff
+#@name: [σ5] Rak1 = 2PI
+#@color:#5F94DE
 #@skipCriticalLine: false
 #@samplingInterval: 1
 # Data format: real,imaginary
