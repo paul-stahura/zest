@@ -386,14 +386,14 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         DrawR(_rps);
         DrawR(_rak);
 
-        using (Draw.StyleScope)
-        {
-            Draw.Thickness = 1f;
-            Draw.Color = Color.yellow;
-            Complex test = ZakCalculator.AK_NegativeApproxG(_app.Real, _app.Index);
-            print($"AK zero at ({test.Magnitude}) = ({test.Real}, {test.Imaginary}i)");
-            Draw.Line(Vector2.zero, test.ToVector2(), Color.yellow);
-        }
+        // using (Draw.StyleScope)
+        // {
+        //     Draw.Thickness = 1f;
+        //     Draw.Color = Color.yellow;
+        //     Complex test = ZakCalculator.AK_NegativeApproxG(_app.Real, _app.Index);
+        //     print($"AK zero at ({test.Magnitude}) = ({test.Real}, {test.Imaginary}i)");
+        //     Draw.Line(Vector2.zero, test.ToVector2(), Color.yellow);
+        // }
     }
 
     private void DrawR(remainder r)

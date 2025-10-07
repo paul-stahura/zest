@@ -18,7 +18,7 @@ using System.Linq;
 public static class DataPointSearch
 {
     private const double MIN_INDEX = 1.0;
-    private const double MAX_INDEX = 6.0;
+    private const double MAX_INDEX = 40.0;
     private const double INDEX_STEP = 0.0001;
 
     static Complex Rak1(double r, double i) => SumRemainders.CalcRak1(r, i);
@@ -805,7 +805,7 @@ public static class DataPointSearch
             }
 
             // For each real value, find the theta data
-            FindRakAnglePI(realCount, realStep, realMax, index, thetaData, findAnglePI: true);
+            FindRakAnglePI(realCount, realStep, realMax, index, thetaData, findAnglePI: false);
             currentStep++;
         }
 
