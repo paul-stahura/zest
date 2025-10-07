@@ -491,7 +491,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         // Scrolling on Windows seems way less sensitive than the Mac trackpad
         sensitivity *= -5;
 #endif
-        float scroll = -Input.GetAxis("Mouse ScrollWheel") * sensitivity;
+        float scroll = Input.GetAxis("Mouse ScrollWheel") * sensitivity;
 
         float zoomFactor = 1f - scroll;
         float dynamicZoomFactor = Mathf.Pow(Mathf.Abs(zoomFactor), 1.5f) * (Mathf.Abs(zoomFactor) > 0 ? 1 : -1); // Adjust the exponent to control the curve steepness
