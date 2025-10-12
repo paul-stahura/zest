@@ -1,3 +1,8 @@
+# Index and Image Input
+Index is a new input frame of reference based off insights gained from the “bisector link”.
+\\ Index to imaginary = $\frac{\pi (2n + 1)}{\log(n + 1) - \log(n)}$
+\\ This conversion is exact.
+
 # Index and Imaginary Input
 Index is a new input frame of reference based off insights gained from the “bisector link”.
 \\ Index to imaginary = $\frac{\pi (2n + 1)}{\log(n + 1) - \log(n)}$
@@ -5,6 +10,10 @@ Index is a new input frame of reference based off insights gained from the “bi
 
 # Zeta Input
 This section controls inputs for the various equations throughout the app.
+
+# \sigma Value Slider
+\sigma value and fine tune controls.
+\\ Hold \bf{Left CTRL} \rm{or} \bf{Command} \rm{to maintain zoom to bisector link ratio}
 
 # Animate
 Animation slider that dynamically adjusts the index.
@@ -36,6 +45,9 @@ Zeta formula outputs and points of Interest.
 # Spiral
 Customize spiral visualization, links to display, formula selection, and reflections
 
+# Refocus Camera
+Reset camera offset and center the selected target
+
 # Open and Close Critical Strip Window
 Open and Close Critical Strip Window
 
@@ -54,6 +66,9 @@ Ems approximates the Riemann zeta function by summing a series of terms, adding 
 # Forward Spiral
 Draws each summed element or “link” of the Riemann-Siegel function when \sigma = \frac{1}{2}. When \sigma \not= \frac{1}{2}, Euler-Maclaurin summation is used instead.
 
+# Eta Spiral
+The EtaFormula method approximates the Riemann eta function by summing an alternating series, where each term involves the cosine and sine of the logarithm of n weighted by powers of n. The summation is computed for a large number of iterations, refining the result by adjusting the real and imaginary components based on the given complex input s = a + bi.
+
 # Eta
 The EtaFormula method approximates the Riemann eta function by summing an alternating series, where each term involves the cosine and sine of the logarithm of n weighted by powers of n. The summation is computed for a large number of iterations, refining the result by adjusting the real and imaginary components based on the given complex input s = a + bi.
 
@@ -63,14 +78,29 @@ Extend critical strip range from [0, 1] to [-4.5, 5.5]
 # Forward \sigma = \frac{1}{2}
 Draws the Riemann-Siegel Formula at \sigma = \frac{1}{2}
 
+# Forward Circle
+A circle to draw insights about equal leg lengths or “pseudo zeros” when \sigma \not= \frac{1}{2}
+
 # Forward Legs
 Bisector point calculated using the distance from joint when \sigma = \frac{1}{2}.
+
+# Forward Path
+Path of Forward bisector as \sigma changes from 0 to 1.
 
 # Forward Reflected
 Forward sprial reflected across the MidPoint
 
 # Grid Forward To Inverse Reflected
 Connects Forward Reflected Sprial to Inverse Reflected Sprial
+
+# Forward to Forward Reflected
+Connects Forward Sprial to Forward Reflected Sprial
+
+# Connects Forward to Inverse
+Connects Forward Sprial to Inverse Sprial
+
+# Forward Joints to Inverse Reflected Joints
+Connects Forward joints to the Inverse Reflected joints
 
 # Gram Points
 Gram points are specific values where the Riemann-Siegel formula changes sign. Gram's Law (which is not always true) states that the zeta function’s zeros alternate with the Gram points.
@@ -121,6 +151,12 @@ Intersection of the Inverse reflected bisector link and the forward bisector lin
 # Inverse Reflected Legs Circle
 A circle to draw insights about equal leg lengths or “pseudo zeros” when \sigma \not= \frac{1}{2}.
 
+# Inverse to Inverse Reflected
+Connects Inverse to Inverse Reflected
+
+# Inverse Joints to Forward Reflected Joints
+Connects inverse joints to the forward reflected joints
+
 # Grid Inverse Joints to Forward Reflected Joints
 Connects inverse joints to the forward reflected joints
 
@@ -142,6 +178,9 @@ A calculation derived from the behavior of the “Reverse Spiral” bisector lin
 # Yin Yang (Tear Drop)
 A calculation derived from the behavior of the “Reverse Spiral” bisector link when \sigma = \frac{1}{2}.
 \\ Using the Derivative of Yin and Yang along with the length of the chi bisector link for when \sigma \not= \frac{1}{2}.
+
+# Link Display Mode
+This setting controls the visibility of links within the spirals.
 
 # Links To Draw
 This setting controls the visibility of links within the spirals.
@@ -260,6 +299,9 @@ Tell me more
 
 # Zak Inverse
 Tell me more
+
+# \Zeta_{em}
+Zem approximates the Riemann zeta function by summing a series of terms, applying a correction and refining the result with higher-order corrections using product expansions.
 
 # Zps Target
 New Formula for Zeta when sigma = 1/2. A finite sum to the bisector link + a distance from the joint discerned from the symmetry of the “Reverse Spiral”.
