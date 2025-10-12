@@ -10,9 +10,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using TexDrawLib;
+using System;
 
 public class DescriptionManager : MonoBehaviour
 {
+    public static Action<RectTransform> OnHoverDescription;
+
     [Header("Defaults")]
     [SerializeField] public const string defaultKey = "Title";
     [SerializeField] private const string defaultDescription = "Tell Me More";
@@ -299,6 +302,8 @@ public class DescriptionManager : MonoBehaviour
 
         _currentUI = ui;
         DisplayDescription(ui.key);
+
+        OnHoverDescription?.Invoke(ui.GetComponent<RectTransform>());
     }
 
     public static void ClearDescriptionUI()
