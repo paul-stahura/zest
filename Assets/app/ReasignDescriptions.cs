@@ -1,3 +1,11 @@
+/// <summary>
+/// ReasignDescriptions is an editor utility script that helps reorganize and assign new IDs and keys to DescriptionUI components in the scene.
+/// It reads from a key file in the Resources folder, updates the IDs and keys of all DescriptionUI components, and saves the changes back to persistent storage.
+/// It also ensures that updated files are copied back to the Resources folder when exiting play mode.
+/// 
+/// This round about solution enables easy editing of descriptions during play mode, while ensuring that changes are not lost. additionaly, changes can be shared with the team via the Resources folder.
+/// new DescriptionUI components should be added with a descriptionID of -1, and then this script can be used to assign them new IDs and keys. This ensures that unique descriptions are not lost between project changes.
+/// </summary>
 #if UNITY_EDITOR
 using UnityEditor;
 #endif

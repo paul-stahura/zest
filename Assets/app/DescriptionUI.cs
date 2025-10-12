@@ -1,3 +1,10 @@
+/// <summary>
+/// DescriptionUI is a component that can be attached to UI elements to provide descriptive text functionality.
+/// It implements pointer event handlers to show and hide descriptions when the user hovers over the UI element.
+/// 
+/// when adding this component to a UI element, ensure that the _descriptionID is set -1.
+/// Then once changes are ready to be pushed, use the ReasignDescriptions script reorganize and assign new IDs and keys.
+/// </summary>
 using UnityEngine;
 using UnityEngine.EventSystems;
 

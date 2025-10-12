@@ -1,3 +1,7 @@
+/// <summary>
+/// DescriptionManager handles loading, displaying, editing, validating, and saving descriptions associated with DescriptionUI components in the scene.
+/// It reads from and writes to text files stored in the Resources and persistent data paths.
+/// </summary>
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -34,13 +38,12 @@ public class DescriptionManager : MonoBehaviour
     [Header("File Settings")]
     [SerializeField] public const string _keyIdsFile = "DescriptionIds";
     [SerializeField] public const string _descriptionsFile = "Descriptions";
-    [SerializeField] private Button purgeUnusedButton;
 
     private static DescriptionUI _currentUI;
     private static Dictionary<int, string> keyDictionary = new();
     private static Dictionary<string, string> _descriptions = new();
-    private string _descriptionsFilePath;
-    private string _keyIdsFilePath;
+    private static string _descriptionsFilePath;
+    private static string _keyIdsFilePath;
 
     private void Awake()
     {
@@ -130,7 +133,7 @@ public class DescriptionManager : MonoBehaviour
         {
             if (!_isEditMode)
             {
-                if (Input.GetKey(KeyCode.LeftShift))
+                if (Input.GetKey(KeyCode.LeftShift) && _displayPanel.gameObject.activeSelf)
                 {
                     ToggleEditMode(true);
                 }
@@ -145,9 +148,6 @@ public class DescriptionManager : MonoBehaviour
     private void Start()
     {
         InitializeDescriptions();
-
-        if (purgeUnusedButton != null)
-            purgeUnusedButton.onClick.AddListener(PurgeUnusedKeys);
     }
 
     private void InitializeDescriptions()
@@ -230,7 +230,7 @@ public class DescriptionManager : MonoBehaviour
         Debug.Log($"Loaded {_descriptions.Count} descriptions from {_descriptionsFile}");
     }
 
-    private void Save()
+    private static void Save()
     {
         StringBuilder sb = new StringBuilder();
 
@@ -295,11 +295,18 @@ public class DescriptionManager : MonoBehaviour
         }
 
         _currentUI = null;
-        DisplayDescription(defaultKey);
+        DisplayDescription("");
     }
 
     private static void DisplayDescription(string key)
     {
+        if(string.IsNullOrEmpty(key))
+        {
+            keyText.text = "";
+            descriptionText.text = "";
+            return;
+        }
+
         _descriptions.TryGetValue(key, out string description);
 
         keyText.text = key;
@@ -393,22 +400,9 @@ public class DescriptionManager : MonoBehaviour
                 if (string.IsNullOrEmpty(newDescription) || newDescription == defaultDescription)
                 {
                     // load existing description
-                    _currentUI.AssighnKey(newKey);
-                    descriptionInput.text = _descriptions[newKey];
-
-                    SaveKeyID(_currentUI.descriptionID, newKey);
-                    return;
+                    newDescription = _descriptions.ContainsKey(_currentUI.key) ? _descriptions[_currentUI.key] : defaultDescription;
                 }
-
-                // check if the description is different
-                if (_descriptions[newKey] != newDescription)
-                {
-                    // overwrite existing description
-                    _descriptions[newKey] = newDescription;
-
-                    SaveKeyID(_currentUI.descriptionID, newKey);
-                    return;
-                }
+                // else overwrite existing description
             }
         }
 
@@ -416,14 +410,13 @@ public class DescriptionManager : MonoBehaviour
         if (string.IsNullOrEmpty(newKey))
         {
             // revert to previous key
-            keyText.text = _currentUI.key;
-            descriptionText.text = _descriptions.ContainsKey(_currentUI.key) ? _descriptions[_currentUI.key] : defaultDescription;
-            return;
+            newKey = _currentUI.key;
+            newDescription = _descriptions.ContainsKey(_currentUI.key) ? _descriptions[_currentUI.key] : defaultDescription;
         }
 
         // save to dictionary
-        _descriptions[newKey] = descriptionInput.text.Trim();
-        _currentUI.AssighnKey(newKey); 
+        _descriptions[newKey] = newDescription;
+        _currentUI.AssighnKey(newKey);
 
         SaveKeyID(_currentUI.descriptionID, newKey);
         Save();
@@ -455,6 +448,9 @@ public class DescriptionManager : MonoBehaviour
 
         keyInput.gameObject.SetActive(editMode);
         descriptionInput.gameObject.SetActive(editMode);
+
+        if (_validatePanel.gameObject.activeSelf)
+            _validatePanel.gameObject.SetActive(false);
 
         _isEditMode = editMode;
     }
