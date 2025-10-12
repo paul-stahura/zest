@@ -30,6 +30,50 @@ public class ZakCalculator : MonoBehaviour
         new Complex(1.353030558654668162533, -1.252503278108132307164)
     };
 
+    #region AK Zeros
+    /// <summary>
+    /// How to find zeros of f(s) using AK’s algorithm when <(s) is negative
+    /// </summary>
+    public static Complex AK_NegativeApproxG(double real, double index, int cutoff = 1000)
+    {
+        Complex s = new Complex(real, Zeta.IndexToImag(index));
+
+        int p = omega.Length;
+        Complex result = Complex.Zero;
+
+        int N = (int)Math.Floor(index);
+        double N_plusHalf = N + 0.5;
+
+        // First sum: n = N+1 to infinity (approximate to cutoff)
+        for (int n = N + 1; n <= N + cutoff; n++)
+        {
+            Complex term = Complex.Pow(n / N_plusHalf, s - 1);
+            result += term;
+        }
+
+        // Second part
+        Complex sumOmega = Complex.Conjugate(omega0);
+
+        for (int j = 0; j < p; j++)
+        {
+            Complex iLambdaOverN = Complex.ImaginaryOne * Complex.Conjugate(lambda[j]) / N_plusHalf;
+
+            Complex term1 = Complex.Pow(1.0 - iLambdaOverN, s - 1) *
+                            Complex.Exp(-2.0 * Math.PI * N_plusHalf * Complex.Conjugate(lambda[j]));
+
+            Complex term2 = Complex.Pow(1.0 + iLambdaOverN, s - 1) *
+                            Complex.Exp(2.0 * Math.PI * N_plusHalf * Complex.Conjugate(lambda[j]));
+
+            sumOmega += Complex.Conjugate(omega[j]) * (term1 + term2);
+        }
+
+        result += (Math.Pow(-1.0, N) * 0.5) * sumOmega;
+
+        return result;
+    }
+    #endregion
+
+
     public static Complex I1(double r, double t)
     {
         double floorT = Math.Floor(t);

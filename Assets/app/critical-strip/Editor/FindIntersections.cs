@@ -24,6 +24,7 @@ using System;
 using System.Numerics;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
+using System.IO.Enumeration;
 
 public static class FindIntersections
 {
@@ -577,28 +578,28 @@ public static class FindIntersections
         return d1 + d2 >= lineLength - buffer && d1 + d2 <= lineLength + buffer;
     }
 
-    public static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections)
+    public static void SaveToCSV(List<(double real, double index, Vector2 point)> intersections, string fileName="intersections")
     {
         var csv = new StringBuilder();
         // csv.AppendLine("Pseudo Zeros,#8800FF");
         csv.AppendLine("# Point Set File Format:");
         csv.AppendLine("# Settings are specified with #@ prefix followed by name: value");
-        csv.AppendLine("#@name: intersections");
+        csv.AppendLine($"#@name: {fileName}");
         csv.AppendLine("#@color:#ffffff");
         csv.AppendLine("#@skipCriticalLine: false");
         csv.AppendLine("#@samplingInterval: 1");
-        csv.AppendLine("# Data format: real,imaginary");
+        csv.AppendLine("# Data format: real,index");
         
         foreach (var (real, index, _) in intersections)
         {
             csv.AppendLine($"{real:F15},{index:F15}");
         }
         
-        string path = "Assets/Resources/CriticalStripPoints/intersections.csv";
+        string path = $"Assets/Resources/CriticalStripPoints/{fileName}.csv";
         Directory.CreateDirectory(Path.GetDirectoryName(path));
         File.WriteAllText(path, csv.ToString());
         AssetDatabase.Refresh();
-        Debug.Log($"[FindIntersections] Saved intersections to {path}");
+        Debug.Log($"[FindIntersections] Saved {fileName} to {path}");
     }
 
     private static void SaveRakZerosToCSV(List<(double real, double index, Vector2 point)> zeros)
