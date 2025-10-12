@@ -53,7 +53,7 @@ public class ReasignDescriptions : MonoBehaviour
 
     private void OnExitPlay()
     {
-        var resourcesDir = Path.Combine(Application.dataPath, "Resources", "Data");
+        var resourcesDir = Path.Combine(Application.dataPath, "Resources", "UI_Descriptions");
         if (!Directory.Exists(resourcesDir))
             Directory.CreateDirectory(resourcesDir);
 
@@ -96,11 +96,11 @@ public class ReasignDescriptions : MonoBehaviour
     {
         var path = Path.Combine(Application.persistentDataPath, DescriptionManager._keyIdsFile + ".txt");
         // Try to load from Resources (always required)
-        TextAsset resourceFile = Resources.Load<TextAsset>($"Data/{DescriptionManager._keyIdsFile}");
+        TextAsset resourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{DescriptionManager._keyIdsFile}");
         if (resourceFile == null)
         {
-            Debug.LogError($"Description IDs file missing in Resources: Data/{DescriptionManager._keyIdsFile}.txt");
-            throw new FileNotFoundException($"Missing Resources file: Data/{DescriptionManager._keyIdsFile}.txt");
+            Debug.LogError($"Description IDs file missing in Resources: UI_Descriptions/{DescriptionManager._keyIdsFile}.txt");
+            throw new FileNotFoundException($"Missing Resources file: UI_Descriptions/{DescriptionManager._keyIdsFile}.txt");
         }
         // Overwrite the persistent version every time
         File.WriteAllText(path, resourceFile.text);

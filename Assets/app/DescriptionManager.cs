@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TexDrawLib;
 
 public class DescriptionManager : MonoBehaviour
 {
@@ -16,11 +17,15 @@ public class DescriptionManager : MonoBehaviour
     [SerializeField] public const string defaultKey = "Title";
     [SerializeField] private const string defaultDescription = "Tell Me More";
 
+    [Header("Style Settings")]
+    private static string _keyStyle = @"\bf";
+    private static string _descriptionStyle = @"\rm";
+
     [Header("Display References")]
     [SerializeField] private RectTransform _displayPanel;
     [SerializeField] private Button _editButton;
-    private static TMP_Text keyText;
-    private static TMP_Text descriptionText;
+    private static TEXDraw keyText;
+    private static TEXDraw descriptionText;
 
     [Header("Edit References")]
     [SerializeField] private Button _saveButton;
@@ -38,6 +43,7 @@ public class DescriptionManager : MonoBehaviour
     [Header("File Settings")]
     [SerializeField] public const string _keyIdsFile = "DescriptionIds";
     [SerializeField] public const string _descriptionsFile = "Descriptions";
+    [SerializeField] private bool _purgeUnusedKeys = false;
 
     private static DescriptionUI _currentUI;
     private static Dictionary<int, string> keyDictionary = new();
@@ -47,13 +53,15 @@ public class DescriptionManager : MonoBehaviour
 
     private void Awake()
     {
+        _purgeUnusedKeys = false; // disable purge for safety
+
         _keyIdsFilePath = Path.Combine(Application.persistentDataPath, _keyIdsFile + ".txt");
         // Try to load from Resources (always required)
-        TextAsset resourceFile = Resources.Load<TextAsset>($"Data/{_keyIdsFile}");
+        TextAsset resourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_keyIdsFile}");
         if (resourceFile == null)
         {
-            Debug.LogError($"Description IDs file missing in Resources: Data/{_keyIdsFile}.txt");
-            throw new FileNotFoundException($"Missing Resources file: Data/{_keyIdsFile}.txt");
+            Debug.LogError($"Description IDs file missing in Resources: UI_Descriptions/{_keyIdsFile}.txt");
+            throw new FileNotFoundException($"Missing Resources file: UI_Descriptions/{_keyIdsFile}.txt");
         }
         // Overwrite the persistent version every time
         File.WriteAllText(_keyIdsFilePath, resourceFile.text);
@@ -62,11 +70,11 @@ public class DescriptionManager : MonoBehaviour
 
         _descriptionsFilePath = Path.Combine(Application.persistentDataPath, _descriptionsFile + ".txt");
         // Try to load from Resources (always required)
-        resourceFile = Resources.Load<TextAsset>($"Data/{_descriptionsFile}");
+        resourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_descriptionsFile}");
         if (resourceFile == null)
         {
-            Debug.LogError($"Descriptions file missing in Resources: Data/{_descriptionsFile}.txt");
-            throw new FileNotFoundException($"Missing Resources file: Data/{_descriptionsFile}.txt");
+            Debug.LogError($"Descriptions file missing in Resources: UI_Descriptions/{_descriptionsFile}.txt");
+            throw new FileNotFoundException($"Missing Resources file: UI_Descriptions/{_descriptionsFile}.txt");
         }
         // Overwrite the persistent version every time
         File.WriteAllText(_descriptionsFilePath, resourceFile.text);
@@ -75,7 +83,7 @@ public class DescriptionManager : MonoBehaviour
         // find references in the display panel
         if (_displayPanel != null)
         {
-            var texts = _displayPanel.GetComponentsInChildren<TMP_Text>(true);
+            var texts = _displayPanel.GetComponentsInChildren<TEXDraw>(true);
             foreach (var text in texts)
             {
                 if (text.name == "KeyText")
@@ -142,6 +150,12 @@ public class DescriptionManager : MonoBehaviour
                     _displayPanel.gameObject.SetActive(!_displayPanel.gameObject.activeSelf);
                 }
             }
+        }
+
+        if(_purgeUnusedKeys)
+        {
+            PurgeUnusedKeys();
+            _purgeUnusedKeys = false;
         }
     }
 
@@ -300,7 +314,7 @@ public class DescriptionManager : MonoBehaviour
 
     private static void DisplayDescription(string key)
     {
-        if(string.IsNullOrEmpty(key))
+        if (string.IsNullOrEmpty(key))
         {
             keyText.text = "";
             descriptionText.text = "";
@@ -309,8 +323,13 @@ public class DescriptionManager : MonoBehaviour
 
         _descriptions.TryGetValue(key, out string description);
 
-        keyText.text = key;
-        descriptionText.text = description ?? "Tell Me More";
+        keyText.text = ApplyStyle(key, _keyStyle);
+        descriptionText.text = ApplyStyle(description ?? "Tell Me More", _descriptionStyle);
+    }
+    
+    private static string ApplyStyle(string text, string style)
+    {
+        return style + "{" + text + "}";
     }
 
     public void ValidateEdit()

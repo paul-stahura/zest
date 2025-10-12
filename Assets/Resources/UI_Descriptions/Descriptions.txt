@@ -1,0 +1,27 @@
+# This one is new
+Take this formula for example\\
+\frac{\alpha_{mcd}\left(\sigma_{1},\ I_{ndex}\right)\cdot\left(\Sigma_{1}\left(I_{ndex}\ ,\sigma_{1},\ I_{ndex}\right)+R_{1}\left(\sigma_{1},\ I_{ndex}\right)\right)+.001\left(\Sigma_{1}\left(I_{ndex},\ \sigma_{1},\ I_{ndex}\right)\right)}{\alpha_{mcd}\left(\sigma_{1},\ I_{ndex}\right)+.001}\\
+
+looks cool right!
+
+# New Manual Descriptions!
+Take this formula for example\\
+\frac{\alpha_{mcd}\left(\sigma_{1},\ I_{ndex}\right)\cdot\left(\Sigma_{1}\left(I_{ndex}\ ,\sigma_{1},\ I_{ndex}\right)+R_{1}\left(\sigma_{1},\ I_{ndex}\right)\right)+.001\left(\Sigma_{1}\left(I_{ndex},\ \sigma_{1},\ I_{ndex}\right)\right)}{\alpha_{mcd}\left(\sigma_{1},\ I_{ndex}\right)+.001}\\
+
+looks cool right!
+
+# Not everything is working
+123456
+
+# \Sigma_{1}
+IIIIIIIIIIIIIII
+
+# YAY
+123456
+
+# edit file test
+works?
+
+# \frac{\Sigma_{1}/?}
+IIIIIIIIIIIIIII
+
