@@ -1,6 +1,6 @@
 /// <summary>
 /// DescriptionManager handles loading, displaying, editing, validating, and saving descriptions associated with DescriptionUI components in the scene.
-/// It reads from and writes to text files stored in the Resources and persistent data paths.
+/// descriptions are save locally in the persistent data path, and can be overwritten by resources files.
 /// </summary>
 using System.Collections.Generic;
 using System.IO;
@@ -36,6 +36,12 @@ public class DescriptionManager : MonoBehaviour
     private static TMP_InputField descriptionInput;
     private static bool _isEditMode = false;
 
+    [Header("Load References")]
+    [SerializeField] private RectTransform _loadPanel;
+    [SerializeField] private Button _loadLocalButton;
+    [SerializeField] private Button _overwriteLocalButton;
+    private static bool _hasLoadedEntries = false;
+
     [Header("Validate References")]
     [SerializeField] private RectTransform _validatePanel;
     [SerializeField] private Button _overrideValidateButton;
@@ -57,31 +63,6 @@ public class DescriptionManager : MonoBehaviour
     private void Awake()
     {
         _purgeUnusedKeys = false; // disable purge for safety
-
-        _keyIdsFilePath = Path.Combine(Application.persistentDataPath, _keyIdsFile + ".txt");
-        // Try to load from Resources (always required)
-        TextAsset resourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_keyIdsFile}");
-        if (resourceFile == null)
-        {
-            Debug.LogError($"Description IDs file missing in Resources: UI_Descriptions/{_keyIdsFile}.txt");
-            throw new FileNotFoundException($"Missing Resources file: UI_Descriptions/{_keyIdsFile}.txt");
-        }
-        // Overwrite the persistent version every time
-        File.WriteAllText(_keyIdsFilePath, resourceFile.text);
-        Debug.Log($"Description IDs file successfully copied from Resources to persistent path: {_keyIdsFilePath}");
-
-
-        _descriptionsFilePath = Path.Combine(Application.persistentDataPath, _descriptionsFile + ".txt");
-        // Try to load from Resources (always required)
-        resourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_descriptionsFile}");
-        if (resourceFile == null)
-        {
-            Debug.LogError($"Descriptions file missing in Resources: UI_Descriptions/{_descriptionsFile}.txt");
-            throw new FileNotFoundException($"Missing Resources file: UI_Descriptions/{_descriptionsFile}.txt");
-        }
-        // Overwrite the persistent version every time
-        File.WriteAllText(_descriptionsFilePath, resourceFile.text);
-        Debug.Log($"Description IDs file successfully copied from Resources to persistent path: {_descriptionsFilePath}");
 
         // find references in the display panel
         if (_displayPanel != null)
@@ -120,29 +101,80 @@ public class DescriptionManager : MonoBehaviour
         // button listeners
         if (_editButton != null)
             _editButton.onClick.AddListener(() => ToggleEditMode(true));
-        
+
         if (_saveButton != null)
             _saveButton.onClick.AddListener(ValidateEdit);
 
         if (_overrideValidateButton != null)
-            _overrideValidateButton.onClick.AddListener(() => {
+            _overrideValidateButton.onClick.AddListener(() =>
+            {
                 SaveDescriptionUI();
             });
 
         if (_cancelValidateButton != null)
             _cancelValidateButton.onClick.AddListener(CancelValidation);
-        
+
         if (_revertValidateButton != null)
             _revertValidateButton.onClick.AddListener(RevertValidation);
 
+        if (_loadLocalButton != null)
+            _loadLocalButton.onClick.AddListener(UseLocalEntries);
+        if (_overwriteLocalButton != null)
+            _overwriteLocalButton.onClick.AddListener(OverwriteLocalEntries);
+    }
+
+    public void UseLocalEntries()
+    {
+        LoadSavedEntries(false);
         LoadDescriptions();
+        InitializeDescriptions();
+    }
+
+    public void OverwriteLocalEntries()
+    {
+        LoadSavedEntries(true);
+        LoadDescriptions();
+        InitializeDescriptions();
+    }
+    
+    private void LoadSavedEntries(bool overwrite = false)
+    {
+        _keyIdsFilePath = Path.Combine(Application.persistentDataPath, _keyIdsFile + ".txt");
+        _descriptionsFilePath = Path.Combine(Application.persistentDataPath, _descriptionsFile + ".txt");
+
+        // check if files exist in persistent path
+        if (!File.Exists(_keyIdsFilePath) || !File.Exists(_descriptionsFilePath))
+        {
+            overwrite = true; // force overwrite if files are missing
+        }
+
+        TextAsset keyResourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_keyIdsFile}");
+        TextAsset entryResourceFile = Resources.Load<TextAsset>($"UI_Descriptions/{_descriptionsFile}");
+        if (entryResourceFile == null || keyResourceFile == null)
+        {
+            throw new FileNotFoundException($"Missing Manual Entry Resources files: UI_Descriptions/{_keyIdsFile}.txt || {_descriptionsFile}.txt");
+        }
+
+        if (overwrite)
+        {
+            // Overwrite local version with Resources version
+            File.WriteAllText(_descriptionsFilePath, entryResourceFile.text);
+            File.WriteAllText(_keyIdsFilePath, entryResourceFile.text);
+            Debug.Log($"Manual entries successfully copied from Resources to persistent path: {Application.persistentDataPath}");
+        }
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            if (!_isEditMode)
+            if (!_hasLoadedEntries)
+            {
+                // toggle load panel
+                if (_loadPanel != null)
+                    _loadPanel.gameObject.SetActive(!_loadPanel.gameObject.activeSelf);
+            }
+            else if (!_isEditMode)
             {
                 if (Input.GetKey(KeyCode.LeftShift) && _displayPanel.gameObject.activeSelf)
                 {
@@ -162,15 +194,10 @@ public class DescriptionManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        InitializeDescriptions();
-    }
-
     private void InitializeDescriptions()
     {
         // find all DescriptionUI gameobjects in the scene
-        var allUIs = FindObjectsOfType<DescriptionUI>();
+        var allUIs = FindObjectsOfType<DescriptionUI>(true);
 
         // read from the IdKeys file
         // format "1 # KeyName"
@@ -217,6 +244,15 @@ public class DescriptionManager : MonoBehaviour
                 ui.AssighnKey(defaultKey);
             }
         }
+
+        if (!_hasLoadedEntries)
+        {
+            _hasLoadedEntries = true;
+            if (_loadPanel != null)
+                _loadPanel.gameObject.SetActive(false);
+            
+            _displayPanel.gameObject.SetActive(true);
+        }
     }
 
     #region Save Utils
@@ -244,7 +280,7 @@ public class DescriptionManager : MonoBehaviour
     {
         _descriptions.Clear();
         _descriptions = ParseFile(File.ReadAllText(_descriptionsFilePath));
-        Debug.Log($"Loaded {_descriptions.Count} descriptions from {_descriptionsFile}");
+        Debug.Log($"Loaded {_descriptions.Count} descriptions from {_descriptionsFilePath}");
     }
 
     private static void Save()
@@ -258,7 +294,6 @@ public class DescriptionManager : MonoBehaviour
             sb.AppendLine(); // spacing between entries
         }
 
-        // Save to resources
         File.WriteAllText(_descriptionsFilePath, sb.ToString());
         Debug.Log($"Descriptions saved to {_descriptionsFilePath}");
     }
@@ -295,9 +330,10 @@ public class DescriptionManager : MonoBehaviour
     #region UI Updates
     public static void LoadDescriptionUI(DescriptionUI ui)
     {
-        if (_isEditMode)
+        if (!_hasLoadedEntries || _isEditMode)
         {
-            return; // prevent loading new UI while in edit mode
+            // prevent loading new UI while in edit mode or if entries haven't been loaded yet
+            return;
         }
 
         _currentUI = ui;
@@ -308,9 +344,10 @@ public class DescriptionManager : MonoBehaviour
 
     public static void ClearDescriptionUI()
     {
-        if (_isEditMode)
+        if (!_hasLoadedEntries || _isEditMode)
         {
-            return; // prevent clearing while in edit mode
+            // prevent clearing UI while in edit mode or if entries haven't been loaded yet
+            return;
         }
 
         _currentUI = null;
