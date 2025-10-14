@@ -15,6 +15,7 @@ using System;
 public class DescriptionManager : MonoBehaviour
 {
     public static Action<RectTransform> OnHoverDescription;
+    public static bool InEditMode => _isEditMode;
 
     [Header("Defaults")]
     [SerializeField] public const string defaultKey = "Title";
@@ -159,7 +160,7 @@ public class DescriptionManager : MonoBehaviour
         {
             // Overwrite local version with Resources version
             File.WriteAllText(_descriptionsFilePath, entryResourceFile.text);
-            File.WriteAllText(_keyIdsFilePath, entryResourceFile.text);
+            File.WriteAllText(_keyIdsFilePath, keyResourceFile.text);
             Debug.Log($"Manual entries successfully copied from Resources to persistent path: {Application.persistentDataPath}");
         }
     }
@@ -258,6 +259,12 @@ public class DescriptionManager : MonoBehaviour
     #region Save Utils
     private void PurgeUnusedKeys()
     {
+        if (!_hasLoadedEntries)
+        {
+            Debug.LogWarning("Cannot purge unused keys before loading entries.");
+            return;
+        }
+
         // find keys that are not used
         var keysToRemove = new List<string>();
         foreach (var key in _descriptions.Keys)
@@ -461,7 +468,7 @@ public class DescriptionManager : MonoBehaviour
                 if (string.IsNullOrEmpty(newDescription) || newDescription == defaultDescription)
                 {
                     // load existing description
-                    newDescription = _descriptions.ContainsKey(_currentUI.key) ? _descriptions[_currentUI.key] : defaultDescription;
+                    newDescription = _descriptions.ContainsKey(newKey) ? _descriptions[newKey] : defaultDescription;
                 }
                 // else overwrite existing description
             }

@@ -87,3 +87,5 @@
 96 # \zeta_{ps}
 99 # Zrs Target
 89 # \Sigma_{1} Target
+-1 # Manual Entries
+9 # Manual Entries

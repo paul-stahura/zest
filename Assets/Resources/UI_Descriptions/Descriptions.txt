@@ -276,3 +276,8 @@ Riemann-Siegel function: \Zeta(index)
 # \Sigma_{1} Target
 \Sigma up to Index
 
+# Manual Entries
+Mouse over elements to learn more.
+\\ Press M to Hide.
+\\ Press Shift + M to edit selected entry.
+
