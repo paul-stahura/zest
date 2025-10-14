@@ -345,8 +345,11 @@ public class App : ImmediateModeShapeDrawer
 
         if (Input.GetKeyUp("space"))
         {
-            var active = canvas.gameObject.activeSelf;
-            canvas.gameObject.SetActive(!active);
+            if (!DescriptionManager.InEditMode)
+            {
+                var active = canvas.gameObject.activeSelf;
+                canvas.gameObject.SetActive(!active);
+            }
         }
 
         frameCount++;

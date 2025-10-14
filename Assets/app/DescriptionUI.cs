@@ -3,7 +3,7 @@
 /// It implements pointer event handlers to show and hide descriptions when the user hovers over the UI element.
 /// 
 /// when adding this component to a UI element, ensure that the _descriptionID is set -1.
-/// Then once changes are ready to be pushed, use the ReasignDescriptions script reorganize and assign new IDs and keys.
+/// Then us the AssignDescriptionIDs script to assign a unique ID and key to the component.
 /// </summary>
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,7 +30,7 @@ public class DescriptionUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         key = newKey;
     }
 
-    private string GetHerarchyPath(Transform current)
+    public string GetHerarchyPath(Transform current)
     {
         if (current.parent == null)
             return current.name;

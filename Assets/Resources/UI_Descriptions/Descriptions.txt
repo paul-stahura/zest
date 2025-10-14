@@ -1,0 +1,283 @@
+# Index and Imaginary Input
+Index is a new input frame of reference based off insights gained from the “bisector link”.
+\\ Index to imaginary = $\frac{\pi (2n + 1)}{\log(n + 1) - \log(n)}$
+\\ This conversion is exact.
+
+# Zeta Input
+This section controls inputs for the various equations throughout the app.
+
+# Animate
+Animation slider that dynamically adjusts the index.
+
+# Animation Hold
+Click this toggle for the Animation slider to maintain its position after the mouse is released.
+
+# Animation Speed
+Adjusts the animation slider scale
+
+# Remainders
+Tell Me More
+
+# Grid
+Observations about how the symmectrical space is transformed when \sigma is changed
+
+# Symmetry
+Focuses on visualizing the inherent symmetry of the Zeta function
+
+# Camera Tracking
+Select elements to follow
+
+# Yin Yang
+Tear Drop Shape Calculations
+
+# Zeta Targets
+Zeta formula outputs and points of Interest.
+
+# Spiral
+Customize spiral visualization, links to display, formula selection, and reflections
+
+# Open and Close Critical Strip Window
+Open and Close Critical Strip Window
+
+# Color Middle Links
+This option highlights the symmetry link and its immediate neighbors (+1 and -1) with distinct colors.
+
+# Critical Strip Coordinate Space Toggle
+Toggle between Index and Imaginary units
+
+# Draw Origin
+Draw Target at (0,0)
+
+# Ems Target
+Ems approximates the Riemann zeta function by summing a series of terms, adding a basic correction term, and improving accuracy with higher-order refinements based on the Pochhammer symbol and a convergence check.
+
+# Forward Spiral
+Draws each summed element or “link” of the Riemann-Siegel function when \sigma = \frac{1}{2}. When \sigma \not= \frac{1}{2}, Euler-Maclaurin summation is used instead.
+
+# Eta
+The EtaFormula method approximates the Riemann eta function by summing an alternating series, where each term involves the cosine and sine of the logarithm of n weighted by powers of n. The summation is computed for a large number of iterations, refining the result by adjusting the real and imaginary components based on the given complex input s = a + bi.
+
+# Extend Critical Strip Range
+Extend critical strip range from [0, 1] to [-4.5, 5.5]
+
+# Forward \sigma = \frac{1}{2}
+Draws the Riemann-Siegel Formula at \sigma = \frac{1}{2}
+
+# Forward Legs
+Bisector point calculated using the distance from joint when \sigma = \frac{1}{2}.
+
+# Forward Reflected
+Forward sprial reflected across the MidPoint
+
+# Grid Forward To Inverse Reflected
+Connects Forward Reflected Sprial to Inverse Reflected Sprial
+
+# Gram Points
+Gram points are specific values where the Riemann-Siegel formula changes sign. Gram's Law (which is not always true) states that the zeta function’s zeros alternate with the Gram points.
+
+# Index Fine Control
+Index value broken up into its integer and fractional parts for adaptable control.
+
+# \sigma Fine Control
+\sigma value and fine tune controls.
+\\ Hold \bf{Left CTRL} \rm{or} \bf{Command} \rm{to maintain zoom to bisector link ratio}
+
+# Infinity Bisector Link
+The bisector link as index reaches infinity
+
+# Infinity Yin Yang
+The Yin Yang path as Index approaches infinity
+
+# Inverse Spiral
+The inverse sum of the Riemann Siegel Formula using Chi Titchmarsh and Stirling Approximation
+
+# Yin Yang Reverse
+Yin Yang reflected along the Symmetry Bisector
+
+# Inverse Legs Circle
+A circle to draw insights about equal leg lengths or “pseudo zeros” when \sigma \not= \frac{1}{2}.
+
+# Forward Legs Circle
+A circle to draw insights about equal leg lengths or “pseudo zeros” when \sigma \not= \frac{1}{2}
+
+# Forward Bisector Path
+Path of Forward bisector as \sigma changes from 0 to 1.
+
+# Inverse Legs
+Bisector point calculated using distance from joint when \sigma = \frac{1}{2}.
+
+# Inverse Legs Path
+Path of Inverse bisector as \sigma changes from 0 to 1.
+
+# Inverse Reflected
+The "Inverse Spiral" staring at zeta Euler Maclaurin and reflected along the zeta vector.
+
+# Inverse Reflected Bisector Path
+Path of the Inverse Reflected bisector as \sigma changes from 0 to 1.
+
+# Inverse Reflected Legs
+Intersection of the Inverse reflected bisector link and the forward bisector link.
+
+# Inverse Reflected Legs Circle
+A circle to draw insights about equal leg lengths or “pseudo zeros” when \sigma \not= \frac{1}{2}.
+
+# Grid Inverse Joints to Forward Reflected Joints
+Connects inverse joints to the forward reflected joints
+
+# Grid Inverse to Inverse Reflected
+Connects Inverse to Inverse Reflected
+
+# Grid Forward to Forward Reflected
+Connects Forward Sprial to Forward Reflected Sprial
+
+# Grid Connects Forward to Inverse
+Connects Forward Sprial to Inverse Sprial
+
+# Grid Forward Joints to Inverse Reflected Joints
+Connects Forward joints to the Inverse Reflected joints
+
+# Yin Yang \frac{1}{2}
+A calculation derived from the behavior of the “Reverse Spiral” bisector link when \sigma = \frac{1}{2}.
+
+# Yin Yang (Tear Drop)
+A calculation derived from the behavior of the “Reverse Spiral” bisector link when \sigma = \frac{1}{2}.
+\\ Using the Derivative of Yin and Yang along with the length of the chi bisector link for when \sigma \not= \frac{1}{2}.
+
+# Links To Draw
+This setting controls the visibility of links within the spirals.
+
+# MidPoint Target
+Zeta / 2
+
+# Camera Tracking Target
+Select Cam Tracking category. Afterwards, elements will be automatically tracked by drawn priority. You can change what exact element is being tracked by exploring additional category settings.
+
+# Title
+Tell me more
+
+# R/2 Legs
+Green = \Sigma_{1} + R_{1}
+\\ Red = \Sigma_{2} + R_{2}
+
+# R/2 Path
+Draws the path of R/2 as index changes
+
+# R/2 R_{2}
+(1) R_{2} forward.
+\\ (2) R_{2} = \Sigma_{1} - \Sigma_{2}
+\\ (4) R_{2} = inverse
+
+# R2 Forward Legs
+Uses Zak Remainder/2 as bisector
+
+# R2 Forward Bisector Path
+Real Path of Remainder/2 point
+
+# R2 Inverse Legs
+Uses Zak Remainder/2 as bisector
+
+# R2 Inverse Bisector Path
+Real Path of Remainder/2 point
+
+# R_{ak} Legs
+Green = \Sigma_{1} + R_{ak1}
+\\ Red = \Sigma_{2} + R_{ak2}
+
+# R_{ak1} Path
+Draws the path of R_{ak1} as index changes
+
+# R_{ak2}
+(1) R_{ak2} forward.
+\\ (2) R_{ak2} = \Sigma_{1} - \Sigma_{2}
+\\ (4) R_{ak2} = inverse
+
+# Right Angle Vertex
+Along the vector or first leg of the “Bisector legs at 1/2" there is a point perpendicular to zeta. This is drawn as the Right Angle Vertex or (RAV)
+
+# Forward Spiral Real Path
+Draws a line tracing the path of the Zeta function as the sigma component changes. It provides a visual representation of how the function evolves along the \sigma axis.  Euler-Maclaurin summation is used to calculate the \sigma path.
+
+# Reverse Spiral
+Reflects the forward spiral along the "symmetry line" (A bisector line between zeta and the origin.)
+
+# Reverse Link
+The Bisector link of the Reverse spiral
+
+# R_{ps} Legs
+Green = \Sigma_{1} + R_{ps1}
+\\ Red = \Sigma_{2} + R_{ps2}
+
+# R_{ps1} Path
+Draws the path of R_{ps1} as index changes
+
+# R_{ps2}
+(1) R_{ps2} forward.
+\\ (2) R_{ps2} = \Sigma_{1} - \Sigma_{2}
+\\ (4) R_{ps2} = inverse
+
+# Focus Current Index
+Click to focus the critical strip window on the current index.
+\\ Click and Hold to lock the window to follow the current index.
+
+# Spiral Transparency
+Set the drawn line transparency
+
+# Symmetry Path
+Path of the Symmetry Bisector as \sigma changes from 0 to 1
+
+# Symmetry Bisector
+The point of intersection between the Forward and Reverse spiral bisector links.
+
+# Zps Bisector To Zeta
+Draws a line from the Bisector Point to zeta
+
+# Bisector Legs at 1/2
+New Formula for Zeta when \sigma = \frac{1}{2}. A finite sum to the bisector link + a distance from the joint discerned from the symmetry of the “Reverse Spiral”. Calculated from the “Yin & Yang” teardrop formulas.
+
+# Yin Yang 1/2 Link
+A bisector link created from the fractional part of the index, connecting the points along the Yin and Yang Paths.
+
+# Trace Zeta
+Toggle to draw the path of enabled zeta targets
+
+# Zps = 1/2 Circle
+A circle drawn from the Bisector at 1/2 to zeta Euler Maclaurin. Used to draw insights for when leg lengths are equal, indicated by “window points” when sigma = 1.
+
+# Yin Yang Link
+A bisector link created from the fractional part of the index, connection the points along the Yin and Yang Paths.
+
+# Extend Spiral
+Expand the number of links drawn
+
+# Window Points
+Instances of when “Bisector Legs at 1/2" and Bisector Legs at 1/2 to Zeta are equal at \sigma values of 1.
+
+# Zak Spiral
+Tell me more
+
+# Zak Target
+Tell me more
+
+# Zak Inverse
+Tell me more
+
+# Zps Target
+New Formula for Zeta when sigma = 1/2. A finite sum to the bisector link + a distance from the joint discerned from the symmetry of the “Reverse Spiral”.
+
+# \zeta_{ps}
+General case for zeta when sigma is not 1/2.
+
+# \zeta_{em}
+Zem approximates the Riemann zeta function by summing a series of terms, applying a correction and refining the result with higher-order corrections using product expansions.
+
+# Zrs Target
+Riemann-Siegel function: \Zeta(index)
+
+# \Sigma_{1} Target
+\Sigma up to Index
+
+# Manual Entries
+Mouse over elements to learn more.
+\\ Press M to Hide.
+\\ Press Shift + M to edit selected entry.
+
