@@ -1510,90 +1510,81 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     public void ToggleSpaceMode()
     {
         if (!isInitialized || criticalStripTransform == null) return;
-        
-        // Store current viewport center and range before toggling
+
+        // Store current viewport range in current space
         float currentMin = criticalStripTransform.MinValue;
         float currentMax = criticalStripTransform.MaxValue;
-        float currentRange = currentMax - currentMin;
-        float currentCenter = (currentMax + currentMin) / 2f;
-        
-        // Toggle space mode
+
+        // Toggle space mode flag
         bool newMode = !criticalStripTransform.UseImaginarySpace;
         criticalStripTransform.UseImaginarySpace = newMode;
-        
-        // Calculate appropriate range for the new space mode
+
+        // Convert range boundaries to new space using simple 1:1 mathematical conversion
+        // This maintains the same visual coverage - no arbitrary adjustments
         float newMin, newMax;
-        
+
         if (newMode) // Switching to imaginary space
         {
             // Convert current index range to imaginary range
             newMin = (float)Zeta.IndexToImag(currentMin);
             newMax = (float)Zeta.IndexToImag(currentMax);
-            
-            // If range is too small in imaginary space, expand to show more points
-            if (newMax - newMin < 50f) // Minimum useful range in imaginary space
-            {
-                float imagCenter = (newMax + newMin) / 2f;
-                newMin = imagCenter - 200f; // Show a reasonable range centered around current view
-                newMax = imagCenter + 200f;
-                
-                // Ensure we don't go below minimum imaginary value (approx t=14)
-                float minImag = (float)Zeta.IndexToImag(-1);
-                if (newMin < minImag)
-                {
-                    newMin = minImag;
-                    newMax = minImag + 400f; // Keep the same range size
-                }
-            }
         }
         else // Switching to index space
         {
             // Convert current imaginary range to index range
             newMin = (float)Zeta.ImagToIndex(currentMin);
             newMax = (float)Zeta.ImagToIndex(currentMax);
-            
-            // Ensure minimum reasonable range in index space
-            if (newMax - newMin > 25f) // If range too big in index space
+        }
+
+        // Apply minimum bounds constraint
+        if (newMode)
+        {
+            // Ensure we don't go below minimum imaginary value (equivalent to index = -1)
+            float minAllowedImag = (float)Zeta.IndexToImag(-1f);
+            if (newMin < minAllowedImag)
             {
-                float indexCenter = (newMax + newMin) / 2f;
-                newMin = indexCenter - 6f; // Show reasonable index range
-                newMax = indexCenter + 6f;
-            }
-            
-            // Ensure we don't go below -1 index
-            if (newMin < -1f)
-            {
-                newMin = -1f;
-                newMax = Math.Max(newMax, 11f); // Ensure we see at least up to index 11
+                float adjustment = minAllowedImag - newMin;
+                newMin = minAllowedImag;
+                newMax += adjustment;
             }
         }
-        
+        else
+        {
+            // Ensure we don't go below index -1
+            if (newMin < -1f)
+            {
+                float adjustment = -1f - newMin;
+                newMin = -1f;
+                newMax += adjustment;
+            }
+        }
+
         // Update UI indicator if available
         if (spaceModeText != null)
         {
             spaceModeText.text = newMode ? "Imag Space" : "Index Space";
         }
-        
-        // Set the new range
+
+        // Set the new range (this updates internal bounds in CriticalStripTransform)
         criticalStripTransform.SetRange(newMin, newMax);
-        
-        // Force a complete refresh of all point sets
-        RefreshAllPointSets();
-        
-        // Notify listeners (e.g. PointSetManager) that the viewport changed, so mesh points can be recalculated
+
+        // Update current position indicator to match new space
+        UpdateCurrentPosIndicator();
+
+        // Fire viewport changed event - this will trigger UpdatePointPositions() in PointSetManager
+        // which re-calculates mesh positions from original index-space data
         OnViewportChanged?.Invoke();
-        
-        // Update the index labels
+
+        // Update the axis labels to show new space mode
         var labelRenderer = GetComponent<IndexLabelsRenderer>();
         if (labelRenderer != null)
         {
-            // Send both the current range and the new space mode
             labelRenderer.UpdateLabels(newMin, newMax);
             if (labelRenderer is IndexLabelsRenderer indexLabels)
             {
                 indexLabels.SetUseImaginarySpace(newMode);
             }
-        }        
+        }
     }
 
     // Add these editor tools for testing
