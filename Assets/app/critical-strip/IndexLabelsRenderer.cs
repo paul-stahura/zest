@@ -374,9 +374,9 @@ public class IndexLabelsRenderer : MonoBehaviour
             // Skip labels below minimum allowed value
             if (useImaginarySpace)
             {
-                // For imaginary space, ensure we don't go below the imaginary value corresponding to index = -1
-                double minAllowedImag = Zeta.IndexToImag(-1);
-                if (index < minAllowedImag) continue;
+                // For imaginary space, enforce minimum imaginary bound (safe constant, avoiding IndexToImag(-1) which is undefined)
+                const double MIN_IMAGINARY_VALUE = 10.0; // Safe lower bound, actual first zero is ~14.13
+                if (index < MIN_IMAGINARY_VALUE) continue;
             }
             else
             {

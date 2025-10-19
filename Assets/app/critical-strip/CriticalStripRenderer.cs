@@ -43,6 +43,11 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     // 0 = [0,1], 1 = [-0.5,1.5], 2 = [-1.5,2.5], etc.
     [SerializeField] public static int realRange = 0;
 
+    // Mathematical constraints for index/imaginary conversion
+    // IndexToImag formula requires n > 0 (contains log(n) in denominator)
+    private const float MIN_VALID_INDEX = 0f;
+    private static readonly float MIN_IMAGINARY_VALUE = 10f; // Safe lower bound, actual first zero is ~14.13
+
     
     [Header("Centering")]
     [SerializeField] private Button centerButton;
@@ -335,10 +340,9 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             if (needsRangeAdjustment)
             {
                 // Ensure minimum imaginary value
-                float minAllowedImag = (float)Zeta.IndexToImag(-1);
-                if (newMin < minAllowedImag)
+                if (newMin < MIN_IMAGINARY_VALUE)
                 {
-                    newMin = minAllowedImag;
+                    newMin = MIN_IMAGINARY_VALUE;
                 }
 
                 // Set the new range
@@ -1078,16 +1082,15 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
             // Prevent scrolling below minimum allowed value
             if (criticalStripTransform.UseImaginarySpace)
             {
-                // When in imaginary space, use the imaginary equivalent of index = -1
-                float minAllowedImag = (float)Zeta.IndexToImag(-1f);
-                if (newMin < minAllowedImag)
+                // When in imaginary space, enforce minimum imaginary bound
+                if (newMin < MIN_IMAGINARY_VALUE)
                 {
-                    float adjustment = minAllowedImag - newMin;
-                    newMin = minAllowedImag;
+                    float adjustment = MIN_IMAGINARY_VALUE - newMin;
+                    newMin = MIN_IMAGINARY_VALUE;
                     newMax += adjustment;
                 }
             }
-            else 
+            else
             {
                 // Original index space behavior
                 if (newMin < -1f)
@@ -1141,16 +1144,15 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
         // Prevent dragging below minimum allowed value
         if (criticalStripTransform.UseImaginarySpace)
         {
-            // When in imaginary space, use the imaginary equivalent of index = -1
-            float minAllowedImag = (float)Zeta.IndexToImag(-1f);
-            if (newMin < minAllowedImag)
+            // When in imaginary space, enforce minimum imaginary bound
+            if (newMin < MIN_IMAGINARY_VALUE)
             {
-                float adjustment = minAllowedImag - newMin;
-                newMin = minAllowedImag;
+                float adjustment = MIN_IMAGINARY_VALUE - newMin;
+                newMin = MIN_IMAGINARY_VALUE;
                 newMax += adjustment;
             }
         }
-        else 
+        else
         {
             // Original index space behavior
             if (newMin < -1f)
@@ -1525,32 +1527,40 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
 
         if (newMode) // Switching to imaginary space
         {
-            // Convert current index range to imaginary range
-            newMin = (float)Zeta.IndexToImag(currentMin);
-            newMax = (float)Zeta.IndexToImag(currentMax);
+            // IMPORTANT: IndexToImag(n) formula is only valid for n > 0 due to log(n) in denominator
+            // Clamp to minimum valid index before converting to avoid NaN/invalid values
+            float clampedMin = Mathf.Max(currentMin, MIN_VALID_INDEX);
+            float clampedMax = Mathf.Max(currentMax, MIN_VALID_INDEX + 1f); // Ensure some range
+
+            // Convert clamped index range to imaginary range
+            newMin = (float)Zeta.IndexToImag(clampedMin);
+            newMax = (float)Zeta.IndexToImag(clampedMax);
+
+            // Validate conversion results to catch any edge cases
+            if (float.IsNaN(newMin) || float.IsInfinity(newMin) || float.IsNaN(newMax) || float.IsInfinity(newMax))
+            {
+                Debug.LogError($"[CriticalStripRenderer] Invalid imaginary conversion: index [{currentMin}, {currentMax}] → imag [{newMin}, {newMax}]. Using fallback range.");
+                // Fallback to safe default range using MIN_IMAGINARY_VALUE
+                newMin = MIN_IMAGINARY_VALUE;
+                newMax = (float)Zeta.IndexToImag(7);
+            }
         }
         else // Switching to index space
         {
             // Convert current imaginary range to index range
             newMin = (float)Zeta.ImagToIndex(currentMin);
             newMax = (float)Zeta.ImagToIndex(currentMax);
-        }
 
-        // Apply minimum bounds constraint
-        if (newMode)
-        {
-            // Ensure we don't go below minimum imaginary value (equivalent to index = -1)
-            float minAllowedImag = (float)Zeta.IndexToImag(-1f);
-            if (newMin < minAllowedImag)
+            // Validate conversion results
+            if (float.IsNaN(newMin) || float.IsInfinity(newMin) || float.IsNaN(newMax) || float.IsInfinity(newMax))
             {
-                float adjustment = minAllowedImag - newMin;
-                newMin = minAllowedImag;
-                newMax += adjustment;
+                Debug.LogError($"[CriticalStripRenderer] Invalid index conversion: imag [{currentMin}, {currentMax}] → index [{newMin}, {newMax}]. Using fallback range.");
+                // Fallback to safe default range
+                newMin = 0f;
+                newMax = 7f;
             }
-        }
-        else
-        {
-            // Ensure we don't go below index -1
+
+            // Ensure we don't go below index -1 in index space
             if (newMin < -1f)
             {
                 float adjustment = -1f - newMin;
