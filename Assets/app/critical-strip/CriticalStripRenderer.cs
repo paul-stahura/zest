@@ -1003,7 +1003,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 UpdateIndicatorVisibility();
             }
         }
-        
+
         // Handle long press detection
         if (isPressingButton)
         {
@@ -1016,6 +1016,18 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
                 isPressingButton = false; // Stop checking for long press
                 longPressHandled = true; // Set flag to consume the upcoming click event
             }
+        }
+    }
+
+    /// <summary>
+    /// Unity callback when RectTransform dimensions change (e.g., window resize).
+    /// Invalidates the cached rect values in the transform to avoid stale cached data.
+    /// </summary>
+    protected virtual void OnRectTransformDimensionsChange()
+    {
+        if (criticalStripTransform != null)
+        {
+            criticalStripTransform.InvalidateRectCache();
         }
     }
 

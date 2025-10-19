@@ -17,10 +17,12 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
     
     public RectTransform hoverPoint; // Assigned by PointSetManager
     public PointSetManager pointSetManager; // Reference to the manager for all point sets
-    
+
     private Vector2 lastHoverPosition;
     private Coroutine hoverAnimation;
     private bool isHovered = false;
+    private float lastHoverCheckTime = 0f;
+    private const float HOVER_CHECK_INTERVAL = 0.033f;  // ~30fps for hover detection
 
     // When clicked, find the closest point and update App
     public void OnPointerClick(PointerEventData eventData)
@@ -73,6 +75,18 @@ public class PointSetInteractionHandler : MonoBehaviour, IPointerClickHandler, I
     {
         if (criticalStripRenderer == null || pointSetManager == null || hoverPoint == null)
             return;
+
+        // Skip expensive hover detection during drag/pan operations
+        // This eliminates 500k+ point checks per frame during panning
+        if (eventData.dragging)
+            return;
+
+        // Throttle hover checks to 30fps to reduce overhead
+        // Mouse events can fire at 60+ fps, but hover doesn't need to update that fast
+        if (Time.time - lastHoverCheckTime < HOVER_CHECK_INTERVAL)
+            return;
+
+        lastHoverCheckTime = Time.time;
 
         // Convert pointer position to local position
         Vector2 localPoint;
