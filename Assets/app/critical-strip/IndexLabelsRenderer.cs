@@ -234,14 +234,14 @@ public class IndexLabelsRenderer : MonoBehaviour
     {
         GameObject labelObj = new GameObject("IndexLabel");
         labelObj.transform.SetParent(parent, false);
-        
+
         Text text = labelObj.AddComponent<Text>();
         text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
         text.fontSize = fontSize;
         text.color = textColor;
         text.alignment = TextAnchor.MiddleRight;
         text.raycastTarget = false;
-        
+
         // Set up RectTransform for proper rendering
         RectTransform rect = text.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0, 0.5f);
@@ -249,10 +249,50 @@ public class IndexLabelsRenderer : MonoBehaviour
         rect.pivot = new Vector2(0.5f, 0.5f);  // Center pivot
         rect.sizeDelta = new Vector2(-offsetFromEdge * 2, fontSize * 1.5f); // Width with padding, height based on font
         rect.anchoredPosition = Vector2.zero;  // Center in parent
-        
+
         labelPool.Add(text);
         text.gameObject.SetActive(false);
         return text;
+    }
+
+    /// <summary>
+    /// Calculates appropriate data spacing based on viewport pixel constraints
+    /// </summary>
+    private float CalculatePixelAwareSpacing(float visibleRange, bool isImaginarySpace)
+    {
+        // Calculate minimum pixel spacing needed for readability (label height * margin)
+        float labelHeightPixels = fontSize * 1.5f;
+        float marginMultiplier = isImaginarySpace ? 2.0f : 1.8f; // More space for imaginary labels
+        float minPixelSpacing = labelHeightPixels * marginMultiplier;
+
+        // Calculate how many labels can physically fit in the viewport
+        float viewportHeightPixels = viewportRect.rect.height;
+        int maxLabelsToFit = Mathf.Max(1, Mathf.FloorToInt(viewportHeightPixels / minPixelSpacing));
+
+        // Calculate required data spacing to fit that many labels
+        float idealDataSpacing = visibleRange / maxLabelsToFit;
+
+        // Round to nice numbers (powers of 10 with 1, 2, 5 multipliers)
+        float log10 = Mathf.Log10(idealDataSpacing);
+        int power = Mathf.FloorToInt(log10);
+        float magnitude = Mathf.Pow(10, power);
+
+        // Choose between 1×, 2×, or 5× the magnitude
+        float niceSpacing;
+        if (idealDataSpacing >= 5 * magnitude)
+            niceSpacing = 10 * magnitude; // Jump to next power of 10
+        else if (idealDataSpacing >= 2 * magnitude)
+            niceSpacing = 5 * magnitude;
+        else if (idealDataSpacing >= magnitude)
+            niceSpacing = 2 * magnitude;
+        else
+            niceSpacing = magnitude;
+
+        logs.AppendLine($"Pixel-aware spacing: viewport={viewportHeightPixels}px, labelHeight={labelHeightPixels}px, " +
+                       $"minSpacing={minPixelSpacing}px, maxLabels={maxLabelsToFit}, " +
+                       $"idealSpacing={idealDataSpacing:F3}, niceSpacing={niceSpacing}");
+
+        return niceSpacing;
     }
     
     /// <summary>
@@ -274,118 +314,33 @@ public class IndexLabelsRenderer : MonoBehaviour
         
         // Calculate visible range and determine appropriate spacing and format
         float visibleRange = maxValue - minValue;
-        
-        // Adjust targetLabelCount based on space mode
-        float effectiveTargetCount = useImaginarySpace ? imagTargetLabelCount : targetLabelCount;
-        float idealSpacing = visibleRange / effectiveTargetCount;
-        
-        float currentSpacing;
+
+        // Use pixel-aware spacing calculation for both index and imaginary space
+        float currentSpacing = CalculatePixelAwareSpacing(visibleRange, useImaginarySpace);
+
+        // Determine decimal places based on spacing magnitude
         int decimalPlaces;
-        
-        if (useImaginarySpace)
+        if (currentSpacing >= 1)
         {
-            // For imaginary space, use different spacing strategy based on range
-            if (useAdaptiveSpacing)
-            {
-                // Use logarithmic spacing for large ranges in imaginary space
-                if (visibleRange > 500)
-                {
-                    currentSpacing = 100f;
-                    decimalPlaces = 0;
-                }
-                else if (visibleRange > 200)
-                {
-                    currentSpacing = 50f;
-                    decimalPlaces = 0;
-                }
-                else if (visibleRange > 100)
-                {
-                    currentSpacing = 20f;
-                    decimalPlaces = 0;
-                }
-                else if (visibleRange > 50)
-                {
-                    currentSpacing = 10f;
-                    decimalPlaces = 0;
-                }
-                else if (visibleRange > 20)
-                {
-                    currentSpacing = 5f;
-                    decimalPlaces = 0;
-                }
-                else if (visibleRange > 10)
-                {
-                    currentSpacing = 2f;
-                    decimalPlaces = 1;
-                }
-                else
-                {
-                    currentSpacing = 1f;
-                    decimalPlaces = 2;
-                }
-            }
-            else
-            {
-                // Find the appropriate power of 10 for spacing
-                float log10 = Mathf.Log10(idealSpacing);
-                int power = Mathf.FloorToInt(log10);
-                
-                // Calculate spacing based on power of 10
-                float magnitude = Mathf.Pow(10, power);
-                
-                // Choose nice round numbers
-                if (idealSpacing >= 5 * magnitude)
-                    currentSpacing = 5 * magnitude;
-                else if (idealSpacing >= 2 * magnitude)
-                    currentSpacing = 2 * magnitude;
-                else
-                    currentSpacing = magnitude;
-                
-                // Determine decimal places inversely to the spacing
-                decimalPlaces = Mathf.Max(0, -power);
-                decimalPlaces = Mathf.Min(decimalPlaces, maxDecimalPlaces);
-            }
+            decimalPlaces = 0;
+        }
+        else if (currentSpacing >= 0.1f)
+        {
+            decimalPlaces = 1;
+        }
+        else if (currentSpacing >= 0.01f)
+        {
+            decimalPlaces = 2;
         }
         else
         {
-            // Original index space spacing logic
-            float log10 = Mathf.Log10(idealSpacing);
-            int power = Mathf.FloorToInt(log10);
-            
-            // Never go larger than integer spacing (power > 0)
-            power = Mathf.Min(0, power);
-            
-            // Calculate actual spacing and number of decimal places
-            currentSpacing = Mathf.Max(minSpacing, Mathf.Pow(10, power));
-            decimalPlaces = 0;
-            
-            // Determine decimal places based on visible range
-            if (visibleRange <= thirdDecimalThreshold && maxDecimalPlaces >= 3)
-            {
-                decimalPlaces = 3;
-                currentSpacing = 0.001f * spacingMultiplier;
-            }
-            else if (visibleRange <= secondDecimalThreshold && maxDecimalPlaces >= 2)
-            {
-                decimalPlaces = 2;
-                currentSpacing = 0.01f * spacingMultiplier;
-            }
-            else if (visibleRange <= firstDecimalThreshold && maxDecimalPlaces >= 1)
-            {
-                decimalPlaces = 1;
-                currentSpacing = 0.1f * spacingMultiplier;
-            }
-            else
-            {
-                decimalPlaces = 0;
-                currentSpacing = 1f;
-            }
+            decimalPlaces = 3;
         }
+        decimalPlaces = Mathf.Min(decimalPlaces, maxDecimalPlaces);
         
         string format = $"F{decimalPlaces}";
-        
-        logs.AppendLine($"Range: {visibleRange:F3}, Ideal spacing: {idealSpacing:F3}");
-        logs.AppendLine($"Visible range: {visibleRange}, Decimal places: {decimalPlaces}, Spacing: {currentSpacing}");
+
+        logs.AppendLine($"Visible range: {visibleRange:F3}, Decimal places: {decimalPlaces}, Spacing: {currentSpacing:F3}");
         
         // Calculate how many labels we need
         int labelsNeeded = Mathf.CeilToInt(visibleRange / currentSpacing) + 2; // +2 for edge cases
@@ -403,12 +358,16 @@ public class IndexLabelsRenderer : MonoBehaviour
             label.gameObject.SetActive(false);
         }
         
-        // Position and activate needed labels
+        // Position and activate needed labels with overlap detection
         // Use double for more precise decimal calculations
         double dCurrentSpacing = currentSpacing;
         double dMinIndex = minValue;
         double startIndex = Math.Floor(dMinIndex / dCurrentSpacing) * dCurrentSpacing;
-        
+
+        // Track last label position to detect overlaps
+        float lastLabelY = float.MinValue;
+        float minPixelSpacing = fontSize * 1.5f * (useImaginarySpace ? 2.0f : 1.8f);
+
         int labelIndex = 0;
         for (double index = startIndex; index <= maxValue && labelIndex < labelPool.Count; index += dCurrentSpacing)
         {
@@ -424,13 +383,23 @@ public class IndexLabelsRenderer : MonoBehaviour
                 // For index space, ensure we don't go below -1
                 if (index < -1) continue;
             }
-            
+
             // Skip if below minValue (after minimum allowed check to ensure we don't miss the first label)
             if (index < dMinIndex) continue;
-            
+
+            // Convert strip coordinates to viewport coordinates
+            Vector2 viewportPos = stripTransform.StripToViewport(new Vector2(0, (float)index));
+
+            // Overlap detection: skip this label if it's too close to the previous one
+            if (labelIndex > 0 && Mathf.Abs(viewportPos.y - lastLabelY) < minPixelSpacing)
+            {
+                logs.AppendLine($"Skipping label at {index} - too close to previous (deltaY: {Mathf.Abs(viewportPos.y - lastLabelY):F1}px < {minPixelSpacing}px)");
+                continue;
+            }
+
             Text label = labelPool[labelIndex];
             label.gameObject.SetActive(true);
-            
+
             // Format the label text based on the space mode
             if (useImaginarySpace)
             {
@@ -453,16 +422,17 @@ public class IndexLabelsRenderer : MonoBehaviour
                     label.text = Math.Round(index).ToString("F0");
                 }
             }
-            
-            // Convert strip coordinates to viewport coordinates
-            Vector2 viewportPos = stripTransform.StripToViewport(new Vector2(0, (float)index));
+
             logs.AppendLine($"Label {index}: text='{label.text}', pos={viewportPos}, active={label.gameObject.activeSelf}");
-            
+
             // Modified label positioning
             RectTransform labelRect = label.GetComponent<RectTransform>();
             float scaledOffset = Mathf.Max(offsetFromEdge, viewportRect.rect.width * 0.02f); // Make offset responsive
             labelRect.anchoredPosition = new Vector2(-scaledOffset, viewportPos.y);
-            
+
+            // Remember this label's position for next iteration
+            lastLabelY = viewportPos.y;
+
             labelIndex++;
         }
 
