@@ -371,7 +371,8 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             case 4: pathRange = 0.5f; break;
             default: pathRange = 0f; break;
         }
-        int steps = 20 * (option * option); // more steps for larger paths
+        pathRange /= (float)(_index * 2.0);
+        int steps = 50 * option * (int)_index; // more steps for larger paths
         for (int s = 0; s <= steps; s++)
         {
             double idx = _index - pathRange + 2 * pathRange * s / steps;

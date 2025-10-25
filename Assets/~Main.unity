@@ -99857,6 +99857,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _selectedOption: 1
   _options:
+  - 10%
   - 25%
   - 50%
   - 100%

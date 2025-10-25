@@ -257,13 +257,16 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
     {
         switch (option)
         {
-            case 0: // Light
+            case 0: // faded
+                SetColorTransparency(0.1f);
+                break;
+            case 1: // Light
                 SetColorTransparency(0.25f);
                 break;
-            case 1: // Half
+            case 2: // Half
                 SetColorTransparency(0.5f);
                 break;
-            case 2: // Full
+            case 3: // Full
                 SetColorTransparency(1f);
                 break;
         }
