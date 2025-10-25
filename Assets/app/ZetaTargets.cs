@@ -74,6 +74,9 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     private Vector2[] _etaPath = new Vector2[_traceLength];
     private int _etaPathIndex = 0;
 
+    private Vector2[] _ravPath = new Vector2[_traceLength];
+    private int _ravPathIndex = 0;
+
     private Vector2[] _r1akPath = new Vector2[_traceLength];
     private int _r1akPathIndex = 0;
     private Vector2[] _r2akPath = new Vector2[_traceLength];
@@ -312,7 +315,10 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         UpdateTargetPos(invBisector, ref _invBisectorPath, ref _invBisectorPathIndex);
     }
 
-    private void UpdateRAV(Vector rav) { }
+    private void UpdateRAV(Vector rav)
+    {
+        UpdateTargetPos(rav, ref _ravPath, ref _ravPathIndex);
+    }
 
     private void DrawTargets()
     {
@@ -335,7 +341,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawZetaTarget(_fwdBisectorToggle, null, _spiralCalculator.GetForwardBisector().ToComplex(), _fwdBisectorPath, _fwdBisectorPathIndex, _fwdBisectorColor, false);
         DrawZetaTarget(_invBisectorToggle, null, _spiralCalculator.GetInverseBisector().ToComplex(), _invBisectorPath, _invBisectorPathIndex, _invBisectorColor, false);
 
-        if (_ravToggle.isOn) DrawRav();
+        DrawZetaTarget(_ravToggle, null, _spiralCalculator.GetRAV().ToComplex(), _ravPath, _ravPathIndex, _ravColor, false);
 
         if (_midPointToggle.isOn) DrawMiddlePoint();
         if (_r2MidPointToggle.isOn) DrawMiddlePoint(true);
@@ -386,16 +392,6 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             Draw.Ring(Vector2.zero, 0.032f);
             ShapesUtils.DrawCross(Vector2.zero, 0.05f);
-        }
-    }
-
-    private void DrawRav()
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Color = _ravColor;
-            Draw.Thickness = 1f;
-            ShapesUtils.DrawCross45(_spiralCalculator.GetRAV(), 0.08f);
         }
     }
 
