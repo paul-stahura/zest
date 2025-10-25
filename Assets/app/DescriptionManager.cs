@@ -26,6 +26,7 @@ public class DescriptionManager : MonoBehaviour
     private static string _descriptionStyle = @"\rm";
 
     [Header("Display References")]
+    [SerializeField] private Toggle _toggleManualButton;
     [SerializeField] private RectTransform _displayPanel;
     [SerializeField] private Button _editButton;
     private static TEXDraw keyText;
@@ -122,6 +123,10 @@ public class DescriptionManager : MonoBehaviour
             _loadLocalButton.onClick.AddListener(UseLocalEntries);
         if (_overwriteLocalButton != null)
             _overwriteLocalButton.onClick.AddListener(OverwriteLocalEntries);
+
+        _toggleManualButton = GameObject.Find("ManualToggle")?.GetComponent<Toggle>();
+        if (_toggleManualButton != null)
+            _toggleManualButton.onValueChanged.AddListener((isOn) => ToggleManualMode());
     }
 
     public void UseLocalEntries()
@@ -169,29 +174,34 @@ public class DescriptionManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            if (!_hasLoadedEntries)
-            {
-                // toggle load panel
-                if (_loadPanel != null)
-                    _loadPanel.gameObject.SetActive(!_loadPanel.gameObject.activeSelf);
-            }
-            else if (!_isEditMode)
-            {
-                if (Input.GetKey(KeyCode.LeftShift) && _displayPanel.gameObject.activeSelf)
-                {
-                    ToggleEditMode(true);
-                }
-                else
-                {
-                    _displayPanel.gameObject.SetActive(!_displayPanel.gameObject.activeSelf);
-                }
-            }
+            _toggleManualButton.isOn = !_toggleManualButton.isOn;
         }
 
-        if(_purgeUnusedKeys)
+        if (_purgeUnusedKeys)
         {
             PurgeUnusedKeys();
             _purgeUnusedKeys = false;
+        }
+    }
+    
+    private void ToggleManualMode()
+    {
+        if (!_hasLoadedEntries)
+        {
+            // toggle load panel
+            if (_loadPanel != null)
+                _loadPanel.gameObject.SetActive(!_loadPanel.gameObject.activeSelf);
+        }
+        else if (!_isEditMode)
+        {
+            if (Input.GetKey(KeyCode.LeftShift) && _displayPanel.gameObject.activeSelf)
+            {
+                ToggleEditMode(true);
+            }
+            else
+            {
+                _displayPanel.gameObject.SetActive(!_displayPanel.gameObject.activeSelf);
+            }
         }
     }
 
