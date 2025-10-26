@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using Vector3 = UnityEngine.Vector3;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 public class SumRemainderRenderer : ImmediateModeShapeDrawer
 {
@@ -16,11 +17,17 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         public Vector2 r2;
         public Color color1;
         public Color color2;
-        public Toggle toggle1;
+        public MultiOptionToggle toggle1;
         public MultiOptionToggle toggle2;
-        public MultiOptionToggle legsToggle;
-        public MultiOptionToggle pathToggle;
-        public List<Vector2> path;
+        public MultiOptionToggle legsForwardToggle;
+        public MultiOptionToggle legsInverseToggle;
+        public MultiOptionToggle symToggle;
+        public MultiOptionToggle pathSigmaToggle;
+        public MultiOptionToggle pathIndexToggle;
+        public List<Vector2> pathSigma;
+        public List<Vector2> pathInverseSigma;
+        public List<Vector2> pathIndex;
+        public List<Vector2> pathInverseIndex;
         public int active;
 
         public remainder(Color c1, Color c2)
@@ -31,9 +38,15 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             color2 = c2;
             toggle1 = null;
             toggle2 = null;
-            legsToggle = null;
-            pathToggle = null;
-            path = new List<Vector2>();
+            legsForwardToggle = null;
+            legsInverseToggle = null;
+            symToggle = null;
+            pathSigmaToggle = null;
+            pathIndexToggle = null;
+            pathSigma = new List<Vector2>();
+            pathInverseSigma = new List<Vector2>();
+            pathIndex = new List<Vector2>();
+            pathInverseIndex = new List<Vector2>();
             active = 0;
         }
     }
@@ -52,6 +65,9 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
     private remainder _rak;
     [SerializeField] private Color _rak1Color = Color.green;
     [SerializeField] private Color _rak2Color = Color.red;
+
+    [Header("Path adds")]
+    [SerializeField] private MultiOptionToggle _addInversePaths;
 
     private Vector2 _sum1;
     private Vector2 _sum2;
@@ -237,32 +253,53 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _rps = new remainder(_rps1Color, _rps2Color);
         _rak = new remainder(_rak1Color, _rak2Color);
 
-        _r.toggle1 = GameObject.Find("R/2_R1_Toggle").GetComponent<Toggle>();
-        _r.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _r.active, v));
+        _r.toggle1 = GameObject.Find("R/2_R1_Toggle").GetComponent<MultiOptionToggle>();
+        _r.toggle1.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
         _r.toggle2 = GameObject.Find("R/2_R2_Toggle").GetComponent<MultiOptionToggle>();
         _r.toggle2.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
-        _r.legsToggle = GameObject.Find("R/2_Legs_Toggle").GetComponent<MultiOptionToggle>();
-        _r.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
-        _r.pathToggle = GameObject.Find("R/2_Path_Toggle").GetComponent<MultiOptionToggle>();
-        _r.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _r.active, option); _remaindersUpdated = false; };
+        _r.legsForwardToggle = GameObject.Find("R/2_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _r.legsForwardToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
+        _r.legsInverseToggle = GameObject.Find("R/2_Legs_Inverse_Toggle").GetComponent<MultiOptionToggle>();
+        _r.legsInverseToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
+        _r.symToggle = GameObject.Find("R/2_Sym_Toggle").GetComponent<MultiOptionToggle>();
+        _r.symToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
+        _r.pathSigmaToggle = GameObject.Find("R/2_Path_Sigma_Toggle").GetComponent<MultiOptionToggle>();
+        _r.pathSigmaToggle.OnOptionChanged += (option) => { UpdateActive(ref _r.active, option); _remaindersUpdated = false; };
+        _r.pathIndexToggle = GameObject.Find("R/2_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _r.pathIndexToggle.OnOptionChanged += (option) => { UpdateActive(ref _r.active, option); _remaindersUpdated = false; };
 
-        _rps.toggle1 = GameObject.Find("Rps_R1_Toggle").GetComponent<Toggle>();
-        _rps.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _rps.active, v));
+        _rps.toggle1 = GameObject.Find("Rps_R1_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.toggle1.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
         _rps.toggle2 = GameObject.Find("Rps_R2_Toggle").GetComponent<MultiOptionToggle>();
         _rps.toggle2.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
-        _rps.legsToggle = GameObject.Find("Rps_Legs_Toggle").GetComponent<MultiOptionToggle>();
-        _rps.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
-        _rps.pathToggle = GameObject.Find("Rps_Path_Toggle").GetComponent<MultiOptionToggle>();
-        _rps.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _rps.active, option); _remaindersUpdated = false; };
+        _rps.legsForwardToggle = GameObject.Find("Rps_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.legsForwardToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
+        _rps.legsInverseToggle = GameObject.Find("Rps_Legs_Inverse_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.legsInverseToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
+        _rps.symToggle = GameObject.Find("Rps_Sym_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.symToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
+        _rps.pathSigmaToggle = GameObject.Find("Rps_Path_Sigma_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.pathSigmaToggle.OnOptionChanged += (option) => { UpdateActive(ref _rps.active, option); _remaindersUpdated = false; };
+        _rps.pathIndexToggle = GameObject.Find("Rps_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.pathIndexToggle.OnOptionChanged += (option) => { UpdateActive(ref _rps.active, option); _remaindersUpdated = false; };
 
-        _rak.toggle1 = GameObject.Find("Rak_R1_Toggle").GetComponent<Toggle>();
-        _rak.toggle1.onValueChanged.AddListener((v) => UpdateActive(ref _rak.active, v));
+        _rak.toggle1 = GameObject.Find("Rak_R1_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.toggle1.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
         _rak.toggle2 = GameObject.Find("Rak_R2_Toggle").GetComponent<MultiOptionToggle>();
         _rak.toggle2.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
-        _rak.legsToggle = GameObject.Find("Rak_Legs_Toggle").GetComponent<MultiOptionToggle>();
-        _rak.legsToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
-        _rak.pathToggle = GameObject.Find("Rak_Path_Toggle").GetComponent<MultiOptionToggle>();
-        _rak.pathToggle.OnOptionChanged += (option) => { UpdateActive(ref _rak.active, option); _remaindersUpdated = false; };
+        _rak.legsForwardToggle = GameObject.Find("Rak_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.legsForwardToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
+        _rak.legsInverseToggle = GameObject.Find("Rak_Legs_Inverse_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.legsInverseToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
+        _rak.symToggle = GameObject.Find("Rak_Sym_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.symToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
+        _rak.pathSigmaToggle = GameObject.Find("Rak_Path_Sigma_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.pathSigmaToggle.OnOptionChanged += (option) => { UpdateActive(ref _rak.active, option); _remaindersUpdated = false; };
+        _rak.pathIndexToggle = GameObject.Find("Rak_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.pathIndexToggle.OnOptionChanged += (option) => { UpdateActive(ref _rak.active, option); _remaindersUpdated = false; };
+
+        _addInversePaths = GameObject.Find("Add_Inverse_Path_Toggle").GetComponent<MultiOptionToggle>();
+        _addInversePaths.OnOptionChanged += (option) => { _remaindersUpdated = false; };
     }
 
     private static void UpdateActive(ref int active, bool isOn) => UpdateActive(ref active, isOn ? 1 : 0);
@@ -322,8 +359,16 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _rps.r1 = SumRemainders.CalcRps1(_real, _index).ToVector2();
         _rps.r2 = SumRemainders.CalcRps2(_real, _index).ToVector2();
 
-        // build path
-        CalcPath(_rps.path, (r, i) => SumRemainders.CalcRps1(r, i), _rps.pathToggle.GetSelectedOption().Item1);
+        // build paths
+        CalcSigmaPath(_rps.pathSigma, (r, i) => SumRemainders.CalcRps1(r, i), SumRemainders.CalcForwardSumUpToBisector, _rps.pathSigmaToggle.GetSelectedOption().Item1);
+        CalcPath(_rps.pathIndex, (r, i) => SumRemainders.CalcRps1(r, i), SumRemainders.CalcForwardSumUpToBisector, _rps.pathIndexToggle.GetSelectedOption().Item1);
+
+        int addOption = _addInversePaths.GetSelectedOption().Item1;
+        int InverseOption = (addOption > 0) ? _rps.pathSigmaToggle.GetSelectedOption().Item1 : 0;
+        CalcSigmaPath(_rps.pathInverseSigma, (r, i) => SumRemainders.CalcRps2(r, i), SumRemainders.CalcInverseSumUpToBisector, InverseOption);
+
+        InverseOption = (addOption > 0) ? _rps.pathIndexToggle.GetSelectedOption().Item1 : 0;
+        CalcPath(_rps.pathInverseIndex, (r, i) => SumRemainders.CalcRps2(r, i), SumRemainders.CalcInverseSumUpToBisector, InverseOption);
     }
 
     private void UpdateRak()
@@ -333,8 +378,16 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _rak.r1 = SumRemainders.CalcRak1(_real, _index).ToVector2();
         _rak.r2 = SumRemainders.CalcRak2(_real, _index).ToVector2();
 
-        // build path
-        CalcPath(_rak.path, (r, i) => SumRemainders.CalcRak1(r, i), _rak.pathToggle.GetSelectedOption().Item1);
+        // build paths
+        CalcSigmaPath(_rak.pathSigma, (r, i) => SumRemainders.CalcRak1(r, i), SumRemainders.CalcForwardSumUpToBisector, _rak.pathSigmaToggle.GetSelectedOption().Item1);
+        CalcPath(_rak.pathIndex, (r, i) => SumRemainders.CalcRak1(r, i), SumRemainders.CalcForwardSumUpToBisector, _rak.pathIndexToggle.GetSelectedOption().Item1);
+
+        int addOption = _addInversePaths.GetSelectedOption().Item1;
+        int InverseOption = (addOption > 0) ? _rak.pathSigmaToggle.GetSelectedOption().Item1 : 0;
+        CalcSigmaPath(_rak.pathInverseSigma, (r, i) => SumRemainders.CalcRak2(r, i), SumRemainders.CalcInverseSumUpToBisector, InverseOption);
+
+        InverseOption = (addOption > 0) ? _rak.pathIndexToggle.GetSelectedOption().Item1 : 0;
+        CalcPath(_rak.pathInverseIndex, (r, i) => SumRemainders.CalcRak2(r, i), SumRemainders.CalcInverseSumUpToBisector, InverseOption);
     }
 
     private void UpdateR()
@@ -353,11 +406,43 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             _r.r2 = _r.r1;
         }
 
-        // build path
-        CalcPath(_r.path, (r, i) => ZakCalculator.Rak(r, i) / 2.0, _r.pathToggle.GetSelectedOption().Item1);
+        // build paths
+        CalcSigmaPath(_r.pathSigma, (r, i) => ZakCalculator.Rak(r, i) / 2.0, SumRemainders.CalcForwardSumUpToBisector, _r.pathSigmaToggle.GetSelectedOption().Item1);
+        CalcPath(_r.pathIndex, (r, i) => ZakCalculator.Rak(r, i) / 2.0, SumRemainders.CalcForwardSumUpToBisector, _r.pathIndexToggle.GetSelectedOption().Item1);
+
+        int addOption = _addInversePaths.GetSelectedOption().Item1;
+        int InverseOption = (addOption > 0) ? _r.pathSigmaToggle.GetSelectedOption().Item1 : 0;
+        CalcSigmaPath(_r.pathInverseSigma, (r, i) => ZakCalculator.Rak(r, i) / 2.0, SumRemainders.CalcInverseSumUpToBisector, InverseOption);
+
+        InverseOption = (addOption > 0) ? _r.pathIndexToggle.GetSelectedOption().Item1 : 0;
+        CalcPath(_r.pathInverseIndex, (r, i) => ZakCalculator.Rak(r, i) / 2.0, SumRemainders.CalcInverseSumUpToBisector, InverseOption);
     }
 
-    private void CalcPath(List<Vector2> path, Func<double, double, Complex> calcFunc, int option)
+    private void CalcSigmaPath(List<Vector2> path, Func<double, double, Complex> calcFunc, Func<double, double, Complex> sumFunc, int option)
+    {
+        if (option == 0) return;
+        path.Clear();
+
+        int minSigma = 0;
+        switch (option)
+        {
+            case 1: minSigma = 0; break;
+            case 2: minSigma = -5; break;
+        }
+        for (int i = minSigma; i <= 10; i++)
+        {
+            var scaler = Math.Max(i, 0);
+            var ptCount = 100 / (scaler + 1);
+            for (int j = 0; j <= ptCount; j++)
+            {
+                var r = i + (float)j/ptCount;
+                Vector2 idx = calcFunc(r, _index).ToVector2() + sumFunc(r, _index).ToVector2();
+                path.Add(idx);
+            }
+        }
+    }
+
+    private void CalcPath(List<Vector2> path, Func<double, double, Complex> calcFunc, Func<double, double, Complex> sumFunc, int option)
     {
         if (option == 0) return;
         path.Clear();
@@ -365,10 +450,10 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         float pathRange;
         switch (option)
         {
-            case 1: pathRange = 0.001f; break;
-            case 2: pathRange = 0.01f; break;
-            case 3: pathRange = 0.1f; break;
-            case 4: pathRange = 0.5f; break;
+            // case 1: pathRange = 0.001f; break;
+            case 1: pathRange = 0.01f; break;
+            case 2: pathRange = 0.1f; break;
+            case 3: pathRange = 0.5f; break;
             default: pathRange = 0f; break;
         }
         pathRange /= (float)(_index * 2.0);
@@ -376,7 +461,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         for (int s = 0; s <= steps; s++)
         {
             double idx = _index - pathRange + 2 * pathRange * s / steps;
-            Vector2 r = calcFunc(_real, idx).ToVector2() + SumRemainders.CalcForwardSumUpToBisector(_real, idx).ToVector2();
+            Vector2 r = calcFunc(_real, idx).ToVector2() + sumFunc(_real, idx).ToVector2();
             path.Add(r);
         }
     }
@@ -409,20 +494,50 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 2f;
             Draw.Color = r.color1;
 
-            if (r.toggle1.isOn) Draw.Line(_sum1, l1, r.color1);
+            int option = r.toggle1.GetSelectedOption().Item1;
+            switch(option)
+            {
+                case 1:
+                    Draw.Line(_sum1, l1, r.color1);
+                    break;
+                case 2:
+                    Draw.Line(_sum2 + r.r2, _sum2 + r.r2 + r.r1, r.color1);
+                    break;
+            }
 
-            int option = r.toggle2.GetSelectedOption().Item1;
+            option = r.toggle2.GetSelectedOption().Item1;
             switch (option)
             {
                 case 1:
                     Draw.Line(l1, l1 + r.r2, r.color2);
-                    if (r.toggle1.isOn) Draw.Line(l1, l1, 5f, r.color1);
+                    if (r.toggle1.GetSelectedOption().Item1 == 1) Draw.Line(l1, l1, 5f, r.color1);
                     break;
                 case 2:
-                    Draw.Line(_sum1, _sum1 + r.r2, r.color2);
+                    Draw.Line(_sum2, _sum2 + r.r2, r.color2);
                     break;
                 case 3:
                     Draw.Line(_sum1, _sum1 + r.r2, r.color2);
+                    break;
+            }
+
+            option = r.legsForwardToggle.GetSelectedOption().Item1;
+            if (option > 0)
+            {
+                Draw.Line(Vector2.zero, l1, color: Color.green);
+                if (option > 1) Draw.Line(l1, l2, color: Color.red);
+            }
+
+            option = r.legsInverseToggle.GetSelectedOption().Item1;
+            if (option > 0)
+            {
+                Draw.Line(Vector2.zero, _sum2 + r.r2, color: Color.red);
+                if (option > 1) Draw.Line(_sum2 + r.r2, l2, color: Color.green);
+            }
+
+            option = r.symToggle.GetSelectedOption().Item1;
+            switch (option)
+            {
+                case 1: // cut?
                     Draw.UseDashes = true;
                     var rDir = r.r2 - r.r1;
                     if (Mathf.Approximately(rDir.magnitude, 0f))
@@ -434,85 +549,83 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                     Draw.Line(_sum1 + r.r1 - (rDir * 2), _sum1 + r.r2 + (rDir * 2));
                     Draw.UseDashes = false;
                     break;
-                case 4:
-                    Draw.Line(_sum2, _sum2 + r.r2, r.color2);
+
+                case 2: // bisect
+                    Draw.UseDashes = true;
+                    var bisectDir = r.r1 + r.r2;
+                    bisectDir = new Vector2(-bisectDir.y, bisectDir.x).normalized;
+                    var dist = Mathf.Max(0.01f, Vector2.Distance(l1, _sum2 + r.r2));
+                    Draw.Line(l1 - (bisectDir * dist), l1 + (bisectDir * dist));
+                    Draw.UseDashes = false;
                     break;
-                case 5:
-                    Draw.Line(_sum2, _sum2 + r.r2, r.color2);
+
+                case 3: // Zeta/2
                     Draw.UseDashes = true;
                     var dir = ((_sum2 + r.r2) - (_sum1 + r.r1)).normalized;
                     Draw.Line(_sum1 + r.r1 - (dir * 2), _sum2 + r.r2 + (dir * 2));
                     Draw.UseDashes = false;
                     break;
-            }
 
-            option = r.legsToggle.GetSelectedOption().Item1;
-            if (option > 0)
-            {
-                Draw.Line(Vector2.zero, l1, color: Color.green);
-                if (option > 1) Draw.Line(l1, l2, color: Color.red);
-                if (option > 2)
-                {
+                case 4: // Equal
                     Draw.Line(Vector2.zero, l2, color: Color.cyan);
                     Draw.UseDashes = true;
                     Draw.Ring(l1, l1.magnitude, Color.green);
                     Draw.Ring(l1, (l2 - l1).magnitude, Color.red);
                     Draw.UseDashes = false;
+                    break;
+            }
+
+            int _pathAddOption = _addInversePaths.GetSelectedOption().Item1;
+
+            option = r.pathSigmaToggle.GetSelectedOption().Item1;
+            if (option > 0 && r.pathSigma.Count > 1)
+            {
+                Draw.Thickness = 1f;
+
+                if (_pathAddOption != 1)
+                {
+                    Draw.Color = r.color1;
+                    for (int p = 0; p < r.pathSigma.Count - 1; p++)
+                    {
+                        Draw.Line(r.pathSigma[p], r.pathSigma[p + 1]);
+                    }
+                }
+
+                // draw Inverse
+                if (_pathAddOption > 0)
+                {
+                    Draw.Color = r.color2;
+                    for (int p = 0; p < r.pathInverseSigma.Count - 1; p++)
+                    {
+                        Draw.Line(r.pathInverseSigma[p], r.pathInverseSigma[p + 1]);
+                    }
                 }
             }
 
-            option = r.pathToggle.GetSelectedOption().Item1;
-            if (option > 0 && r.path.Count > 1)
+            option = r.pathIndexToggle.GetSelectedOption().Item1;
+            if (option > 0 && r.pathIndex.Count > 1)
             {
                 Draw.Thickness = 1f;
-                Draw.Color = r.color1;
-                for (int p = 0; p < r.path.Count - 1; p++)
+
+                if (_pathAddOption != 1)
                 {
-                    Draw.Line(r.path[p], r.path[p + 1]);
+                    Draw.Color = r.color1;
+                    for (int p = 0; p < r.pathIndex.Count - 1; p++)
+                    {
+                        Draw.Line(r.pathIndex[p], r.pathIndex[p + 1]);
+                    }
+                }
+
+                // draw Inverse
+                if (_pathAddOption > 0)
+                {
+                    Draw.Color = r.color2;
+                    for (int p = 0; p < r.pathInverseIndex.Count - 1; p++)
+                    {
+                        Draw.Line(r.pathInverseIndex[p], r.pathInverseIndex[p + 1]);
+                    }
                 }
             }
         }
     }
-
-    // private void DrawRemainders()
-    // {
-    //     DrawZakLegs(_zakLegsToggle.GetSelectedOption().Item1);
-
-    //     if (_zakR1Toggle.isOn) DrawZakR1();
-    //     if (_zakR2Toggle.isOn) DrawZakR2();
-    //     if (_zakR1Toggle.isOn && _zakR2Toggle.isOn)
-    //     {
-    //         using (Draw.StyleScope)
-    //         {
-    //             Draw.Thickness = 1f;
-    //             Draw.UseDashes = true;
-    //             Draw.Color = Color.yellow;
-    //             Vector2 dir = (_zakR2 - _zakR1).normalized;
-    //             Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
-    //             Vector2 projectedZeta = Vector2.Dot(zeta - _zakR1, dir) * dir;
-    //             projectedZeta += projectedZeta.normalized;
-    //             Draw.Line(_zakR1 + projectedZeta, _zakR2 - projectedZeta);
-    //             Draw.UseDashes = false;
-    //         }
-    //     }
-
-    //     if (_zpsR1Toggle.isOn) DrawZpsR1();
-    //     if (_zpsR2Toggle.isOn) DrawZpsR2();
-    //     if (_zpsR1Toggle.isOn && _zpsR2Toggle.isOn)
-    //     {
-    //         using (Draw.StyleScope)
-    //         {
-    //             Draw.Thickness = 1f;
-    //             Draw.UseDashes = true;
-    //             Draw.Color = Color.cyan;
-    //             Vector2 dir = (_zpsR2 - _zpsR1).normalized;
-    //             // project _zpsR1 to Zeta onto the line between _zpsR1 and _zpsR2
-    //             Vector2 zeta = _spiralCalculator.GetEms().zeta.ToVector2();
-    //             Vector2 projectedZeta = Vector2.Dot(zeta - _zpsR1, dir) * dir;
-    //             projectedZeta += projectedZeta.normalized;
-    //             Draw.Line(_zpsR1 + projectedZeta, _zpsR2 - projectedZeta);
-    //             Draw.UseDashes = false;
-    //         }
-    //     }
-    // }
 }
