@@ -40,8 +40,8 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     [SerializeField] private float currentZoom = 0.8f;
 
     [Header("Range Properties")]
-    // 0 = [0,1], 1 = [-0.5,1.5], 2 = [-1.5,2.5], etc.
-    [SerializeField] public static int realRange = 0;
+    // 1 = [0,1], 2 = [-1,2], 3 = [-2,3], etc.
+    [SerializeField] public static int realRange = 1;
 
     // Mathematical constraints for index/imaginary conversion
     // IndexToImag formula requires n > 0 (contains log(n) in denominator)
@@ -111,12 +111,29 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     {
         pointObjects = new Dictionary<PointSet, List<RectTransform>>();
         app = FindObjectOfType<App>();
-        
+
         if (app != null)
         {
             app.IndexChanged += OnIndexChanged;
             app.RealChanged += OnRealChanged;
         }
+
+        // CriticalStripWindow.OnSigmaRangeChanged += () =>
+        // {
+        //     // trying to refresh points to no avail
+
+        //     RefreshAllPointSets();
+
+        //     // Update the transform range
+        //     criticalStripTransform.SetRange(criticalStripTransform.MinValue, criticalStripTransform.MaxValue);
+            
+        //     // Update all point positions and the current position indicator
+        //     UpdateAllPoints();
+        //     UpdateCurrentPosIndicator();
+            
+        //     // Notify listeners that the viewport has changed
+        //     OnViewportChanged?.Invoke();
+        // };
     }
 
     /// <summary>
@@ -268,8 +285,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// </summary>
     public void SetRealRange(int range)
     {
-        realRange = Mathf.Max(0, range);
-        RefreshAllPointSets();
+        realRange = Mathf.Max(1, range);
     }
     
     /// <summary>

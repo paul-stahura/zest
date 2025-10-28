@@ -49,8 +49,7 @@ public class App : ImmediateModeShapeDrawer
     public Slider realPartSlider;
     public FineTuneSlider realPartFineTune;
     public TMP_Dropdown spiralFormula;
-    public Button extendRealRangeButton;
-    [SerializeField] private bool isRealRangeExtended = false;
+    public MultiOptionToggle _realRangeToggle;
 
     // public double _imag = 206.491213762; //Zeta.IndexToImag(5.24);
     readonly double IMAG_WITH_2_LINKS = Zeta.IndexToImag(1, true);
@@ -270,7 +269,8 @@ public class App : ImmediateModeShapeDrawer
             Real = value;
         });
 
-        extendRealRangeButton.onClick.AddListener(ToggleExtendRealRange);
+        _realRangeToggle = GameObject.Find("SigmaRangeToggle")?.GetComponent<MultiOptionToggle>();
+        _realRangeToggle.OnOptionChanged += (option) => ToggleExtendRealRange();
 
         spiralFormula.onValueChanged.AddListener(value =>
         {
@@ -416,14 +416,13 @@ public class App : ImmediateModeShapeDrawer
 
     private void ToggleExtendRealRange()
     {
-        isRealRangeExtended = !isRealRangeExtended;
-        ExtendRealRange(isRealRangeExtended);
+        ExtendRealRange(CriticalStripWindow.sigmaWindowRange);
     }
 
-    private void ExtendRealRange(bool isExtended)
+    private void ExtendRealRange(int range)
     {
-        realPartSlider.minValue = isExtended ? -4.5f : 0f;
-        realPartSlider.maxValue = isExtended ? 5.5f : 1f;
+        realPartSlider.minValue = (range - 1) * -1;
+        realPartSlider.maxValue = range;
     }
 
     private void UpdateActiveSceneOnStart(string startScene)
