@@ -94,16 +94,15 @@ public class CriticalStripTransform
     {
         int range = CriticalStripRenderer.realRange;
         float x;
-        if (range == 0)
+        if (range == 1)
         {
             // real [0,1]
             x = stripPos.x * cachedRectWidth;  // Use cached value
         }
         else
         {
-            // Shift the real axis so that 0.5 is at the center, then map [-realScale, realScale] to [0, cachedRectWidth]
-            float shiftedX = stripPos.x - 0.5f;
-            x = ((shiftedX + range) / (2f * range)) * cachedRectWidth;  // Use cached value
+            // map [(realScale - 1) * -1, realScale] to [0, cachedRectWidth]
+            x = ((stripPos.x + (range - 1)) / (2 * range - 1)) * cachedRectWidth;  // Use cached value
         }
 
         // Use double for calculations to maintain precision
@@ -145,15 +144,10 @@ public class CriticalStripTransform
         }
         else
         {
-            float realMin = 0;
-            float realMax = 1;
-            // Support extended real axis range (e.g., -4.5 to 5.5)
-            if (CriticalStripWindow.IsExtended)
-            {
-                realMin = -4.5f;
-                realMax = 5.5f;
-            }
-
+            // Support extended real axis range
+            float realMin = (CriticalStripWindow.sigmaWindowRange - 1) * -1;
+            float realMax = CriticalStripWindow.sigmaWindowRange;
+            
             real = realMin + normalizedX * (realMax - realMin);
             real = Mathf.Clamp(real, realMin, realMax);
         }

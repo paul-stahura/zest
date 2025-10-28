@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(RectTransform))]
 public class CriticalStripWindow : MonoBehaviour
@@ -11,21 +12,24 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private float animationDuration = 0.3f;
     [SerializeField] private RectTransform windowContent;
     [SerializeField] private Button collapseTab;
-    [SerializeField] private Button extendButton;
+    [SerializeField] private MultiOptionToggle _realRangeToggle;
 
     [Header("References")]
     [SerializeField] private CriticalStripRenderer criticalStripRenderer;
     
     private RectTransform rectTransform;
     private static bool isExpanded = true;
-    private static bool isExtended = false;
     private float targetX;
     private float currentX;
     private PointSetManager pointSetManager;
     private float animationTime;
+
+    private List<int> _sigmaRangeOptions = new List<int> { 1, 5, 10 };
+    private int _sigmaRangeIndex = 0;
+    public static int sigmaWindowRange = 1;
+    public static Action OnSigmaRangeChanged;
     
     public static bool IsExpanded => isExpanded;
-    public static bool IsExtended => isExtended;
     public float Width => width;
 
     private void Awake()
@@ -36,8 +40,8 @@ public class CriticalStripWindow : MonoBehaviour
         if (collapseTab != null)
             collapseTab.onClick.AddListener(ToggleExpand);
 
-        if (extendButton != null)
-            extendButton.onClick.AddListener(ToggleExtend);
+        _realRangeToggle = GameObject.Find("SigmaRangeToggle").GetComponent<MultiOptionToggle>();
+        _realRangeToggle.OnOptionChanged += (option) => ToggleSigmaRange();
             
         // Initialize position
         currentX = isExpanded ? 0 : -width;
@@ -70,7 +74,7 @@ public class CriticalStripWindow : MonoBehaviour
         if (isExpanded == expand) return;
 
         isExpanded = expand;
-        targetX = expand ? 0 : -width;
+        targetX = expand ? 0 : (_sigmaRangeIndex > 0 ? -extendedWidth : -width);
         animationTime = 0f; // Reset animation time when starting new animation
 
         // Rotate the collapse tab if it exists
@@ -84,43 +88,28 @@ public class CriticalStripWindow : MonoBehaviour
             }
         }
 
-        // Hide the extend button when collapsed
-        if (extendButton != null)
+        // Hide the rangeToggle when collapsed
+        if (_realRangeToggle != null)
         {
-            extendButton.gameObject.SetActive(expand);
+            _realRangeToggle.gameObject.SetActive(expand);
         }
     }
     
-    public void ToggleExtend()
+    public void ToggleSigmaRange()
     {
-        SetExtend(!isExtended);
+        _sigmaRangeIndex = (_sigmaRangeIndex + 1) % _sigmaRangeOptions.Count;
+        sigmaWindowRange = _sigmaRangeOptions[_sigmaRangeIndex];
+        SetSigmaRange(sigmaWindowRange);
+        OnSigmaRangeChanged?.Invoke();
     }
 
-    private void SetExtend(bool extend)
+    private void SetSigmaRange(int newRange)
     {
-        if (!isExpanded) return; // Only allow extending if expanded
-        if (isExtended == extend) return;
+        if (!isExpanded) return; // should only be changeable when expanded
 
-        isExtended = extend;
+        bool extend = newRange > 1;
         rectTransform.sizeDelta = new Vector2(extend ? extendedWidth : width, rectTransform.sizeDelta.y);
-        criticalStripRenderer.SetRealRange(extend ? 5 : 0);
-
-        // Hide the Collapse button when extended
-        if (collapseTab != null)
-        {
-            collapseTab.gameObject.SetActive(!extend);
-        }
-
-        // Rotate extend button if it exists
-        if (extendButton != null)
-        {
-            var tabRect = extendButton.GetComponent<RectTransform>();
-            if (tabRect != null)
-            {
-                // Rotate 180 degrees when collapsing
-                tabRect.rotation = Quaternion.Euler(0, 0, extend ? 180 : 0);
-            }
-        }
+        criticalStripRenderer.SetRealRange(newRange);
     }
 
     private void UpdatePosition(float x)
