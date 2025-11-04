@@ -17,6 +17,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         public Vector2 r2;
         public Color color1;
         public Color color2;
+        public MultiOptionToggle targetToggle;
         public MultiOptionToggle toggle1;
         public MultiOptionToggle toggle2;
         public MultiOptionToggle legsForwardToggle;
@@ -36,6 +37,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             r2 = Vector2.zero;
             color1 = c1;
             color2 = c2;
+            targetToggle = null;
             toggle1 = null;
             toggle2 = null;
             legsForwardToggle = null;
@@ -253,6 +255,8 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _rps = new remainder(_rps1Color, _rps2Color);
         _rak = new remainder(_rak1Color, _rak2Color);
 
+        _r.targetToggle = GameObject.Find("R/2_Target_Toggle").GetComponent<MultiOptionToggle>();
+        _r.targetToggle.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
         _r.toggle1 = GameObject.Find("R/2_R1_Toggle").GetComponent<MultiOptionToggle>();
         _r.toggle1.OnOptionChanged += (option) => UpdateActive(ref _r.active, option);
         _r.toggle2 = GameObject.Find("R/2_R2_Toggle").GetComponent<MultiOptionToggle>();
@@ -268,6 +272,8 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _r.pathIndexToggle = GameObject.Find("R/2_Path_Toggle").GetComponent<MultiOptionToggle>();
         _r.pathIndexToggle.OnOptionChanged += (option) => { UpdateActive(ref _r.active, option); _remaindersUpdated = false; };
 
+        _rps.targetToggle = GameObject.Find("Rps_Target_Toggle").GetComponent<MultiOptionToggle>();
+        _rps.targetToggle.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
         _rps.toggle1 = GameObject.Find("Rps_R1_Toggle").GetComponent<MultiOptionToggle>();
         _rps.toggle1.OnOptionChanged += (option) => UpdateActive(ref _rps.active, option);
         _rps.toggle2 = GameObject.Find("Rps_R2_Toggle").GetComponent<MultiOptionToggle>();
@@ -283,6 +289,8 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _rps.pathIndexToggle = GameObject.Find("Rps_Path_Toggle").GetComponent<MultiOptionToggle>();
         _rps.pathIndexToggle.OnOptionChanged += (option) => { UpdateActive(ref _rps.active, option); _remaindersUpdated = false; };
 
+        _rak.targetToggle = GameObject.Find("Rak_Target_Toggle").GetComponent<MultiOptionToggle>();
+        _rak.targetToggle.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
         _rak.toggle1 = GameObject.Find("Rak_R1_Toggle").GetComponent<MultiOptionToggle>();
         _rak.toggle1.OnOptionChanged += (option) => UpdateActive(ref _rak.active, option);
         _rak.toggle2 = GameObject.Find("Rak_R2_Toggle").GetComponent<MultiOptionToggle>();
@@ -302,7 +310,6 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         _addInversePaths.OnOptionChanged += (option) => { _remaindersUpdated = false; };
     }
 
-    private static void UpdateActive(ref int active, bool isOn) => UpdateActive(ref active, isOn ? 1 : 0);
     private static void UpdateActive(ref int active, int option)
     {
         if (option == 1)
@@ -494,7 +501,22 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 2f;
             Draw.Color = r.color1;
 
-            int option = r.toggle1.GetSelectedOption().Item1;
+            int option = r.targetToggle.GetSelectedOption().Item1;
+            switch (option)
+            {
+                case 1:
+                    ShapesUtils.DrawCross(l1, 0.05f);
+                    break;
+                case 2:
+                    ShapesUtils.DrawCross(_sum2 + r.r2, 0.05f);
+                    break;
+                case 3:
+                    ShapesUtils.DrawCross(l1, 0.05f);
+                    ShapesUtils.DrawCross(_sum2 + r.r2, 0.05f);
+                    break;
+            }
+
+            option = r.toggle1.GetSelectedOption().Item1;
             switch(option)
             {
                 case 1:
