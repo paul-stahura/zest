@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Numerics;
 using Shapes;
 using TMPro;
@@ -11,88 +12,68 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 {
     [SerializeField] private Color _zrsColor;
     [SerializeField] private Toggle _zrsToggle;
+    [SerializeField] private MultiOptionToggle _zrsIndexPathToggle;
     [SerializeField] private TMP_Text _zrsPos;
+    private List<Vector2> _zrsIndexPath = new List<Vector2>();
 
     [SerializeField] private Color _zakColor;
     [SerializeField] private Toggle _zakToggle;
+    [SerializeField] private MultiOptionToggle _zakSigmaPathToggle;
+    [SerializeField] private MultiOptionToggle _zakIndexPathToggle;
     [SerializeField] private TMP_Text _zakPos;
+    private List<Vector2> _zakSigmaPath = new List<Vector2>();
+    private List<Vector2> _zakIndexPath = new List<Vector2>();
 
     [SerializeField] private Color _zpsColor;
     [SerializeField] private Toggle _zpsToggle;
+    [SerializeField] private MultiOptionToggle _zpsIndexPathToggle;
     [SerializeField] private TMP_Text _zpsPos;
+    private List<Vector2> _zpsIndexPath = new List<Vector2>();
+
     [SerializeField] private Color _zetapsColor;
     [SerializeField] private Toggle _zetapsToggle;
+    [SerializeField] private MultiOptionToggle _zetapsSigmaPathToggle;
+    [SerializeField] private MultiOptionToggle _zetapsIndexPathToggle;
     [SerializeField] private TMP_Text _zetapsPos;
+    private List<Vector2> _zetapsSigmaPath = new List<Vector2>();
+    private List<Vector2> _zetapsIndexPath = new List<Vector2>();
 
     [SerializeField] private Color _emsColor;
     [SerializeField] private Toggle _emsToggle;
+    [SerializeField] private MultiOptionToggle _emsSigmaPathToggle;
+    [SerializeField] private MultiOptionToggle _emsIndexPathToggle;
     [SerializeField] private TMP_Text _emsPos;
-    [SerializeField] private Color _zemColor;
-    [SerializeField] private Toggle _zemToggle;
-    [SerializeField] private TMP_Text _zemPos;
+    private List<Vector2> _emsSigmaPath = new List<Vector2>();
+    private List<Vector2> _emsIndexPath = new List<Vector2>();
 
     [SerializeField] private Color _etaColor;
     [SerializeField] private Toggle _etaToggle;
+    // [SerializeField] private MultiOptionToggle _etaSigmaPathToggle;
+    // [SerializeField] private MultiOptionToggle _etaIndexPathToggle;
     [SerializeField] private TMP_Text _etaPos;
-
-    [SerializeField] private Toggle _R1akToggle;
-    [SerializeField] private Color _R1akColor;
-    [SerializeField] private Toggle _R2akToggle;
-    [SerializeField] private Color _R2akColor;
+    // private List<Vector2> _etaSigmaPath = new List<Vector2>();
+    // private List<Vector2> _etaIndexPath = new List<Vector2>();
 
     [SerializeField] private Toggle _sum1Toggle;
+    [SerializeField] private MultiOptionToggle _sum1SigmaPathToggle;
+    [SerializeField] private MultiOptionToggle _sum1IndexPathToggle;
     [SerializeField] private Color _sum1Color;
-
-    [SerializeField] private Toggle _fwdBisectorToggle;
-    [SerializeField] private Color _fwdBisectorColor;
-    [SerializeField] private Toggle _invBisectorToggle;
-    [SerializeField] private Color _invBisectorColor;
+    private List<Vector2> _sum1SigmaPath = new List<Vector2>();
+    private List<Vector2> _sum1IndexPath = new List<Vector2>();
 
     [SerializeField] private Toggle _ravToggle;
+    [SerializeField] private MultiOptionToggle _ravIndexPathToggle;
     [SerializeField] private Color _ravColor;
-
-    [SerializeField] private Toggle _drawOrigin;
-
-    [Header("Trace Settings")]
-    private const int _traceLength = 100;
-    private const double _traceInterval = 0.0000000000001f;
-    [SerializeField] private Toggle _traceToggle;
-    private Vector2[] _zrsPath = new Vector2[_traceLength];
-    private int _zrsPathIndex = 0;
-
-    private Vector2[] _zakPath = new Vector2[_traceLength];
-    private int _zakPathIndex = 0;
-
-    private Vector2[] _zpsPath = new Vector2[_traceLength];
-    private int _zpsPathIndex = 0;
-    private Vector2[] _zetapsPath = new Vector2[_traceLength];
-    private int _zetapsPathIndex = 0;
-    private Vector2[] _emsPath = new Vector2[_traceLength];
-    private int _emsPathIndex = 0;
-    private Vector2[] _zemPath = new Vector2[_traceLength];
-    private int _zemPathIndex = 0;
-    private Vector2[] _etaPath = new Vector2[_traceLength];
-    private int _etaPathIndex = 0;
-
-    private Vector2[] _ravPath = new Vector2[_traceLength];
-    private int _ravPathIndex = 0;
-
-    private Vector2[] _r1akPath = new Vector2[_traceLength];
-    private int _r1akPathIndex = 0;
-    private Vector2[] _r2akPath = new Vector2[_traceLength];
-    private int _r2akPathIndex = 0;
-    private Vector2[] _sum1Path = new Vector2[_traceLength];
-    private int _sum1PathIndex = 0;
-
-    private Vector2[] _fwdBisectorPath = new Vector2[_traceLength];
-    private int _fwdBisectorPathIndex = 0;
-    private Vector2[] _invBisectorPath = new Vector2[_traceLength];
-    private int _invBisectorPathIndex = 0;
+    private List<Vector2> _ravIndexPath = new List<Vector2>();
 
     [SerializeField] private Toggle _midPointToggle;
-    [SerializeField] private Toggle _r2MidPointToggle;
-    private Vector2[] _midPointPath = new Vector2[_traceLength];
-    private int _midPointIndex = 0;
+    [SerializeField] private MultiOptionToggle _midPointSigmaPathToggle;
+    [SerializeField] private MultiOptionToggle _midPointIndexPathToggle;
+    [SerializeField] private Color _midPointColor;
+    private List<Vector2> _midPointSigmaPath = new List<Vector2>();
+    private List<Vector2> _midPointIndexPath = new List<Vector2>();
+
+    [SerializeField] private Toggle _drawOrigin;
 
     private SpiralCalculator _spiralCalculator;
     private CameraPositionTracking _cameraPositionTracking;
@@ -103,44 +84,112 @@ public class ZetaTargets : ImmediateModeShapeDrawer
     void Awake()
     {
         _zrsToggle = GameObject.Find("Zrs Zeta Toggle").GetComponent<Toggle>();
+        _zrsIndexPathToggle = GameObject.Find("ZrsIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _zrsIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _zrsIndexPath, option, CalcZrsPoint);
+        };
         _zrsPos = GameObject.Find("Zrs Pos").GetComponent<TMP_Text>();
 
         _zakToggle = GameObject.Find("Zak Zeta Toggle").GetComponent<Toggle>();
+        _zakSigmaPathToggle = GameObject.Find("ZakSigmaPathToggle").GetComponent<MultiOptionToggle>();
+        _zakSigmaPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateSigmaPath(ref _zakSigmaPath, option, CalcZakPoint);
+        };
+        _zakIndexPathToggle = GameObject.Find("ZakIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _zakIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _zakIndexPath, option, CalcZakPoint);
+        };
         _zakPos = GameObject.Find("Zak Pos").GetComponent<TMP_Text>();
 
         _zpsToggle = GameObject.Find("Zps 1/2 Toggle").GetComponent<Toggle>();
+        _zpsIndexPathToggle = GameObject.Find("ZpsIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _zpsIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _zpsIndexPath, option, CalcZpsPoint);
+        };
         _zpsPos = GameObject.Find("Zps Pos").GetComponent<TMP_Text>();
+
         _zetapsToggle = GameObject.Find("Zeta ps Toggle").GetComponent<Toggle>();
+        _zetapsSigmaPathToggle = GameObject.Find("ZetapsSigmaPathToggle").GetComponent<MultiOptionToggle>();
+        _zetapsSigmaPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateSigmaPath(ref _zetapsSigmaPath, option, CalcZetapsPoint);
+        };
+        _zetapsIndexPathToggle = GameObject.Find("ZetapsIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _zetapsIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _zetapsIndexPath, option, CalcZetapsPoint);
+        };
         _zetapsPos = GameObject.Find("Zeta ps Pos").GetComponent<TMP_Text>();
 
         _emsToggle = GameObject.Find("Ems Zeta Toggle").GetComponent<Toggle>();
+        _emsSigmaPathToggle = GameObject.Find("EmsSigmaPathToggle").GetComponent<MultiOptionToggle>();
+        _emsSigmaPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateSigmaPath(ref _emsSigmaPath, option, CalcEmsPoint);
+        };
+        _emsIndexPathToggle = GameObject.Find("EmsIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _emsIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _emsIndexPath, option, CalcEmsPoint);
+        };
         _emsPos = GameObject.Find("Ems Pos").GetComponent<TMP_Text>();
-        _zemToggle = GameObject.Find("Zem3 Toggle").GetComponent<Toggle>();
-        _zemPos = GameObject.Find("Zem3 Pos").GetComponent<TMP_Text>();
 
         _etaToggle = GameObject.Find("Eta Zeta Toggle").GetComponent<Toggle>();
+        // _etaSigmaPathToggle = GameObject.Find("EtaSigmaPathToggle").GetComponent<MultiOptionToggle>();
+        // _etaSigmaPathToggle.OnOptionChanged += (option) =>
+        // {
+        //     UpdateSigmaPath(ref _etaSigmaPath, option, CalcEtaPoint);
+        // };
+        // _etaIndexPathToggle = GameObject.Find("EtaIndexPathToggle").GetComponent<MultiOptionToggle>();
+        // _etaIndexPathToggle.OnOptionChanged += (option) =>
+        // {
+        //     UpdateIndexPath(ref _etaIndexPath, option, CalcEtaPoint);
+        // };
         _etaPos = GameObject.Find("Eta Pos").GetComponent<TMP_Text>();
 
         _midPointToggle = GameObject.Find("Mid Point Toggle").GetComponent<Toggle>();
-        _r2MidPointToggle = GameObject.Find("R2 Mid Point Toggle").GetComponent<Toggle>();
+        _midPointIndexPathToggle = GameObject.Find("MidIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _midPointIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _midPointIndexPath, option, CalcMidPoint);
+        };
+        _midPointSigmaPathToggle = GameObject.Find("MidSigmaPathToggle").GetComponent<MultiOptionToggle>();
+        _midPointSigmaPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateSigmaPath(ref _midPointSigmaPath, option, CalcMidPoint);
+        };
 
-        _R1akToggle = GameObject.Find("R1ak Target Toggle").GetComponent<Toggle>();
-        _R2akToggle = GameObject.Find("R2ak Target Toggle").GetComponent<Toggle>();
         _sum1Toggle = GameObject.Find("Sum1 Target Toggle").GetComponent<Toggle>();
-
-        _fwdBisectorToggle = GameObject.Find("Fwd Bisector Target Toggle").GetComponent<Toggle>();
-        _invBisectorToggle = GameObject.Find("Inv Bisector Target Toggle").GetComponent<Toggle>();
-
+        _sum1SigmaPathToggle = GameObject.Find("Sum1SigmaPathToggle").GetComponent<MultiOptionToggle>();
+        _sum1SigmaPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateSigmaPath(ref _sum1SigmaPath, option, CalcSum1Point);
+        };
+        _sum1IndexPathToggle = GameObject.Find("Sum1IndexPathToggle").GetComponent<MultiOptionToggle>();
+        _sum1IndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _sum1IndexPath, option, CalcSum1Point);
+        };
 
         _ravToggle = GameObject.Find("Rav Zps Toggle").GetComponent<Toggle>();
+        _ravIndexPathToggle = GameObject.Find("RavIndexPathToggle").GetComponent<MultiOptionToggle>();
+        _ravIndexPathToggle.OnOptionChanged += (option) =>
+        {
+            UpdateIndexPath(ref _ravIndexPath, option, CalcRavPoint);
+        };
 
-        _traceToggle = GameObject.Find("Trace Zeta Toggle").GetComponent<Toggle>();
         _drawOrigin = GameObject.Find("Draw Origin Toggle").GetComponent<Toggle>();
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
-        _cameraPositionTracking = Camera.main.GetComponent<CameraPositionTracking>();
+        SpiralCalculator.IndexChanged += OnIndexChanged;
+        SpiralCalculator.RealChanged += OnSigmaChanged;
 
-        SubTargets();
+        _cameraPositionTracking = Camera.main.GetComponent<CameraPositionTracking>();
+        CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
     }
 
     public override void DrawShapes(Camera cam)
@@ -157,200 +206,212 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void SubTargets()
+
+    #region Path Helpers
+    private void OnIndexChanged(double index)
     {
-        _zrsToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateZrs += UpdateZrs;
-            else SpiralCalculator.UpdateZrs -= UpdateZrs; 
-        });
-
-        _zakToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateZakLinks += UpdateZak;
-            else SpiralCalculator.UpdateZakLinks -= UpdateZak; 
-        });
-
-        _zpsToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateZps += UpdateZps;
-            else SpiralCalculator.UpdateZps -= UpdateZps; 
-        });
-        _zetapsToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateZetaPS += UpdateZetaPS;
-            else SpiralCalculator.UpdateZetaPS -= UpdateZetaPS;
-        });
-
-        _emsToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateEms += UpdateEms;
-            else SpiralCalculator.UpdateEms -= UpdateEms; 
-        });
-        _zemToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateZem += UpdateZem;
-            else SpiralCalculator.UpdateZem -= UpdateZem;
-        });
-
-        _etaToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateEta += UpdateEta;
-            else SpiralCalculator.UpdateEta -= UpdateEta; 
-        });
-
-        _midPointToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateMidPoint += UpdateMidPoint;
-            else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
-        });
-
-        _r2MidPointToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateMidPoint += UpdateMidPoint;
-            else SpiralCalculator.UpdateMidPoint -= UpdateMidPoint; 
-        });
-
-        _R1akToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateR1ak += UpdateR1akTarget;
-            else SpiralCalculator.UpdateR1ak -= UpdateR1akTarget; 
-        });
-
-        _R2akToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateR2ak += UpdateR2akTarget;
-            else SpiralCalculator.UpdateR2ak -= UpdateR2akTarget; 
-        });
-
-        _sum1Toggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateSum1 += UpdateSum1Target;
-            else SpiralCalculator.UpdateSum1 -= UpdateSum1Target;
-        });
-
-        _fwdBisectorToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateForwardBisector += UpdateFwdBisectorTarget;
-            else SpiralCalculator.UpdateForwardBisector -= UpdateFwdBisectorTarget; 
-        });
-
-        _invBisectorToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateInverseBisector += UpdateInverseBisector;
-            else SpiralCalculator.UpdateInverseBisector -= UpdateInverseBisector; 
-        });
-
-        _ravToggle.onValueChanged.AddListener((bool value) => 
-        { 
-            if(value) SpiralCalculator.UpdateRAV += UpdateRAV;
-            else SpiralCalculator.UpdateRAV -= UpdateRAV; 
-        });
-
-        CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
+        ValidateAllPaths();
     }
 
-    private void UpdateZrs(Zeta.Spiral zrs)
+    private void OnSigmaChanged(double sigma)
     {
-        UpdateTargetPos(zrs.zeta.ToVector2(), ref _zrsPath, ref _zrsPathIndex);
-    }
-
-    private void UpdateZak(Vector[] zakLinks)
-    {
-        var zak = _spiralCalculator.GetZakLinks();
-        var lastZak = zak[zak.Length - 1].ToComplex();
-        UpdateTargetPos(lastZak.ToVector2(), ref _zakPath, ref _zakPathIndex);
-    }
-
-    private void UpdateZps(Vector zps)
-    {
-        UpdateTargetPos(zps, ref _zpsPath, ref _zpsPathIndex);
-    }
-
-    private void UpdateZetaPS(Vector zetaPS)
-    {
-        UpdateTargetPos(zetaPS, ref _zetapsPath, ref _zetapsPathIndex);
-    }
-
-    private void UpdateEms(Zeta.Spiral ems)
-    {
-        UpdateTargetPos(ems.zeta.ToVector2(), ref _emsPath, ref _emsPathIndex);
-    }
-
-    private void UpdateZem(Vector zem) 
-    {
-        UpdateTargetPos(zem, ref _zemPath, ref _zemPathIndex);
-    }
-
-    private void UpdateEta(Zeta.Spiral eta)
-    {
-        UpdateTargetPos(eta.zeta.ToVector2(), ref _etaPath, ref _etaPathIndex);
+        ValidateAllPaths();
     }
     
-    private void UpdateMidPoint(Vector midPoint)
+    private void ValidateAllPaths()
     {
-        UpdateTargetPos(midPoint, ref _midPointPath, ref _midPointIndex);
+        UpdateIndexPath(ref _zrsIndexPath, _zrsIndexPathToggle.GetSelectedOption().Item1, CalcZrsPoint);
+        UpdateSigmaPath(ref _zakSigmaPath, _zakSigmaPathToggle.GetSelectedOption().Item1, CalcZakPoint);
+        UpdateIndexPath(ref _zakIndexPath, _zakIndexPathToggle.GetSelectedOption().Item1, CalcZakPoint);
+        UpdateIndexPath(ref _zpsIndexPath, _zpsIndexPathToggle.GetSelectedOption().Item1, CalcZpsPoint);
+        UpdateSigmaPath(ref _zetapsSigmaPath, _zetapsSigmaPathToggle.GetSelectedOption().Item1, CalcZetapsPoint);
+        UpdateIndexPath(ref _zetapsIndexPath, _zetapsIndexPathToggle.GetSelectedOption().Item1, CalcZetapsPoint);
+        UpdateSigmaPath(ref _emsSigmaPath, _emsSigmaPathToggle.GetSelectedOption().Item1, CalcEmsPoint);
+        UpdateIndexPath(ref _emsIndexPath, _emsIndexPathToggle.GetSelectedOption().Item1, CalcEmsPoint);
+        // UpdateSigmaPath(ref _etaSigmaPath, _etaSigmaPathToggle.GetSelectedOption().Item1, CalcEtaPoint);
+        // UpdateIndexPath(ref _etaIndexPath, _etaIndexPathToggle.GetSelectedOption().Item1, CalcEtaPoint);
+        UpdateSigmaPath(ref _sum1SigmaPath, _sum1SigmaPathToggle.GetSelectedOption().Item1, CalcSum1Point);
+        UpdateIndexPath(ref _sum1IndexPath, _sum1IndexPathToggle.GetSelectedOption().Item1, CalcSum1Point);
+        UpdateSigmaPath(ref _midPointSigmaPath, _midPointSigmaPathToggle.GetSelectedOption().Item1, CalcMidPoint);
+        UpdateIndexPath(ref _midPointIndexPath, _midPointIndexPathToggle.GetSelectedOption().Item1, CalcMidPoint);
+        UpdateIndexPath(ref _ravIndexPath, _ravIndexPathToggle.GetSelectedOption().Item1, CalcRavPoint);
     }
 
-    private void UpdateR1akTarget(Complex r1ak)
+    private void UpdateSigmaPath(ref List<Vector2> path, int option, Func<double, double, Vector2> pointFunc)
     {
-        UpdateTargetPos(r1ak.ToVector2(), ref _r1akPath, ref _r1akPathIndex);
+        if (option == 0) return;
+        path.Clear();
+
+        double index = _spiralCalculator.GetIndex();
+
+        int minSigma = 0;
+        switch (option)
+        {
+            case 1: minSigma = 0; break;
+            case 2: minSigma = -5; break;
+        }
+        for (int i = minSigma; i <= 10; i++)
+        {
+            var scaler = Math.Max(i, 0);
+            var ptCount = 100 / (scaler + 1);
+            for (int j = 0; j <= ptCount; j++)
+            {
+                var r = i + (float)j / ptCount;
+                Vector2 idx = pointFunc(r, index);
+                path.Add(idx);
+            }
+        }
     }
-    private void UpdateR2akTarget(Complex r2ak)
+    
+    private void UpdateIndexPath(ref List<Vector2> path, int option, Func<double, double, Vector2> pointFunc)
     {
-        UpdateTargetPos(r2ak.ToVector2(), ref _r2akPath, ref _r2akPathIndex);
-    }
-    private void UpdateSum1Target(Complex sum1)
-    {
-        UpdateTargetPos(sum1.ToVector2(), ref _sum1Path, ref _sum1PathIndex);
+        if (option == 0) return;
+        path.Clear();
+
+        double index = _spiralCalculator.GetIndex();
+        double sigma = _spiralCalculator.GetReal();
+
+        float pathRange;
+        switch (option)
+        {
+            // case 1: pathRange = 0.001f; break;
+            case 1: pathRange = 0.01f; break;
+            case 2: pathRange = 0.1f; break;
+            case 3: pathRange = 0.5f; break;
+            default: pathRange = 0f; break;
+        }
+        pathRange /= (float)(index * 2.0);
+        int steps = 50 * option * (int)index; // more steps for larger paths
+        for (int s = 0; s <= steps; s++)
+        {
+            double idx = index - pathRange + 2 * pathRange * s / steps;
+            Vector2 r = pointFunc(sigma, idx);
+            path.Add(r);
+        }
     }
 
-    private void UpdateFwdBisectorTarget(Vector fwdBisector)
+    private Vector2 CalcZrsPoint(double sigma, double index)
     {
-        UpdateTargetPos(fwdBisector, ref _fwdBisectorPath, ref _fwdBisectorPathIndex);
+        return Zeta.ReimannSiegel(new Complex(0.5, Zeta.IndexToImag(index))).ToVector2();
     }
 
-    private void UpdateInverseBisector(Vector invBisector)
+    private Vector2 CalcZpsPoint(double sigma, double index)
     {
-        UpdateTargetPos(invBisector, ref _invBisectorPath, ref _invBisectorPathIndex);
+        return BisectorPoint.GetZPS(index).ToVector2();
     }
 
-    private void UpdateRAV(Vector rav)
+    private Vector2 CalcRavPoint(double sigma, double index)
     {
-        UpdateTargetPos(rav, ref _ravPath, ref _ravPathIndex);
+        return BisectorPoint.RightAngleVertex(BisectorPoint.BpOneHalf(index), index);
     }
+
+    // private Vector2 CalcEtaPoint(double sigma, double index)
+    // {
+    //     return Zeta.EtaFormula(new Complex(sigma, Zeta.IndexToImag(index))).ToVector2();
+    // }
+    
+    private Vector2 CalcEmsPoint(double sigma, double index)
+    {
+        return Zeta.EulerMaclauren(new Complex(sigma, Zeta.IndexToImag(index))).ToVector2();
+    }
+
+    private Vector2 CalcZetapsPoint(double sigma, double index)
+    {
+        var v = ZpsGeneral.ForwardBisector(sigma, index) + ZpsGeneral.InverseBisector(sigma, index);
+        return v.ToVector2();
+    }
+
+    private Vector2 CalcZakPoint(double sigma, double index)
+    {
+        var links = ZakCalculator.CalcZakLinks(sigma, index);
+        return links[links.Length - 1];
+    }
+
+    private Vector2 CalcSum1Point(double sigma, double index)
+    {
+        return SumRemainders.CalcForwardSumUpToBisector(sigma, index).ToVector2();
+    }
+
+    private Vector2 CalcMidPoint(double sigma, double index)
+    {  
+        return ZpsGeneral.GetMidPoint(sigma, index).ToVector2();
+    }
+    #endregion
+
 
     private void DrawTargets()
     {
-        DrawZetaTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta, _zrsPath, _zrsPathIndex, _zrsColor);
+        DrawPointTarget(_zrsToggle, _zrsPos, _spiralCalculator.GetZrs().zeta.ToVector2(), _zrsColor, true);
+        DrawPointPath(_zrsIndexPathToggle, _zrsIndexPath, _zrsColor);
 
-        var zak = _spiralCalculator.GetZakLinks();
-        var lastZak = zak[zak.Length - 1].ToComplex();
-        DrawZetaTarget(_zakToggle, _zakPos, lastZak, _zakPath, _zakPathIndex, _zakColor);
+        DrawPointTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsColor, true);
+        DrawPointPath(_zpsIndexPathToggle, _zpsIndexPath, _zpsColor);
 
-        DrawZetaTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsPath, _zpsPathIndex, _zpsColor);
-        DrawZetaTarget(_zetapsToggle, _zetapsPos, _spiralCalculator.GetZetaPS(), _zetapsPath, _zetapsPathIndex, _zetapsColor);
-        DrawZetaTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta, _emsPath, _emsPathIndex, _emsColor);
-        DrawZetaTarget(_zemToggle, _zemPos, _spiralCalculator.GetZem(), _zemPath, _zemPathIndex, _zemColor);
-        DrawZetaTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta, _etaPath, _etaPathIndex, _etaColor);
+        DrawPointTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta.ToVector2(), _etaColor, true);
+        // DrawPointPath(_etaSigmaPathToggle, _etaSigmaPath, _etaColor);
+        // DrawPointPath(_etaIndexPathToggle, _etaIndexPath, _etaColor);
 
-        DrawZetaTarget(_R1akToggle, null, _spiralCalculator.GetR1ak(), _r1akPath, _r1akPathIndex, _R1akColor, false);
-        DrawZetaTarget(_R2akToggle, null, _spiralCalculator.GetR2ak(), _r2akPath, _r2akPathIndex, _R2akColor, false);
-        DrawZetaTarget(_sum1Toggle, null, _spiralCalculator.GetSum1(), _sum1Path, _sum1PathIndex, _sum1Color, false);
+        DrawPointTarget(_ravToggle, null, _spiralCalculator.GetRAV(), _ravColor, false);
+        DrawPointPath(_ravIndexPathToggle, _ravIndexPath, _ravColor);
 
-        DrawZetaTarget(_fwdBisectorToggle, null, _spiralCalculator.GetForwardBisector().ToComplex(), _fwdBisectorPath, _fwdBisectorPathIndex, _fwdBisectorColor, false);
-        DrawZetaTarget(_invBisectorToggle, null, _spiralCalculator.GetInverseBisector().ToComplex(), _invBisectorPath, _invBisectorPathIndex, _invBisectorColor, false);
+        DrawPointTarget(_emsToggle, _emsPos, _spiralCalculator.GetEms().zeta.ToVector2(), _emsColor, true);
+        DrawPointPath(_emsSigmaPathToggle, _emsSigmaPath, _emsColor);
+        DrawPointPath(_emsIndexPathToggle, _emsIndexPath, _emsColor);
 
-        DrawZetaTarget(_ravToggle, null, _spiralCalculator.GetRAV().ToComplex(), _ravPath, _ravPathIndex, _ravColor, false);
+        DrawPointTarget(_zetapsToggle, _zetapsPos, _spiralCalculator.GetZetaPS(), _zetapsColor, true);
+        DrawPointPath(_zetapsSigmaPathToggle, _zetapsSigmaPath, _zetapsColor);
+        DrawPointPath(_zetapsIndexPathToggle, _zetapsIndexPath, _zetapsColor);
+
+        var zakLinks = _spiralCalculator.GetZakLinks();
+        DrawPointTarget(_zakToggle, _zakPos, zakLinks[zakLinks.Length - 1], _zakColor, true);
+        DrawPointPath(_zakSigmaPathToggle, _zakSigmaPath, _zakColor);
+        DrawPointPath(_zakIndexPathToggle, _zakIndexPath, _zakColor);
+
+
+        DrawPointTarget(_sum1Toggle, null, _spiralCalculator.GetSum1().ToVector2(), _sum1Color, false);
+        DrawPointPath(_sum1SigmaPathToggle, _sum1SigmaPath, _sum1Color);
+        DrawPointPath(_sum1IndexPathToggle, _sum1IndexPath, _sum1Color);
 
         if (_midPointToggle.isOn) DrawMiddlePoint();
-        if (_r2MidPointToggle.isOn) DrawMiddlePoint(true);
-
+        DrawPointPath(_midPointSigmaPathToggle, _midPointSigmaPath, _midPointColor);
+        DrawPointPath(_midPointIndexPathToggle, _midPointIndexPath, _midPointColor);
+        
         if (_drawOrigin.isOn) DrawOrigin();
-
         if (_camTargetColor.a > 0.05f) DrawCamTarget();
+    }
 
-        // DrawRemainderToForwardBisectorLine();
+    private void DrawPointTarget(Toggle toggle, TMP_Text posText, Vector2 pos, Color color, bool drawZ = true)
+    {
+        if (toggle.isOn)
+        {
+            if (drawZ)
+            {
+                DrawZ(pos, color);
+            }
+            else
+            {
+                using (Draw.StyleScope)
+                {
+                    Draw.Color = color;
+                    Draw.Thickness = 1f;
+                    ShapesUtils.DrawCross(pos, 0.05f);
+                }
+            }
+
+            if (posText != null) posText.text = $"({pos.x:F6}, {pos.y:F6})";
+        }
+        else if (posText != null)
+        {
+            posText.text = "";
+        }
+    }
+
+    private void DrawPointPath(MultiOptionToggle toggle, List<Vector2> path, Color color)
+    {
+        if (toggle.GetSelectedOption().Item1 != 0 && path.Count > 1)
+        {
+            DrawPath(path, color);
+        }
     }
 
     private void FlashCamTarget()
@@ -395,79 +456,39 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         }
     }
 
-    private void DrawRemainderToForwardBisectorLine()
+    // private void DrawRemainderToForwardBisectorLine()
+    // {
+    //     using (Draw.StyleScope)
+    //     {
+    //         Draw.Color = _zakColor;
+    //         Draw.Thickness = 1f;
+    //         var Bf = _spiralCalculator.GetForwardBisector();
+    //         var Br = _spiralCalculator.GetRemainderForwardBisector();
+    //         var Bi = _spiralCalculator.GetInverseBisector();
+    //         var FtR = (Br - Bf).Normalized();
+
+    //         var Bri = _spiralCalculator.GetRemainderInverseBisector();
+    //         var ItR = (Bri - Bi).Normalized();
+
+    //         var rtr = (Br - Bri).Length / 2;
+
+    //         Draw.Line(Br + FtR * rtr, Br - FtR * rtr);
+    //         Draw.Line(Bri + ItR * rtr, Bri - ItR * rtr);
+    //     }
+    // }
+
+    private void DrawMiddlePoint()
     {
         using (Draw.StyleScope)
         {
-            Draw.Color = _zakColor;
+            Draw.Color = _zrsColor;
             Draw.Thickness = 1f;
-            var Bf = _spiralCalculator.GetForwardBisector();
-            var Br = _spiralCalculator.GetRemainderForwardBisector();
-            var Bi = _spiralCalculator.GetInverseBisector();
-            var FtR = (Br - Bf).Normalized();
-
-            var Bri = _spiralCalculator.GetRemainderInverseBisector();
-            var ItR = (Bri - Bi).Normalized();
-
-            var rtr = (Br - Bri).Length / 2;
-
-            Draw.Line(Br + FtR * rtr, Br - FtR * rtr);
-            Draw.Line(Bri + ItR * rtr, Bri - ItR * rtr);
-        }
-    }
-
-    private void DrawMiddlePoint(bool useR2 = false)
-    {
-        using (Draw.StyleScope)
-        {
-            Draw.Color = useR2 ? _zrsColor : _zpsColor;
-            Draw.Thickness = 1f;
-            var Bf = useR2 ? _spiralCalculator.GetRemainderForwardBisector() : _spiralCalculator.GetForwardBisector();
-            var Bi = useR2 ? _spiralCalculator.GetRemainderInverseBisector() : _spiralCalculator.GetInverseBisector();
-            var Zps = Bf + Bi;
+            var Zps = _spiralCalculator.GetZetaPS();
             var midPoint = _spiralCalculator.GetMidPoint();
             Draw.Ring(midPoint, 0.02f);
             ShapesUtils.DrawCross(midPoint, 0.03f);
-
             Draw.UseDashes = true;
-            Draw.Line(Bf, Bi);
             Draw.Line(Vector2.zero, Zps);
-        }
-
-        if (_traceToggle.isOn)
-        {
-            DrawPath(_midPointPath, _midPointIndex, _zrsColor);
-        }
-    }
-
-    private void DrawZetaTarget(Toggle toggle, TMP_Text posText, Complex pos, Vector2[] pathList, int pathIndex, Color color, bool drawZ = true)
-    {
-        if (toggle.isOn)
-        {
-            if (drawZ)
-            {
-                DrawZ(pos.ToVector2(), color);
-            }
-            else
-            {
-                using (Draw.StyleScope)
-                {
-                    Draw.Color = color;
-                    Draw.Thickness = 1f;
-                    ShapesUtils.DrawCross(pos.ToVector2(), 0.05f);
-                }
-            }
-
-            if (posText != null) posText.text = $"({pos.Real:F6}, {pos.Imaginary:F6})";
-
-            if (_traceToggle.isOn)
-            {
-                DrawPath(pathList, pathIndex, color);
-            }
-        }
-        else if (posText != null)
-        {
-            posText.text = "";
         }
     }
 
@@ -479,39 +500,24 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Thickness = 1f;
             // -Z
             var r = .05f;
-            Draw.Line(pt + new Vector2(-r/2, 0), pt + new Vector2(r/2, 0)); // -
+            Draw.Line(pt + new Vector2(-r / 2, 0), pt + new Vector2(r / 2, 0)); // -
             Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, r));    // /
             Draw.Line(pt + new Vector2(-r, r), pt + new Vector2(r, r));     // `
-            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r,-r));    // _
+            Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, -r));    // _
         }
     }
-
-    private void DrawPath(Vector2[] path, int pathIndex, Color pathColor)
+    
+    private void DrawPath(List<Vector2> path, Color pathColor)
     {
         using (Draw.StyleScope)
         {
             Draw.Color = pathColor;
             Draw.Thickness = 1;
             //draw a line along the path starting at pathIndex and looping through the array
-            for (int i = 1; i < _traceLength; i++)
+            for (int i = 1; i < path.Count; i++)
             {
-                Draw.Line(path[(pathIndex + i) % _traceLength], path[(pathIndex + i + 1) % _traceLength]);
+                Draw.Line(path[i - 1], path[i]);
             }
         }
-    }
-
-    private void UpdateTargetPos(Vector2 pos, ref Vector2[] targetPath, ref int targetPathIndex)
-    {
-        UpdatePath(ref targetPath, ref targetPathIndex, pos);
-    }
-
-    private void UpdatePath(ref Vector2[] path, ref int pathIndex, Vector2 pos)
-    {
-        var prevIndex = (pathIndex - 1 + _traceLength) % _traceLength;
-        if(Math.Abs(path[prevIndex].magnitude - pos.magnitude) > _traceInterval)
-        {
-            pathIndex = (pathIndex + 1) % _traceLength;
-        }
-        path[pathIndex] = pos;
     }
 }
