@@ -50,7 +50,7 @@
 79 # Links To Draw
 92 # MidPoint Target
 40 # R/2 Legs
-39 # R/2 Path
+39 # R/2 Index Path
 16 # Yin Yang Link
 38 # R/2 R_{2}
 88 # Title
@@ -59,14 +59,14 @@
 58 # R2 Forward Bisector Path
 57 # R2 Inverse Legs
 56 # R2 Inverse Bisector Path
-29 # R_{ak} Legs
+29 # R_{ak} Forward Legs
 26 # R_{ak1} Path
 30 # R_{ak2}
 86 # Right Angle Vertex
 75 # Forward Spiral Real Path
 73 # Reverse Spiral
 62 # Reverse Link
-34 # R_{ps} Legs
+34 # R_{ps} Forward Legs
 33 # R_{ps1} Path
 31 # R_{ps2}
 2 # Focus Current Index
@@ -89,3 +89,40 @@
 89 # \Sigma_{1} Target
 -1 # Manual Entries
 9 # Manual Entries
+37 # Testme
+36 # Remainder R_1
+7 # Color Invert
+145 # Zak Remainder
+147 # Stahura Remainder
+146 # Riemann Remainder
+121 # R/2 Point
+117 # Rps Point
+113 # Rak Point
+32 # R_{ps1}
+27 # R_{ak1}
+143 # R/2 Forward Legs
+120 # R/2 Inverse Legs
+116 # R_{ps} Inverse Legs
+112 # R_{ak} Inverse Legs
+142 # R_{ps} Index Path
+144 # R_{ak} Index Path
+122 # Visible Path Options
+118 # R/2 \sigma Path
+114 # R_{ps} \sigma Path
+110 # R_{ak} \sigma Path
+119 # Remainder Symmetry
+115 # Remainder Symmetry
+111 # Remainder Symmetry
+135 # Z_{rs} Index Path
+134 # Z_{ps} Index Path
+133 # RAV Index Path
+131 # E_{ms} Index Path
+132 # E_{ms} \sigma Path
+130 # \zeta_{ps} \sigma Path
+128 # Z_{ak} \sigma Path
+126 # \Sigma_1 \sigma Path
+124 # Mid \sigma Path
+129 # \zeta_{ps} Index Path
+127 # Z_{ak} Index Path
+125 # \Sigma_1 Index Path
+123 # Mid Index Path

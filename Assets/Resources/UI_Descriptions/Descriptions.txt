@@ -159,13 +159,12 @@ Tell me more
 Green = \Sigma_{1} + R_{1}
 \\ Red = \Sigma_{2} + R_{2}
 
-# R/2 Path
-Draws the path of R/2 as index changes
-
 # R/2 R_{2}
-(1) R_{2} forward.
-\\ (2) R_{2} = \Sigma_{1} - \Sigma_{2}
-\\ (4) R_{2} = inverse
+Reimann's remainder devided by two,
+\\ Drawn at
+\\ 1: \Sigma_1 + R/2
+\\ 2: \Sigma_2
+\\ 3: \Sigma_1
 
 # R2 Forward Legs
 Uses Zak Remainder/2 as bisector
@@ -179,17 +178,14 @@ Uses Zak Remainder/2 as bisector
 # R2 Inverse Bisector Path
 Real Path of Remainder/2 point
 
-# R_{ak} Legs
-Green = \Sigma_{1} + R_{ak1}
-\\ Red = \Sigma_{2} + R_{ak2}
-
 # R_{ak1} Path
 Draws the path of R_{ak1} as index changes
 
 # R_{ak2}
-(1) R_{ak2} forward.
-\\ (2) R_{ak2} = \Sigma_{1} - \Sigma_{2}
-\\ (4) R_{ak2} = inverse
+\\ Drawn at
+\\ 1: \Sigma_1 + R_{ak1}
+\\ 2: \Sigma_2
+\\ 3: \Sigma_1
 
 # Right Angle Vertex
 Along the vector or first leg of the “Bisector legs at 1/2" there is a point perpendicular to zeta. This is drawn as the Right Angle Vertex or (RAV)
@@ -203,17 +199,14 @@ Reflects the forward spiral along the "symmetry line" (A bisector line between z
 # Reverse Link
 The Bisector link of the Reverse spiral
 
-# R_{ps} Legs
-Green = \Sigma_{1} + R_{ps1}
-\\ Red = \Sigma_{2} + R_{ps2}
-
 # R_{ps1} Path
 Draws the path of R_{ps1} as index changes
 
 # R_{ps2}
-(1) R_{ps2} forward.
-\\ (2) R_{ps2} = \Sigma_{1} - \Sigma_{2}
-\\ (4) R_{ps2} = inverse
+\\ Drawn at
+\\ 1: \Sigma_1 + R_{ps1}
+\\ 2: \Sigma_2
+\\ 3: \Sigma_1
 
 # Focus Current Index
 Click to focus the critical strip window on the current index.
@@ -280,4 +273,150 @@ Riemann-Siegel function: \Zeta(index)
 Mouse over elements to learn more.
 \\ Press M to Hide.
 \\ Press Shift + M to edit selected entry.
+
+\\ add line
+
+# Testme
+Z_{em5}\left(J,\ n_{iteration},\ s\right)=\sum_{n=0}^{n_{iteration}-1}\frac{1}{\left(1+n\right)^{s}}+\frac{\left(1+n_{iteration}\right)^{\left(1-s\right)}}{s-1}+\frac{\left(1+n_{iteration}\right)^{-s}}{2}+\sum_{j=1}^{J}\left(\frac{B_{2nList}\left[j\right]}{\left(2j\right)!}\prod_{k=0}^{2j-2}\left(s+k\right)\left(1+n_{iteration}\right)^{\left(-s-2j+1\right)}\right)
+
+# Color Invert
+Changes colors for paper screenshots
+
+# Zak Remainder
+Tell me more
+
+# Stahura Remainder
+Tell me more
+
+# Riemann Remainder
+Tell me more
+
+# R/2 Point
+Places a crosshair at
+\\ 1: {\Sigma_{1} + {R/2}}
+\\ 2: {\Sigma_{2} + {R/2}}
+\\ 3: 1 and 2
+
+# Rps Point
+Places a crosshair at
+\\ 1: \Sigma_{1} + R_{ps1}
+\\ 2: \Sigma_{2} + R_{ps2}
+\\ 3: 1 and 2
+
+# Rak Point
+Places a crosshair at
+\\ 1: \Sigma_{1} + R_{ak1}
+\\ 2: \Sigma_{2} + R_{ak2}
+\\ 3: 1 and 2
+
+# Remainder R_1
+Reimann's remainder devided by two,
+\\ Drawn at
+\\ 1: \Sigma_1
+\\ 2: \Sigma_2 + R/2
+
+# R_{ps1}
+Distance from \Sigma_1 along the "bisector link"
+\\ Drawn at
+\\ 1: \Sigma_1
+\\ 2: \Sigma_2 + R_{ps2}
+
+# R_{ak1}
+Zak Remainder first part
+\\ Drawn At
+\\ 1: \Sigma_1
+\\ 2: \Sigma_2 + R_{ak2}
+
+# R/2 Forward Legs
+Green = \Sigma_{1} + R/2
+\\ Red = \Sigma_{2} + R/2
+
+# R_{ps} Forward Legs
+Green = \Sigma_{1} + R_{ps1}
+\\ Red = \Sigma_{2} + R_{ps2}
+
+# R_{ak} Forward Legs
+Green = \Sigma_{1} + R_{ak1}
+\\ Red = \Sigma_{2} + R_{ak2}
+
+# R/2 Inverse Legs
+Red = \Sigma_{2} + R_{ps2}
+\\ Green = \Sigma_{1} + R/2
+
+# R_{ps} Inverse Legs
+Red = \Sigma_{2} + R_{ps2}
+\\ Green = \Sigma_{1} + R_{ps1}
+
+# R_{ak} Inverse Legs
+Red = \Sigma_{2} + R_{ak2}
+\\ Green = \Sigma_{1} + R_{ak1}
+
+# R/2 Index Path
+Draws the path of R/2 as index changes
+
+# R_{ps} Index Path
+Draws the path of R_{ps} as Index changes
+
+# R_{ak} Index Path
+Draws the path of R_{ak} as Index changes
+
+# Visible Path Options
+\\1: R_1
+\\2: R_2
+\\3: Both
+
+# R/2 \sigma Path
+Draws the path of R/2 as \sigma changes
+
+# R_{ps} \sigma Path
+Draws the path of R_{ps} as \sigma changes
+
+# R_{ak} \sigma Path
+Draws the path of R_{ak} as \sigma changes
+
+# Remainder Symmetry
+Options
+\\1: Cut (Draws a line from \Sigma_1 + R_1 to \Sigma_1 + R_2)
+\\2: Bisect (Angle bisector between R_1 and R_2)
+\\3: Zeta/2 (Draws a line from \Sigma_1 + R_1 to \Sigma_2 + R_2, always passing through Zeta/2)
+\\4: Equal (red and green circles for representation of leg lengths)
+
+# Z_{rs} Index Path
+Path of Z_{rs} as Index changes
+
+# Z_{ps} Index Path
+Path of Z_{ps} as Index change
+
+# RAV Index Path
+Path of RAV as Index change
+
+# E_{ms} Index Path
+Path of E_{ms} as Index changes
+
+# E_{ms} \sigma Path
+Path of E_{ms} as \sigma changes
+
+# Z_{ak} \sigma Path
+Path of Z_{ak} as \sigma changes
+
+# \Sigma_1 \sigma Path
+Path of \Sigma_1 as \sigma changes
+
+# Mid \sigma Path
+Path of Zeta/2 as \sigma changes
+
+# \zeta_{ps} Index Path
+Path of \zeta_{ps} as Index changes
+
+# \zeta_{ps} \sigma Path
+Path of \zeta_{ps} as \sigma changes
+
+# Z_{ak} Index Path
+Path of Z_{ak} as Index changes
+
+# \Sigma_1 Index Path
+Path of \Sigma_1 as Index changes
+
+# Mid Index Path
+Path of Zeta/2 as Index changes
 

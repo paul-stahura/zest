@@ -40,6 +40,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     {
         Auto,
         BisectorLink,
+        Sum1,
         ZakRemainder,
         ZakInverseRemainder,
         MidPoint,
@@ -293,6 +294,11 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
                 target = spiral.joints[spiral.middleIndex];
                 target += midLink / 2f;
                 newUP = new Vector2(-midLink.y, midLink.x).normalized;
+                break;
+
+            case SymmetryTarget.Sum1:
+                target = spiral.joints[spiral.middleIndex];
+                newUP = new Vector2(midLink.x, midLink.y).normalized;
                 break;
 
             case SymmetryTarget.ZakRemainder:
