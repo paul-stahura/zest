@@ -37,20 +37,26 @@ public class MathFileParser
 
         var points = new List<(double, double, Vector2)>();
         var outBoundsPoints = new List<(double, double, Vector2)>();
+        var zetaPoints = new List<(double, double, Vector2)>();
         for (int i = 0; i < ParsedValues.Count; i++)
         {
             var pair = ParsedValues[i];
             // convert from imag to index
             double index = Zeta.SearchImagToIndex(pair.y);
 
-            if (pair.x < -4.5)
-                outBoundsPoints.Add((-4.5, index, new Vector2((float)-4.5, (float)index)));
+            if (pair.x < -4)
+                outBoundsPoints.Add((-4, index, new Vector2((float)-4, (float)index)));
 
             points.Add((pair.x, index, new Vector2((float)pair.x, (float)index)));
+
+            // mirror x across 0.5 critical line
+            var mirroredX = 1.0 - pair.x;
+            zetaPoints.Add((mirroredX, index, new Vector2((float)mirroredX, (float)index)));
         }
 
         FindIntersections.SaveToCSV(points, "Rak1_10k");
         FindIntersections.SaveToCSV(outBoundsPoints, "Rak1_10k_OutOfBounds");
+        FindIntersections.SaveToCSV(zetaPoints, "Rak1_Zetas");
     }
 
     /// <summary>
