@@ -71,6 +71,9 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
     [Header("Path adds")]
     [SerializeField] private MultiOptionToggle _addInversePaths;
 
+    [Header("Extras")]
+    [SerializeField] private MultiOptionToggle _rpsToRakToggle;
+
     private Vector2 _sum1;
     private Vector2 _sum2;
 
@@ -308,6 +311,15 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
         _addInversePaths = GameObject.Find("Add_Inverse_Path_Toggle").GetComponent<MultiOptionToggle>();
         _addInversePaths.OnOptionChanged += (option) => { _remaindersUpdated = false; };
+
+        _rpsToRakToggle = GameObject.Find("Rps_To_Rak_Toggle").GetComponent<MultiOptionToggle>();
+        _rpsToRakToggle.OnOptionChanged += (option) =>
+        {
+            UpdateActive(ref _rak.active, option);
+            UpdateActive(ref _rps.active, option);
+            UpdateActive(ref _r.active, option);
+            _remaindersUpdated = false;
+        };
     }
 
     private static void UpdateActive(ref int active, int option)
@@ -487,6 +499,55 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
         //     print($"AK zero at ({test.Magnitude}) = ({test.Real}, {test.Imaginary}i)");
         //     Draw.Line(Vector2.zero, test.ToVector2(), Color.yellow);
         // }
+
+        if (_rpsToRakToggle.GetSelectedOption().Item1 > 0)
+        {
+            using (Draw.StyleScope)
+            {
+                Draw.Thickness = 2f;
+                Draw.Color = Color.magenta;
+                Draw.UseDashes = true;
+                Vector2 rpsPoint = _sum1 + _rps.r1;
+                Vector2 rakPoint = _sum1 + _rak.r1;
+                Vector2 dir = (rakPoint - rpsPoint).normalized;
+                Draw.Line(rpsPoint - dir * 2f, rakPoint + dir * 2f);
+
+                if(_rpsToRakToggle.GetSelectedOption().Item1 == 2)
+                {
+                    Vector2 intersection = LineLineIntersection(rpsPoint - dir * 2f, rakPoint + dir * 2f, _sum1, _sum1 + _r.r1 + _r.r2);
+                    Vector2 zeta = _sum1 + _rps.r1 + _sum2 + _rps.r2;
+                    Vector2 leg2 = zeta - intersection;
+
+                    Draw.Line(Vector2.zero, intersection, Color.green);
+                    Draw.Line(intersection, zeta, Color.red);
+                    Draw.Ring(intersection, intersection.magnitude, Color.green);
+                    Draw.Ring(intersection, leg2.magnitude, Color.red);
+                }
+            }
+        }
+    }
+    
+    private Vector2 LineLineIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4)
+    {
+        float A1 = p2.y - p1.y;
+        float B1 = p1.x - p2.x;
+        float C1 = A1 * p1.x + B1 * p1.y;
+
+        float A2 = p4.y - p3.y;
+        float B2 = p3.x - p4.x;
+        float C2 = A2 * p3.x + B2 * p3.y;
+
+        float denominator = A1 * B2 - A2 * B1;
+
+        if (Mathf.Approximately(denominator, 0f))
+        {
+            return Vector2.zero;
+        }
+
+        float intersectX = (B2 * C1 - B1 * C2) / denominator;
+        float intersectY = (A1 * C2 - A2 * C1) / denominator;
+
+        return new Vector2(intersectX, intersectY);
     }
 
     private void DrawR(remainder r)
