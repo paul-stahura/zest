@@ -15,32 +15,31 @@ public class PresetHandler : MonoBehaviour
     }
 
     private App _app;
-    [SerializeField] private TMP_Dropdown _cameraTargetDropdown;
-    [SerializeField] private TMP_Dropdown _symmetryTargetDropdown;
-    [SerializeField] private CameraPositionTracking _cameraPositionTracking;
+    private TMP_Dropdown _cameraTargetDropdown;
+    private CameraPositionTracking _cameraPositionTracking;
 
     [Header("Preset Settings")]
     [Header("Zeta Input")]
-    [SerializeField] private Slider _animationSpeedSlider;
-    [SerializeField] private Toggle _autoAnimateToggle;
+    private Slider _animationSpeedSlider;
+    private Toggle _autoAnimateToggle;
 
     [Header("Point Targets")]
-    [SerializeField] private Toggle _zakTargetToggle;
-    [SerializeField] private Toggle _originTargetToggle;
+    private Toggle _zakTargetToggle;
+    private Toggle _originTargetToggle;
 
     [Header("Spiral")]
-    [SerializeField] private Toggle _spiralForwardToggle;
-    [SerializeField] private Toggle _spiralInverseReflectedToggle;
-    [SerializeField] private TMP_Dropdown _linksToDrawDropdown;
+    private Toggle _spiralForwardToggle;
+    private Toggle _spiralInverseReflectedToggle;
+    private TMP_Dropdown _linksToDrawDropdown;
 
     [Header("Yin Yang")]
-    [SerializeField] private Toggle _YinYangToggle;
+    private Toggle _YinYangToggle;
 
     [Header("Grid")]
-    [SerializeField] private Toggle _gridForwardToInverseReflectedToggle;
-    [SerializeField] private Toggle _gridInverseToForwardReflectedToggle;
-    [SerializeField] private Toggle _gridForwardToInverseToggle;
-    [SerializeField] private Toggle _gridForwardReflectedToInverseReflectedToggle;
+    private Toggle _gridForwardToInverseReflectedToggle;
+    private Toggle _gridInverseToForwardReflectedToggle;
+    private Toggle _gridForwardToInverseToggle;
+    private Toggle _gridForwardReflectedToInverseReflectedToggle;
 
     private enum FolderOrder
     {
@@ -60,6 +59,58 @@ public class PresetHandler : MonoBehaviour
     void Awake()
     {
         _app = FindObjectOfType<App>();
+
+        _cameraTargetDropdown = GameObject.Find("Camera Tracking Options").GetComponent<TMP_Dropdown>();
+        _cameraPositionTracking = GameObject.Find("Camera").GetComponent<CameraPositionTracking>();
+
+        _animationSpeedSlider = GameObject.Find("AnimSpeed").GetComponent<Slider>();
+        _autoAnimateToggle = GameObject.Find("AnimHold").GetComponent<Toggle>();
+
+        _zakTargetToggle = GameObject.Find("Zak Zeta Toggle").GetComponent<Toggle>();
+        _originTargetToggle = GameObject.Find("Draw Origin Toggle").GetComponent<Toggle>();
+
+        _spiralForwardToggle = GameObject.Find("EmsForwardToggle").GetComponent<Toggle>();
+        _spiralInverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
+        _linksToDrawDropdown = GameObject.Find("LinksToDrawDropdown").GetComponent<TMP_Dropdown>();
+
+        _YinYangToggle = GameObject.Find("YinYang Toggle").GetComponent<Toggle>();
+
+        _gridForwardToInverseReflectedToggle = GameObject.Find("FtIR_Links").GetComponent<Toggle>();
+        _gridInverseToForwardReflectedToggle = GameObject.Find("ItFR_Links").GetComponent<Toggle>();
+        _gridForwardToInverseToggle = GameObject.Find("ForwardToInverseToggle").GetComponent<Toggle>();
+        _gridForwardReflectedToInverseReflectedToggle = GameObject.Find("ForwardReflectedToInverseReflectedToggle").GetComponent<Toggle>();
+
+        FindFolders();
+        FindClearButtons();
+    }
+
+    private void FindFolders()
+    {
+        _folders = new List<Accordion>
+        {
+            GameObject.Find("Zeta Input (2.0)").GetComponent<Accordion>(),
+            GameObject.Find("Point Targets").GetComponent<Accordion>(),
+            GameObject.Find("Camera Tracking (2.0)").GetComponent<Accordion>(),
+            GameObject.Find("Sprial (2.0)").GetComponent<Accordion>(),
+            GameObject.Find("Symmetry (2.0)").GetComponent<Accordion>(),
+            GameObject.Find("Remainders (2.0)").GetComponent<Accordion>(),
+            GameObject.Find("GridLinksToLinksFolder").GetComponent<Accordion>(),
+            GameObject.Find("Yin Yang (2.0)").GetComponent<Accordion>()
+        };
+    }
+
+    private void FindClearButtons()
+    {
+        _clearButtons = new List<Button>
+        {
+            GameObject.Find("ClearAllSpiralButton").GetComponent<Button>(),
+            GameObject.Find("GridClearAllButton").GetComponent<Button>(),
+            GameObject.Find("RemaindersClearAllButton").GetComponent<Button>(),
+            GameObject.Find("SymmetryClearAllButton").GetComponent<Button>(),
+            GameObject.Find("YinYangClearAllButton").GetComponent<Button>(),
+            GameObject.Find("ZetaTargetsClearAllButton").GetComponent<Button>()
+        };
+        
     }
 
     public void CollapseAllFolders()
@@ -162,7 +213,7 @@ public class PresetHandler : MonoBehaviour
         // set Camera
         _cameraPositionTracking.SetZoomLevel(5f);
         _cameraTargetDropdown.value = 2;
-        _symmetryTargetDropdown.value = 5;
+        GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>().value = 5;
 
         // extend folders
         _folders[(int)FolderOrder.ZetaInput].ExstendInstant();
