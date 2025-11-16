@@ -10,6 +10,8 @@ using Vector2 = UnityEngine.Vector2;
 
 public class YinYangRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private Button _clearAllButton;
+
     [SerializeField] private Toggle _yinYangToggle;
     [SerializeField] private Toggle _yinYangLinkToggle;
     [SerializeField] private Toggle _yinYangSpecialToggle;
@@ -49,6 +51,20 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
 
         InitPaths();
         SubCalc();
+
+        _clearAllButton = GameObject.Find("YinYangClearAllButton").GetComponent<Button>();
+        _clearAllButton.onClick.AddListener(() =>
+        {
+            _yinYangToggle.isOn = false;
+            _yinYangLinkToggle.isOn = false;
+            _yinYangSpecialToggle.isOn = false;
+            _yinYangSpecialLinkToggle.isOn = false;
+            _inverseSpecialToggle.isOn = false;
+            _infToggle.isOn = false;
+            _infLinkToggle.isOn = false;
+
+            _derivativeModeDropdown.value = 0;
+        });
     }
 
     public override void DrawShapes(Camera cam)

@@ -10,6 +10,7 @@ using Vector2 = UnityEngine.Vector2;
 
 public class SpiralRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private Button _clearAllSpiralButton;
     [SerializeField] private MultiOptionToggle _spiralTransparency;
     [Header("Spiral Colors")]
     [SerializeField] private Color EmsColor;
@@ -70,6 +71,31 @@ public class SpiralRenderer : ImmediateModeShapeDrawer
 
         // init
         _emsForwardToggle.isOn = true;
+
+        ClearAllInit();
+    }
+
+    private void ClearAllInit()
+    {
+        _clearAllSpiralButton = GameObject.Find("ClearAllSpiralButton").GetComponent<Button>();
+        _clearAllSpiralButton.onClick.AddListener(() =>
+        {
+            _emsForwardToggle.isOn = false;
+            _ZrsForwardToggle.isOn = false;
+            _forwardReflectedToggle.isOn = false;
+            _reverseSpiralToggle.isOn = false;
+            _inverseSpiralToggle.isOn = false;
+            _inverseReflectedToggle.isOn = false;
+            _zakLinksToggle.isOn = false;
+            _zakInverseLinksToggle.isOn = false;
+            _etaSpiralToggle.isOn = false;
+            _realPathToggle.isOn = false;
+
+            _spiralTransparency.SetSelectedOption(2);
+            _linksToDrawDropdown.value = 0;
+            _colorLinksToggle.SetSelectedOption(0);
+            App.ExtendSpiralToggle.isOn = false;
+        });
     }
 
     public override void DrawShapes(Camera cam)

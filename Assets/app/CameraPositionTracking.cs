@@ -113,6 +113,11 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         return _zoomLevel;
     }
 
+    public void SetZoomLevel(float zoom)
+    {
+        _zoomLevel = Mathf.Clamp(zoom, minZoom, maxZoom);
+    }
+
     private void OnTargetChanged(int v)
     {
         ResetCamOffset();
@@ -141,7 +146,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         }
     }
 
-    private void ResetCamOffset()
+    public void ResetCamOffset()
     {
         _cameraTrackingOffset = Vector2.zero;
         _cameraUp = Vector2.up;

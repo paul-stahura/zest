@@ -21,7 +21,7 @@ public class MultiOptionToggle : MonoBehaviour
 
     void Awake()
     {
-        var trigger = new EventTrigger.Entry 
+        var trigger = new EventTrigger.Entry
         {
             eventID = EventTriggerType.PointerDown,
             callback = new EventTrigger.TriggerEvent()
@@ -34,6 +34,20 @@ public class MultiOptionToggle : MonoBehaviour
 
         UpdateText();
         UpdateColor();
+    }
+    
+    public void SetSelectedOption(int index)
+    {
+        if (index < 0 || index >= Math.Max(_options.Count, _colors.Count))
+        {
+            Debug.Log("Index is out of range of options or colors.");
+            return;
+        }
+
+        _selectedOption = index;
+        UpdateText();
+        UpdateColor();
+        OnOptionChanged?.Invoke(_selectedOption);
     }
 
     public (int, string) GetSelectedOption()

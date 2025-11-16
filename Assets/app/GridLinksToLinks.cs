@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class GridLinksToLinks : ImmediateModeShapeDrawer
 {
+    [SerializeField] private Button _clearAllButton;
+
     // links to spirals
     [SerializeField] private Toggle _forwardLinksToInverseReflectedLinksToggle;
     [SerializeField] private Toggle _inverseLinksToForwardReflectedLinksToggle;
@@ -39,6 +41,17 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
 
 
         _spiralCalculator = GameObject.Find("Spiral Calculator").GetComponent<SpiralCalculator>();
+
+        _clearAllButton = GameObject.Find("GridClearAllButton").GetComponent<Button>();
+        _clearAllButton.onClick.AddListener(() =>
+        {
+            _forwardLinksToInverseReflectedLinksToggle.isOn = false;
+            _inverseLinksToForwardReflectedLinksToggle.isOn = false;
+            _forwardToInverseToggle.isOn = false;
+            _forwardReflectedToInverseReflectedToggle.isOn = false;
+            _forwardToReflectedLinksToggle.isOn = false;
+            _inverseToReflectedLinksToggle.isOn = false;
+        });
     }
 
     public override void DrawShapes(Camera cam)
