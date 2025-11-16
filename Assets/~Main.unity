@@ -1888,6 +1888,7 @@ GameObject:
   - component: {fileID: 29418442}
   - component: {fileID: 29418441}
   - component: {fileID: 29418440}
+  - component: {fileID: 29418443}
   m_Layer: 5
   m_Name: RemaindersClearAllButton
   m_TagString: Untagged
@@ -1998,6 +1999,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 29418438}
   m_CullTransparentMesh: 1
+--- !u!114 &29418443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29418438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &29752435
 GameObject:
   m_ObjectHideFlags: 0
@@ -19054,6 +19068,7 @@ GameObject:
   - component: {fileID: 339661521}
   - component: {fileID: 339661520}
   - component: {fileID: 339661519}
+  - component: {fileID: 339661522}
   m_Layer: 5
   m_Name: GridClearAllButton
   m_TagString: Untagged
@@ -19164,6 +19179,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 339661517}
   m_CullTransparentMesh: 1
+--- !u!114 &339661522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 339661517}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &341932281
 GameObject:
   m_ObjectHideFlags: 0
@@ -22260,6 +22288,7 @@ GameObject:
   - component: {fileID: 388498289}
   - component: {fileID: 388498288}
   - component: {fileID: 388498287}
+  - component: {fileID: 388498290}
   m_Layer: 5
   m_Name: GridPresetButton
   m_TagString: Untagged
@@ -22382,6 +22411,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 388498285}
   m_CullTransparentMesh: 1
+--- !u!114 &388498290
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 388498285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &390378485
 GameObject:
   m_ObjectHideFlags: 0
@@ -23693,6 +23735,7 @@ GameObject:
   - component: {fileID: 408498725}
   - component: {fileID: 408498724}
   - component: {fileID: 408498723}
+  - component: {fileID: 408498726}
   m_Layer: 5
   m_Name: DefaultPresetButton
   m_TagString: Untagged
@@ -23815,6 +23858,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 408498721}
   m_CullTransparentMesh: 1
+--- !u!114 &408498726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408498721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &411798015
 GameObject:
   m_ObjectHideFlags: 0
@@ -55460,6 +55516,7 @@ GameObject:
   - component: {fileID: 938749131}
   - component: {fileID: 938749130}
   - component: {fileID: 938749129}
+  - component: {fileID: 938749132}
   m_Layer: 5
   m_Name: YinYangPreset
   m_TagString: Untagged
@@ -55582,6 +55639,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 938749127}
   m_CullTransparentMesh: 1
+--- !u!114 &938749132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938749127}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &940986715
 GameObject:
   m_ObjectHideFlags: 0
@@ -64281,6 +64351,7 @@ GameObject:
   - component: {fileID: 1096733910}
   - component: {fileID: 1096733909}
   - component: {fileID: 1096733908}
+  - component: {fileID: 1096733911}
   m_Layer: 5
   m_Name: SymmetryClearAllButton
   m_TagString: Untagged
@@ -64391,6 +64462,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1096733906}
   m_CullTransparentMesh: 1
+--- !u!114 &1096733911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096733906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &1097185565
 GameObject:
   m_ObjectHideFlags: 0
@@ -86372,7 +86456,7 @@ MonoBehaviour:
   _cancelValidateButton: {fileID: 1644963249}
   _revertValidateButton: {fileID: 311661887}
   _validateMessage: {fileID: 1095898564}
-  _purgeUnusedKeys: 1
+  _purgeUnusedKeys: 0
 --- !u!1 &1454532523
 GameObject:
   m_ObjectHideFlags: 0
@@ -86891,6 +86975,7 @@ GameObject:
   - component: {fileID: 1464907040}
   - component: {fileID: 1464907039}
   - component: {fileID: 1464907038}
+  - component: {fileID: 1464907041}
   m_Layer: 5
   m_Name: ClearAllSpiralButton
   m_TagString: Untagged
@@ -87001,6 +87086,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1464907036}
   m_CullTransparentMesh: 1
+--- !u!114 &1464907041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1464907036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &1468300199
 GameObject:
   m_ObjectHideFlags: 0
@@ -96511,6 +96609,7 @@ GameObject:
   - component: {fileID: 1600671966}
   - component: {fileID: 1600671965}
   - component: {fileID: 1600671964}
+  - component: {fileID: 1600671967}
   m_Layer: 5
   m_Name: YinYangClearAllButton
   m_TagString: Untagged
@@ -96621,6 +96720,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1600671962}
   m_CullTransparentMesh: 1
+--- !u!114 &1600671967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600671962}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &1600709315
 GameObject:
   m_ObjectHideFlags: 0
@@ -104303,6 +104415,7 @@ GameObject:
   - component: {fileID: 1737494656}
   - component: {fileID: 1737494655}
   - component: {fileID: 1737494654}
+  - component: {fileID: 1737494657}
   m_Layer: 5
   m_Name: ZetaTargetsClearAllButton
   m_TagString: Untagged
@@ -104413,6 +104526,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737494652}
   m_CullTransparentMesh: 1
+--- !u!114 &1737494657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737494652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &1740029386
 GameObject:
   m_ObjectHideFlags: 0
@@ -110237,6 +110363,7 @@ GameObject:
   - component: {fileID: 1835044627}
   - component: {fileID: 1835044626}
   - component: {fileID: 1835044625}
+  - component: {fileID: 1835044628}
   m_Layer: 5
   m_Name: ClearPointsButton
   m_TagString: Untagged
@@ -110347,6 +110474,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1835044623}
   m_CullTransparentMesh: 1
+--- !u!114 &1835044628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1835044623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958837e321631344d877fbcb78fc0ec4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _descriptionID: -1
 --- !u!1 &1835117456
 GameObject:
   m_ObjectHideFlags: 0
