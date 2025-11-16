@@ -65,7 +65,7 @@ public class BandsOverlayRenderer : MaskableGraphic
         // Subscribe to viewport change events
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged += OnViewportChanged;
+            CriticalStripRenderer.OnViewportChanged += OnViewportChanged;
         }
         
         // Process data and generate bands
@@ -82,7 +82,7 @@ public class BandsOverlayRenderer : MaskableGraphic
         // Unsubscribe from events
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged -= OnViewportChanged;
+            CriticalStripRenderer.OnViewportChanged -= OnViewportChanged;
         }
         
         // Clear references that might cause issues during cleanup

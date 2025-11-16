@@ -626,7 +626,7 @@ public class PointSetManager : MonoBehaviour
         // Unsubscribe from viewport changes
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged -= UpdatePointPositions;
+            CriticalStripRenderer.OnViewportChanged -= UpdatePointPositions;
         }
     }
     
@@ -645,7 +645,7 @@ public class PointSetManager : MonoBehaviour
         // Subscribe to viewport changes
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged += UpdatePointPositions;
+            CriticalStripRenderer.OnViewportChanged += UpdatePointPositions;
         }
     }
     

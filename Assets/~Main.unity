@@ -48795,7 +48795,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 577174951}
   m_HandleRect: {fileID: 577174950}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -122511,6 +122511,7 @@ MonoBehaviour:
   collapseTab: {fileID: 332602937}
   _realRangeToggle: {fileID: 0}
   criticalStripRenderer: {fileID: 2042214199}
+  _pointSetManager: {fileID: 1997160102}
 --- !u!1 &1998638251
 GameObject:
   m_ObjectHideFlags: 0

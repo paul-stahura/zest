@@ -87,7 +87,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     private const float SCROLL_CLICK_THRESHOLD = 0.1f; // Ignore clicks within 100ms of scrolling
 
     // Event for notifying when the viewport changes (zoom or pan)
-    public event System.Action OnViewportChanged;
+    public static Action OnViewportChanged;
 
     private bool isUpdating = false;
 
@@ -547,7 +547,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// <summary>
     /// Updates the positions of all points in the visualization
     /// </summary>
-    private void UpdateAllPoints()
+    public void UpdateAllPoints()
     {
         if (!isInitialized) return;
 

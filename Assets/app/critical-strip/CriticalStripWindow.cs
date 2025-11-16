@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 
 [RequireComponent(typeof(RectTransform))]
 public class CriticalStripWindow : MonoBehaviour
@@ -101,6 +102,14 @@ public class CriticalStripWindow : MonoBehaviour
         sigmaWindowRange = _sigmaRangeOptions[_sigmaRangeIndex];
         SetSigmaRange(sigmaWindowRange);
         OnSigmaRangeChanged?.Invoke();
+
+        StartCoroutine(InvokeOnNextFrame(CriticalStripRenderer.OnViewportChanged));
+    }
+
+    private IEnumerator InvokeOnNextFrame(Action action)
+    {
+        yield return null; // Wait for the next frame
+        action?.Invoke();
     }
 
     private void SetSigmaRange(int newRange)
