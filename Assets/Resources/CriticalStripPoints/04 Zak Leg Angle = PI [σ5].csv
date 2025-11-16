@@ -1,6 +1,6 @@
 # Point Set File Format:
 # Settings are specified with #@ prefix followed by name: value
-#@name: Rak Leg Angle = PI [σ5]
+#@name: Zak Leg Angle = PI [σ5]
 #@color:#b65dd9
 #@skipCriticalLine: false
 #@samplingInterval: 1

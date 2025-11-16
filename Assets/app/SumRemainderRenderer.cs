@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 
 public class SumRemainderRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private Button _clearAllRemaindersButton;
+
     private struct remainder
     {
         public Vector2 r1;
@@ -90,6 +92,50 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
         _real = _app.Real;
         _index = _app.Index;
+
+        _clearAllRemaindersButton = GameObject.Find("RemaindersClearAllButton").GetComponent<Button>();
+        _clearAllRemaindersButton.onClick.AddListener(() =>
+        {
+            ClearAllRemaindersInit();
+        });
+    }
+
+    private void ClearAllRemaindersInit()
+    {
+        _r.active = 0;
+        _rps.active = 0;
+        _rak.active = 0;
+
+        _r.targetToggle.SetSelectedOption(0);
+        _r.toggle1.SetSelectedOption(0);
+        _r.toggle2.SetSelectedOption(0);
+        _r.legsForwardToggle.SetSelectedOption(0);
+        _r.legsInverseToggle.SetSelectedOption(0);
+        _r.symToggle.SetSelectedOption(0);
+        _r.pathSigmaToggle.SetSelectedOption(0);
+        _r.pathIndexToggle.SetSelectedOption(0);
+
+        _rps.targetToggle.SetSelectedOption(0);
+        _rps.toggle1.SetSelectedOption(0);
+        _rps.toggle2.SetSelectedOption(0);
+        _rps.legsForwardToggle.SetSelectedOption(0);
+        _rps.legsInverseToggle.SetSelectedOption(0);
+        _rps.symToggle.SetSelectedOption(0);
+        _rps.pathSigmaToggle.SetSelectedOption(0);
+        _rps.pathIndexToggle.SetSelectedOption(0);
+
+        _rak.targetToggle.SetSelectedOption(0);
+        _rak.toggle1.SetSelectedOption(0);
+        _rak.toggle2.SetSelectedOption(0);
+        _rak.legsForwardToggle.SetSelectedOption(0);
+        _rak.legsInverseToggle.SetSelectedOption(0);
+        _rak.symToggle.SetSelectedOption(0);
+        _rak.pathSigmaToggle.SetSelectedOption(0);
+        _rak.pathIndexToggle.SetSelectedOption(0);
+
+        _remaindersUpdated = false;
+
+        _rpsToRakToggle.SetSelectedOption(0);
     }
 
     void Update()

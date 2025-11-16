@@ -60,7 +60,7 @@ public class IndexLabelsRenderer : MonoBehaviour
     {
         if (stripRenderer != null)
         {
-            stripRenderer.OnViewportChanged += HandleViewportChanged;
+            CriticalStripRenderer.OnViewportChanged += HandleViewportChanged;
         }
     }
 
@@ -68,7 +68,7 @@ public class IndexLabelsRenderer : MonoBehaviour
     {
         if (stripRenderer != null)
         {
-            stripRenderer.OnViewportChanged -= HandleViewportChanged;
+            CriticalStripRenderer.OnViewportChanged -= HandleViewportChanged;
         }
     }
 
@@ -108,7 +108,7 @@ public class IndexLabelsRenderer : MonoBehaviour
         // No longer getting components from same GameObject
         if (stripRenderer != null)
         {
-            stripRenderer.OnViewportChanged += HandleViewportChanged;
+            CriticalStripRenderer.OnViewportChanged += HandleViewportChanged;
         }
         
         EmitLogs("Awake");

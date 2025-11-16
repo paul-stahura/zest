@@ -172,7 +172,7 @@ public class DescriptionManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && !_isEditMode)
         {
             _toggleManualButton.isOn = !_toggleManualButton.isOn;
         }

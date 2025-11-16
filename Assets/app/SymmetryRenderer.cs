@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class SymmetryRenderer : ImmediateModeShapeDrawer
 {
+    [SerializeField] private Button _clearAllSymmetryButton;
+
     [SerializeField] private Toggle _zpsBisectorToggle;
     [SerializeField] private Color _zpsBisectorColor;
     [SerializeField] private Toggle _zpsBPToZetaCirlceToggle;
@@ -72,6 +74,29 @@ public class SymmetryRenderer : ImmediateModeShapeDrawer
         _cam = Camera.main.GetComponent<CameraPositionTracking>();
 
         SubToCalculations();
+
+        _clearAllSymmetryButton = GameObject.Find("SymmetryClearAllButton").GetComponent<Button>();
+        _clearAllSymmetryButton.onClick.AddListener(() => {
+            _zpsBisectorToggle.isOn = false;
+            _zpsBPToZetaCirlceToggle.isOn = false;
+            _symmeytryToggle.isOn = false;
+            _symmetryRealPathToggle.isOn = false;
+            _reverseLinkToggle.isOn = false;
+            _remainderForwardLegsToggle.SetSelectedOption(0);
+            _remainderForwardLegsPathToggle.isOn = false;
+            _remainderInverseLegsToggle.SetSelectedOption(0);
+            _remainderInverseLegsPathToggle.isOn = false;
+            _ForwardLegsToggle.SetSelectedOption(0);
+            _ForwardLegsPathToggle.isOn = false;
+            _ForwardLegsZetaCircleToggle.isOn = false;
+            _inverseLegsToggle.SetSelectedOption(0);
+            _inverseLegsPathToggle.isOn = false;
+            _inverseLegsZetaCircleToggle.isOn = false;
+            _inverseReflectedLegsToggle.isOn = false;
+            _inverseReflectedLegsPathToggle.isOn = false;
+            _inverseReflectedZetaCircleToggle.isOn = false;
+            _tempForwardToZetaToggle.isOn = false;
+        });
     }
     #endregion
 

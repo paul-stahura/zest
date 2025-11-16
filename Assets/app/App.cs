@@ -59,7 +59,7 @@ public class App : ImmediateModeShapeDrawer
     readonly double IMAG_AT_ZERO = Zeta.IndexToImag(0, true);
 
 
-    [SerializeField] private Toggle _extendSpiralToggle;
+    public static Toggle ExtendSpiralToggle;
     public int _extendSpiral = 0;
 
 
@@ -283,8 +283,8 @@ public class App : ImmediateModeShapeDrawer
             spiral.Update(spiral.real, spiral.index, (SpiralFormulas)spiralFormula.value, usingPolyImag);
         });
 
-        _extendSpiralToggle = GameObject.Find("ToggleExtendSpiral")?.GetComponent<Toggle>();
-        _extendSpiralToggle.onValueChanged.AddListener(value =>
+        ExtendSpiralToggle = GameObject.Find("ToggleExtendSpiral")?.GetComponent<Toggle>();
+        ExtendSpiralToggle.onValueChanged.AddListener(value =>
         {
             _extendSpiral = value ? 10000 : 0;
             SpiralCalculator.ExtendSpiralChanged?.Invoke(_extendSpiral);

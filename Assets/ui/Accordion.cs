@@ -39,12 +39,28 @@ public class Accordion : MonoBehaviour
         }
     }
 
-    public void OnValidate() 
+    public void OnValidate()
     {
-        if(StartExstended != IsExstended)
+        if (StartExstended != IsExstended)
         {
             SetContentSizes();
         }
+    }
+
+    public void CollapseInstant()
+    {
+        if (_animCoroutine != null) StopCoroutine(_animCoroutine);
+
+        rect.sizeDelta = new Vector2(rect.sizeDelta.x, _collapsedHight - 1);
+        IsExstended = false;
+    }
+    
+    public void ExstendInstant()
+    {
+        if (_animCoroutine != null) StopCoroutine(_animCoroutine);
+
+        rect.sizeDelta = new Vector2(rect.sizeDelta.x, _exstendedHeight + 1);
+        IsExstended = true;
     }
 
     public void Toggle()

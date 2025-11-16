@@ -14,6 +14,7 @@ public class PointSetManager : MonoBehaviour
     [Tooltip("How close to 0.5 before points are skipped")]
     [SerializeField] [Range(0.001f, 0.1f)] private float criticalLineSkipTolerance = 0.01f;
     [SerializeField] private CriticalStripStats stats;  // Reference to the Stats component
+    private Button _clearPointsButton;
     
     [Header("Points Mesh Setup")]
     [SerializeField] private PointsMeshRenderer pointsMeshPrefab;
@@ -78,6 +79,13 @@ public class PointSetManager : MonoBehaviour
         {
             Debug.LogWarning("PointSetSelector not assigned in inspector");
         }
+
+        _clearPointsButton = GameObject.Find("ClearPointsButton")?.GetComponent<Button>();
+        _clearPointsButton?.onClick.AddListener(() =>
+        {
+            pointSetSelector.ClearOptions();
+            RefreshPointSetList();
+        });
     }
     
     private void SetupPointsDirectory()
@@ -626,7 +634,7 @@ public class PointSetManager : MonoBehaviour
         // Unsubscribe from viewport changes
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged -= UpdatePointPositions;
+            CriticalStripRenderer.OnViewportChanged -= UpdatePointPositions;
         }
     }
     
@@ -645,7 +653,7 @@ public class PointSetManager : MonoBehaviour
         // Subscribe to viewport changes
         if (criticalStripRenderer != null)
         {
-            criticalStripRenderer.OnViewportChanged += UpdatePointPositions;
+            CriticalStripRenderer.OnViewportChanged += UpdatePointPositions;
         }
     }
     

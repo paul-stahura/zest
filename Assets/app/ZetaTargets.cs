@@ -75,6 +75,8 @@ public class ZetaTargets : ImmediateModeShapeDrawer
 
     [SerializeField] private Toggle _drawOrigin;
 
+    [SerializeField] private Button _clearAllButton;
+
     private SpiralCalculator _spiralCalculator;
     private CameraPositionTracking _cameraPositionTracking;
     private Coroutine _camTargetFade;
@@ -188,8 +190,44 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         SpiralCalculator.IndexChanged += OnIndexChanged;
         SpiralCalculator.RealChanged += OnSigmaChanged;
 
+        InitAllOff();
+
         _cameraPositionTracking = Camera.main.GetComponent<CameraPositionTracking>();
         CameraPositionTracking.OnCameraTrackingChanged += FlashCamTarget;
+    }
+
+    private void InitAllOff()
+    {
+        _clearAllButton = GameObject.Find("ZetaTargetsClearAllButton").GetComponent<Button>();
+        _clearAllButton.onClick.AddListener(() =>
+        {
+            _zrsToggle.isOn = false;
+            _zakToggle.isOn = false;
+            _zpsToggle.isOn = false;
+            _etaToggle.isOn = false;
+            _emsToggle.isOn = false;
+            _zetapsToggle.isOn = false;
+            _sum1Toggle.isOn = false;
+            _ravToggle.isOn = false;
+            _midPointToggle.isOn = false;
+            _drawOrigin.isOn = false;
+
+            _zrsIndexPathToggle.SetSelectedOption(0);
+            _zakSigmaPathToggle.SetSelectedOption(0);
+            _zakIndexPathToggle.SetSelectedOption(0);
+            _zpsIndexPathToggle.SetSelectedOption(0);
+            _zetapsSigmaPathToggle.SetSelectedOption(0);
+            _zetapsIndexPathToggle.SetSelectedOption(0);
+            _emsSigmaPathToggle.SetSelectedOption(0);
+            _emsIndexPathToggle.SetSelectedOption(0);
+            // _etaSigmaPathToggle.SetSelectedOption(0);
+            // _etaIndexPathToggle.SetSelectedOption(0);
+            _sum1SigmaPathToggle.SetSelectedOption(0);
+            _sum1IndexPathToggle.SetSelectedOption(0);
+            _ravIndexPathToggle.SetSelectedOption(0);
+            _midPointSigmaPathToggle.SetSelectedOption(0);
+            _midPointIndexPathToggle.SetSelectedOption(0);
+        });
     }
 
     public override void DrawShapes(Camera cam)
