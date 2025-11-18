@@ -1396,7 +1396,7 @@ public class CriticalStripRenderer : MonoBehaviour, IPointerClickHandler, IPoint
     /// <summary>
     /// Sets the locked state and updates UI accordingly
     /// </summary>
-    private void SetLockedState(bool locked)
+    public void SetLockedState(bool locked)
     {
         isLocked = locked;
         Debug.Log($"[CriticalStripRenderer] Setting locked state to {locked}.");

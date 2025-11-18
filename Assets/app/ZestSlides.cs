@@ -6,13 +6,18 @@ using UnityEngine.UI;
 
 public enum SlideTitles
 {
-    Zeta = 0,
-    Symmetry = 1,
-    Inverse = 2,
-    Bisector = 3,
-    YinYang = 4,
-    Remainder = 5,
-    Legs = 6,
+    Zeta,
+    Symmetry,
+    Index,
+    YinYang,
+    Remainder,
+    Legs,
+    Equal,
+
+    // Candy
+    Galaxy,
+    Taffy,
+    Saver
 }
 
 public class ZestSlides : MonoBehaviour
@@ -22,6 +27,7 @@ public class ZestSlides : MonoBehaviour
     private List<MultiOptionToggle> _slides;
 
     private PresetHandler _presetHandler;
+    private MultiOptionToggle _currentSlide;
 
     void Awake()
     {
@@ -34,11 +40,15 @@ public class ZestSlides : MonoBehaviour
         _slides = new List<MultiOptionToggle>{
             GameObject.Find("ZetaSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("SymSlide").GetComponent<MultiOptionToggle>(),
-            GameObject.Find("InverseSlide").GetComponent<MultiOptionToggle>(),
-            GameObject.Find("BisectorSlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("IndexSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("YinYangSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("RemainderSlide").GetComponent<MultiOptionToggle>(),
-            GameObject.Find("LegsSlide").GetComponent<MultiOptionToggle>()
+            GameObject.Find("LegsSlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("EqualSlide").GetComponent<MultiOptionToggle>(),
+
+            GameObject.Find("GalaxySlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("TaffySlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("SaverSlide").GetComponent<MultiOptionToggle>()
         };
 
         InitSlides();
@@ -48,11 +58,20 @@ public class ZestSlides : MonoBehaviour
     {
         ResetSlides();
 
+        _currentSlide = _slides[0];
+
         for(int i = 0; i < _slides.Count; i++)
         {
             int index = i; // Capture variable for closure
-            _slides[i].OnOptionChanged += (optionIndex) =>
+            var slide = _slides[index];
+            slide.OnOptionChanged += (optionIndex) =>
             {
+                if(slide != _currentSlide)
+                {
+                    _currentSlide.SetSilently(0);
+                    _currentSlide = slide;
+                }
+
                 _presetHandler.ApplyPreset((SlideTitles)index, optionIndex);
             };
         }
