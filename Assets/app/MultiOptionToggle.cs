@@ -50,6 +50,19 @@ public class MultiOptionToggle : MonoBehaviour
         OnOptionChanged?.Invoke(_selectedOption);
     }
 
+    public void SetSilently(int index)
+    {
+        if (index < 0 || index >= Math.Max(_options.Count, _colors.Count))
+        {
+            Debug.Log("Index is out of range of options or colors.");
+            return;
+        }
+
+        _selectedOption = index;
+        UpdateText();
+        UpdateColor();
+    }
+
     public (int, string) GetSelectedOption()
     {
         return (_selectedOption, _options[_selectedOption]);

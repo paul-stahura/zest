@@ -247,6 +247,7 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
     #endregion
 
     #region Symmetry Target
+
     private Vector2 GetSymmetryTarget()
     {
         if(_symmetryTargetDropdown == null)
