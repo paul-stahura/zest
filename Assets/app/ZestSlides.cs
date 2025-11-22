@@ -9,10 +9,13 @@ public enum SlideTitles
     Zeta,
     Symmetry,
     Index,
+    Frame,
     YinYang,
     Remainder,
+    SigmaNotHalf,
     Legs,
     Equal,
+    RakZero,
 
     // Candy
     Galaxy,
@@ -41,10 +44,13 @@ public class ZestSlides : MonoBehaviour
             GameObject.Find("ZetaSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("SymSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("IndexSlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("FrameSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("YinYangSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("RemainderSlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("SigmaNotHalfSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("LegsSlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("EqualSlide").GetComponent<MultiOptionToggle>(),
+            GameObject.Find("RakZeroSlide").GetComponent<MultiOptionToggle>(),
 
             GameObject.Find("GalaxySlide").GetComponent<MultiOptionToggle>(),
             GameObject.Find("TaffySlide").GetComponent<MultiOptionToggle>(),

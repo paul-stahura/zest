@@ -696,7 +696,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                     break;
 
                 case 4: // Equal
-                    Draw.Line(Vector2.zero, l2, color: Color.cyan);
+                    // Draw.Line(Vector2.zero, l2, color: Color.cyan);
                     Draw.UseDashes = true;
                     Draw.Ring(l1, l1.magnitude, Color.green);
                     Draw.Ring(l1, (l2 - l1).magnitude, Color.red);

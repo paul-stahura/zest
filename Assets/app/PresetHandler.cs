@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -35,6 +36,7 @@ public class PresetHandler : MonoBehaviour
     private Toggle _spiralForwardReflectedToggle;
     private Toggle _spiralInverseToggle;
     private Toggle _spiralInverseReflectedToggle;
+    private Toggle _spiralZakToggle;
     private TMP_Dropdown _linksToDrawDropdown;
     private Toggle _extendSpiralToggle;
     private MultiOptionToggle _colorLinksToggle;
@@ -47,6 +49,9 @@ public class PresetHandler : MonoBehaviour
     private MultiOptionToggle _rpsSymToggle;
     private MultiOptionToggle _rak1Toggle;
     private MultiOptionToggle _rak2Toggle;
+    private MultiOptionToggle _rakForwardLegsToggle;
+    private MultiOptionToggle _rakSymToggle;
+
     private MultiOptionToggle _r1Toggle;
     private MultiOptionToggle _r2Toggle;
 
@@ -67,6 +72,7 @@ public class PresetHandler : MonoBehaviour
     [Header("critical strip")]
     private DropdownEx _criticalStripDropdown;
     private CriticalStripRenderer _criticalStripRenderer;
+    private CriticalStripWindow _criticalStripWindow;
 
     private enum FolderOrder
     {
@@ -82,6 +88,7 @@ public class PresetHandler : MonoBehaviour
 
     [SerializeField] private List<Accordion> _folders;
     [SerializeField] private List<Button> _clearButtons;
+    private Coroutine _animateCoroutine;
 
     void Awake()
     {
@@ -105,6 +112,7 @@ public class PresetHandler : MonoBehaviour
         _spiralForwardReflectedToggle = GameObject.Find("forwardReflectedToggle").GetComponent<Toggle>();
         _spiralInverseToggle = GameObject.Find("InverseSpiralToggle").GetComponent<Toggle>();
         _spiralInverseReflectedToggle = GameObject.Find("InverseReflectedToggle").GetComponent<Toggle>();
+        _spiralZakToggle = GameObject.Find("ZakLinksToggle").GetComponent<Toggle>();
         _linksToDrawDropdown = GameObject.Find("LinksToDrawDropdown").GetComponent<TMP_Dropdown>();
         _extendSpiralToggle = GameObject.Find("ToggleExtendSpiral").GetComponent<Toggle>();
         _colorLinksToggle = GameObject.Find("ColorBisectorOptionsToggle").GetComponent<MultiOptionToggle>();
@@ -118,6 +126,9 @@ public class PresetHandler : MonoBehaviour
 
         _rak1Toggle = GameObject.Find("Rak_R1_Toggle").GetComponent<MultiOptionToggle>();
         _rak2Toggle = GameObject.Find("Rak_R2_Toggle").GetComponent<MultiOptionToggle>();
+        _rakForwardLegsToggle = GameObject.Find("Rak_Legs_Toggle").GetComponent<MultiOptionToggle>();
+        _rakSymToggle = GameObject.Find("Rak_Sym_Toggle").GetComponent<MultiOptionToggle>();
+
         _r1Toggle = GameObject.Find("R/2_R1_Toggle").GetComponent<MultiOptionToggle>();
         _r2Toggle = GameObject.Find("R/2_R2_Toggle").GetComponent<MultiOptionToggle>();
 
@@ -135,6 +146,7 @@ public class PresetHandler : MonoBehaviour
 
         _criticalStripDropdown = GameObject.Find("DropdownEx").GetComponent<DropdownEx>();
         _criticalStripRenderer = GameObject.Find("Critical Strip Renderer").GetComponent<CriticalStripRenderer>();
+        _criticalStripWindow = GameObject.Find("Critical Strip Window").GetComponent<CriticalStripWindow>();
 
         FindFolders();
         FindClearButtons();
@@ -215,17 +227,26 @@ public class PresetHandler : MonoBehaviour
             case SlideTitles.Index:
                 HandleIndexPreset(optionIndex);
                 break;
+            case SlideTitles.Frame:
+                HandleFramePreset(optionIndex);
+                break;
             case SlideTitles.YinYang:
                 HandleYinYangPreset(optionIndex);
                 break;
             case SlideTitles.Remainder:
                 HandleRemainderPreset(optionIndex);
                 break;
+            case SlideTitles.SigmaNotHalf:
+                HandleSigmaNotHalfPreset(optionIndex);
+                break;
             case SlideTitles.Legs:
                 HandleLegsPreset(optionIndex);
                 break;
             case SlideTitles.Equal:
                 HandleEqualPreset(optionIndex);
+                break;
+            case SlideTitles.RakZero:
+                HandleZakZeroPreset(optionIndex);
                 break;
 
             // Candy Presets
@@ -267,7 +288,7 @@ public class PresetHandler : MonoBehaviour
                 _animationSpeedSlider.value = 1.5f;
 
                 _zakTargetToggle.isOn = true;
-                _zakTargetPath.SetSelectedOption(2);
+                _zakTargetPath.SetSelectedOption(3);
                 _originTargetToggle.isOn = true;
                 
                 // show zeros
@@ -289,9 +310,6 @@ public class PresetHandler : MonoBehaviour
 
                 SetInput(3.07, 0.5f);
 
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 1.0f;
-
                 _zakTargetToggle.isOn = true;
                 _zakTargetPath.SetSelectedOption(2);
                 _originTargetToggle.isOn = true;
@@ -300,7 +318,12 @@ public class PresetHandler : MonoBehaviour
                 break;
             
             case 3:
-                // good view of links
+                // extend
+                _extendSpiralToggle.isOn = true;
+                break;
+            
+            case 4:
+                // big
                 CollapseAllFolders();
                 ClearAll();
                 ResetInput();
@@ -312,17 +335,12 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Spiral].ExstendInstant();
 
-                SetInput(3.65, 0.5f);
+                SetInput(168.65368, 0.5f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
 
                 _spiralForwardToggle.isOn = true;
-                break;
-            
-            case 4:
-                // extend spiral
-                _extendSpiralToggle.isOn = true;
                 break;
         }
     }
@@ -346,7 +364,7 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Spiral].ExstendInstant();
 
-                SetInput(3.65, 0.5f);
+                SetInput(39.655, 0.5f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
@@ -355,11 +373,15 @@ public class PresetHandler : MonoBehaviour
                 break;
             
             case 2:
-                _spiralInverseToggle.isOn = true;
+                // animate till 39.662
+                HandleAnimateToIndex(39.6615);
                 break;
             
             case 3:
-                _gridForwardToInverseToggle.isOn = true;
+                _rpsSymToggle.SetSelectedOption(3);
+                _rpsForwardLegsToggle.SetSelectedOption(2);
+
+                _midTargetToggle.isOn = true;
                 break;
             
             case 4:
@@ -367,26 +389,35 @@ public class PresetHandler : MonoBehaviour
                 break;
             
             case 5:
-                _spiralInverseToggle.isOn = false;
-                _gridForwardToInverseToggle.isOn = false;
                 _gridForwardToInverseReflectedToggle.isOn = true;
-                break;
-            case 6:
-                _linksToDrawDropdown.value = 1;
-                break;
-            case 7:
-                _cameraPositionTracking.SetZoomLevel(2.0f);
-                _cameraTargetDropdown.value = 2;
-                _cameraPositionTracking.ResetCamOffset();
-                break;
-            
-            case 8:
-                _r1Toggle.SetSelectedOption(1);
-                _r2Toggle.SetSelectedOption(1);
                 break;
         }
     }
+
+    private void HandleAnimateToIndex(double targetIndex)
+    {
+        if (_animateCoroutine != null)
+        {
+            StopCoroutine(_animateCoroutine);
+        }
+        _animateCoroutine = StartCoroutine(AnimateCoroutine(targetIndex));
+    }
+
+    private IEnumerator AnimateCoroutine(double targetIndex)
+    {
+        _autoAnimateToggle.isOn = true;
+        _animationSpeedSlider.value = 1.2f;
+
+        while (_autoAnimateToggle.isOn && _app.Index < targetIndex)
+        {
+            yield return null; // Wait for the next frame
+        }
+
+        _app.Index = targetIndex; // Ensure the target index is exactly set
+        _autoAnimateToggle.isOn = false;
+    }
     
+    #region Preset Handlers
     private void HandleIndexPreset(int optionIndex)
     {
         switch (optionIndex)
@@ -406,7 +437,7 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Spiral].ExstendInstant();
 
-                SetInput(3.65, 0.5f);
+                SetInput(6.18, 0.5f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
@@ -424,29 +455,53 @@ public class PresetHandler : MonoBehaviour
                 _colorLinksToggle.SetSelectedOption(1);
                 break;
             case 4:
-                // draw up to sum
+                // draw up to bisector
+                _linksToDrawDropdown.value = 3;
+                break;
+        }
+    }
+
+    private void HandleFramePreset(int optionIndex)
+    {
+        switch (optionIndex)
+        {
+            // skip case 0
+
+            case 1:
+                // forward and inverse
+                CollapseAllFolders();
+                ClearAll();
+                ResetInput();
+
+                _cameraPositionTracking.SetZoomLevel(4.0f);
+                _cameraTargetDropdown.value = 3;
+                _cameraPositionTracking.ResetCamOffset();
+
+                _folders[(int)FolderOrder.ZetaInput].ExstendInstant();
+                _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
+                _folders[(int)FolderOrder.Spiral].ExstendInstant();
+
+                SetInput(6.18, 0.5f);
+
+                _zakTargetToggle.isOn = true;
+                _originTargetToggle.isOn = true;
+
+                _spiralForwardToggle.isOn = true;
+                _spiralInverseReflectedToggle.isOn = true;
+
+                // color links by bisector
+                _colorLinksToggle.SetSelectedOption(1);
+
+                // draw up to bisector
                 _linksToDrawDropdown.value = 3;
                 break;
             
-            case 5:
-                _cameraTargetDropdown.value = 2;
-                break;
-            case 6:
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 2.0f;
-                break;
-            case 7:
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 4.0f;
-
+            case 2:
+                // just bisector
                 _linksToDrawDropdown.value = 4;
 
                 _zakTargetToggle.isOn = false;
                 _originTargetToggle.isOn = false;
-
-                _cameraPositionTracking.SetZoomLevel(2.0f);
-                _cameraTargetDropdown.value = 3;
-                _cameraPositionTracking.ResetCamOffset();
                 break;
         }
     }
@@ -472,34 +527,37 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.YinYang].ExstendInstant();
 
                 // set input
-                SetInput(4.0, 0.5f);
-
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 3f;
+                SetInput(4.12, 0.5f);
 
                 // set spiral
                 _linksToDrawDropdown.value = 4;
                 _spiralForwardToggle.isOn = true;
                 _spiralInverseReflectedToggle.isOn = true;
-                break;
-            
-            case 2:
+
                 // set yin yang
                 _YinYangToggle.isOn = true;
                 break;
             
-            case 3:
-                _app.Real = 0.5f;
-                
+            case 2:
+                // remainders
                 _folders[(int)FolderOrder.Remainders].ExstendInstant();
                 // dist from origin
                 _rpsR1Toggle.SetSelectedOption(1);
                 _rpsR2Toggle.SetSelectedOption(1);
                 break;
-            case 4:
+            case 3:
                 // R
                 _r1Toggle.SetSelectedOption(1);
                 _r2Toggle.SetSelectedOption(1);
+                break;
+            case 4:
+                // links back
+                _linksToDrawDropdown.value = 1;
+
+                _zakTargetToggle.isOn = true;
+                _originTargetToggle.isOn = true;
+
+                SetInput(6.18, 0.5f);
                 break;
         }
     }
@@ -523,7 +581,7 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Remainders].ExstendInstant();
 
-                SetInput(3.65, 0.5f);
+                SetInput(6.18, 0.5f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
@@ -561,10 +619,45 @@ public class PresetHandler : MonoBehaviour
                 _rak1Toggle.SetSelectedOption(1);
                 _rak2Toggle.SetSelectedOption(1);
                 break;
+        }
+    }
+
+    private void HandleSigmaNotHalfPreset(int optionIndex)
+    {
+        switch (optionIndex)
+        {
+            // skip case 0
+
+            case 1:
+                CollapseAllFolders();
+                ClearAll();
+                ResetInput();
+
+                _cameraPositionTracking.SetZoomLevel(4.0f);
+                _cameraTargetDropdown.value = 0;
+                _cameraPositionTracking.ResetCamOffset();
+
+                _folders[(int)FolderOrder.ZetaInput].ExstendInstant();
+                _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
+                _folders[(int)FolderOrder.Remainders].ExstendInstant();
+
+                SetInput(6.18, 0.72f);
+                _linksToDrawDropdown.value = 3;
+
+                _zakTargetToggle.isOn = true;
+                _originTargetToggle.isOn = true;
+
+                _spiralForwardToggle.isOn = true;
+                _spiralInverseReflectedToggle.isOn = true;
+
+                _rpsR1Toggle.SetSelectedOption(1);
+                _rpsR2Toggle.SetSelectedOption(1);
+                break;
             
-            case 6:
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 2.0f;
+            case 2:
+                _rpsSymToggle.SetSelectedOption(3);
+                _rpsForwardLegsToggle.SetSelectedOption(2);
+                _midTargetToggle.isOn = true;
                 break;
         }
     }
@@ -588,43 +681,25 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Remainders].ExstendInstant();
 
-                SetInput(6.18, 0.5f);
+                SetInput(6.18, 0.72f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
 
-                _spiralForwardToggle.isOn = true;
-                _spiralInverseReflectedToggle.isOn = true;
-
-                _rpsR1Toggle.SetSelectedOption(1);
-                _rpsR2Toggle.SetSelectedOption(1);
+                _rpsSymToggle.SetSelectedOption(3);
+                _rpsForwardLegsToggle.SetSelectedOption(2);
+                _midTargetToggle.isOn = true;
                 break;
             
             case 2:
-                _spiralInverseReflectedToggle.isOn = false;
-                _spiralInverseToggle.isOn = true;
-
-                _rpsR2Toggle.SetSelectedOption(2);
+                _cameraTargetDropdown.value = 2;
+                // zeta target = forward bisector
+                GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>().value = 8;
                 break;
-            
+
             case 3:
-                // cut links
-                _linksToDrawDropdown.value = 1;
-                break;
-
-            case 4:
-                _rpsForwardLegsToggle.SetSelectedOption(1);
-                _rpsInverseLegsToggle.SetSelectedOption(1);
-                break;
-            
-            case 5:
                 _midTargetToggle.isOn = true;
                 _rpsSymToggle.SetSelectedOption(3);
-                break;
-            
-            case 6:
-                _rpsForwardLegsToggle.SetSelectedOption(2);
-                _rpsInverseLegsToggle.SetSelectedOption(2);
                 break;
         }
     }
@@ -648,43 +723,91 @@ public class PresetHandler : MonoBehaviour
                 _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
                 _folders[(int)FolderOrder.Remainders].ExstendInstant();
 
+                SetInput(6.18, 0.72f);
+
+                _zakTargetToggle.isOn = true;
+                _originTargetToggle.isOn = true;
+
+                _rpsForwardLegsToggle.SetSelectedOption(2);
+                _rpsSymToggle.SetSelectedOption(4);
+                _midTargetToggle.isOn = true;
+
+                _cameraTargetDropdown.value = 2;
+                // zeta target = forward bisector
+                GameObject.Find("SymmetryTargetDropdown").GetComponent<TMP_Dropdown>().value = 8;
+                
+                // Zps equal legs + zeros
+                _criticalStripDropdown.value = 129;
+                break;
+
+            case 2:
+                // equal legs point
+                SetInput(6.2105, 0.95f);
+
+                break;
+
+            case 3:
+                // equal angle point
+                SetInput(6.21747, 0.766075f);
+                break;
+        }
+    }
+
+    private void HandleZakZeroPreset(int optionIndex)
+    {
+        switch (optionIndex)
+        {
+            // skip case 0
+
+            case 1:
+                CollapseAllFolders();
+                ClearAll();
+                ResetInput();
+
+                _cameraPositionTracking.SetZoomLevel(4.0f);
+                _cameraTargetDropdown.value = 0;
+                _cameraPositionTracking.ResetCamOffset();
+
+                _folders[(int)FolderOrder.ZetaInput].ExstendInstant();
+                _folders[(int)FolderOrder.CameraTracking].ExstendInstant();
+                _folders[(int)FolderOrder.Remainders].ExstendInstant();
+
                 SetInput(3.65, 0.5f);
 
                 _zakTargetToggle.isOn = true;
                 _originTargetToggle.isOn = true;
 
                 _spiralForwardToggle.isOn = true;
-                _spiralInverseReflectedToggle.isOn = true;
-
                 _linksToDrawDropdown.value = 1;
 
-                _rpsR1Toggle.SetSelectedOption(1);
-                _rpsR2Toggle.SetSelectedOption(1);
-                break;
+                _rak1Toggle.SetSelectedOption(1);
 
-            case 2:
-                _rpsForwardLegsToggle.SetSelectedOption(2);
-                break;
-        
-            case 3:
-                // Zps equal legs + zeros
-                _criticalStripDropdown.value = 129;
+                _criticalStripWindow.realRangeToggle.SetSelectedOption(1);
 
-                _rpsSymToggle.SetSelectedOption(4);
+                // zeros
+                _criticalStripDropdown.value = 4;
                 break;
             
-            case 4:
-                // turn off spiral
-                _spiralForwardToggle.isOn = false;
-                _spiralInverseReflectedToggle.isOn = false;
+            case 2:
+                _criticalStripDropdown.value = 12;
+                break;
 
-                _rpsR1Toggle.SetSelectedOption(0);
-                _rpsR2Toggle.SetSelectedOption(0);
+            case 3:
+                _rakForwardLegsToggle.SetSelectedOption(2);
+                _rakSymToggle.SetSelectedOption(3);
+                _midTargetToggle.isOn = true;
+
+                // show angles
+                _criticalStripDropdown.value = 108 - 12;
+
+                // load points after to stay on top
+                _criticalStripDropdown.value = 108;
                 break;
         }
     }
+    #endregion
 
-
+    #region Candy Presets
     private void HandleGalaxyPreset(int optionIndex)
     {
         switch (optionIndex)
@@ -715,6 +838,21 @@ public class PresetHandler : MonoBehaviour
             
             case 2:
                 _cameraPositionTracking.SetZoomLevel(0.00075f);
+                break;
+
+            case 3:
+                _spiralInverseToggle.isOn = true;
+                break;
+            
+            case 4:
+                _spiralInverseToggle.isOn = false;
+                _spiralInverseReflectedToggle.isOn = true;
+
+                _cameraPositionTracking.SetZoomLevel(5f);
+                _cameraTargetDropdown.value = 1;
+                _cameraPositionTracking.ResetCamOffset();
+
+                _spiralZakToggle.isOn = true;
                 break;
         }
     }
@@ -765,6 +903,17 @@ public class PresetHandler : MonoBehaviour
                 break;
             
             case 2:
+                _app.Index = 76;
+                _app.Real = 0.323692f;
+                break;
+            
+            case 3:
+                _cameraPositionTracking.SetZoomLevel(42f);
+                _app.Index = 97.249f;
+                _app.Real = 0.2199f;
+                break;
+            
+            case 4:
                 _zakTargetToggle.isOn = false;
                 _originTargetToggle.isOn = false;
 
@@ -820,5 +969,5 @@ public class PresetHandler : MonoBehaviour
                 break;
         }
     }
-    
+    #endregion
 }

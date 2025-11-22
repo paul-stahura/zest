@@ -13,7 +13,7 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private float animationDuration = 0.3f;
     [SerializeField] private RectTransform windowContent;
     [SerializeField] private Button collapseTab;
-    [SerializeField] private MultiOptionToggle _realRangeToggle;
+    [SerializeField] public MultiOptionToggle realRangeToggle;
 
     [Header("References")]
     [SerializeField] private CriticalStripRenderer criticalStripRenderer;
@@ -26,7 +26,6 @@ public class CriticalStripWindow : MonoBehaviour
     private float animationTime;
 
     private List<int> _sigmaRangeOptions = new List<int> { 1, 5, 10 };
-    private int _sigmaRangeIndex = 0;
     public static int sigmaWindowRange = 1;
     public static Action OnSigmaRangeChanged;
     
@@ -41,8 +40,8 @@ public class CriticalStripWindow : MonoBehaviour
         if (collapseTab != null)
             collapseTab.onClick.AddListener(ToggleExpand);
 
-        _realRangeToggle = GameObject.Find("SigmaRangeToggle").GetComponent<MultiOptionToggle>();
-        _realRangeToggle.OnOptionChanged += (option) => ToggleSigmaRange();
+        realRangeToggle = GameObject.Find("SigmaRangeToggle").GetComponent<MultiOptionToggle>();
+        realRangeToggle.OnOptionChanged += (option) => ToggleSigmaRange(option);
             
         // Initialize position
         currentX = isExpanded ? 0 : -width;
@@ -75,7 +74,7 @@ public class CriticalStripWindow : MonoBehaviour
         if (isExpanded == expand) return;
 
         isExpanded = expand;
-        targetX = expand ? 0 : (_sigmaRangeIndex > 0 ? -extendedWidth : -width);
+        targetX = expand ? 0 : (realRangeToggle.GetSelectedOption().Item1 > 0 ? -extendedWidth : -width);
         animationTime = 0f; // Reset animation time when starting new animation
 
         // Rotate the collapse tab if it exists
@@ -90,16 +89,15 @@ public class CriticalStripWindow : MonoBehaviour
         }
 
         // Hide the rangeToggle when collapsed
-        if (_realRangeToggle != null)
+        if (realRangeToggle != null)
         {
-            _realRangeToggle.gameObject.SetActive(expand);
+            realRangeToggle.gameObject.SetActive(expand);
         }
     }
     
-    public void ToggleSigmaRange()
+    public void ToggleSigmaRange(int option)
     {
-        _sigmaRangeIndex = (_sigmaRangeIndex + 1) % _sigmaRangeOptions.Count;
-        sigmaWindowRange = _sigmaRangeOptions[_sigmaRangeIndex];
+        sigmaWindowRange = _sigmaRangeOptions[realRangeToggle.GetSelectedOption().Item1];
         SetSigmaRange(sigmaWindowRange);
         OnSigmaRangeChanged?.Invoke();
 
