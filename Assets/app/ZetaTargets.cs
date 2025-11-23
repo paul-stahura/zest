@@ -465,7 +465,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         {
             float alpha = Mathf.Lerp(1f, 0f, elapsedTime / duration);
             _camTargetColor.a = alpha;
-            elapsedTime += Time.deltaTime;
+            elapsedTime += Time.fixedDeltaTime;
             yield return null;
         }
     }

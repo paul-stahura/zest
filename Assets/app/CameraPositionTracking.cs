@@ -154,6 +154,11 @@ public class CameraPositionTracking : ImmediateModeShapeDrawer
         OnCameraTrackingChanged?.Invoke();
     }
 
+    public void SetCameraOffset(Vector2 offset)
+    {
+        _cameraTrackingOffset = offset;
+    }
+
     private Vector2 GetTrackingTarget()
     {
         Vector2 target = new Vector2(0, 0);

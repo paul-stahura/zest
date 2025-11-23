@@ -19,6 +19,7 @@ public class CriticalStripWindow : MonoBehaviour
     [SerializeField] private CriticalStripRenderer criticalStripRenderer;
     
     private RectTransform rectTransform;
+
     private static bool isExpanded = true;
     private float targetX;
     private float currentX;
@@ -61,6 +62,21 @@ public class CriticalStripWindow : MonoBehaviour
 
             currentX = Mathf.Lerp(currentX, targetX, t);
             UpdatePosition(currentX);
+        }
+
+        if (Input.GetKeyUp("space"))
+        {
+            if (!DescriptionManager.InEditMode)
+            {
+                if(rectTransform.position.x < -1)
+                {
+                    rectTransform.anchoredPosition = new Vector3(0, 0, 0); // Move back on-screen
+                }
+                else
+                {
+                    rectTransform.anchoredPosition = new Vector3(-1000, 0, 0); // Move off-screen temporarily
+                }
+            }
         }
     }
 
