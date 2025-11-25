@@ -115,7 +115,7 @@ public sealed class ZetaSolverPointData
 
     #region Editor functions
 
-#if UNITY_EDITOR
+// #if UNITY_EDITOR
 
     static uint EncodeColor(Color c)
     {
@@ -217,7 +217,7 @@ public sealed class ZetaSolverPointData
         buffer.SetData(_pointData);
     }
 
-#endif
+// #endif
 
     #endregion
 }

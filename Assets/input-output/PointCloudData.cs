@@ -65,7 +65,7 @@ public sealed class PointCloudData
 
     #region Editor functions
 
-#if UNITY_EDITOR
+// #if UNITY_EDITOR
 
     static uint EncodeColor(Color c)
     {
@@ -117,7 +117,7 @@ public sealed class PointCloudData
         buffer.SetData(_pointData);
     }
 
-#endif
+// #endif
 
     #endregion
 }

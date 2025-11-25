@@ -5,9 +5,14 @@ public class SceneHandler : MonoBehaviour
 {
     void Update() 
     {
-        if (Input.GetKeyDown(KeyCode.R))
+        // if (Input.GetKeyDown(KeyCode.R))
+        // {
+        //     SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }    
+            Application.Quit();
+        }
     }
 }

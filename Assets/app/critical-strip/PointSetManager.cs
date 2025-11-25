@@ -166,19 +166,20 @@ public class PointSetManager : MonoBehaviour
     private void RefreshPointSetList()
     {
         if (pointSetSelector == null) return;
-        var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
+        var files = Resources.LoadAll<TextAsset>("CriticalStripPoints");
+        // var files = Directory.GetFiles(pointsDirectoryPath, "*.csv");
         optionIndexToName.Clear();
         var options = new List<DropdownEx.OptionData>();
         uint index = 0;
         foreach (var filePath in files)
         {
-            string[] allLines = File.ReadAllLines(filePath);
+            string[] allLines = filePath.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
             var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
-            string displayName = metadata.Name ?? Path.GetFileNameWithoutExtension(filePath);
+            string displayName = metadata.Name ?? filePath.name;
             Color pointColor = metadata.Color;
             options.Add(new DropdownEx.OptionData(displayName, pointColor));
             // Debug.Log($"Dropdown option: {displayName}, color: {pointColor} (RGBA: {pointColor.r}, {pointColor.g}, {pointColor.b}, {pointColor.a})");
-            optionIndexToName[index] = Path.GetFileNameWithoutExtension(filePath);
+            optionIndexToName[index] = filePath.name;
             index++;
         }
         pointSetSelector.ClearOptions();
@@ -266,28 +267,30 @@ public class PointSetManager : MonoBehaviour
     
     private void LoadPointSet(string setName)
     {
-        string filePath = Path.Combine(pointsDirectoryPath, $"{setName}.csv");
+        // string filePath = Path.Combine(pointsDirectoryPath, $"{setName}.csv");
+        var file = Resources.Load<TextAsset>($"CriticalStripPoints/{setName}");
         
-        if (File.Exists(filePath))
+        // if (File.Exists(filePath))
+        if (file != null)
         {
-            var allLines = File.ReadAllLines(filePath);
+            var allLines = file.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);;
             if (allLines.Length < 1)
             {
-                Debug.LogWarning($"[PointSetManager] Empty file: {filePath}");
+                Debug.LogWarning($"[PointSetManager] Empty file: {file.name}");
                 return;
             }
             var metadata = ParsePointSetMetadata(allLines, defaultPointColor);
             
-            // Check if this is an old-style file that needs conversion
-            bool needsConversion = ShouldConvertToEnhancedFormat(allLines);
-            if (needsConversion)
-            {
-                // Convert and update the file on disk
-                var updatedLines = ConvertToEnhancedFormat(allLines, metadata);
-                File.WriteAllLines(filePath, updatedLines);
-                Debug.Log($"[PointSetManager] Converted {filePath} to enhanced header format");
-                allLines = updatedLines; // Use the updated lines for loading
-            }
+            // // Check if this is an old-style file that needs conversion
+            // bool needsConversion = ShouldConvertToEnhancedFormat(allLines);
+            // if (needsConversion)
+            // {
+            //     // Convert and update the file on disk
+            //     var updatedLines = ConvertToEnhancedFormat(allLines, metadata);
+            //     File.WriteAllLines(filePath, updatedLines);
+            //     Debug.Log($"[PointSetManager] Converted {filePath} to enhanced header format");
+            //     allLines = updatedLines; // Use the updated lines for loading
+            // }
             
             string pointSetName = metadata.Name ?? setName;
             Color pointColor = metadata.Color;
@@ -474,7 +477,7 @@ public class PointSetManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[PointSetManager] Point set file not found at: {filePath}");
+            Debug.LogWarning($"[PointSetManager] Point set file not found at: {file.name}");
         }
     }
     
