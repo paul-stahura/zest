@@ -45,13 +45,15 @@ public class ZpsGeneral : MonoBehaviour
     public static Vector ForwardBisector(double real, double index, bool useR2 = false)
     {
         return RemainderForwardBisector(real, index, useR2);
-        // return YinYangForwardBisector(real, index, imag, chi);
+        // var imag = Zeta.IndexToImag(index);
+        // return YinYangForwardBisector(real, index, imag, SpiralCalculator.ChiBrian(new Complex(real, imag)));
     }
 
     public static Vector InverseBisector(double real, double index, bool useR2 = false)
     {
         return RemainderInverseBisector(real, index, useR2);
-        // return YinYangInverseBisector(real, index, imag, chiFunc);
+        // var imag = Zeta.IndexToImag(index);
+        // return YinYangInverseBisector(real, index, imag, SpiralCalculator.ChiBrian);
     }
 
     public static Vector GetMidPoint(double real, double index)
