@@ -1,13 +1,16 @@
 # Index and Imaginary Input
-Index is a new input frame of reference based off insights gained from the “bisector link”.
-\\ Index to imaginary = $\frac{\pi (2n + 1)}{\log(n + 1) - \log(n)}$
+Index is a change of variable.  It converts an index (which is a real number) to the imaginary component of the complex number input to the zeta function.
+\\ t = I\left(T\right) = \frac{\pi\cdot\left(2T+1\right)}{\log\left(\frac{1}{T}+1\right)}
 \\ This conversion is exact.
 
 # Zeta Input
 This section controls inputs for the various equations throughout the app.
 
 # Animate
-Animation slider that dynamically adjusts the index.
+Animation slider that contunually adjusts the index by either increaseing it or decreasing it.  
+\\ The speed box increase the amount it is increased or decreased by.  
+\\ Clicking the speed box multiple times will cycle through different speed increments
+\\ Check the hold box to coninute to change the index without holding the slider
 
 # Animation Hold
 Click this toggle for the Animation slider to maintain its position after the mouse is released.
@@ -28,7 +31,7 @@ Focuses on visualizing the inherent symmetry of the Zeta function
 Select elements to follow
 
 # Yin Yang
-Tear Drop Shape Calculations
+Teardrop shaped curves where \Sigma_1 and \Sigma_2 bisector links intersect
 
 # Zeta Targets
 Zeta formula outputs and points of Interest.
@@ -76,10 +79,13 @@ Connects Forward Reflected Sprial to Inverse Reflected Sprial
 Gram points are specific values where the Riemann-Siegel formula changes sign. Gram's Law (which is not always true) states that the zeta function’s zeros alternate with the Gram points.
 
 # Index Fine Control
-Index value broken up into its integer and fractional parts for adaptable control.
+Index value broken up into its integer (corse control) and fractional parts (fine control)
+The "fine tune" slider changes the range on the index fraction control, and the reset button returns the fine tune control to its default state.
 
 # \sigma Fine Control
 \sigma value and fine tune controls.
+\ the reset button resets \sigma to \frac{1}{2}
+\\ \sigma is the real part of the complex number input to the zeta function
 \\ Hold \bf{Left CTRL} \rm{or} \bf{Command} \rm{to maintain zoom to bisector link ratio}
 
 # Infinity Bisector Link
@@ -142,15 +148,15 @@ A calculation derived from the behavior of the “Reverse Spiral” bisector lin
 # Yin Yang (Tear Drop)
 A calculation derived from the behavior of the “Reverse Spiral” bisector link when \sigma = \frac{1}{2}.
 \\ Using the Derivative of Yin and Yang along with the length of the chi bisector link for when \sigma \not= \frac{1}{2}.
+\\
+Y_{in1}\left(\sigma,T\right)=R\left(\sigma,T\right)\cdot\operatorname{floor}\left(T+1\right)^{\sigma+iI\left(T\right)}\\
+Y_{ang1}\left(\sigma,\ T\right)=Y_{in1}\left(\sigma,T\right)-\ \chi\left(\sigma\ +\ iI\left(T\right)\right)\operatorname{ceil}\left(T\right)^{-1+2\left(\sigma+iI\left(T\right)\right)}
 
 # Links To Draw
 This setting controls the visibility of links within the spirals.
 
 # MidPoint Target
 Zeta / 2
-
-# Camera Tracking Target
-Select Cam Tracking category. Afterwards, elements will be automatically tracked by drawn priority. You can change what exact element is being tracked by exploring additional category settings.
 
 # Title
 Tell me more
@@ -326,6 +332,7 @@ Zak Remainder first part
 \\ Drawn At
 \\ 1: \Sigma_1
 \\ 2: \Sigma_2 + R_{ak2}
+\\ \Sigma_1 + R_{ak2} is Siegel's f(s) function from his 1932 paper
 
 # R/2 Forward Legs
 Green = \Sigma_{1} + R/2
@@ -376,9 +383,9 @@ Draws the path of R_{ak} as \sigma changes
 
 # Remainder Symmetry
 Options
-\\1: Cut (Draws a line from \Sigma_1 + R_1 to \Sigma_1 + R_2)
-\\2: Bisect (Angle bisector between R_1 and R_2)
-\\3: Zeta/2 (Draws a line from \Sigma_1 + R_1 to \Sigma_2 + R_2, always passing through Zeta/2)
+\\1: Cut (line through \Sigma_1 + R_1 to \Sigma_1 + R_2)
+\\2: Bisect (line bisects angle between R_1 and R_2)
+\\3: Zeta/2 (line from \Sigma_1 + R_1 to \Sigma_2 + R_2, always passing through Zeta/2)
 \\4: Equal (red and green circles for representation of leg lengths)
 
 # Z_{rs} Index Path
@@ -419,4 +426,59 @@ Path of \Sigma_1 as Index changes
 
 # Mid Index Path
 Path of Zeta/2 as Index changes
+
+# Manual Entries Panel
+mouse over an object to display information about that object in this panel.  To edit the entries type "M" (shift M) while hovering over the object, then enter your text (limited latex is accepted), and click save.
+
+# show bands
+turning this on will show the bands in the critical strip where the legs for R_{ps} are equal length. The bands are colored slightly lighter than the background.
+
+# Camera Tracking Refocus
+Moves whatever the camera is attached to to the middle of the screen.
+
+# f(s) zeros
+Demos the zeros of Siegel's f(s) function which is \Sigma_1 + R_{1ak}
+\\The zeros are the white dots in the critical strip and the red dots are when f(s) = \zeta
+
+# Presets
+Explore what the app has to offer
+
+# Symmetry Presets
+observed symmetry between links and spirals
+
+# Index Preset
+The link where the forward and inverse reflected spiral first intersect
+
+# Frame Preset
+New perspective from the bisector link
+
+# Yin Yang Preset
+Formula for new remainder
+
+# Remainder Preset
+Vew of all remainders
+
+# /sigma not 1/2 Preset
+still works
+
+# \sigma not 1/2 Preset
+still works
+
+# Zps Legs preset
+view of both sums and a perspective from R_{1ps}
+
+# Equal Legs Preset
+View of equal leg properties within the critical strip.
+\\ Orange: equal length (possible zero)
+\\ Green: leg angle equals \pi
+\\ Purple: leg angle equals zero
+
+# Galaxy Candy Preset
+Press Space to Hide all windows
+
+# Taffy Candy Preset
+Press Space to Hide all windows
+
+# Saver Candy Preset
+Press Space to Hide all windows
 

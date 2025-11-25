@@ -375,9 +375,7 @@ public class DescriptionManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(key))
         {
-            keyText.text = "";
-            descriptionText.text = "";
-            return;
+            key = "Manual Entries";
         }
 
         _descriptions.TryGetValue(key, out string description);
@@ -400,6 +398,13 @@ public class DescriptionManager : MonoBehaviour
         // check if the new key contains #, and remove all instances
         newKey = newKey.Replace("#", "").Trim();
         keyInput.text = newKey; // update input field
+
+        // check if the key is Title
+        if (newKey == "Title")
+        {
+            DisplayValidationMessage("Key cannot be 'Title'. Revert?", true);
+            return;
+        }
 
         // check if the key has changed
         if (newKey != _currentUI.key)
@@ -467,7 +472,7 @@ public class DescriptionManager : MonoBehaviour
 
         string newKey = keyInput.text.Trim();
         string newDescription = descriptionInput.text.Trim();
-
+        
         // check if the key has changed
         if (newKey != _currentUI.key)
         {
@@ -481,6 +486,12 @@ public class DescriptionManager : MonoBehaviour
                     newDescription = _descriptions.ContainsKey(newKey) ? _descriptions[newKey] : defaultDescription;
                 }
                 // else overwrite existing description
+
+                // reset if Title
+                if (newKey == "Title")
+                {
+                    newDescription = defaultDescription;
+                }
             }
         }
 

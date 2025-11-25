@@ -11,7 +11,7 @@
 18 # Yin Yang
 100 # Zeta Targets
 80 # Spiral
-82 # Camera Tracking Target
+82 # Camera Tracking Refocus
 4 # Open and Close Critical Strip Window
 78 # Color Middle Links
 1 # Critical Strip Coordinate Space Toggle
@@ -126,3 +126,18 @@
 127 # Z_{ak} Index Path
 125 # \Sigma_1 Index Path
 123 # Mid Index Path
+136 # Manual Entries Panel
+0 # show bands
+171 # f(s) zeros
+172 # Presets
+157 # Symmetry Presets
+151 # Index Preset
+169 # Frame Preset
+150 # Yin Yang Preset
+148 # Remainder Preset
+170 # \sigma not 1/2 Preset
+156 # Zps Legs preset
+155 # Equal Legs Preset
+149 # Galaxy Candy Preset
+152 # Taffy Candy Preset
+154 # Saver Candy Preset
