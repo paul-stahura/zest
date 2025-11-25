@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Win32.SafeHandles;
 using Shapes;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 public class SegmentMarks : MonoBehaviour

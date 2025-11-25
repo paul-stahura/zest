@@ -3,6 +3,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 /// A container class optimized for compute buffer.
 public sealed class PointCloudData

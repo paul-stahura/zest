@@ -5,8 +5,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Shapes;
 using Complex = System.Numerics.Complex;
-using System.Security.Cryptography.X509Certificates;
-using UnityEditor.PackageManager.Requests;
 
 public class ZTrace : MonoBehaviour
 {

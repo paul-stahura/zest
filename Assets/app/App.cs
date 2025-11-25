@@ -1,5 +1,4 @@
 using System;
-using Complex = System.Numerics.Complex;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,9 +6,6 @@ using TMPro;
 using UnityEngine.SceneManagement;
 
 using Shapes;
-using System.Runtime.CompilerServices;
-using Unity.VersionControl.Git;
-using System.Xml.Schema;
 using UnityEngine.EventSystems;
 
 public enum SpiralFormulas

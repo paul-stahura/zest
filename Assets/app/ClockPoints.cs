@@ -180,8 +180,10 @@ public class ClockPoints : MonoBehaviour
         WriteFamilyPointTables(table);
         WriteIndividualPointTables(table);
 
-        // Refresh the Unity editor to reflect changes
-        UnityEditor.AssetDatabase.Refresh();
+        #if UNITY_EDITOR
+            // Refresh the Unity editor to reflect changes
+            UnityEditor.AssetDatabase.Refresh();
+        #endif
 
         Application.OpenURL(Application.dataPath + "/StreamingAssets");
     }

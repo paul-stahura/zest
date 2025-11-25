@@ -507,8 +507,10 @@ public class ZetaSolver : MonoBehaviour
             }
         }
 
-        // Refresh the Unity editor to reflect changes
-        UnityEditor.AssetDatabase.Refresh();
+        #if UNITY_EDITOR
+            // Refresh the Unity editor to reflect changes
+            UnityEditor.AssetDatabase.Refresh();
+        #endif
 
         // Log a message to indicate that the TextAsset is created
         Debug.Log($"Points saved to '{fileName}'");
@@ -558,8 +560,10 @@ public class ZetaSolver : MonoBehaviour
             // }
         }
 
-        // Refresh the Unity editor to reflect changes
-        UnityEditor.AssetDatabase.Refresh();
+        #if UNITY_EDITOR
+            // Refresh the Unity editor to reflect changes
+            UnityEditor.AssetDatabase.Refresh();
+        #endif
 
         // Log a message to indicate that the TextAsset is created
         Debug.Log($"Points saved to '{fileName}'");
