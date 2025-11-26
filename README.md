@@ -177,30 +177,6 @@ Many proofs start with geometric insight. Someone sees a pattern, gets an intuit
 
 And even if you never prove anything, there's value in understanding. In seeing beauty. In experiencing one of mathematics' greatest mysteries as a visual, interactive, explorable form.
 
-## What Professionals Say
-
-*"I spent twenty years studying the zeta function through equations. Five minutes with Zest showed me patterns I'd never noticed."*
-
-*"This is what I wish I'd had when I was learning complex analysis. Seeing the spirals makes everything click."*
-
-*"The way it lets you jump between different zeros—comparing their spirals instantly—that's powerful for building intuition about what's typical vs. special."*
-
-## The Invitation
-
-You don't need a PhD. You don't need years of training. You don't need to understand all the mathematical machinery behind the scenes.
-
-You just need curiosity and five minutes.
-
-**Open Zest.** Move some sliders. Click some points. Watch spirals wind. Notice patterns. Ask questions.
-
-Maybe you'll see something Paul missed. Maybe you'll see something everyone has missed. Maybe you'll just see beauty.
-
-Either way, you'll see the Riemann Zeta function the way Riemann never could—as a living, dynamic, geometric object that you can explore with your eyes and your curiosity.
-
-The computational microscope is ready.
-
-**What will you discover?**
-
 ---
 
 ## Quick Start
@@ -215,23 +191,5 @@ The computational microscope is ready.
 8. Click another. Compare.
 9. Move the real part slider away from 0.5. See what changes.
 10. Follow your curiosity.
-
----
-
-## For the Mathematically Curious
-
-- **VISUALIZATIONS.md** — Comprehensive guide to every visualization type, what they show, and why they matter
-- **README.[Author].md** — Multiple perspectives from famous science communicators (Feynman, Sagan, 3Blue1Brown, and more)
-- **CLAUDE.md** — Technical architecture for developers
-
-## For Everyone Else
-
-Just open it and explore. The spirals speak for themselves.
-
----
-
-*"The only way to learn mathematics is to do mathematics."* — Paul Halmos
-
-*"The only way to understand the zeta function is to see the zeta function."* — Paul Stahura (probably)
 
 **Welcome to the microscope. The spirals are waiting.**
