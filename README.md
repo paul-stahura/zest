@@ -109,7 +109,7 @@ Paul Stahura is an engineer. Not a number theorist. Not a complex analysis exper
 
 So he built Zest. He implemented six calculation methods. He created interactive visualizations. He loaded 100,000 zeros. He built controls for exploring every parameter.
 
-And then he looked. Really looked. He spent hours exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular microscope before.
+And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular microscope before.
 
 **This is what computational tools are for.** Not replacing mathematical thought, but extending perception. Galileo's telescope didn't replace astronomy; it revealed moons around Jupiter that pure thought could never discover. Zest is the same idea: use computation to see what pure calculation might miss.
 
