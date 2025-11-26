@@ -44,6 +44,10 @@ When the real part equals 0.5, spirals can wind all the way around and return to
 
 But move the real part away from 0.5—to 0.49, to 0.51, to anywhere else—and the spirals *don't make it back.* They wind around, they approach the origin, but they miss. They can't quite close the loop.
 
+**Here's the geometry that makes this visible:** Draw a line from the origin to the zeta value. Bisect it—cut it exactly in half. That bisector line passes through one specific point in the spiral. Now draw two "legs"—one from origin to the bisector point, one from the bisector point to zeta. At σ = 0.5, these legs are *exactly the same length*. The spiral is perfectly balanced. When the angle between the legs reaches zero (they align perfectly), you have a zero—both legs pointing the same direction, same length, meeting at the origin.
+
+Move σ away from 0.5? The leg lengths diverge. One longer, one shorter. And if they're different lengths, they can't both arrive at the same point. The symmetry breaks. Zeros become impossible.
+
 This isn't a proof. But it's something you can **see**. Play with it for five minutes, and you'll feel it in your bones: there's something special about σ = 0.5. The geometry knows it. The spirals know it.
 
 Maybe seeing it this way—really seeing it, not just reading about it—will spark an idea. Or maybe it'll just give you a visceral understanding of what the Riemann Hypothesis *means* geometrically.
@@ -88,6 +92,8 @@ Turn on two at once. Watch them trace different spirals with different intermedi
 And here's the thing: at σ = 0.5, Riemann-Siegel *nails it*. Perfect overlap with other methods. Move away from 0.5? Riemann-Siegel starts to drift. The formula *knows* that 0.5 is special.
 
 ### 4. Symmetries, Remainders, and Hidden Structure
+
+Turn on the **ZPS Bisector** visualization—it draws the two "legs" from origin → bisector point → zeta. At σ = 0.5, watch them stay equal length as you vary t. Move σ off 0.5? They immediately diverge. This is the core geometric insight: equal legs = possible zeros. Unequal legs = no zeros possible.
 
 Enable the "yin-yang" teardrops—shapes traced by rotating spiral arms. Watch them narrow and widen, revealing where the function is stable vs. oscillating.
 
