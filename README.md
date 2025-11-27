@@ -18,27 +18,7 @@ This tool was created by an engineer, not a mathematician. Someone who asked, "W
 
 What he found is remarkable. And now you can see it too.
 
-## The Core Idea: Spirals That Know Where They're Going
-
-The Riemann Zeta function is an infinite sum:
-
-ζ(s) = 1/1^s + 1/2^s + 1/3^s + 1/4^s + ...
-
-When s is a complex number (has both real and imaginary parts), each term is a vector in the 2D complex plane. Add them tip-to-tail, and they trace a path—a spiral that winds inward toward the final sum.
-
-**Here's what's wild:** Change s by just a tiny bit, and the entire spiral reconfigures. Different shape, different path, different character. It's like each point in the complex plane has its own unique spiral signature.
-
-Zest shows you these spirals. Any spiral you want. In real-time. As you move sliders, as you click on the map, as you explore.
-
-## The Discovery: Zeros Only Happen at One Place
-
-The "zeros" of the zeta function are special values where ζ(s) = 0. These zeros encode deep information about prime numbers—how they're distributed, how predictable they are, how the whole number system is structured.
-
-The Riemann Hypothesis says: **All the non-trivial zeros have real part equal to exactly 1/2.**
-
-We've checked ten trillion zeros. Every single one is at σ = 1/2 (where σ is the real part). But we still don't have a proof. We don't know *why*.
-
-**Here's what you can see in Zest:**
+Zest visualizes the partial sum spirals of ζ(s) = Σ(1/n^s) as they wind through the complex plane. Each term is a vector added tip-to-tail, tracing a path toward the final sum. The Riemann Hypothesis says all non-trivial zeros have real part σ = 1/2. We've checked ten trillion zeros—every one is on that line. But we don't know *why*. **Here's what you can see:**
 
 When the real part equals 0.5, spirals can wind all the way around and return to the origin. The hundreds of terms add up, rotating and shrinking, and manage to produce exactly zero. It's like watching a lock tumbler click into place—everything aligns, and the spiral closes on itself at (0, 0).
 
@@ -179,17 +159,10 @@ And even if you never prove anything, there's value in understanding. In seeing 
 
 ---
 
-## Quick Start
+## Getting Started
 
-1. Download Zest for your platform (Windows, macOS, Linux)
-2. Launch the application
-3. See the spiral winding inward? Move the index slider. Watch it breathe.
-4. Click the "Critical Strip" tab at the top
-5. Click "Load Point Sets" → "00 Zeta Zeros"
-6. See those 100,000 points? All on one vertical line. That's the Riemann Hypothesis, visualized.
-7. Click any zero. Watch its spiral.
-8. Click another. Compare.
-9. Move the real part slider away from 0.5. See what changes.
-10. Follow your curiosity.
+Use one of the downloads on the right for your platform (Windows or MacOS), or build the source code yourself.
+
+To build from source, you'll need Unity Editor version **2021.3.45f2**. Open the project in Unity and build for your target platform.
 
 **Welcome to the microscope. The spirals are waiting.**
