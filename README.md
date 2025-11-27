@@ -127,8 +127,6 @@ There's wonder in observation. There's pleasure in seeing something beautiful. T
 
 The Riemann Zeta function has been studied since 1859. Riemann himself calculated the first few zeros by hand. Modern computers have found ten trillion more. But until tools like Zest, almost nobody could actually *see* what the function looks like as a living, breathing geometric object.
 
-**Now you can.**
+**Now you can. Welcome to the microscope. The spirals are waiting.**
 
 ---
-
-**Welcome to the microscope. The spirals are waiting.**
