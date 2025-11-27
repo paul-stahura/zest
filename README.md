@@ -1,6 +1,6 @@
 # Zest — A Computational Microscope for the Riemann Zeta Function
 
-*Or: What you see when you finally look at one of mathematics' most famous mysteries*
+*Or: Seeing what Riemann could only imagine*
 
 ## What This Is
 
