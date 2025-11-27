@@ -108,11 +108,12 @@ Zest gives you access to that mode of understanding. Not through genius, but thr
 
 Suggested path:
 
-1. **Start at s = 2 + 0i**: Euler's famous sum equal to π²/6. Watch the spiral wind gently toward 1.645.
-2. **Move to the critical line**: s = 0.5 + 10i. More twists. More personality. Where things get fun.
-3. **Jump to a zero**: Load zeta zeros, click the first point (t ≈ 14.13). Watch the spiral wind *tight* around the origin.
-4. **Try off the critical line**: Move σ to 0.49 or 0.51. Watch what happens. The spiral doesn't make it back to zero. Something about σ = 0.5 is special.
-5. **Play**: Turn on teardrops. Load different datasets. Compare formulas. Follow your curiosity.
+1. Download for your platform (Windows or MacOS), or build from source using Unity Editor version **2021.3.45f2**.
+2. **Start at s = 2 + 0i**: Euler's famous sum equal to π²/6. Watch the spiral wind gently toward 1.645.
+3. **Move to the critical line**: s = 0.5 + 10i. More twists. More personality. Where things get fun.
+4. **Jump to a zero**: Load zeta zeros, click the first point (t ≈ 14.13). Watch the spiral wind *tight* around the origin.
+5. **Try off the critical line**: Move σ to 0.49 or 0.51. Watch what happens. The spiral doesn't make it back to zero. Something about σ = 0.5 is special.
+6. **Play**: Turn on teardrops. Load different datasets. Compare formulas. Follow your curiosity.
 
 There's no wrong way to explore. This is your computational microscope. Point it wherever you want.
 
@@ -129,9 +130,5 @@ The Riemann Zeta function has been studied since 1859. Riemann himself calculate
 **Now you can.**
 
 ---
-
-## Getting Started
-
-Download for your platform (Windows or MacOS), or build from source using Unity Editor version **2021.3.45f2**.
 
 **Welcome to the microscope. The spirals are waiting.**
