@@ -385,7 +385,7 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         DrawPointTarget(_zpsToggle, _zpsPos, _spiralCalculator.GetZps(), _zpsColor, true);
         DrawPointPath(_zpsIndexPathToggle, _zpsIndexPath, _zpsColor);
 
-        DrawPointTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta.ToVector2(), _etaColor, true);
+        DrawPointTarget(_etaToggle, _etaPos, _spiralCalculator.GetEta().zeta.ToVector2(), _etaColor, false, true);
         // DrawPointPath(_etaSigmaPathToggle, _etaSigmaPath, _etaColor);
         // DrawPointPath(_etaIndexPathToggle, _etaIndexPath, _etaColor);
 
@@ -418,13 +418,17 @@ public class ZetaTargets : ImmediateModeShapeDrawer
         if (_camTargetColor.a > 0.05f) DrawCamTarget();
     }
 
-    private void DrawPointTarget(Toggle toggle, TMP_Text posText, Vector2 pos, Color color, bool drawZ = true)
+    private void DrawPointTarget(Toggle toggle, TMP_Text posText, Vector2 pos, Color color, bool drawZ = true, bool drawH = false)
     {
         if (toggle.isOn)
         {
             if (drawZ)
             {
                 DrawZ(pos, color);
+            }
+            else if (drawH)
+            {
+                DrawH(pos, color);
             }
             else
             {
@@ -542,6 +546,22 @@ public class ZetaTargets : ImmediateModeShapeDrawer
             Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, r));    // /
             Draw.Line(pt + new Vector2(-r, r), pt + new Vector2(r, r));     // `
             Draw.Line(pt + new Vector2(-r, -r), pt + new Vector2(r, -r));    // _
+        }
+    }
+
+    private void DrawH(Vector2 pt, Color color)
+    {
+        using (Draw.StyleScope)
+        {
+            Draw.Color = color;
+            Draw.Thickness = 1f;
+            // H
+            var h = .04f;
+            var w = h * 0.5f;
+            Draw.Line(pt + new Vector2(-w, h), pt + new Vector2(-w, -h)); // |
+            Draw.Line(pt + new Vector2(w, h), pt + new Vector2(w, -h));   // |
+            Draw.Line(pt + new Vector2(-w, 0), pt + new Vector2(w, 0));   // -
+            Draw.Line(pt + new Vector2(0, h / 2), pt + new Vector2(0, - h / 2));   // x
         }
     }
     

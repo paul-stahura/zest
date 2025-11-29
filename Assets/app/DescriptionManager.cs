@@ -174,7 +174,7 @@ public class DescriptionManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.M) && !_isEditMode)
         {
-            _toggleManualButton.isOn = !_toggleManualButton.isOn;
+            ToggleManualMode();
         }
 
         if (_purgeUnusedKeys)
@@ -203,6 +203,13 @@ public class DescriptionManager : MonoBehaviour
                 _displayPanel.gameObject.SetActive(!_displayPanel.gameObject.activeSelf);
             }
         }
+
+        SetToggleColor(_displayPanel.gameObject.activeSelf || _loadPanel.gameObject.activeSelf);
+    }
+
+    private void SetToggleColor(bool isOn)
+    {
+        _toggleManualButton.targetGraphic.color = isOn ? Color.green : Color.white;
     }
 
     private void InitializeDescriptions()

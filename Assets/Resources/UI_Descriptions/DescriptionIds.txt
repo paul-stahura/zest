@@ -7,11 +7,11 @@
 45 # Remainders
 25 # Grid
 65 # Symmetry
-83 # Camera Tracking
+83 # Camera Tracking overview
 18 # Yin Yang
 100 # Zeta Targets
 80 # Spiral
-82 # Camera Tracking Refocus
+82 # Camera Tracking
 4 # Open and Close Critical Strip Window
 78 # Color Middle Links
 1 # Critical Strip Coordinate Space Toggle
@@ -141,3 +141,5 @@
 149 # Galaxy Candy Preset
 152 # Taffy Candy Preset
 154 # Saver Candy Preset
+141 # Possible Frames
+15 # Derivative Options

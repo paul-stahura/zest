@@ -343,7 +343,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         for(int i = 1; i < _yinPath.Length - 1; i++)
         {
             var indexFrac = _yinYangPathIndex + ((double)i)/_yangPath.Length;
-            // avoid discontinuity at 0.25 and 0.75
+            // avoid Infinity at 0.25 and 0.75
             if(Mathf.Approximately((float)indexFrac, 0.25f) || Mathf.Approximately((float)indexFrac, 0.75f)) indexFrac += 0.00001f;
 
             yinSpecial = ZpsGeneral.YinSpecial(indexFrac);
@@ -378,7 +378,7 @@ public class YinYangRenderer : ImmediateModeShapeDrawer
         for(int i = 1; i < _infYinPath.Length - 1; i++)
         {
             var index = ((float)i)/_infYinPath.Length;
-            // avoid discontinuity at 0.25 and 0.75
+            // avoid Infinity at 0.25 and 0.75
             if(Mathf.Approximately(index, 0.25f) || Mathf.Approximately(index, 0.75f)) index += 0.0001f;
             _infYinPath[i] = Zeta.InfinityTdrop(index, false);
             _infYangPath[i] = Zeta.InfinityTdrop(index, true);
