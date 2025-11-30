@@ -52,6 +52,8 @@ public class GridLinksToLinks : ImmediateModeShapeDrawer
             _forwardToReflectedLinksToggle.isOn = false;
             _inverseToReflectedLinksToggle.isOn = false;
         });
+
+        _reflectedThroughMidColor.a = 0.1f;
     }
 
     public override void DrawShapes(Camera cam)

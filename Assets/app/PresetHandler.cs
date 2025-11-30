@@ -895,26 +895,33 @@ public class PresetHandler : MonoBehaviour
                 break;
             
             case 2:
-                _cameraPositionTracking.SetZoomLevel(0.00075f);
-                _cameraTargetDropdown.value = 1;
-                _cameraPositionTracking.ResetCamOffset();
-                break;
-
-            case 3:
-                _cameraPositionTracking.SetZoomLevel(0.00075f);
-                _cameraTargetDropdown.value = 1;
-                _spiralInverseToggle.isOn = true;
-                break;
-            
-            case 4:
-                _spiralInverseToggle.isOn = false;
+                SetInput(100.005353f, 0.5f);
                 _spiralInverseReflectedToggle.isOn = true;
 
-                _cameraPositionTracking.SetZoomLevel(5f);
+                _cameraPositionTracking.SetZoomLevel(4f);
                 _cameraTargetDropdown.value = 2;
                 _cameraPositionTracking.ResetCamOffset();
 
+                _animationSpeedSlider.value = 0.8f;
+
                 _spiralZakToggle.isOn = true;
+                break;
+            
+            case 3:
+                _animationSpeedSlider.value = 0.087f;
+
+                _spiralInverseReflectedToggle.isOn = false;
+                _spiralZakToggle.isOn = false;
+
+                _cameraPositionTracking.SetZoomLevel(0.00075f);
+                _cameraTargetDropdown.value = 1;
+                _cameraPositionTracking.ResetCamOffset();
+                break;
+
+            case 4:
+                _cameraPositionTracking.SetZoomLevel(0.00075f);
+                _cameraTargetDropdown.value = 1;
+                _spiralInverseToggle.isOn = true;
                 break;
         }
     }
@@ -1010,10 +1017,10 @@ public class PresetHandler : MonoBehaviour
                 _zakTargetToggle.isOn = false;
                 _originTargetToggle.isOn = false;
 
-                _spiralForwardToggle.isOn = false;
-                _spiralInverseReflectedToggle.isOn = false;
-                _spiralInverseToggle.isOn = false;
-                _spiralForwardReflectedToggle.isOn = false;
+                // _spiralForwardToggle.isOn = false;
+                // _spiralInverseReflectedToggle.isOn = false;
+                // _spiralInverseToggle.isOn = false;
+                // _spiralForwardReflectedToggle.isOn = false;
 
                 _gridForwardToInverseReflectedToggle.isOn = true;
                 _gridInverseToForwardReflectedToggle.isOn = true;
@@ -1053,16 +1060,19 @@ public class PresetHandler : MonoBehaviour
                 _rPath.SetSelectedOption(2);
                 _rpsPath.SetSelectedOption(2);
                 _rakPath.SetSelectedOption(2);
+
+                _zakTargetToggle.isOn = true;
+                _originTargetToggle.isOn = true;
+                _midTargetToggle.isOn = true;
+                _r1Toggle.SetSelectedOption(1);
+                _r2Toggle.SetSelectedOption(2);
+                _rak1Toggle.SetSelectedOption(1);
+                _rak2Toggle.SetSelectedOption(2);
+                _rpsR1Toggle.SetSelectedOption(1);
+                _rpsR2Toggle.SetSelectedOption(2);
                 break;
             
             case 2:
-                _cameraPositionTracking.SetZoomLevel(4.0f);
-                _cameraTargetDropdown.value = 0;
-                _cameraPositionTracking.ResetCamOffset();
-
-                _autoAnimateToggle.isOn = true;
-                _animationSpeedSlider.value = 1.0f;
-
                 SetInput(5.23, 0.25f);
                 break;
 

@@ -366,6 +366,8 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             UpdateActive(ref _r.active, option);
             _remaindersUpdated = false;
         };
+
+        ClearAllRemaindersInit();
     }
 
     private static void UpdateActive(ref int active, int option)
@@ -375,7 +377,13 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             active += 1;
             _remaindersUpdated = false;
         }
-        else if (option == 0) active -= 1;
+        else if (option == 0)
+        {
+            if( active > 0 )
+            {
+                active -= 1;
+            }
+        }
     }
 
     public override void DrawShapes(Camera cam)
@@ -533,6 +541,18 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
     private void DrawRemainders()
     {
+        // for some reason, drawing just one line will not show when making a executable
+        // temp work around
+        if(_r.active > 0 || _rps.active > 0 || _rak.active > 0)
+        {
+            using (Draw.StyleScope)
+            {
+                Draw.Thickness = 0f;
+                Draw.Color = Color.clear;
+                Draw.Line(Vector2.zero, Vector2.zero);
+            }
+        }
+
         DrawR(_r);
         DrawR(_rps);
         DrawR(_rak);
@@ -608,8 +628,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
             Draw.Thickness = 2f;
             Draw.Color = r.color1;
 
-            int option = r.targetToggle.GetSelectedOption().Item1;
-            switch (option)
+            switch (r.targetToggle.GetSelectedOption().Item1)
             {
                 case 1:
                     ShapesUtils.DrawCross(l1, 0.05f);
@@ -623,8 +642,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                     break;
             }
 
-            option = r.toggle1.GetSelectedOption().Item1;
-            switch(option)
+            switch(r.toggle1.GetSelectedOption().Item1)
             {
                 case 1:
                     Draw.Line(_sum1, l1, r.color1);
@@ -634,8 +652,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                     break;
             }
 
-            option = r.toggle2.GetSelectedOption().Item1;
-            switch (option)
+            switch (r.toggle2.GetSelectedOption().Item1)
             {
                 case 1:
                     Draw.Line(l1, l1 + r.r2, r.color2);
@@ -649,22 +666,19 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                     break;
             }
 
-            option = r.legsForwardToggle.GetSelectedOption().Item1;
-            if (option > 0)
+            if (r.legsForwardToggle.GetSelectedOption().Item1 > 0)
             {
                 Draw.Line(Vector2.zero, l1, color: Color.green);
-                if (option > 1) Draw.Line(l1, l2, color: Color.red);
+                if (r.legsForwardToggle.GetSelectedOption().Item1 > 1) Draw.Line(l1, l2, color: Color.red);
             }
 
-            option = r.legsInverseToggle.GetSelectedOption().Item1;
-            if (option > 0)
+            if (r.legsInverseToggle.GetSelectedOption().Item1 > 0)
             {
                 Draw.Line(Vector2.zero, _sum2 + r.r2, color: Color.red);
-                if (option > 1) Draw.Line(_sum2 + r.r2, l2, color: Color.green);
+                if (r.legsInverseToggle.GetSelectedOption().Item1 > 1) Draw.Line(_sum2 + r.r2, l2, color: Color.green);
             }
 
-            option = r.symToggle.GetSelectedOption().Item1;
-            switch (option)
+            switch (r.symToggle.GetSelectedOption().Item1)
             {
                 case 1: // cut?
                     Draw.UseDashes = true;
@@ -706,8 +720,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
 
             int _pathAddOption = _addInversePaths.GetSelectedOption().Item1;
 
-            option = r.pathSigmaToggle.GetSelectedOption().Item1;
-            if (option > 0 && r.pathSigma.Count > 1)
+            if (r.pathSigmaToggle.GetSelectedOption().Item1 > 0 && r.pathSigma.Count > 1)
             {
                 Draw.Thickness = 1f;
 
@@ -731,8 +744,7 @@ public class SumRemainderRenderer : ImmediateModeShapeDrawer
                 }
             }
 
-            option = r.pathIndexToggle.GetSelectedOption().Item1;
-            if (option > 0 && r.pathIndex.Count > 1)
+            if (r.pathIndexToggle.GetSelectedOption().Item1 > 0 && r.pathIndex.Count > 1)
             {
                 Draw.Thickness = 1f;
 
