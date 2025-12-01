@@ -44,6 +44,16 @@ public class MultiOptionToggle : MonoBehaviour
             return;
         }
 
+        // temp fix for presets that set options
+        if(index > 1 && _selectedOption != 1)
+        {
+            // ensure we always pass through option 1
+            _selectedOption = 1;
+            UpdateText();
+            UpdateColor();
+            OnOptionChanged?.Invoke(_selectedOption);
+        }
+
         _selectedOption = index;
         UpdateText();
         UpdateColor();
