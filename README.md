@@ -1,5 +1,5 @@
 # Zest — Visualizing the Riemann Zeta Function
-
+![Spirals_1](ZestImages/Spirals_1.png)
 *Seeing what Riemann could only imagine*
 
 ## What This Is
@@ -15,15 +15,17 @@ Not prove it. Not derive it. Just **see it.** Watch it. Explore it. Like pointin
 This tool was created by an engineer, not a mathematician. Someone who asked, "What if I could visualize this function the way we visualize anything else... interactively, in real-time, with modern computing power?" Someone curious enough to look, patient enough to build, and bold enough to share what he found.
 
 What he found is remarkable. And now you can see it too.
+<img src="ZestImages/Spirals_12.png" />
 
 ## The View
-
 Zest visualizes the partial sum spirals of ζ(s) = Σ(1/n^s) as they wind through the complex plane. Each term is a vector added tip-to-tail, tracing a path toward the final sum. The Riemann Hypothesis says all non-trivial zeros have real part σ = 1/2. They've checked ten trillion zeros—every one is on that line. But we don't know *why*.
+<img src="ZestImages/Spirals_3.png" width=70% />
 
 **Here's what you can see:** When the real part equals 0.5, spirals can wind all the way around and return to the origin. The thousands of terms add up, rotating and shrinking, and manage to produce exactly zero. It's like watching a lock tumbler click into place where everything aligns, and the spiral closes on itself at (0, 0).
 
 But move the real part away from 0.5—to 0.49, to 0.51, to anywhere else—and the spirals *don't make it back.* They wind around, approach the origin, but miss. They can't quite close the loop.
 
+<img src="ZestImages/Spirals_4 (0.5, 19.05).png" width=46% /><img src="ZestImages/Spirals_5 (0.78, 19.05).png" width=50% />
 **Here's the geometry that makes this visible:** Draw a line from the origin to the zeta value. Bisect it. That bisector line passes through one specific point in the spiral. Now draw two "legs"—one from origin to the bisector point, one from the bisector point to zeta. At σ = 0.5, these legs are *exactly the same length*. The spiral is perfectly balanced. When the angle between the legs reaches zero (they align perfectly), you have a zero—both legs aligned, one leg out and the other leg back, same length, meeting at the origin.
 
 Move σ away from 0.5? The leg lengths diverge. But not always! One longer, one shorter. And if they're different lengths, they can't both arrive at the same point. The symmetry breaks. Zeros become impossible.
@@ -43,6 +45,7 @@ Watch them build, term by term. See how they wind inward. Notice how the shape c
 - **Near a zero**: Winds *tightly* around the origin, hundreds of terms conspiring to produce exactly zero
 
 Move the index slider slowly and watch the spiral breathe. Jump to specific values and see how they differ.
+<img src="ZestImages/Spirals_6.png" width=44.2% /><img src="ZestImages/Spirals_11.png" width=39.1% />
 
 ### The Critical Strip: A Map of All Possible Spirals
 
@@ -51,11 +54,17 @@ The horizontal axis could be other units too, for example, an angle between -pi 
 
 Load the **10,000 or 100,000 known zeros**. They appear as points—every single one perfectly aligned on σ = 0.5. It's staggering. Ten trillion zeros have been checked, and they're *all* on that line.
 
+<img src="ZestImages/Crit_1.png" />
+<img src="ZestImages/Zeros_1.png" width="70%" />
+
 Click on any point in the critical strip, and the spiral view instantly recalculates for that point. You're teleporting through mathematical space.
 
 **Zoom in.** See the fine structure—how zeros cluster, where gaps appear, subtle patterns in their spacing. Zoom in more! More!
 
 **Toggle coordinate modes.** Switch between "index" (a new unit) and "imaginary" (the classic units).
+
+<img src="ZestImages/Crit_2.png"/>
+<img src="ZestImages/Crit_3.png"/>
 
 ### Multiple Formulas: Different Paths to the Same Truth
 
@@ -73,20 +82,24 @@ Zip to Gram points using the slider. What do you notice about them?
 ### Symmetries and Hidden Structure
 
 Turn on the **ZPS Bisector** visualization—it draws the two "legs" from origin → bisector point → zeta. At σ = 0.5, watch them stay equal length as you vary t. Move σ off 0.5? They immediately diverge. This is an interesting fact: equal legs = possible zeros. Unequal legs = no zeros possible.
+<img src="ZestImages/ZpsBisector_1.png" />
 
 Enable "yin-yang" teardrops—shapes by a link's ends traced in the local frame of reference.
+<img src="ZestImages/YinYang_1.png" />
 
 Turn on remainder functions (Rps, Rak). They are different ways of expressing Siegel's remainder function.
+<img src="ZestImages/Remainders_1.png" />
 
 Turn on various paths to trace what happens when the imaginary part is changed, or when the real part is changed.
+<img src="ZestImages/Paths_1.png" />
 
 ## Who Made This and Why
 
 Paul Stahura is an engineer. Not a number theorist. Not a complex analysis expert. An engineer who got curious about the Riemann Hypothesis and thought, "What if I could just *look* at the function?"
 
-So he asked some folks to build Zest. Make interactive visualizations. Build controls for exploring tons of parameters.
+So he recruited Chris Cowherd and Nicolas Fish to build Zest. Make interactive visualizations. Build controls for exploring tons of parameters.
 
-And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular tool before. Note this elaborate, at least. 
+And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular tool before. Not this elaborate, at least. 
 
 Where is the exact, symbolic point along the spiral where the symmetry occurs?  The point that is simultaneously continuous in 2-d (the complex plane) and in 1-d (the spiral). He figured it out.
 
@@ -119,7 +132,10 @@ Suggested path:
 5. **Try off the critical line**: Move σ to 0.49 or 0.51. Watch what happens. The spiral doesn't make it back to zero. Something about σ = 0.5 is special.
 6. **Play**: Turn on teardrops. Load different datasets. Compare formulas. Follow your curiosity.
 
+<img src="ZestImages/Start_1.png" />
+
 Try the pre-sets!
+<img src="ZestImages/Taffy_1.png" />
 
 There's no wrong way to explore. Point it wherever you want.
 
@@ -138,5 +154,7 @@ The Riemann Zeta function has been studied since 1859. Riemann himself calculate
 If you really want to dig into the details, the terminology and the equations behind it, read this paper: [Remainder Terms of the Riemann Zeta Function](https://drive.google.com/file/d/1BIfq9CWdIOipq5I-ILCNvK1xU0gVhN4Z/view?usp=sharing)
 
 **The spirals are waiting.**
+
+<img src="ZestImages/Spirals_2.png" />
 
 ---
