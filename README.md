@@ -1,4 +1,4 @@
-# Zest — A Computational Microscope for the Riemann Zeta Function
+# Zest — Visualizing the Riemann Zeta Function
 
 *Seeing what Riemann could only imagine*
 
@@ -8,9 +8,9 @@ The Riemann Hypothesis is one of the most important unsolved problems in mathema
 
 But here's a different question: **What if you could just... look at it?**
 
-Not prove it. Not derive it. Just **see it.** Watch it. Explore it. Like pointing a microscope at a drop of pond water and discovering an entire universe you didn't know existed.
+Not prove it. Not derive it. Just **see it.** Watch it. Explore it. Like pointing a microscope at a drop of pond water and discovering an entire universe you didn't know existed. Like Galileo's telescope revealing moons around Jupiter that pure thought could never predict.
 
-**That's what Zest is.** A computational microscope (or telescope!) for the Riemann Zeta function. You point it at different parts of the complex plane, you zoom in, you watch patterns emerge, take measurements, watch it in motion, and you see things that no amount of equation-staring would reveal.
+**That's what Zest is.** A computational tool for the Riemann Zeta function. You point it at different parts of the complex plane, you zoom in, you watch patterns emerge, take measurements, watch it in motion, and you see things that no amount of equation-staring would reveal.
 
 This tool was created by an engineer, not a mathematician. Someone who asked, "What if I could visualize this function the way we visualize anything else... interactively, in real-time, with modern computing power?" Someone curious enough to look, patient enough to build, and bold enough to share what he found.
 
@@ -86,7 +86,7 @@ Paul Stahura is an engineer. Not a number theorist. Not a complex analysis exper
 
 So he asked some folks to build Zest. Make interactive visualizations. Build controls for exploring tons of parameters.
 
-And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular microscope before.  Note this elaborate, at least. 
+And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular tool before. Note this elaborate, at least. 
 
 Where is the exact, symbolic point along the spiral where the symmetry occurs?  The point that is simultaneously continuous in 2-d (the complex plane) and in 1-d (the spiral). He figured it out.
 
@@ -121,21 +121,21 @@ Suggested path:
 
 Try the pre-sets!
 
-There's no wrong way to explore. This is your computational microscope. Point it wherever you want.
+There's no wrong way to explore. Point it wherever you want.
 
 ## The Joy of Just Looking
 
 You're not trying to solve anything. You're not writing a proof. You're not grinding through calculations. You're just... looking. Exploring. Noticing patterns. Following hunches.
 
-It's the same joy as peering through a telescope at Saturn's rings, examining pond water under a microscope, watching time-lapse video of plants growing.
+It's the same joy as peering through a telescope at Jupiter's moons, examining pond water under a microscope, watching time-lapse video of plants growing.
 
 There's wonder in observation. There's pleasure in seeing something beautiful. There's satisfaction in understanding through perception rather than derivation.
 
 The Riemann Zeta function has been studied since 1859. Riemann himself calculated the first few zeros by hand. Modern computers have found ten trillion more. But until tools like Zest, almost nobody could actually *see* what the function looks like as a living, breathing geometric object.
 
-If you really want to dig into the details, the terminology and the equations behind it, read this paper: [link]
+If you really want to dig into the details, the terminology and the equations behind it, read this paper: [Remainder Terms of the Riemann Zeta Function](https://drive.google.com/file/d/1BIfq9CWdIOipq5I-ILCNvK1xU0gVhN4Z/view?usp=sharing)
 
-**Welcome to the microscope. The spirals are waiting.**
+**The spirals are waiting.**
 
 
 ---
