@@ -125,8 +125,8 @@ Zest gives you access to that mode of understanding. Not through genius, but thr
 
 Suggested path:
 
-1. Download for your platform (Windows or MacOS), or build from source using Unity Editor version **2021.3.45f2**.
-2. **Start at s = 2 + 0i**: Euler's famous sum equal to π²/6. Watch the spiral wind gently toward 1.645.
+1. [Download](https://github.com/paul-stahura/zest/releases) for your platform (Windows or MacOS), or build from source using Unity Editor version **2021.3.45f2**.
+2. *Start at s = 2 + 0i**: Euler's famous sum equal to π²/6. Watch the spiral wind gently toward 1.645.
 3. **Move to the critical line**: s = 0.5 + 10i. More twists. More personality. Where things get fun.
 4. **Jump to a zero**: Load zeta zeros, click the first point (t ≈ 14.13). Watch the spiral wind *tight* around the origin.
 5. **Try off the critical line**: Move σ to 0.49 or 0.51. Watch what happens. The spiral doesn't make it back to zero. Something about σ = 0.5 is special.
