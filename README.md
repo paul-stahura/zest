@@ -133,9 +133,10 @@ There's wonder in observation. There's pleasure in seeing something beautiful. T
 
 The Riemann Zeta function has been studied since 1859. Riemann himself calculated the first few zeros by hand. Modern computers have found ten trillion more. But until tools like Zest, almost nobody could actually *see* what the function looks like as a living, breathing geometric object.
 
+[Video of the app in action](https://docs.google.com/videos/d/125Jo54jM8zF64Y7TjaTRHaDfDONbNi5Uf7QFXzEmbRA/edit?usp=share_link)
+
 If you really want to dig into the details, the terminology and the equations behind it, read this paper: [Remainder Terms of the Riemann Zeta Function](https://drive.google.com/file/d/1BIfq9CWdIOipq5I-ILCNvK1xU0gVhN4Z/view?usp=sharing)
 
 **The spirals are waiting.**
-
 
 ---
