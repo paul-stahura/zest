@@ -1,0 +1,26 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 30,
+  "nSigma": 100,
+  "nT": 1000,
+  "metric": "Triangle area of heads (R1ps, R/2, R1ak); plotted field = log10(1/max(area,ε)). Larger = closer to colinear. Yellow is high 1/area, not exact 1.",
+  "areaEps": 1e-18,
+  "layout": "row-major T (slow) × sigma (fast): index = jT * nSigma + iSigma",
+  "bin": "colinearity_strip_0_30_area.bin",
+  "dtype": "float64",
+  "field": "log10(1/area)",
+  "stats": {
+    "areaMin": 1.482713173159983e-10,
+    "areaMax": 37.80093786461211,
+    "areaMean": 0.0020697940282703494,
+    "logInvMin": -1.5775025750851874,
+    "logInvMax": 9.828942853935683,
+    "logInvMean": 4.6569993362924045,
+    "logInvMeanOnCriticalColumn": 6.2089249860694045,
+    "elapsedMs": 1301.095959
+  },
+  "notePrevYellow": "Earlier plots used window-normalized distance so most cells were ~1 (almost as good as the best cell), not exactly colinear.",
+  "caveat": "R1ak = Kuznetsov/i1 estimate, not exact Siegel f(s); T clamped to ≥1e-4"
+}

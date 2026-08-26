@@ -1,0 +1,19 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 20,
+  "nSigma": 10000,
+  "nT": 2000,
+  "sigmaSampling": "uniform",
+  "metric": "mean tau over splits {Rps,R/2,Rak}; tau=(pi-|arg((Σ2+R2)/(Σ1+R1))|)/pi",
+  "layout": "row-major T × sigma-index",
+  "bin": "theta2_pi_strip_0_20_meand.bin",
+  "dtype": "float64",
+  "stats": {
+    "tauMin": 0.000021363616035852323,
+    "tauMax": 0.997789126414705,
+    "tauMean": 0.49901026006230276,
+    "elapsedMs": 393521.277166
+  }
+}

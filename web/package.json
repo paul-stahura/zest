@@ -1,0 +1,49 @@
+{
+  "name": "zest-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "npm install && node scripts/check-env.mjs",
+    "check-env": "node scripts/check-env.mjs",
+    "wip-squash": "node scripts/wip-squash.mjs",
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "lint:legacy": "node scripts/lint.mjs",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:joint-angles-webgl": "vitest run src/features/joint-angles/jointAnglesDecimation.test.ts src/features/joint-angles/jointAnglesRenderPoints.test.ts src/features/joint-angles/jointAnglesWebGlPoints.test.ts src/features/joint-angles/jointAnglesRenderBench.test.ts"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.6.0",
+    "three": "^0.175.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.184.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-local-rules": "^3.0.2",
+    "eslint-plugin-no-only-tests": "^3.3.0",
+    "eslint-plugin-no-relative-import-paths": "^1.6.1",
+    "fake-indexeddb": "^6.2.5",
+    "gl": "^8.1.6",
+    "jsdom": "^26.0.0",
+    "typescript": "^5.8.3",
+    "undici": "^8.3.0",
+    "vite": "^6.3.4",
+    "vitest": "^3.1.2"
+  }
+}

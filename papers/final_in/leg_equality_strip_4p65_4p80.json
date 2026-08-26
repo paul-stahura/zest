@@ -1,0 +1,22 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 4.65,
+  "tMax": 4.8,
+  "nSigma": 2500,
+  "nT": 500,
+  "sigmaSampling": "uniform",
+  "metric": "mean δ over splits {Rps,R/2,Rak}; δ=||Σ1+R1|−|Σ2+R2||/(|Σ1+R1|+|Σ2+R2|)",
+  "layout": "row-major T × sigma-index",
+  "bin": "leg_equality_strip_4p65_4p80_meand.bin",
+  "dtype": "float64",
+  "overlays": {
+    "zeros": "Assets/.../00 Zeta Zeros.csv → σ=1/2 green"
+  },
+  "stats": {
+    "meanDeltaMin": 9.26357322960135e-13,
+    "meanDeltaMax": 0.8449780642822743,
+    "meanDeltaMean": 0.2281096059882196,
+    "elapsedMs": 26367.806542000002
+  }
+}

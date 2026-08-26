@@ -1,0 +1,15 @@
+{
+  "stage": "done",
+  "workers": 15,
+  "n_sig": 721,
+  "n_t": 1201,
+  "updated": "2026-08-17 12:37:10",
+  "done": 721,
+  "total": 721,
+  "rate_per_s": 412.62,
+  "eta_s": 0.0,
+  "elapsed_s": 1.7,
+  "path": "/Users/paul/Documents/zest/papers/my main paper/rewrite_v7/figures/fig_two_zero_hourglass_cache/T320.npz",
+  "pdf": "/Users/paul/Documents/zest/papers/my main paper/rewrite_v7/figures/fig_two_zero_hourglass.pdf",
+  "png": "/Users/paul/Documents/zest/papers/my main paper/rewrite_v7/figures/fig_two_zero_hourglass.png"
+}

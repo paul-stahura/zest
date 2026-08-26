@@ -1,0 +1,20 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 16.95,
+  "tMax": 18.05,
+  "nSigma": 2500,
+  "nT": 1650,
+  "metric": "flatness of triangle (R1ps, R/2, R1ak): 2|area|/diam^2",
+  "metricPca": "PCA aspect ratio lambda_min/lambda_max of the 3-point cloud",
+  "layout": "row-major T × sigma-index",
+  "bin": "colinearity_strip_16p95_18p05.bin",
+  "binPca": "colinearity_strip_16p95_18p05_pca.bin",
+  "dtype": "float64",
+  "stats": {
+    "min": 3.259575362699312e-17,
+    "max": 0.5060684976790311,
+    "mean": 0.014787903641660983,
+    "elapsedMs": 48690.65125
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 4,
+  "tMax": 5,
+  "nSigma": 1501,
+  "nT": 1501,
+  "metric": "flatness of triangle (R1ps, R/2, R1ak): 2|area|/diam^2",
+  "layout": "row-major T × sigma-index",
+  "bin": "colinearity_strip_4_5_flat.bin",
+  "dtype": "float64",
+  "stats": {
+    "min": 3.3311609487548853e-15,
+    "max": 0.5230400236816296,
+    "mean": 0.045285113135240626,
+    "elapsedMs": 26438.751459
+  }
+}

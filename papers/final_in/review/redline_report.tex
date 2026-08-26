@@ -1,0 +1,569 @@
+% ======================================================================
+% Redline review of "Remainder Terms of the Riemann Zeta Function" (v7)
+% Audit report with numbered proposed changes. The paper itself is
+% NOT modified; every change below awaits the author's approval.
+% Build: pdflatex redline_report.tex  (BasicTeX-compatible preamble)
+% ======================================================================
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage{booktabs}
+
+\definecolor{delred}{RGB}{178,24,24}
+\definecolor{insblue}{RGB}{18,58,188}
+\definecolor{tagerr}{RGB}{178,24,24}
+\definecolor{taginc}{RGB}{176,98,0}
+\definecolor{tagunc}{RGB}{110,60,160}
+\definecolor{tagtyp}{RGB}{40,110,40}
+\definecolor{tagedt}{RGB}{80,80,80}
+
+% Deleted text: red strikethrough. Inserted text: blue.
+\newcommand{\del}[1]{\textcolor{delred}{\sout{#1}}}
+\newcommand{\ins}[1]{\textcolor{insblue}{#1}}
+
+% One numbered change. Usage:
+% \change{TAGCOLOR}{TAG}{location}
+\newcounter{chg}
+\newcommand{\change}[3]{%
+  \refstepcounter{chg}%
+  \bigskip\par\noindent
+  {\large\textbf{Change \thechg}}\quad
+  {\color{#1}\textbf{[#2]}}\quad
+  \textit{#3}\par\nobreak\smallskip}
+
+\newenvironment{cur}{\par\noindent\textbf{Current:}\begin{quote}\color{delred}}{\end{quote}}
+\newenvironment{prop}{\par\noindent\textbf{Proposed:}\begin{quote}\color{insblue}}{\end{quote}}
+\newcommand{\why}[1]{\par\noindent\textbf{Why:} #1\par}
+
+\newcommand{\zh}{\tfrac12}
+\emergencystretch=2em
+
+\title{\textbf{Redline review of ``Remainder Terms of the Riemann Zeta Function'' (rewrite v7)}\\[0.4em]
+\large Audit report with numbered proposed changes}
+\author{Review pass of \texttt{main.tex} (4953 lines, August 4, 2026)}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\noindent
+This report is the requested full review of the paper. \textbf{Nothing in
+\texttt{main.tex} has been changed.} Each proposed change is numbered so you can
+reply with, e.g., ``apply 1, 4, 9--12.'' Conventions:
+\del{red strikethrough} is text proposed for deletion, \ins{blue} is proposed
+replacement or insertion. Line numbers refer to the current \texttt{main.tex}.
+Tags: {\color{tagerr}\textbf{[ERROR]}} a mathematical or factual mistake;
+{\color{taginc}\textbf{[INCONSISTENCY]}} two places in the paper that contradict
+each other; {\color{tagunc}\textbf{[UNCLEAR]}} correct but likely to confuse a
+reader; {\color{tagtyp}\textbf{[TYPO]}} grammar, punctuation, citation
+mechanics; {\color{tagedt}\textbf{[EDITORIAL]}} housekeeping before submission.
+
+\medskip\noindent
+Two of the items below (Changes 1 and 2) were verified numerically before being
+flagged; the check values are quoted in place.
+
+% ======================================================================
+\section*{Part 1 --- Mathematical errors and internal inconsistencies}
+% ======================================================================
+
+\change{tagerr}{ERROR}{\S{}9.4 ``PS, AK and RS Legs and Angles,'' paragraph
+``Intersecting equal-leg ovals and the Riemann Hypothesis,'' main.tex
+lines 2133--2139}
+\begin{cur}
+On the critical line this is automatic: Corollary 9.? puts the whole line in
+$\mathcal{E}_{\mathrm{ps}}$, and on $\sigma=\zh$ one also has
+\sout{$\Sigma_1=\Sigma_2$ (up to the usual conjugacy with $|\chi|=1$), hence
+$B_{1rs}=\zeta/2$} and the whole line lies in
+$\mathcal{E}_{\mathrm{rs}}$ as well.
+\end{cur}
+\begin{prop}
+On the critical line this is automatic: Corollary~\texttt{cor:equal-legs} puts
+the whole line in $\mathcal{E}_{\mathrm{ps}}$, and the $rs$ split is
+reflection-symmetric there as well: $\Sigma_2=\chi\,\overline{\Sigma_1}$ and
+$R=\chi\,\overline{R}$ (the latter because $e^{-i\psi/2}R$ is real,
+Appendix~B), so
+$\chi\,\overline{B_{1rs}}
+ =\Sigma_2+\tfrac12R=\zeta-B_{1rs}$;
+since $|\chi|=1$ this gives
+$\bigl|B_{1rs}\bigr|=\bigl|\zeta-B_{1rs}\bigr|$, and the
+whole line lies in $\mathcal{E}_{\mathrm{rs}}$ as well. (Note that
+$B_{1rs}\neq\zeta/2$: only its perpendicular projection onto the base
+is $\zeta/2$, by Corollary~\texttt{cor:bisector-proj}.)
+\end{prop}
+\why{The two struck claims are false. $\Sigma_2=\chi\overline{\Sigma_1}$, which
+is not $\Sigma_1$, even on the line; and $B_{1rs}=\Sigma_1+\tfrac12R$
+is not $\zeta/2$ (that would require $\Sigma_1=\Sigma_2$ literally).
+Verified numerically at $\sigma=\zh$, $T=6.18$:
+$B_{1rs}=1.9256+2.1268i$ while $\zeta/2=-0.3869+1.5494i$; yet the
+legs are equal, $|B_{1rs}|=|\zeta-B_{1rs}|=2.868955\ldots$,
+so the \emph{conclusion} (the line lies in $\mathcal{E}_{\mathrm{rs}}$) stands
+once the argument is repaired as above. The paper's own Figure
+\texttt{fig:splits-h} already draws $B_{1rs}$ off $\zeta/2$
+($h_{R/2}=2.383\neq0$), so this passage also contradicts that figure.}
+
+\change{taginc}{INCONSISTENCY}{Positivity of $d_1,d_2$: abstract (lines
+174--175), \S{}1 item 3 (lines 208--212), \S{}4 (lines 428--443) versus
+Remark~12.3 \texttt{rem:d-ratio} (lines 3452--3458)}
+\begin{cur}
+(\S{}4) Note: both $d_1$ and $d_2$ are real and \sout{positive}. \ldots{} They
+are positive because $R$ lies in the cone spanned by the two directions
+$e^{-i\omega}$ and $e^{i(\omega+\psi)}$ \ldots{} each fractional summand points
+\emph{forward} along its partial sum, a positive fraction of the next term.
+\par\smallskip
+(Abstract) with $\hat d_1,\hat d_2$ \sout{positive real numbers}, the fractions
+of those two summands that are used.
+\end{cur}
+\begin{prop}
+(\S{}4) Note: both $d_1$ and $d_2$ are real, and generically positive. They are
+positive whenever $R$ lies in the cone spanned by the two directions
+$e^{-i\omega}$ and $e^{i(\omega+\psi)}$, so that both numerators carry the same
+sign as the common denominator $\sin(2\omega+\psi)$. That holds everywhere on
+the critical line and, off it, everywhere outside a narrow window around each
+pole of \S\texttt{sec:pole-locations}; inside such a window $R$ exits the cone
+and one of the two weights turns negative (Remark~\texttt{rem:d-ratio}).
+Geometrically, outside those windows each fractional summand points
+\emph{forward} along its partial sum, a positive fraction of the next term.
+\par\smallskip
+(Abstract) with $\hat d_1,\hat d_2$ real numbers --- positive on the critical
+line, and off it outside narrow windows around the poles of the split --- the
+fractions of those two summands that are used.
+\end{prop}
+\why{The unqualified positivity claim is contradicted later by the paper
+itself: Remark~12.3 reports $d_1=-d_2\approx-4.07\times10^{36}$ near a pole and
+says explicitly that ``$R$ has left the cone \ldots{} in a narrow window around
+each pole.'' Verified numerically: at $\sigma=0.1$, $T=4.2566$ one gets
+$d_1=-147.3$, $d_2=+147.7$; at $T=4.2560$, $d_2=-1.24$. The same softening is
+needed in \S{}1 item 3 (see Change~16 for its exact wording). Corollary
+\texttt{cor:equal} and everything on the critical line are unaffected.}
+
+\change{tagerr}{ERROR}{Proof of Theorem 4.1, ``Integer $T$'' paragraph,
+line 504}
+\begin{cur}
+\ldots{} and the factor \sout{$(-1)^{\lfloor t\rfloor}$} in $R$ shifts
+$\phi=\arg R$ by $\pi$.
+\end{cur}
+\begin{prop}
+\ldots{} and the factor $(-1)^{\lfloor T\rfloor}$ in $R$ shifts
+$\phi=\arg R$ by $\pi$.
+\end{prop}
+\why{The sign factor in question is the $(-1)^{\lfloor T\rfloor}$ of the split
+\texttt{eq:Rak} (\S{}7.1); $\lfloor t\rfloor$ (the floor of the height,
+$t\approx280$ at $T=6.18$) changes parity at many non-integer $T$ and plays no
+role at the handoff instants the paragraph is about. Please confirm the intended
+convention, but as written the subscripted variable appears to be a typo.}
+
+\change{tagerr}{ERROR}{Table 2 caption \texttt{tab:poles} (lines 1652--1655)
+and the same sentence repeated in \S{}9.4 (lines 1998--2000)}
+\begin{cur}
+Note the poles occur at approximately \sout{$T=\lfloor T\rfloor\pm\tfrac14$}
+and approach \sout{$\lfloor T\rfloor\pm\tfrac14$} as $T$ approaches $\infty$.
+\end{cur}
+\begin{prop}
+Note the poles occur at approximately $T=\lfloor T\rfloor+\tfrac14$ and
+$T=\lfloor T\rfloor+\tfrac34$ (equivalently, an integer $\pm\tfrac14$), and
+approach those values as $T\to\infty$.
+\end{prop}
+\why{Per the table itself, the poles sit near fractional parts $0.25$ and
+$0.75$ (e.g.\ $1.2689$ and $1.7637$). ``$\lfloor T\rfloor\pm\tfrac14$''
+includes $\lfloor T\rfloor-\tfrac14$, which lies in the \emph{previous} unit
+interval; the intended reading was presumably ``nearest integer
+$\pm\tfrac14$.'' The same wording appears twice (both places listed above), and
+also matches the correct phrasing already used elsewhere (``near fractional
+parts ${\approx}\,0.25$ and ${\approx}\,0.75$'').}
+
+\change{tagerr}{ERROR}{\S{}7.3 ``Scaling the remainders \ldots,''
+equation \texttt{eq:kappa} and its lead-in, lines 1092--1110}
+\begin{cur}
+The three amplitudes admit the \sout{exact formulas} \ldots{}
+$\kappa_{1rs}=\tfrac14\,n^{\sigma}\,\bigl|I_1(s)+\chi(s)I_2(s)\bigr|$ \ldots
+\end{cur}
+\begin{prop}
+The three amplitudes admit the closed forms
+\[
+\kappa_{1rs}=\tfrac12\,n^{\sigma}\,|R|
+\;\approx\;\tfrac14\,n^{\sigma}\bigl|I_1(s)+\chi(s)I_2(s)\bigr|,
+\]
+the ``$\approx$'' holding when $R$ is evaluated by Kuznetsov's method, with
+$\kappa_{1ps}$ and $\kappa_{1ak}$ as before.
+\end{prop}
+\why{$R_{1rs}=\tfrac12R$ makes $\kappa_{1rs}=\tfrac12n^{\sigma}|R|$ the exact
+statement. Writing it as $\tfrac14n^{\sigma}|I_1+\chi I_2|$ silently replaces
+$R$ by $R_{ak}$, which \texttt{eq:Rak} itself marks as ``$\approx$''; calling
+the result an ``exact formula'' contradicts \S{}7.1. ($\kappa_{1ak}$ is fine as
+is: it is the definition of the $ak$ split. The second equality in
+$\kappa_{1ps}=2\kappa_{1rs}\sin(\cdot)/\sin(\cdot)$ then also becomes exact,
+with $\kappa_{1rs}$ read as $\tfrac12n^{\sigma}|R|$.)}
+
+\change{tagerr}{ERROR}{\S{}11.2 ($I_p$ for $L$-functions), sentence after
+\texttt{eq:Ip-base}, lines 2563--2565}
+\begin{cur}
+Asymptotically $I_p(T)\sim\frac{2p}{(p-1)^2}\pi T^2$, so the leading
+coefficient is $2\pi$ for zeta \sout{(formally $p=1$)}, $\tfrac32\pi$ for
+$p=3$, \ldots
+\end{cur}
+\begin{prop}
+Asymptotically $I_p(T)\sim\frac{2p}{(p-1)^2}\pi T^2$: the leading coefficient
+is $\tfrac32\pi$ for $p=3$ and $\tfrac58\pi$ for $p=5$, against $2\pi$ for
+zeta's own $I(T)$. (Zeta is not the $p=1$ member of this family --- the factor
+$2p/(p-1)^2$ diverges there --- because for zeta every summand is a link and
+there are no phantoms.)
+\end{prop}
+\why{Substituting $p=1$ into $2p/(p-1)^2$ gives a division by zero, not $2\pi$,
+so ``(formally $p=1$)'' is not correct as stated. The $2\pi$ comes from
+$I(T)\sim2\pi T^2$ directly.}
+
+\change{tagerr}{ERROR}{\S{}12.4, equation \texttt{eq:S-slope} and the sentence
+around it, lines 3504--3509}
+\begin{cur}
+\ldots{} and falls smoothly in between, at the rate
+$S'(t)=-\frac{\theta'(t)}{\pi}\;\sout{=}\;-\frac{1}{2\pi}\log\frac{t}{2\pi}$,
+which is exactly the mean zero density.
+\end{cur}
+\begin{prop}
+\ldots{} and falls smoothly in between, at the rate
+\[
+S'(t)=-\frac{\theta'(t)}{\pi}
+      =-\frac{1}{2\pi}\log\frac{t}{2\pi}+O(t^{-2}),
+\]
+which is the mean zero density.
+\end{prop}
+\why{$\theta'(t)=\tfrac12\log\frac{t}{2\pi}+O(t^{-2})$, so the second equality
+is asymptotic, not exact. This matters here more than elsewhere because
+\S{}12.4 is explicitly at pains to keep exact and approximate statements
+separate (``Stated in terms of $\theta$ the formula is exact \ldots{}
+approximation enters only when $\theta$ is replaced by its expansion'').
+$S'=-\theta'/\pi$ between ordinates is the exact clause and can keep the
+``exactly.''}
+
+\change{tagerr}{ERROR}{\S{}2, description of Siegel's contour $C_2$ after
+\texttt{eq:siegel13}, lines 283--285}
+\begin{cur}
+where the path $C_2$ is a polyline of two half-lines, one starting at
+$\eta-\tfrac{\epsilon}{2}\eta$ and containing $\eta=+\sqrt{\tfrac{t}{2\pi}}$
+and $-(m+\tfrac12)$, and $g$ is defined below.
+\end{cur}
+\begin{prop}
+where the path $C_2$ consists of two half-lines meeting at the point
+$\eta\bigl(1-\tfrac{\epsilon}{2}\bigr)$ for a small fixed $\epsilon>0$, one
+half-line passing through the saddle point $\eta=+\sqrt{t/2\pi}$ and the other
+through $-(m+\tfrac12)$, and $g$ is defined below.
+\emph{[Wording to be confirmed against Siegel \S2 / the Barkan--Sklar
+translation before applying.]}
+\end{prop}
+\why{As written the sentence has three problems: $\epsilon$ is never defined
+anywhere in the paper; only one of the ``two half-lines'' is described; and
+``one starting at \ldots{} and containing $\eta$ \emph{and} $-(m+\tfrac12)$''
+cannot be one straight half-line through both points and the stated start. The
+proposal is the most plausible reconstruction (vertex at
+$\eta-\tfrac{\epsilon}{2}\eta=\eta(1-\tfrac{\epsilon}{2})$, one arm through
+each of the two named points), but since this describes Siegel's construction
+it should be checked against the source rather than taken from this report.}
+
+% ======================================================================
+\section*{Part 2 --- Unclear passages}
+% ======================================================================
+
+\change{tagunc}{UNCLEAR}{\S{}8.4 ``Where are the $d_1$ and $d_2$ poles?,''
+opening of the second paragraph, lines 1611--1615}
+\begin{cur}
+A pole occurs when \sout{the link at $\lfloor T+1\rfloor$ of the $\Sigma_1$
+chain (the summand just after the last summand of the partial sum) is parallel
+to the link at $\lfloor T+1\rfloor$ of the $\Sigma_2$ chain}, that is, when the
+two next summands have the same argument, \ldots
+\end{cur}
+\begin{prop}
+A pole occurs when the two bisector links --- link $m=\lfloor T\rfloor$ of each
+chain, carrying summand $\lceil T\rceil$, the summand just after the last one
+included in the partial sum --- are parallel, that is, when the two next
+summands have the same argument, \ldots
+\end{prop}
+\why{Under the paper's own numbering (\S{}6: ``link $n$ represents the
+$(n+1)$st summand''), the summand $\lfloor T+1\rfloor$ is link
+$m=\lfloor T\rfloor$, not ``the link at $\lfloor T+1\rfloor$.'' The current
+phrasing quietly switches to summand-numbering for links, which \S{}6 and
+\S{}9.1 tell the reader not to do; it is also exactly the bisector-link pair,
+so naming it makes the cross-reference to \S{}9.1 immediate.}
+
+\change{tagunc}{UNCLEAR}{Roadmap paragraph, \S{}1, lines 243--263: \S{}8 is
+missing}
+\begin{cur}
+\ldots{} \S\texttt{sec:remainders-summary} names the three splits $R_{rs}$,
+$R_{ps}$, and $R_{ak}$ side by side, and \S\texttt{sec:remainder-scaling}
+records how the remainders scale when $\{T\}$ is held fixed.
+\S\texttt{sec:geometry} tells the experimental/geometric story \ldots
+\end{cur}
+\begin{prop}
+\ldots{} \S\texttt{sec:remainders-summary} names the three splits $R_{rs}$,
+$R_{ps}$, and $R_{ak}$ side by side, and \S\texttt{sec:remainder-scaling}
+records how the remainders scale when $\{T\}$ is held fixed.
+\ins{\S\texttt{sec:d1-function} studies the weight $d_1$ as a function of the
+index: its handoff jumps, two exactly continuous coordinates built from it, and
+zeta-free closed-form approximations on and off the critical line.}
+\S\texttt{sec:geometry} tells the experimental/geometric story \ldots
+\end{prop}
+\why{The roadmap walks through every section of the paper except \S{}8
+(\texttt{sec:d1-function}), which is one of the longer and more technical
+sections; a reader following the roadmap hits it unannounced.}
+
+\change{tagunc}{UNCLEAR}{Draft banner under the title, lines 153--156}
+\begin{cur}
+\sout{DRAFT, rewrite in progress (v7). Sections 1--8 drafted; \S{}10 and
+appendices pending.}
+\end{cur}
+\begin{prop}
+DRAFT, rewrite in progress (v7). \emph{[or delete the banner]}
+\end{prop}
+\why{The banner is stale: the paper now has thirteen sections plus two
+completed appendices. Either update the status or remove the line.}
+
+\change{tagunc}{UNCLEAR}{\S{}9.4 ``The strip lines at ${\approx}\,0.25$ and
+${\approx}\,0.75$ are not flat,'' lines 1995--2008}
+\begin{cur}
+\sout{\emph{[Pulled from the original paper; to be reworked.]}}
+Numerical methods were used to show, relative to $\sigma$ in the critical
+strip, where the poles of the split lie. \sout{The poles occur at approximately
+$T=\lfloor T\rfloor\pm\tfrac14$ and approach $\lfloor T\rfloor\pm\tfrac14$ as
+$T\to\infty$. Viewed across the strip, the pole heights are nearly invariant
+(``flat'') in $\sigma$, with a symmetry about $\sigma=\tfrac12$: reflecting
+$\sigma\mapsto1-\sigma$ yields the same $T$-solutions, because
+$\arg\chi(\sigma+it)=-\arg\chi(1-\sigma+it)$ by the identity
+$\chi(s)\chi(1-s)=1$ and the pole condition uses $\arg\chi$ only as a phase
+offset.} But they are \emph{not exactly} flat: \ldots
+\end{cur}
+\begin{prop}
+Viewed across the strip, the pole heights of \S\texttt{sec:pole-locations} are
+nearly invariant (``flat'') in $\sigma$, and symmetric about $\sigma=\tfrac12$
+(Table~\texttt{tab:poles} and its caption). But they are \emph{not exactly}
+flat: there is a slight, symmetric curvature in $\sigma$, visible in
+Figure~\texttt{fig:pole-heights-zoom}. \ldots
+\end{prop}
+\why{Two problems: the bracketed editorial marker ``[Pulled from the original
+paper; to be reworked.]'' is still in the text; and the struck sentences repeat
+the Table 2 caption almost verbatim (the $\pm\tfrac14$ sentence, the
+$\sigma\mapsto1-\sigma$ symmetry argument). The one new fact in this subsection
+is the curvature; the proposal keeps that and points back rather than
+repeating. (If Change 4 is applied, apply it here too if this paragraph is
+kept.)}
+
+\change{tagunc}{UNCLEAR}{Remark 12.1 \texttt{rem:leg-ratio}, line 3396:
+notation collision on $\vartheta$}
+\begin{cur}
+\ldots{} and $\arg\chi=-2\sout{\vartheta(t)}$, with
+\sout{$\vartheta$} the Riemann--Siegel theta function.
+\end{cur}
+\begin{prop}
+\ldots{} and $\arg\chi=-2\theta(t)$, with $\theta$ the Riemann--Siegel theta
+function of \S{}8.2.
+\end{prop}
+\why{Everywhere else the Riemann--Siegel theta function is $\theta(t)$
+(\S{}8.2, \S{}12.4, \ldots), while $\vartheta_1,\vartheta_2$ are reserved for
+the leg angles defined three pages earlier. Using bare $\vartheta(t)$ here
+invites the reader to connect it to the leg angles.}
+
+\change{tagunc}{UNCLEAR}{\S{}7.1, line 909--911: Kuznetsov's coefficient
+$\omega_0$ vs.\ the direction angle $\omega(T)$}
+\begin{cur}
+\ldots{} each evaluated as a short finite series in precomputed coefficients
+$\omega_0,\omega_1[n],\lambda[n]$; \ldots
+\end{cur}
+\begin{prop}
+\ldots{} each evaluated as a short finite series in precomputed coefficients
+(Kuznetsov's $\omega_0,\omega_1[n],\lambda[n]$ --- his notation, unrelated to
+the direction angle $\omega(T)$ of \S\texttt{sec:decomp}); \ldots
+\end{prop}
+\why{$\omega$ is one of the paper's most-used symbols; a one-clause
+disambiguation is cheap insurance.}
+
+\change{tagunc}{UNCLEAR}{Abstract, lines 175--177: which equality is verified
+in Lean}
+\begin{cur}
+As a corollary, when $\sigma=\tfrac12$ one has \sout{$\hat d_1=\hat d_2$}; we
+have verified this fact in Lean.
+\end{cur}
+\begin{prop}
+As a corollary, when $\sigma=\tfrac12$ one has $d_1=d_2$ (equivalently
+$\hat d_1=\hat d_2$); the fact is formally verified in Lean.
+\end{prop}
+\why{The Lean file of Appendix B proves the unhatted equality $d_1=d_2$; the
+hatted version follows on the line because $|\chi|=1$ makes the two scaling
+factors of \texttt{eq:frac-vs-weight} equal. Since the abstract introduces only
+the hatted symbols, either phrasing works, but the parenthetical keeps the
+claim aligned with what the appendix literally proves.}
+
+\change{tagunc}{UNCLEAR}{\S{}1 item 3, lines 208--212: $d$ vs.\ $\hat d$}
+\begin{cur}
+\ldots{} each is exactly \emph{one more summand} of its Dirichlet sum, namely
+the $(m+1)$st term, scaled by a positive real ``fractional'' weight
+\sout{$d_1$ or $d_2$}.
+\end{cur}
+\begin{prop}
+\ldots{} each is exactly \emph{one more summand} of its Dirichlet sum, namely
+the $(m+1)$st term, scaled by a positive real ``fractional'' weight $\hat d_1$
+or $\hat d_2$ (\S\texttt{sec:summand} distinguishes these dimensionless
+\emph{fractional amounts} from the closely related absolute lengths
+$d_1,d_2$).
+\end{prop}
+\why{\S{}5 (lines 586--599) is explicit that the coefficient of the $(m+1)$st
+summand is the hatted fractional amount, ``not the weights $d_1,d_2$.'' The
+introduction currently attaches the unhatted symbols to exactly the role the
+paper later reserves for the hatted ones. (If Change 2 is applied, add its
+positivity qualifier here as well.)}
+
+% ======================================================================
+\section*{Part 3 --- Typos, grammar, citations}
+% ======================================================================
+
+\change{tagtyp}{TYPO}{\S{}6 opening, line 652--653}
+\begin{cur}
+\ldots{} and denote two complex \sout{number} by
+\end{cur}
+\begin{prop}
+\ldots{} and denote two complex numbers by
+\end{prop}
+\why{Singular/plural. (Optionally ``define the two split points'' since $B_1$
+and $B_2$ get a geometric name later.)}
+
+\change{tagtyp}{TYPO}{Figure 5 caption (\texttt{fig:kuznetsov-zoom}),
+line 937--938: missing verb}
+\begin{cur}
+\ldots{} Kuznetsov's approximate half-remainders $R_{1ak},R_{2ak}$
+\sout{in orange dashed line}.
+\end{cur}
+\begin{prop}
+\ldots{} Kuznetsov's approximate half-remainders $R_{1ak},R_{2ak}$ are drawn
+as the orange dashed pair.
+\end{prop}
+\why{The clause has no verb, and ``line'' (singular) describes two links.}
+
+\change{tagtyp}{TYPO}{\S{}12.4, equation \texttt{eq:B1-rotated},
+lines 3546--3549: punctuation}
+\begin{cur}
+$B_1\,e^{i\theta(t)}=\tfrac12Z(t)+ih,\qquad h\in\mathbb{R}$\sout{,}
+\quad Multiplying by $e^{i\theta}$ rotates \ldots
+\end{cur}
+\begin{prop}
+$B_1\,e^{i\theta(t)}=\tfrac12Z(t)+ih,\qquad h\in\mathbb{R}$\ins{.}
+\quad Multiplying by $e^{i\theta}$ rotates \ldots
+\end{prop}
+\why{The displayed equation ends with a comma but the next word begins a new
+sentence (``Multiplying \ldots''). Change the trailing comma to a period.}
+
+\change{tagtyp}{TYPO}{Footnote in \S{}9 (before \texttt{eq:LN}),
+lines 1691--1694 --- \emph{optional}}
+\begin{cur}
+\ldots{} unlike the Dirichlet $L$-functions of
+\S\texttt{sec:IT-Lfunctions}, \sout{who} have bounded character sums \ldots
+\end{cur}
+\begin{prop}
+\ldots{} unlike the Dirichlet $L$-functions of
+\S\texttt{sec:IT-Lfunctions}, whose characters have bounded partial sums \ldots
+\end{prop}
+\why{``Who'' is the personal relative pronoun; functions take ``which'' or
+``whose.'' Flagged as optional because this wording was chosen deliberately in
+an earlier edit; ``which have bounded character sums'' is the minimal fix if
+you want to keep the original rhythm.}
+
+\change{tagtyp}{TYPO}{\S{}11.5 (\texttt{sec:yinyang-infinity}), lines
+3179--3181: Pugh cited without a bibliography entry}
+\begin{cur}
+(it appears in \S{}15.3 of Titchmarsh's book [T] and in \S{}5.4.1 of
+\sout{Glendon Ralph Pugh's 1998 MS thesis}).
+\end{cur}
+\begin{prop}
+(it appears in \S{}15.3 of Titchmarsh's book [T] and in \S{}5.4.1 of Pugh's
+thesis \ins{[Pugh1998]}). \emph{Add to the bibliography:}\quad
+G.~R.\ Pugh, \emph{The Riemann--Siegel formula and large scale computations of
+the Riemann zeta function}, M.Sc.\ thesis, University of British Columbia,
+1998.
+\end{prop}
+\why{Every other work mentioned in the paper is in the bibliography; Pugh is
+the one inline-only reference. (Please confirm the thesis title from the copy
+you used before applying.)}
+
+\change{tagtyp}{TYPO}{\S{}12.2 (\texttt{sec:yinyang-links}),
+lines 3320--3322 --- \emph{optional}}
+\begin{cur}
+\ldots{} it is sequence A005563 in the OEIS database, though no connection of
+that sequence to the zeta function is listed there.
+\end{cur}
+\begin{prop}
+\ldots{} it is sequence A005563 in the OEIS \ins{[OEIS]}, though no connection
+of that sequence to the zeta function is listed there.
+\emph{Add to the bibliography:}\quad OEIS Foundation Inc., \emph{The On-Line
+Encyclopedia of Integer Sequences}, sequence A005563
+(\texttt{oeis.org/A005563}).
+\end{prop}
+\why{Purely mechanical: OEIS asks to be cited, and the entry gives the reader
+the link. Low priority.}
+
+% ======================================================================
+\section*{Part 4 --- Editorial / pre-submission housekeeping}
+% ======================================================================
+
+\change{tagedt}{EDITORIAL}{Acknowledgements, lines 4859--4866}
+\begin{cur}
+(comment block only) TODO before submission: no Acknowledgments section in this
+rewrite yet.
+\end{cur}
+\begin{prop}
+Port the Acknowledgements from the v6 folder (\texttt{main.tex} line 2439):
+Chris Cowherd (eight years of visualization and experimental-mathematics
+tools), Nicolas Fish (three years building and tweaking Zest), Daniel Flores
+Galiote, Jakob von Raumer, Brian Conrey, Freeman Dyson and family.
+\end{prop}
+\why{You asked to be reminded; the TODO comment is already in the source, but
+the section itself still needs to be written before submission.}
+
+\change{tagedt}{EDITORIAL}{Preamble, lines 96--117: dead macros}
+\begin{cur}
+\texttt{\textbackslash zh}, \texttt{\textbackslash half},
+\texttt{\textbackslash Rps}, \texttt{\textbackslash Rtps},
+\texttt{\textbackslash Rak} (lines 96--100) and
+\texttt{\textbackslash figplaceholder} (lines 103--117)
+\end{cur}
+\begin{prop}
+Delete all six definitions.
+\end{prop}
+\why{None of them is used anywhere in the body (checked by grep). The
+placeholder macro was scaffolding for the rewrite; every figure is now real.}
+
+\change{tagedt}{EDITORIAL}{\S{}13 title, line 4540 --- \emph{optional}}
+\begin{cur}
+Prior literature \sout{on the topic}
+\end{cur}
+\begin{prop}
+Prior literature
+\end{prop}
+\why{``On the topic'' adds nothing; section titles elsewhere in the paper are
+tighter. Style only --- skip freely.}
+
+% ======================================================================
+\section*{Checks that came back clean}
+% ======================================================================
+
+For completeness, things audited that did \emph{not} produce a change request:
+the proof of Theorem 4.1 (Steps 1--6 recomputed by hand; the integer-$T$
+identity $\lceil T\rceil^{iI(T)}=-e^{i\omega}$ is correct, since
+$I(T)\log(1+\tfrac1T)=\pi(2T+1)$ is an odd multiple of $\pi$); the Boole
+expansion $n^{\sigma}\Phi(-1,\sigma,n)=\tfrac12+\tfrac1{8n}-\tfrac5{128n^3}+
+O(n^{-5})$ at $\sigma=\tfrac12$; the follower identity
+$m(m+2)=(m+1)^2-1$ and the factor $\lceil T\rceil^{-1}$; the ordinate counts
+quoted for the windows $6\le T\le7$ (55: $\gamma_{117}$--$\gamma_{171}$),
+$5.9\le T\le6.7$ (42: $\gamma_{113}$--$\gamma_{154}$), and $3\le T\le5.2$
+(63); the caustic-joint positions $n=6501,7506,9193,10615,11259$ at $T=13000$
+against $n_f\approx T\sqrt f$; the drift arithmetic of \S{}12.8
+($\mu(2)\,\Delta T\approx360$ turns, $2264$ rad; half/full-turn joints
+$n=1041$, $521$); $\hat d_1=\sqrt7\,d_1=0.2315$ at $T=6.18$; the needle area
+$2\times1.03417=2.0683$; the values of $\overline F$ at half-integers; the
+$\kappa_{1ps}$ identity once Change 5 is applied; and the bearing bookkeeping
+of \S{}12.9 ($n_{\mathrm{last}}=\lfloor t/\pi\rfloor\approx2T^2$,
+$\nu=1/4T^2$, arc-length ratio $\approx236$ at $t=6.73\times10^8$).
+
+\bigskip
+\noindent\textbf{Summary.} 25 numbered changes: 8 errors, 1 standing
+inconsistency, 8 clarity items, 6 typo/citation items, 3 editorial
+(counting the optional ones). None has been applied to \texttt{main.tex}.
+
+\end{document}

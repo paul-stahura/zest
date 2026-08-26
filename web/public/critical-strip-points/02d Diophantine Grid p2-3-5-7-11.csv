@@ -1,0 +1,26 @@
+# Point Set File Format:
+# Settings are specified with #@ prefix followed by name: value
+#@name: Dioph. Grid p=2,3,5,7,11
+#@color: #ffa050
+#@skipCriticalLine: false
+#@samplingInterval: 1
+# Data format: real,index  (t in [1,600] with |t·ln(p)/2π - integer| < 0.2 for p=2,3,5,7,11; one row per cluster local-min)
+0.5,73.77000000
+0.5,81.20660000
+0.5,109.61630000
+0.5,125.52260000
+0.5,136.20860000
+0.5,164.73330000
+0.5,199.61290000
+0.5,206.89600000
+0.5,245.89990000
+0.5,262.09840000
+0.5,280.65800000
+0.5,342.84630000
+0.5,371.59750000
+0.5,406.54150000
+0.5,417.06720000
+0.5,445.35250000
+0.5,526.64020000
+0.5,542.73290000
+0.5,578.56320000

@@ -1,0 +1,23 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 9.42,
+  "tMax": 9.46,
+  "nSigma": 2500,
+  "nT": 500,
+  "sigmaSampling": "uniform",
+  "metric": "mean δ over splits {Rps,R/2,Rak}; δ=||Σ1+R1|−|Σ2+R2||/(|Σ1+R1|+|Σ2+R2|)",
+  "layout": "row-major T × sigma-index",
+  "bin": "leg_equality_strip_9p42_9p46_meand.bin",
+  "dtype": "float64",
+  "overlays": {
+    "champions": "web/public/critical-strip-points/champions_149_with_precise_T.csv → σ=0 red",
+    "zeros": "Assets/.../00 Zeta Zeros.csv → σ=1 green"
+  },
+  "stats": {
+    "meanDeltaMin": 8.286813975812566e-15,
+    "meanDeltaMax": 0.9038882487077616,
+    "meanDeltaMean": 0.24064424498827172,
+    "elapsedMs": 26495.013084000002
+  }
+}

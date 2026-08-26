@@ -1,0 +1,24 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 30,
+  "nSigma": 100,
+  "nT": 1000,
+  "score": "1 - (dist-dmin)/(dmax-dmin) where dist = |R1ak − line(R1ps,R/2)|; 1 = most colinear in this window (≈ critical line), 0 = least in this window",
+  "cosine": "|cos θ| between (R1ps−R/2) and (R1ak−R/2)",
+  "layout": "row-major T (slow) × sigma (fast): index = jT * nSigma + iSigma",
+  "bin": "colinearity_strip_0_30.bin",
+  "dtype": "float64",
+  "stats": {
+    "distMin": 4.119279495541072e-9,
+    "distMax": 0.361569639298839,
+    "distMean": 0.013747197111995095,
+    "cosMin": 0.00010816573830133294,
+    "cosMax": 0.9999999999999958,
+    "cosMean": 0.9419549349025013,
+    "scoreMeanOnCriticalColumn": 0.9949241154020475,
+    "elapsedMs": 1238.540417
+  },
+  "caveat": "R1ak = Kuznetsov/i1 estimate, not exact Siegel f(s); T clamped to ≥1e-4 in formulas"
+}

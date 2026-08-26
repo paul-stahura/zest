@@ -1,0 +1,34 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 30,
+  "nSigma": 625,
+  "nT": 2000,
+  "sigmaDensityKnots": {
+    "0": 100,
+    "1": 100,
+    "0.25": 200,
+    "0.5": 2000,
+    "0.75": 200
+  },
+  "sigmaMass": 624.9999999999965,
+  "metric": "Triangle area of heads (R1ps, R/2, R1ak); plotted = log10(1/max(area,ε)). Sigma grid inverse-CDF sampled from density ρ(σ).",
+  "areaEps": 1e-18,
+  "layout": "row-major T (slow) × sigma-index (fast); sigma abscissae in _sigma.bin",
+  "bin": "colinearity_strip_0_30_area_dense.bin",
+  "dtype": "float64",
+  "field": "log10(1/area)",
+  "stats": {
+    "areaMin": 2.5887444450459554e-20,
+    "areaMax": 381.79700678624647,
+    "areaMean": 0.001177377756422886,
+    "logInvMin": -2.5818325192873184,
+    "logInvMax": 18,
+    "logInvMean": 5.097107382106465,
+    "logInvMeanNearHalf": 7.013729044569004,
+    "nHalfSamples": 38000,
+    "elapsedMs": 15087.046333
+  },
+  "caveat": "R1ak = Kuznetsov/i1 estimate; T clamped to ≥1e-4"
+}

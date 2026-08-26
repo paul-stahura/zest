@@ -1,0 +1,44 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 30,
+  "nSigma": 1125,
+  "nT": 2000,
+  "tau": 0.001,
+  "sigmaDensityKnots": {
+    "0": 100,
+    "1": 100,
+    "0.25": 200,
+    "0.5": 4000,
+    "0.75": 200
+  },
+  "sigmaMass": 1124.9999999999998,
+  "metric": "Per split: δ=||Σ1+R1|−|Σ2+R2||/(|Σ1+R1|+|Σ2+R2|). Splits: Rps, R/2, Rak. On σ=½, δ≈0 (bisector). Equal count uses τ=0.001.",
+  "layout": "row-major T × sigma-index",
+  "files": {
+    "nEq": "leg_equality_strip_0_30_neq.bin",
+    "meanDelta": "leg_equality_strip_0_30_meand.bin",
+    "maxDelta": "leg_equality_strip_0_30_maxd.bin",
+    "sigma": "leg_equality_strip_0_30_sigma.bin"
+  },
+  "dtypeNeq": "uint8",
+  "dtypeDelta": "float64",
+  "stats": {
+    "histNeq": {
+      "0": 2156888,
+      "1": 74794,
+      "2": 5687,
+      "3": 12631
+    },
+    "fracNeq": {
+      "0": 0.9586168888888889,
+      "1": 0.03324177777777778,
+      "2": 0.0025275555555555555,
+      "3": 0.005613777777777777
+    },
+    "meanDeltaMean": 0.17413138980156226,
+    "elapsedMs": 46292.4535
+  },
+  "caveat": "R1ak = Kuznetsov/i1; T clamped ≥1e-4"
+}

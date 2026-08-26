@@ -1,0 +1,19 @@
+# Dependencies and build output
+node_modules/
+dist/
+
+# Local environment / secrets — never commit
+.env
+.env.*
+
+# Dev-server scratch and Vite's dependency cache
+.zest/
+.vite/
+
+# Python bytecode (research scripts under scripts/)
+__pycache__/
+*.pyc
+
+# Per-session auto-generated; recreated each session start, no value in committing.
+.claude/scheduled_tasks.lock
+*.log

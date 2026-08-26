@@ -1,160 +1,108 @@
-# Zest — Visualizing the Riemann Zeta Function
-![Spirals_1](ZestImages/Spirals_1.png)
-*Seeing what Riemann could only imagine*
+<a id="top"></a>
+
+# The Riemann–Siegel Remainder as a Fractional Summand
+
+**Paul Stahura** — `paul+zeta@stahura.net`
+
+## Abstract
+
+Starting from the Riemann–Siegel decomposition of $`\zeta(s)`$ given in Siegel’s 1932 paper, we introduce a change of variable, $`t=I(T)`$, that replaces Siegel’s coupled pair “imaginary part *t* / summation index *m*” with one real index *T*. We then split Siegel’s single remainder integral *R* into two exact pieces, $`R_{1ps}`$ and $`R_{2ps}`$, and prove that $`R = R_{1ps}+R_{2ps}`$, so that
+
+```math
+\zeta \;=\; \Sigma_1 + R_{1ps} + \Sigma_2 + R_{2ps}.
+```
+
+Our central observation is that each of these remainders is nothing more than *one additional, fractional partial summand* appended to its Dirichlet sum:
+
+```math
+\zeta(s)=\sum_{n=1}^m n^{-s} + \hat d_1\,(m+1)^{-s}
+        + \chi(s)\sum_{n=1}^m n^{s-1} + \hat d_2\,\chi(s)\,(m+1)^{s-1},
+```
+
+with $`\hat d_1,\hat d_2`$ real numbers (always positive on the critical line), the fractions of those two summands that are used. As a corollary, when $`\sigma=\tfrac12`$ one has $`d_1=d_2`$ (equivalently $`\hat d_1=\hat d_2`$); this fact is formally verified in Lean. Also, with this rescaling the remainder terms are nearly periodic in *T* with period one, converging to a fixed waveform in the fractional part of *T*. This decomposition of Siegel’s *R* was discovered through experimental mathematics using a spiral visualization of the partial sums, described later in the paper. We also discuss a number of other observations, including what we call the yin yang curves, the zero counting function, and ovals of equal length leg loci.
+
+## Contents
+
+- [1 Introduction](sections/01-introduction.md)
+- [2 Siegel’s 1932 decomposition](sections/02-siegel-s-1932-decomposition.md)
+- [3 The same formula, reparameterized: The I(T) mapping](sections/03-the-same-formula-reparameterized-the-i-t-mapping.md)
+- [4 Decomposing the remainder: R=R1ps+R2ps](sections/04-decomposing-the-remainder-r-r1ps-r2ps.md)
+- [5 The remainders are “one more partial summand”](sections/05-the-remainders-are-one-more-partial-summand.md)
+- [6 Summands as links and joints](sections/06-summands-as-links-and-joints.md)
+  - [6.1 Sum form](sections/06-summands-as-links-and-joints.md#sec-sum-form)
+  - [6.2 Product form](sections/06-summands-as-links-and-joints.md#sec-product-form)
+- [7 Other remainders](sections/07-other-remainders.md)
+  - [7.1 Kuznetsov’s remainders](sections/07-other-remainders.md#sec-kuznetsov)
+  - [7.2 The three remainders naming convention summary](sections/07-other-remainders.md#sec-remainders-summary)
+  - [7.3 Scaling the remainders with the fractional part of T unchanged](sections/07-other-remainders.md#sec-remainder-scaling)
+- [8 The positive real function d₁ and its periodicity](sections/08-the-positive-real-function-d1-and-its-periodicit.md)
+  - [8.1 The exact formulas](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-exact)
+  - [8.2 Approximation of d₁ when σ=1/2](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-approx-critical)
+  - [8.3 Approximation of d₁ and d₂ when σ≠1/2](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-approx-general)
+  - [8.4 Where are the d₁ and d₂ poles?](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-pole-locations)
+  - [8.5 The weights d1,d2 are positive outside narrow windows of T](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-positive)
+  - [8.6 The limit profile of the fractional amount: the waveform in closed form](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-limit)
+  - [8.7 Uniform bounds: the fraction stays between 1/5 and 4/5](sections/08-the-positive-real-function-d1-and-its-periodicit.md#sec-d1-bounds)
+- [9 The geometry behind the result (experimental mathematics)](sections/09-the-geometry-behind-the-result-experimental-math.md)
+  - [9.1 The bisector link and the bisector point](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-bisector)
+  - [9.2 Legs](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-legs)
+  - [9.3 The strip lines at ≈0.25 and ≈0.75 are not flat](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-strip-lines-not-flat)
+  - [9.4 PS, AK and RS Legs and Angles](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-ps-ak-r2)
+  - [9.5 Toward a proof](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-toward-proof)
+  - [9.6 Equal legs density](sections/09-the-geometry-behind-the-result-experimental-math.md#sec-eqleg-density)
+- [10 I(T) functions](sections/10-i-t-functions.md)
+  - [10.1 The origin of I(T): the neighboring links in the bisector frame](sections/10-i-t-functions.md#sec-IT-origin)
+  - [10.2 I(T) functions for other L-functions besides the zeta function](sections/10-i-t-functions.md#sec-IT-Lfunctions)
+- [11 The yin and yang curves](sections/11-the-yin-and-yang-curves.md)
+  - [11.1 The formulas for the yin and yang curves](sections/11-the-yin-and-yang-curves.md#sec-yinyang-formulas)
+  - [11.2 Derivation of R1ps from the yin and yang functions](sections/11-the-yin-and-yang-curves.md#sec-derive-r1ps)
+  - [11.3 Derivation of R2ps from the yin and yang functions](sections/11-the-yin-and-yang-curves.md#sec-derive-r2ps)
+  - [11.4 Comparison of yin and yang to Siegel’s integral result](sections/11-the-yin-and-yang-curves.md#sec-yinyang-siegel)
+  - [11.5 The yin and yang curves are not symmetrical](sections/11-the-yin-and-yang-curves.md#sec-yinyang-asym)
+  - [11.6 The limit curve and the Ψ function: the C₀ connection](sections/11-the-yin-and-yang-curves.md#sec-yinyang-infinity)
+- [12 General yin and yang, and the d₁ and d₂ formulas](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md)
+  - [12.1 Links crossing](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-links-crossing)
+  - [12.2 General yin and yang form for any link](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-yinyang-any)
+  - [12.3 d₁ and d₂ for any link](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-d1-any)
+  - [12.4 The crossings: Σ1x and Σ2x formula](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-sum-x)
+  - [12.5 First-part and second-part sums](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-half-link-sums)
+  - [12.6 Cutting at one crossing](sections/12-general-yin-and-yang-and-the-d1-and-d2-formulas.md#sec-cut-any-link)
+- [13 ϑ₁, ϑ₂ and the zero-counting function](sections/13-theta1-theta2-and-the-zero-counting-function.md)
+  - [13.1 Review: the Riemann–von Mangoldt formula and Nps](sections/13-theta1-theta2-and-the-zero-counting-function.md#sec-counting-review)
+  - [13.2 Improving Nps: the velocity split and a curve that lands on every ordinate](sections/13-theta1-theta2-and-the-zero-counting-function.md#sec-counting-star)
+  - [13.3 Connecting the count, ϑ₂, and the equal-leg loci](sections/13-theta1-theta2-and-the-zero-counting-function.md#sec-counting-ovals)
+- [14 Further observations](sections/14-further-observations.md)
+  - [14.1 Length ratios: Σ₁ to Σ₂, and R1ps to R2ps](sections/14-further-observations.md#sec-length-ratios)
+  - [14.2 The envelope of |ζ(1/2,t)|](sections/14-further-observations.md#sec-envelope)
+  - [14.3 Collinearity of the three first-half remainders](sections/14-further-observations.md#sec-colinearity)
+  - [14.4 Joint angles](sections/14-further-observations.md#sec-joint-angles)
+  - [14.5 Incremental change](sections/14-further-observations.md#sec-incremental)
+- [15 Prior literature](sections/15-prior-literature.md)
+  - [15.1 Nickel’s Argand-diagram geometry](sections/15-prior-literature.md#sec-nickel)
+  - [15.2 Levinson’s G](sections/15-prior-literature.md#sec-levinson)
+  - [15.3 Spirals of exponential sums](sections/15-prior-literature.md#sec-curlicues)
+- [16 Statements left unproved](sections/16-statements-left-unproved.md)
+  - [Possible, but longer](sections/16-statements-left-unproved.md#possible-but-longer)
+  - [Observational](sections/16-statements-left-unproved.md#observational)
+- [17 Glossary](sections/17-glossary.md)
+  - [The parameters](sections/17-glossary.md#the-parameters)
+  - [The chain: joints and links](sections/17-glossary.md#the-chain-joints-and-links)
+  - [The remainder on the chain](sections/17-glossary.md#the-remainder-on-the-chain)
+  - [The bisector](sections/17-glossary.md#the-bisector)
+  - [Frames](sections/17-glossary.md#frames)
+  - [Legs](sections/17-glossary.md#legs)
+  - [How the picture moves with T](sections/17-glossary.md#how-the-picture-moves-with-t)
+  - [Crossings along the chain](sections/17-glossary.md#crossings-along-the-chain)
+  - [Yin and yang](sections/17-glossary.md#yin-and-yang)
+  - [The far chain (links near ζ)](sections/17-glossary.md#the-far-chain-links-near-zeta)
+- [Acknowledgments](sections/acknowledgments.md)
+- [A Lean formalization of R=R1ps+R2ps](sections/a-lean-formalization-of-r-r1ps-r2ps.md)
+  - [A.1 Correspondence with the written proof](sections/a-lean-formalization-of-r-r1ps-r2ps.md#correspondence-with-the-written-proof)
+  - [A.2 What is proved and what is hypothesized](sections/a-lean-formalization-of-r-r1ps-r2ps.md#what-is-proved-and-what-is-hypothesized)
+  - [A.3 Source listing](sections/a-lean-formalization-of-r-r1ps-r2ps.md#source-listing)
+- [B Lean formalization of the critical line: d1=d2, |R1ps|=|R2ps|, and equal legs](sections/b-lean-formalization-of-the-critical-line-d1-d2-r1.md)
+  - [B.1 The chain of implications](sections/b-lean-formalization-of-the-critical-line-d1-d2-r1.md#the-chain-of-implications)
+  - [B.2 What is proved and what is hypothesized](sections/b-lean-formalization-of-the-critical-line-d1-d2-r1.md#what-is-proved-and-what-is-hypothesized-1)
+  - [B.3 Source listing](sections/b-lean-formalization-of-the-critical-line-d1-d2-r1.md#source-listing-1)
+- [References](sections/references.md)
 
-## What This Is
-
-The Riemann Hypothesis is one of the most important unsolved problems in mathematics. It's been open for 165 years. It's worth a million dollars. Thousands of mathematicians have attacked it with every theoretical tool available.
-
-But here's a different question: **What if you could just... look at it?**
-
-Not prove it. Not derive it. Just **see it.** Watch it. Explore it. Like pointing a microscope at a drop of pond water and discovering an entire universe you didn't know existed. Like Galileo's telescope revealing moons around Jupiter that pure thought could never predict.
-
-**That's what Zest is.** A computational tool for the Riemann Zeta function. You point it at different parts of the complex plane, you zoom in, you watch patterns emerge, take measurements, watch it in motion, and you see things that no amount of equation-staring would reveal.
-
-This tool was created by an engineer, not a mathematician. Someone who asked, "What if I could visualize this function the way we visualize anything else... interactively, in real-time, with modern computing power?" Someone curious enough to look, patient enough to build, and bold enough to share what he found.
-
-What he found is remarkable. And now you can see it too.
-<img src="ZestImages/Spirals_12.png" />
-
-## The View
-Zest visualizes the partial sum spirals of ζ(s) = Σ(1/n^s) as they wind through the complex plane. Each term is a vector added tip-to-tail, tracing a path toward the final sum. The Riemann Hypothesis says all non-trivial zeros have real part σ = 1/2. They've checked ten trillion zeros—every one is on that line. But we don't know *why*.
-<img src="ZestImages/Spirals_3.png" width=70% />
-
-**Here's what you can see:** When the real part equals 0.5, spirals can wind all the way around and return to the origin. The thousands of terms add up, rotating and shrinking, and manage to produce exactly zero. It's like watching a lock tumbler click into place where everything aligns, and the spiral closes on itself at (0, 0).
-
-But move the real part away from 0.5—to 0.49, to 0.51, to anywhere else—and the spirals *don't make it back.* They wind around, approach the origin, but miss. They can't quite close the loop.
-
-<img src="ZestImages/Spirals_4 (0.5, 19.05).png" width=46% /><img src="ZestImages/Spirals_5 (0.78, 19.05).png" width=50% />
-**Here's the geometry that makes this visible:** Draw a line from the origin to the zeta value. Bisect it. That bisector line passes through one specific point in the spiral. Now draw two "legs"—one from origin to the bisector point, one from the bisector point to zeta. At σ = 0.5, these legs are *exactly the same length*. The spiral is perfectly balanced. When the angle between the legs reaches zero (they align perfectly), you have a zero—both legs aligned, one leg out and the other leg back, same length, meeting at the origin.
-
-Move σ away from 0.5? The leg lengths diverge. But not always! One longer, one shorter. And if they're different lengths, they can't both arrive at the same point. The symmetry breaks. Zeros become impossible.
-
-This isn't a proof. But it's something you can **see**. Play with it for five minutes, and you'll feel it in your bones: there's something special about σ = 0.5. 
-
-Maybe seeing it this way, not just looking at symbols, will spark an idea. Or maybe it'll just give you a visceral understanding of what the Riemann Hypothesis *means* geometrically. Zest at least makes beautiful pictures!
-
-## What You Can Explore
-
-### The Spirals Themselves
-
-Watch them build, term by term. See how they wind inward. Notice how the shape changes as you vary parameters.
-
-- **At σ = 1**: Smooth, well-behaved, converges quickly
-- **At σ = 0.5**: Rich structure, interesting twists, where all the action is
-- **Near a zero**: Winds *tightly* around the origin, hundreds of terms conspiring to produce exactly zero
-
-Move the index slider slowly and watch the spiral breathe. Jump to specific values and see how they differ.
-<img src="ZestImages/Spirals_6.png" width=44.2% /><img src="ZestImages/Spirals_11.png" width=39.1% />
-
-### The Critical Strip: A Map of All Possible Spirals
-
-The Critical Strip viewing area shows a 2D map of the complex plane. Horizontal axis is σ (real part), vertical is t (imaginary part).
-The horizontal axis could be other units too, for example, an angle between -pi and pi.
-
-Load the **10,000 or 100,000 known zeros**. They appear as points—every single one perfectly aligned on σ = 0.5. It's staggering. Ten trillion zeros have been checked, and they're *all* on that line.
-
-<img src="ZestImages/Crit_1.png" />
-<img src="ZestImages/Zeros_1.png" width="70%" />
-
-Click on any point in the critical strip, and the spiral view instantly recalculates for that point. You're teleporting through mathematical space.
-
-**Zoom in.** See the fine structure—how zeros cluster, where gaps appear, subtle patterns in their spacing. Zoom in more! More!
-
-**Toggle coordinate modes.** Switch between "index" (a new unit) and "imaginary" (the classic units).
-
-<img src="ZestImages/Crit_2.png"/>
-<img src="ZestImages/Crit_3.png"/>
-
-### Multiple Formulas: Different Paths to the Same Truth
-
-There are six built-in ways to calculate the zeta function:
-- **Riemann-Siegel**: Optimized for σ = 0.5, blazingly fast there
-- **Euler-Maclaurin**: General purpose, works anywhere
-- **Alexey Kuznetsov**: Simple and accurate 
-- Three others, each with their own character, pluses and minuses
-- Also the Eta function is available
-
-Turn on two sums at once. Watch them trace different spirals with different intermediate points, but converge to the same final value. It's like watching two hikers take different trails up the same mountain—they meet at the summit.
-
-Zip to Gram points using the slider. What do you notice about them?
-
-### Symmetries and Hidden Structure
-
-Turn on the **ZPS Bisector** visualization—it draws the two "legs" from origin → bisector point → zeta. At σ = 0.5, watch them stay equal length as you vary t. Move σ off 0.5? They immediately diverge. This is an interesting fact: equal legs = possible zeros. Unequal legs = no zeros possible.
-<img src="ZestImages/ZpsBisector_1.png" />
-
-Enable "yin-yang" teardrops—shapes by a link's ends traced in the local frame of reference.
-<img src="ZestImages/YinYang_1.png" />
-
-Turn on remainder functions (Rps, Rak). They are different ways of expressing Siegel's remainder function.
-<img src="ZestImages/Remainders_1.png" />
-
-Turn on various paths to trace what happens when the imaginary part is changed, or when the real part is changed.
-<img src="ZestImages/Paths_1.png" />
-
-## Who Made This and Why
-
-Paul Stahura is an engineer. Not a number theorist. Not a complex analysis expert. An engineer who got curious about the Riemann Hypothesis and thought, "What if I could just *look* at the function?"
-
-So he recruited Chris Cowherd and Nicolas Fish to build Zest. Make interactive visualizations. Build controls for exploring tons of parameters.
-
-And then he looked. Really looked. He spent over eight years exploring, zooming, comparing, noticing patterns. He saw things about the critical strip and the zeros that no one had seen before—because no one had built this particular tool before. Not this elaborate, at least. 
-
-Where is the exact, symbolic point along the spiral where the symmetry occurs?  The point that is simultaneously continuous in 2-d (the complex plane) and in 1-d (the spiral). He figured it out.
-
-**This is what computational tools are for.** Not replacing mathematical symbols, but extending perception. Galileo's telescope didn't replace astronomy; it revealed moons around Jupiter. And after some observational measurements, do those moons' orbits make ellipses? A mathematical formula?  Zest is the same idea: use visualization to generate conjectures. Prove conjectures using symbols.
-
-## What You Might Discover
-
-Nobody knows what you'll notice. That's the point. Choose a random point high up. You are the 1st person to ever see that object.
-
-Maybe you'll see a pattern in how zeros cluster. Maybe you'll notice something about remainder behavior. Maybe you'll observe correlations that suggest new questions.
-
-Or maybe you'll just build intuition. Maybe after exploring, you'll *understand* the Riemann Hypothesis in a way that reading papers never achieved. You'll feel it geometrically. Viscerally. 
-Zeta equals zero only when σ = 0.5  ...Or maybe not, lol. 
-Yes, Riemann knew the sum does not converge, but did he also know the sum produces complex beautiful spirals with a weird symmetry?
-
-**Visual intuition is real intuition.** Some of history's greatest mathematicians—Euler, Gauss, Ramanujan—had extraordinary geometric intuition. They could "see" mathematical structure in ways that formal training doesn't capture. Us non-geniuses need a computer to see it.
-
-Zest gives you access to that mode of understanding. Not through genius, but through computational power.
-
-## How to Start
-
-**Don't overthink it.** Just open Zest and start moving sliders. Five minutes of exploration will teach you more than five paragraphs of explanation.
-
-Suggested path:
-
-1. [Download](https://github.com/paul-stahura/zest/releases) for your platform (Windows or MacOS), or build from source using Unity Editor version **2021.3.45f2**.
-2. *Start at s = 2 + 0i**: Euler's famous sum equal to π²/6. Watch the spiral wind gently toward 1.645.
-3. **Move to the critical line**: s = 0.5 + 10i. More twists. More personality. Where things get fun.
-4. **Jump to a zero**: Load zeta zeros, click the first point (t ≈ 14.13). Watch the spiral wind *tight* around the origin.
-5. **Try off the critical line**: Move σ to 0.49 or 0.51. Watch what happens. The spiral doesn't make it back to zero. Something about σ = 0.5 is special.
-6. **Play**: Turn on teardrops. Load different datasets. Compare formulas. Follow your curiosity.
-
-<img src="ZestImages/Start_1.png" />
-
-Try the pre-sets!
-<img src="ZestImages/Taffy_1.png" />
-
-There's no wrong way to explore. Point it wherever you want.
-
-## The Joy of Just Looking
-
-You're not trying to solve anything. You're not writing a proof. You're not grinding through calculations. You're just... looking. Exploring. Noticing patterns. Following hunches.
-
-It's the same joy as peering through a telescope at Jupiter's moons, examining pond water under a microscope, watching time-lapse video of plants growing.
-
-There's wonder in observation. There's pleasure in seeing something beautiful. There's satisfaction in understanding through perception rather than derivation.
-
-The Riemann Zeta function has been studied since 1859. Riemann himself calculated the first few zeros by hand. Modern computers have found ten trillion more. But until tools like Zest, almost nobody could actually *see* what the function looks like as a living, breathing geometric object.
-
-[Video of the app in action](https://docs.google.com/videos/d/125Jo54jM8zF64Y7TjaTRHaDfDONbNi5Uf7QFXzEmbRA/edit?usp=share_link)
-
-If you really want to dig into the details, the terminology and the equations behind it, read this paper: [Remainder Terms of the Riemann Zeta Function](https://drive.google.com/file/d/1BIfq9CWdIOipq5I-ILCNvK1xU0gVhN4Z/view?usp=sharing)
-
-**The spirals are waiting.**
-
-<img src="ZestImages/Spirals_2.png" />
-
----

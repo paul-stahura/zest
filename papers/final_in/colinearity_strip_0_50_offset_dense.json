@@ -1,0 +1,31 @@
+{
+  "sigmaMin": 0,
+  "sigmaMax": 1,
+  "tMin": 0,
+  "tMax": 50,
+  "nSigma": 1125,
+  "nT": 3000,
+  "sigmaDensityKnots": {
+    "0": 100,
+    "1": 100,
+    "0.25": 200,
+    "0.5": 4000,
+    "0.75": 200
+  },
+  "sigmaMass": 1124.9999999999998,
+  "metric": "Distance of R/2 head to line through R1ps–R1ak, divided by that base. 0 ⇔ colinear; scale-invariant. Same ρ(σ) grid as area run.",
+  "baseEps": 1e-18,
+  "layout": "row-major T (slow) × sigma-index (fast); sigma abscissae in _sigma.bin",
+  "bin": "colinearity_strip_0_50_offset_dense.bin",
+  "dtype": "float64",
+  "field": "dist/base",
+  "stats": {
+    "offsetMin": 1.2764879339561835e-17,
+    "offsetMax": 954.371174685382,
+    "offsetMean": 0.34176426696386153,
+    "offsetMeanNearHalf": 0.2338163224494299,
+    "nHalfSamples": 117000,
+    "elapsedMs": 40378.667958
+  },
+  "caveat": "R1ak = Kuznetsov/i1 estimate; T clamped to ≥1e-4"
+}
