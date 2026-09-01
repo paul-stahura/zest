@@ -348,7 +348,7 @@ export function ZerosSlider(props: { onPick: (T: number) => void; currentT?: num
   }, [externalT, zeros]);
   useEffect(() => {
     let cancelled = false;
-    fetch(`/critical-strip-points/${encodeURIComponent("00 Zeta Zeros.csv")}`)
+    fetch(`${import.meta.env.BASE_URL}critical-strip-points/${encodeURIComponent("00 Zeta Zeros.csv")}`)
       .then((r) => r.text())
       .then((text) => {
         if (cancelled) return;

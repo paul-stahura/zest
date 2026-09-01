@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { AppShell } from "@/app/AppShell";
 import { VisualizationPage } from "@/app/VisualizationPage";
@@ -9,7 +9,7 @@ import { visualizationDefinitions } from "@/registry/visualizationRegistry";
  */
 export function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<AppShell />}>
           {visualizationDefinitions.map((definition) => (
@@ -22,6 +22,6 @@ export function App() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

@@ -7,6 +7,7 @@ import { defineConfig } from "vitest/config";
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: "/zest/",
   plugins: [react()],
   // Baked-in timestamp of when this bundle was built (production) or when the
   // dev server started (local). Read by the header version badge as the local

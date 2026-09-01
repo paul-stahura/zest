@@ -11,7 +11,7 @@ async function fetchPointSet(id: string, filename: string): Promise<CriticalPoin
   // contain `=` — like "Theta2 σ = 0.25.csv" — would otherwise fetch the
   // wrong content). encodeURI still handles spaces (→ %20) and the σ
   // character (→ %CF%83) correctly.
-  const url = `/critical-strip-points/${encodeURI(filename)}`;
+  const url = `${import.meta.env.BASE_URL}critical-strip-points/${encodeURI(filename)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch ${filename}: ${String(res.status)}`);
   const text = await res.text();
