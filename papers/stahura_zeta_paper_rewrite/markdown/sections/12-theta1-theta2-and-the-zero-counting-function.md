@@ -179,7 +179,7 @@ N_{\ast}(T)=\frac{1}{\pi}\vartheta\bigl(I(T)\bigr)
 \qquad \vartheta_1^{\ast}=\arg B_1^{\ast}.\qquad\text{(162)}
 ```
 
-That is the Riemann–Siegel phase plus the argument of the companion $`B_1^{\ast}=\zeta+\zeta'/(2\vartheta')`$, or equivalently the Prüfer angle of $`(Z,\,-Z'/\vartheta')`$[^12]:
+That is the Riemann–Siegel phase plus the argument of the companion $`B_1^{\ast}=\zeta+\zeta'/(2\vartheta')`$, or equivalently the Prüfer angle of $`(Z,\,-Z'/\vartheta')`$<sup id="fnref-12">[12](#fn-12)</sup>:
 
 <a id="eq-N-star-prufer"></a>
 
@@ -487,7 +487,9 @@ $`N_{\ast}`$ contains more and less information than *N*. More because it is con
 
 ---
 
-[^12]: What we have not found in the literature is the argument of this companion used this way, as an interpolant of the count. The nearest classical objects are the exact count $`N=\vartheta/\pi+1+S`$ of [(152)](#eq-N-theta) and the Prüfer phase of an oscillator \[19\].
+### Notes
+
+<a id="fn-12"></a>**12.**&nbsp; What we have not found in the literature is the argument of this companion used this way, as an interpolant of the count. The nearest classical objects are the exact count $`N=\vartheta/\pi+1+S`$ of [(152)](#eq-N-theta) and the Prüfer phase of an oscillator \[19\]. [↩](#fnref-12)
 
 ---
 

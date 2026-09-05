@@ -74,7 +74,7 @@ The usual product form of the zeta function is the Euler product over the primes
 
 The goal of this subsection is to write each link as a homogeneous coordinate transformation matrix, and then to group the links into a single transformation matrix, so that ζ takes the form of a matrix product with four components: the two sums $`\Sigma_1,\Sigma_2`$ and the two partial-summand remainders $`R_1,R_2`$.
 
-Each summand is a link in the plane. We number the links of each chain from zero: link *n* runs from joint *n* to joint $`n+1`$ (joint *n* being the value of the partial sum after *n* summands), so link *n* represents the $`(n+1)`$st summand. The *m* summands of a partial sum are thus links $`0,\dots,m-1`$, and each remainder is the *fractional link* *m*. We encode one link by the $`3\times3`$ matrix with link length *l* and rotation θ from the previous link,[^5]
+Each summand is a link in the plane. We number the links of each chain from zero: link *n* runs from joint *n* to joint $`n+1`$ (joint *n* being the value of the partial sum after *n* summands), so link *n* represents the $`(n+1)`$st summand. The *m* summands of a partial sum are thus links $`0,\dots,m-1`$, and each remainder is the *fractional link* *m*. We encode one link by the $`3\times3`$ matrix with link length *l* and rotation θ from the previous link,<sup id="fnref-5">[5](#fn-5)</sup>
 
 <a id="eq-link-matrix"></a>
 
@@ -241,8 +241,10 @@ Three features of [(57)](#eq-zeta-serial) deserve comment. First, the rotation $
 
 ---
 
-[^5]: This is the planar case of the Denavit–Hartenberg convention of robot kinematics \[8\], in which each link of a serial chain is encoded by the $`4\times4`$ homogeneous transformation $`\mathrm{Rot}_z(\theta_i)\,\mathrm{Trans}_z(d_i)\,\mathrm{Trans}_x(a_i)\,
-    \mathrm{Rot}_x(\alpha_i)`$ built from four parameters: the joint angle $`\theta_i`$, the joint offset $`d_i`$, the link length $`a_i`$ and the link twist $`\alpha_i`$. A planar chain has $`d_i=\alpha_i=0`$, which leaves the two parameters $`(\theta_i,a_i)`$ and the $`3\times3`$ matrix [(50)](#eq-link-matrix); [(57)](#eq-zeta-serial) is then the forward-kinematic product of the chain. One collision of names to watch: the Denavit–Hartenberg offset $`d_i`$ has nothing to do with the weights $`d_1,d_2`$ of [(17)](04-decomposing-the-remainder-r-r1-r2.md#eq-d1)–[(18)](04-decomposing-the-remainder-r-r1-r2.md#eq-d2).
+### Notes
+
+<a id="fn-5"></a>**5.**&nbsp; This is the planar case of the Denavit–Hartenberg convention of robot kinematics \[8\], in which each link of a serial chain is encoded by the $`4\times4`$ homogeneous transformation $`\mathrm{Rot}_z(\theta_i)\,\mathrm{Trans}_z(d_i)\,\mathrm{Trans}_x(a_i)\,
+    \mathrm{Rot}_x(\alpha_i)`$ built from four parameters: the joint angle $`\theta_i`$, the joint offset $`d_i`$, the link length $`a_i`$ and the link twist $`\alpha_i`$. A planar chain has $`d_i=\alpha_i=0`$, which leaves the two parameters $`(\theta_i,a_i)`$ and the $`3\times3`$ matrix [(50)](#eq-link-matrix); [(57)](#eq-zeta-serial) is then the forward-kinematic product of the chain. One collision of names to watch: the Denavit–Hartenberg offset $`d_i`$ has nothing to do with the weights $`d_1,d_2`$ of [(17)](04-decomposing-the-remainder-r-r1-r2.md#eq-d1)–[(18)](04-decomposing-the-remainder-r-r1-r2.md#eq-d2). [↩](#fnref-5)
 
 ---
 

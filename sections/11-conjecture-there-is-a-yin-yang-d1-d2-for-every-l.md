@@ -535,7 +535,7 @@ Checked at $`\sigma=\tfrac12,\tfrac14,\tfrac7{10}`$ and $`T=6.18,\,6.72,\,12.4,\
 
 ### 11.4 The crossings: $`\Sigma_{1x}`$ and $`\Sigma_{2x}`$ formula
 
-§[11.1](#sec-links-crossing) named the reverse partner of each forward link, and §[11.3](#sec-d1-any) read the crossing fraction $`\hat d_1(k,T)`$ along that link. Those two data locate a point on every forward link $`0,\dots,m`$. Connecting the points in order is the same Dirichlet sum as $`\Sigma_1+R_1`$, re-jointed: the joints sit at the crossings instead of at the integers, and the walk ends at the bisector point *B₁* rather than at Σ₁. Call that walk $`\Sigma_{1x}`$.[^11]
+§[11.1](#sec-links-crossing) named the reverse partner of each forward link, and §[11.3](#sec-d1-any) read the crossing fraction $`\hat d_1(k,T)`$ along that link. Those two data locate a point on every forward link $`0,\dots,m`$. Connecting the points in order is the same Dirichlet sum as $`\Sigma_1+R_1`$, re-jointed: the joints sit at the crossings instead of at the integers, and the walk ends at the bisector point *B₁* rather than at Σ₁. Call that walk $`\Sigma_{1x}`$.<sup id="fnref-11">[11](#fn-11)</sup>
 
 The crossing fraction of link *k*, from joint *k* to the crossing point, is $`\hat d_1(k,T)`$ of [(133)](#eq-hat-any); *T* is fixed through what follows, so we write it $`\hat d_1(k)`$. Link *k* carries the summand $`n=k+1`$, so the crossing on it is
 
@@ -802,7 +802,9 @@ Section [11](#sec-general-yinyang) mixes identities that are proved, identities
 
 ---
 
-[^11]: The subscript *x* is for crossing, not a dummy index: $`\Sigma_{1x}`$ is the crossing-joint form of Σ₁, and $`\Sigma_{2x}`$ of Σ₂.
+### Notes
+
+<a id="fn-11"></a>**11.**&nbsp; The subscript *x* is for crossing, not a dummy index: $`\Sigma_{1x}`$ is the crossing-joint form of Σ₁, and $`\Sigma_{2x}`$ of Σ₂. [↩](#fnref-11)
 
 ---
 

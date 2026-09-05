@@ -6,7 +6,7 @@
 
 ## 1 Introduction
 
-Siegel published his study of Riemann’s unpublished papers in 1932 \[21\]. Working through the Nachlaß at Göttingen[^1] he recovered, from calculations Riemann never published, an asymptotic evaluation of ζ by the saddle-point method. The result is what is now called the Riemann–Siegel formula, and it is the starting point of this paper.
+Siegel published his study of Riemann’s unpublished papers in 1932 \[21\]. Working through the Nachlaß at Göttingen<sup id="fnref-1">[1](#fn-1)</sup> he recovered, from calculations Riemann never published, an asymptotic evaluation of ζ by the saddle-point method. The result is what is now called the Riemann–Siegel formula, and it is the starting point of this paper.
 
 This paper does seven things: the five results announced in the abstract, together with the reparameterization they rest on and an account of the geometry from which they came.
 
@@ -57,7 +57,9 @@ which is [(163)](12-theta1-theta2-and-the-zero-counting-function.md#eq-N-star-pr
 
 ---
 
-[^1]: The chronology pins the reading to Göttingen, where the Nachlaß is held: Siegel studied it there in the early 1930s (though he didn’t move to Göttingen until 1938) and published in 1932, before his first visit to the Institute for Advanced Study (January–June 1935) and his longer residence there (1940–1951).
+### Notes
+
+<a id="fn-1"></a>**1.**&nbsp; The chronology pins the reading to Göttingen, where the Nachlaß is held: Siegel studied it there in the early 1930s (though he didn’t move to Göttingen until 1938) and published in 1932, before his first visit to the Institute for Advanced Study (January–June 1935) and his longer residence there (1940–1951). [↩](#fnref-1)
 
 ---
 

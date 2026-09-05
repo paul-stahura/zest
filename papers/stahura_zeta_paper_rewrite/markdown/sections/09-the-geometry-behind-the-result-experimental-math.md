@@ -6,9 +6,9 @@
 
 ## 9 The geometry behind the result (experimental mathematics)
 
-The decomposition $`R=R_{1ps}+R_{2ps}`$ was not first derived; it was first *seen*. Over roughly nine years we built and used an interactive visualization tool, Zest,[^7] which draws the partial-sum chains of ζ in the complex plane and lets us sweep σ and *T* continuously while measuring what appears on the screen. This section reconstructs the series of observations made with that tool. It led, in order, to a distinguished link and point of the spiral (the *bisector link* and *bisector point*), and from their motion to the mapping $`I(T)`$ of §[3](03-reparameterization-and-cutoff-choice-the-i-t-map.md#sec-IT). The final observation in that sequence, the *yin* and *yang* curves from which the weights $`d_1,d_2`$ of §[4](04-decomposing-the-remainder-r-r1-r2.md#sec-decomp) were read off, was developed in §[6.4](06-periodicity-in-t.md#sec-yinyang-inf) and §[6.5](06-periodicity-in-t.md#sec-yinyang-general); §[10](10-geometric-origins-of-the-i-t-and-yin-and-yang-fu.md#sec-geometric-origins) reconstructs how both the mapping and the curves were found.
+The decomposition $`R=R_{1ps}+R_{2ps}`$ was not first derived; it was first *seen*. Over roughly nine years we built and used an interactive visualization tool, Zest,<sup id="fnref-7">[7](#fn-7)</sup> which draws the partial-sum chains of ζ in the complex plane and lets us sweep σ and *T* continuously while measuring what appears on the screen. This section reconstructs the series of observations made with that tool. It led, in order, to a distinguished link and point of the spiral (the *bisector link* and *bisector point*), and from their motion to the mapping $`I(T)`$ of §[3](03-reparameterization-and-cutoff-choice-the-i-t-map.md#sec-IT). The final observation in that sequence, the *yin* and *yang* curves from which the weights $`d_1,d_2`$ of §[4](04-decomposing-the-remainder-r-r1-r2.md#sec-decomp) were read off, was developed in §[6.4](06-periodicity-in-t.md#sec-yinyang-inf) and §[6.5](06-periodicity-in-t.md#sec-yinyang-general); §[10](10-geometric-origins-of-the-i-t-and-yin-and-yang-fu.md#sec-geometric-origins) reconstructs how both the mapping and the curves were found.
 
-Throughout we use the link and joint numbering of §[7](07-summands-as-links-and-joints.md#sec-matrix-product): joint *k* of a chain is the value of its partial sum after *k* summands, and link *k* runs from joint *k* to joint $`k+1`$, so that link *k* represents the $`(k+1)`$st summand and each remainder is the fractional link *m*. The *forward* link chain (Σ₁) is anchored at joint $`0`$, the origin, and it represents the main sum. The *reverse* chain (Σ₂), representing the dual sum, is anchored at ζ and traversed backwards, so its joint *m* lands at $`\zeta-\Sigma_2=\Sigma_1+R`$. In the pictures the chains are drawn well past joint $`m=\lfloor T\rfloor`$: the sum, though ultimately divergent, first winds into an Euler-like spiral whose center lies near ζ; it seemingly converges before it diverges. Figure [16](#fig-full-spirals) shows the picture: the forward chain winds from the origin into a spiral centered near ζ, while the reverse chain winds from ζ into a mirror spiral centered near the origin, and the two link chains cross. If more links were drawn, the links would continue to spiral outward around ζ and cover the entire figure, because the zeta sum diverges on the critical strip, unlike the Dirichlet *L*-functions of §[10.2](10-geometric-origins-of-the-i-t-and-yin-and-yang-fu.md#sec-IT-Lfunctions), whose non-principal characters have bounded partial sums and so those chains close in on their limit instead of covering the plane.[^8] We stop drawing links at link number
+Throughout we use the link and joint numbering of §[7](07-summands-as-links-and-joints.md#sec-matrix-product): joint *k* of a chain is the value of its partial sum after *k* summands, and link *k* runs from joint *k* to joint $`k+1`$, so that link *k* represents the $`(k+1)`$st summand and each remainder is the fractional link *m*. The *forward* link chain (Σ₁) is anchored at joint $`0`$, the origin, and it represents the main sum. The *reverse* chain (Σ₂), representing the dual sum, is anchored at ζ and traversed backwards, so its joint *m* lands at $`\zeta-\Sigma_2=\Sigma_1+R`$. In the pictures the chains are drawn well past joint $`m=\lfloor T\rfloor`$: the sum, though ultimately divergent, first winds into an Euler-like spiral whose center lies near ζ; it seemingly converges before it diverges. Figure [16](#fig-full-spirals) shows the picture: the forward chain winds from the origin into a spiral centered near ζ, while the reverse chain winds from ζ into a mirror spiral centered near the origin, and the two link chains cross. If more links were drawn, the links would continue to spiral outward around ζ and cover the entire figure, because the zeta sum diverges on the critical strip, unlike the Dirichlet *L*-functions of §[10.2](10-geometric-origins-of-the-i-t-and-yin-and-yang-fu.md#sec-IT-Lfunctions), whose non-principal characters have bounded partial sums and so those chains close in on their limit instead of covering the plane.<sup id="fnref-8">[8](#fn-8)</sup> We stop drawing links at link number
 
 <a id="eq-LN"></a>
 
@@ -81,7 +81,7 @@ L_2 &= \bigl|\,\Sigma_2+R_{2ps}\,\bigr|,\qquad\text{(72)}
 \end{align}
 ```
 
-while ϑ₁ is the angle Leg 1 makes with the real axis and ϑ₂ is the angle from Leg 1 to Leg 2 (oriented so that a positive ϑ₂ rotates Leg 1 toward Leg 2):[^9]
+while ϑ₁ is the angle Leg 1 makes with the real axis and ϑ₂ is the angle from Leg 1 to Leg 2 (oriented so that a positive ϑ₂ rotates Leg 1 toward Leg 2):<sup id="fnref-9">[9](#fn-9)</sup>
 
 <a id="autoeq-14"></a>
 
@@ -162,7 +162,7 @@ A zero of ζ in the critical strip requires *both* of the following:
 \vartheta_2 = \pi,
 ```
 
-i.e. the two legs must be equal in length *and* Leg 2 must fold back onto Leg 1.[^10] By Corollary [9.1](#cor-equal-legs) the length condition holds automatically on the critical line; there, a zero occurs exactly when $`\vartheta_2 =
+i.e. the two legs must be equal in length *and* Leg 2 must fold back onto Leg 1.<sup id="fnref-10">[10](#fn-10)</sup> By Corollary [9.1](#cor-equal-legs) the length condition holds automatically on the critical line; there, a zero occurs exactly when $`\vartheta_2 =
 \pi`$. Away from the critical line, the two legs are unequal except at exceptional points, so most of the strip is immediately ruled out for zeros. The leg-length ratio is symmetric across the line,
 
 <a id="autoeq-5"></a>
@@ -540,13 +540,15 @@ There is a converse worth stating. Almost every detected component brackets a ze
 
 ---
 
-[^7]: Source code and standalone executables (Mac and PC) and a web app at <https://github.com/paul-stahura/zest>.
+### Notes
 
-[^8]: At $`t=176.13`$ on the critical line, the partial sums of $`L(s,\chi_3)`$ come within $`0.021`$, $`0.0021`$ and $`0.00019`$ of the value by $`N=10^3`$, $`10^5`$ and $`3\times10^6`$, a drift inward like $`N^{-1/2}`$, while zeta’s are off by $`0.18`$, $`1.80`$ and $`9.83`$, a drift outward at $`\sqrt{N}/t`$. For a principal character modulo *q*, $`L(s,\chi_0)=\zeta(s)\prod_{p\mid q}(1-p^{-s}),`$ rather than $`\zeta(s)`$ itself. The convergence behavior of higher-degree *L*-function Dirichlet series depends on the family and normalization, so no blanket critical-strip claim is made here.
+<a id="fn-7"></a>**7.**&nbsp; Source code and standalone executables (Mac and PC) and a web app at <https://github.com/paul-stahura/zest>. [↩](#fnref-7)
 
-[^9]: The subscripted leg angles $`\vartheta_1,\vartheta_2`$ are not to be confused with the Riemann–Siegel theta function $`\vartheta(t)`$ of Appendix [A.2](a-proof-of-proposition-4-1-reality-and-positivity.md#sec-phase-bound).
+<a id="fn-8"></a>**8.**&nbsp; At $`t=176.13`$ on the critical line, the partial sums of $`L(s,\chi_3)`$ come within $`0.021`$, $`0.0021`$ and $`0.00019`$ of the value by $`N=10^3`$, $`10^5`$ and $`3\times10^6`$, a drift inward like $`N^{-1/2}`$, while zeta’s are off by $`0.18`$, $`1.80`$ and $`9.83`$, a drift outward at $`\sqrt{N}/t`$. For a principal character modulo *q*, $`L(s,\chi_0)=\zeta(s)\prod_{p\mid q}(1-p^{-s}),`$ rather than $`\zeta(s)`$ itself. The convergence behavior of higher-degree *L*-function Dirichlet series depends on the family and normalization, so no blanket critical-strip claim is made here. [↩](#fnref-8)
 
-[^10]: Tolkien’s subtitle for *The Hobbit*, *There and Back Again*, is the whole of the requirement. A hobbit leaves the Shire (the origin) for Mordor (the bisector point) and his journey must end where it began, and no choice of direction for the return trip from Mordor can bring the hobbit back to the Shire unless the way back is exactly as long as the way out. Equal legs is that necessity; $`\vartheta_2=\pi`$ is the further demand that the way back be the way he came.
+<a id="fn-9"></a>**9.**&nbsp; The subscripted leg angles $`\vartheta_1,\vartheta_2`$ are not to be confused with the Riemann–Siegel theta function $`\vartheta(t)`$ of Appendix [A.2](a-proof-of-proposition-4-1-reality-and-positivity.md#sec-phase-bound). [↩](#fnref-9)
+
+<a id="fn-10"></a>**10.**&nbsp; Tolkien’s subtitle for *The Hobbit*, *There and Back Again*, is the whole of the requirement. A hobbit leaves the Shire (the origin) for Mordor (the bisector point) and his journey must end where it began, and no choice of direction for the return trip from Mordor can bring the hobbit back to the Shire unless the way back is exactly as long as the way out. Equal legs is that necessity; $`\vartheta_2=\pi`$ is the further demand that the way back be the way he came. [↩](#fnref-10)
 
 ---
 

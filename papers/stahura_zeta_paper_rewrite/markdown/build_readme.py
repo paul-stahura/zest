@@ -1293,8 +1293,31 @@ def clean_toc_text(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 FOOTNOTE_DEF = re.compile(r"^\[\^(\d+)\]: (.*(?:\n(?![\[#]).*)*)", re.M)
-footnotes = {m.group(1): m.group(0).rstrip() for m in FOOTNOTE_DEF.finditer(body)}
+footnotes = {m.group(1): m.group(2).rstrip() for m in FOOTNOTE_DEF.finditer(body)}
 body = FOOTNOTE_DEF.sub("", body).rstrip() + "\n"
+
+
+def attach_notes(text: str, used: list[str]) -> str:
+    """Emit the notes by hand rather than as GFM footnotes.
+
+    GitHub's math pass never descends into the <section data-footnotes>
+    block it builds for "[^n]:" definitions, so every expression inside a
+    real footnote is left as literal source -- inline and display alike.
+    Writing the same thing as an ordinary paragraph behind our own <a id>
+    anchor puts it back within reach of the renderer, and GitHub's own
+    id-prefixing keeps the jump links working in both directions.
+    """
+    notes = []
+    for n in used:
+        if n not in footnotes:
+            continue
+        para = footnotes[n].split("\n\n")
+        para[0] = '<a id="fn-%s"></a>**%s.**&nbsp; ' % (n, n) + para[0]
+        para[-1] = para[-1].rstrip() + " [\u21a9](#fnref-%s)" % n
+        notes.append("\n\n".join(para))
+    if not notes:
+        return text
+    return text.rstrip() + "\n\n---\n\n### Notes\n\n" + "\n\n".join(notes) + "\n"
 
 # ---------------------------------------------------------------------------
 # 5b. split into one page per top-level section
@@ -1362,6 +1385,8 @@ def link_rewriter(from_file: str):
     """Point every #anchor link at the page that actually holds it."""
     def repl(m: re.Match) -> str:
         text, aid = m.group(1), m.group(2)
+        if re.fullmatch(r"fn-\d+|fnref-\d+", aid):
+            return m.group(0)          # note anchors always live on this page
         home = anchor_home.get(aid)
         if home is None:
             missing_targets.add(aid)
@@ -1413,10 +1438,13 @@ for i, sec in enumerate(sections):
     # Footnotes have to be attached before the links are rewritten -- they
     # carry cross-references of their own.
     used = sorted({n for n in re.findall(r"\[\^(\d+)\]", text)}, key=int)
-    if used:
-        text = text.rstrip() + "\n\n---\n\n" + "\n\n".join(
-            footnotes[n] for n in used if n in footnotes
-        ) + "\n"
+    text = re.sub(
+        r"\[\^(\d+)\]",
+        lambda m: '<sup id="fnref-%s">[%s](#fn-%s)</sup>'
+        % (m.group(1), m.group(1), m.group(1)),
+        text,
+    )
+    text = attach_notes(text, used)
 
     text = link_rewriter(sec["file"])(text)
     text = text.replace('src="figures/', 'src="../figures/')
@@ -1515,6 +1543,8 @@ total_cost = 0
 all_banned: set[str] = set()
 indented_fences: list[str] = []
 dollars_in_math: list[str] = []
+note_problems: list[str] = []
+note_defs: dict[str, str] = {}
 
 for name, _ in [("README.md", 0)] + written:
     path = MD_DIR / name if name == "README.md" else SEC_DIR / name
@@ -1539,6 +1569,29 @@ for name, _ in [("README.md", 0)] + written:
         if "$" in m.group(1):
             dollars_in_math.append(f"{name}:{text[:m.start()].count(chr(10)) + 1}")
 
+    # Notes are written by hand (see attach_notes), so nothing enforces the
+    # pairing for us the way GitHub's own footnote handling would have.
+    marks = re.findall(r'<sup id="fnref-(\d+)">', text)
+    defs = re.findall(r'<a id="fn-(\d+)"></a>', text)
+    if set(marks) != set(defs):
+        note_problems.append(f"{name}: markers {sorted(set(marks), key=int)} "
+                             f"!= notes {sorted(set(defs), key=int)}")
+    if defs != sorted(defs, key=int):
+        note_problems.append(f"{name}: notes out of order {defs}")
+    for kind, got in (("fnref", marks), ("fn", defs)):
+        dup = sorted({n for n in got if got.count(n) > 1})
+        if dup:
+            note_problems.append(f"{name}: duplicate id {kind}-{dup}")
+    for n in set(defs):
+        if f"](#fnref-{n})" not in text:
+            note_problems.append(f"{name}: note {n} has no return link")
+    if re.search(r"(?<!\w)\[\^\d+\]", text):
+        note_problems.append(f"{name}: leftover GFM footnote syntax")
+    for n in defs:
+        if n in note_defs:
+            note_problems.append(f"{name}: note {n} also defined in {note_defs[n]}")
+        note_defs[n] = name
+
 print(f"pages written      : {len(written) + 1}  (README.md + {len(written)} sections)")
 print(f"figures copied     : {copied}"
       + (f"  ({len(borrowed)} from another paper)" if borrowed else ""))
@@ -1548,6 +1601,15 @@ print(f"inline math spans  : {inline_spans}"
 print(f"display math blocks without a number: {unnumbered_eq}")
 print(f"GitHub math cost   : {total_cost} total, "
       f"worst page {worst_page[0]} at {worst_page[1]} (budget {MATH_BUDGET}/page)")
+nums = sorted(int(n) for n in note_defs)
+if nums and nums != list(range(1, len(nums) + 1)):
+    note_problems.append(f"note numbering is not 1..n contiguous: {nums}")
+print(f"notes              : {len(nums)} over "
+      f"{len(set(note_defs.values()))} pages, numbered as in the PDF")
+if note_problems:
+    print(f"NOTE PROBLEMS: {len(note_problems)}", file=sys.stderr)
+    for s in note_problems:
+        print("   " + s, file=sys.stderr)
 if missing_targets:
     print(f"UNRESOLVED LINK TARGETS: {len(missing_targets)}", file=sys.stderr)
     for t in sorted(missing_targets)[:10]:
