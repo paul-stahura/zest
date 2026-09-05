@@ -3,7 +3,7 @@ name: Deploy web app to GitHub Pages
 on:
   push:
     branches:
-      - Web-App-Publish-8-26-26
+      - main
   workflow_dispatch:
 
 permissions:
