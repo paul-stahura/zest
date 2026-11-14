@@ -92,9 +92,9 @@ body {
   border-bottom-color: var(--accent);
 }
 
-/* Header status pill: build label + startup age. Absolutely centered
+/* Header status pill: LOCAL vs CLUSTER + startup/deploy age. Absolutely centered
    in the header (out of flow, so the brand stays left and the tabs stay right);
-   dot glows green while the build is < 10 min old. */
+   dot glows green while the version is < 10 min old. */
 .app-version {
   position: absolute;
   left: 50%;
@@ -182,10 +182,113 @@ body {
   border-top: 1px solid var(--border);
 }
 
+.lfn-fl-label {
+  position: relative;
+  cursor: help;
+}
+
+.lfn-fl-tip {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+  z-index: 40;
+  padding: 3px 6px;
+  background: rgba(12, 14, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.lfn-fl-label:hover .lfn-fl-tip {
+  display: block;
+}
+
+.zof-overlay-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.zof-overlay-sets-grid-head,
+.zof-overlay-sets-grid-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text);
+}
+
+.zof-overlay-sets-grid-head {
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
+.zof-overlay-sets-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.zof-overlay-sets-ak-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text);
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.zof-overlay-sets-label {
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.zof-overlay-sets-count {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-align: right;
+  white-space: nowrap;
+}
+
 .toolbox-section-bare .toolbox-section-body {
   padding: 6px;
   gap: 5px;
   border-top: none;
+}
+
+.zest-ja-cluster {
+  gap: 5px;
+}
+
+.zest-ja-cluster .zest-control-row {
+  gap: 6px;
+}
+
+.zest-ja-sweep-actions {
+  flex-wrap: nowrap !important;
+  gap: 4px;
+}
+
+.zest-ja-sweep-actions button {
+  padding: 2px 5px;
+  font-size: 0.72em;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .zest-ja-legend {
@@ -324,6 +427,46 @@ input[type="range"].zest-animate-slider::-moz-range-thumb {
   box-shadow: 0 0 6px rgba(255, 102, 136, 0.7);
 }
 
+/* Big Sigma tab: σ (green) and {T} (red) native sliders. */
+input[type="range"].zest-big-sigma-green {
+  background: #3bd44a !important;
+  height: 3px;
+  accent-color: #3bd44a;
+}
+input[type="range"].zest-big-sigma-green::-webkit-slider-thumb {
+  background: #3bd44a !important;
+  box-shadow: 0 0 6px rgba(59, 212, 74, 0.7);
+}
+input[type="range"].zest-big-sigma-green:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 10px rgba(59, 212, 74, 0.95);
+}
+input[type="range"].zest-big-sigma-green::-moz-range-thumb {
+  background: #3bd44a !important;
+  box-shadow: 0 0 6px rgba(59, 212, 74, 0.7);
+}
+.zest-value-input.zest-big-sigma-sigma-above-minus-one {
+  color: #4d9fff;
+}
+.zest-value-input.zest-big-sigma-sigma-above-minus-one:focus {
+  border-bottom-color: #4d9fff;
+}
+input[type="range"].zest-big-sigma-red {
+  background: #ff5555 !important;
+  height: 3px;
+  accent-color: #ff5555;
+}
+input[type="range"].zest-big-sigma-red::-webkit-slider-thumb {
+  background: #ff5555 !important;
+  box-shadow: 0 0 6px rgba(255, 85, 85, 0.7);
+}
+input[type="range"].zest-big-sigma-red:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 10px rgba(255, 85, 85, 0.95);
+}
+input[type="range"].zest-big-sigma-red::-moz-range-thumb {
+  background: #ff5555 !important;
+  box-shadow: 0 0 6px rgba(255, 85, 85, 0.7);
+}
+
 /* ── Range Slider ───────────────────────────────────── */
 
 .rs-root {
@@ -432,25 +575,42 @@ input[type="range"].zest-animate-slider::-moz-range-thumb {
 
 .rs-outer {
   position: relative;
-  padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.rs-bound-outer {
-  position: absolute;
-  bottom: 0;
+.rs-range-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rs-range-caption {
+  flex: 1;
+  text-align: center;
   font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--accent);
-  opacity: 0.6;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
   white-space: nowrap;
 }
 
-.rs-bound-outer:first-child {
-  left: 0;
+.rs-range-caption--editable {
+  cursor: pointer;
 }
 
-.rs-bound-outer:last-child {
-  right: 0;
+.rs-range-caption--editable:hover {
+  color: var(--accent);
+}
+
+.rs-bound-outer {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--accent);
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
 .rs-bound-outer--editable {

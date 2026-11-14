@@ -14,6 +14,7 @@ import {
   overlayInverseJoints,
   overlayToScreen,
   crossingPartSums,
+  crossingRemainderSegments,
   psLegs,
   sum1xJoints,
   sum2xJoints,
@@ -179,6 +180,38 @@ describe("fitPointsToRect", () => {
     const { v1, v2 } = crossingPartSums(fwd, inv, 0, crossingScale(index, false), b1);
     expect(v1).toEqual(b1);
     expect(v2).toEqual({ x: 0, y: 0 });
+  });
+
+  it("builds all pair remainder segments J_{m1} → K_{m2} for m1 = 0…⌊T⌋", () => {
+    const index = 6.18;
+    const m = 6;
+    const scale = crossingScale(index, false);
+    const zak = computeZakSpiralGeometry(0.5, index);
+    const fwd = forwardChain(0.5, index, false, 100_000);
+    const inv = reflectedInverseChain(0.5, index, false, zak.zeta, 100_000);
+    const segs = crossingRemainderSegments(fwd, inv, m, scale);
+    expect(segs.map((s) => [s.m1, s.m2])).toEqual([
+      [0, 44],
+      [1, 21],
+      [2, 14],
+      [3, 10],
+      [4, 8],
+      [5, 6],
+      [6, 6],
+    ]);
+    for (const seg of segs) {
+      expect(seg.from).toEqual(fwd.joints[seg.m1]);
+      expect(seg.to).toEqual(inv.joints[seg.m2]);
+    }
+
+    // Off the critical line near a parallel-link window, m1 = m still pins m2 = m.
+    const zakOff = computeZakSpiralGeometry(0.1, 6.24);
+    const fwdOff = forwardChain(0.1, 6.24, false, 100_000);
+    const invOff = reflectedInverseChain(0.1, 6.24, false, zakOff.zeta, 100_000);
+    const segsOff = crossingRemainderSegments(fwdOff, invOff, 6, crossingScale(6.24, false));
+    expect(segsOff).toHaveLength(7);
+    expect(segsOff[6]?.m1).toBe(6);
+    expect(segsOff[6]?.m2).toBe(6);
   });
 
   it("flips y so world-up lands toward the top of the canvas", () => {

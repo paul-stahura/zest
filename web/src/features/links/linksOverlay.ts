@@ -262,3 +262,44 @@ export function crossingPartSums(
   return { v1: { x: v1x, y: v1y }, v2: { x: v2x, y: v2y } };
 }
 
+export type CrossingRemainderSegment = {
+  /** Forward joint index m₁ ∈ {0, …, ⌊T⌋}. */
+  m1: number;
+  /** Partner reverse joint index m₂ = C_ℓ(m₁, T). */
+  m2: number;
+  /** World-space forward joint J_{m₁} = Σ₁(m₁). */
+  from: Point2;
+  /** World-space reflected reverse joint K_{m₂} = ζ(s) − Σ₂(m₂). */
+  to: Point2;
+};
+
+/**
+ * Remainder segments J_{m₁} → K_{m₂} (vector R_{m₁,m₂}(s) = ζ − Σ₁(m₁) − Σ₂(m₂))
+ * for every forward joint m₁ = 0 … ⌊T⌋, where m₂ is the reverse link that crosses
+ * forward link m₁ (pinned to m₂ = m at the bisector m = ⌊T⌋).
+ */
+export function crossingRemainderSegments(
+  fwd: Chain,
+  inv: Chain,
+  m: number,
+  scale: number,
+): CrossingRemainderSegment[] {
+  const out: CrossingRemainderSegment[] = [];
+  for (let m1 = 0; m1 <= m; m1++) {
+    const m2 = m1 === m
+      ? m
+      : crossingLink(fwd, inv, m1, scale, m)?.link ?? null;
+    if (m2 === null) continue;
+    const from = fwd.joints[m1];
+    const to = inv.joints[m2];
+    if (from === undefined || to === undefined) continue;
+    out.push({
+      m1,
+      m2,
+      from: { x: from.x, y: from.y },
+      to: { x: to.x, y: to.y },
+    });
+  }
+  return out;
+}
+

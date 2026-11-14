@@ -28,7 +28,13 @@ import {
   inverseChain,
   reflectedInverseChain,
 } from "@/features/links/linksChains";
-import { crossingPartSums, psLegs, sum1xJoints, sum2xJoints } from "@/features/links/linksOverlay";
+import {
+  crossingPartSums,
+  crossingRemainderSegments,
+  psLegs,
+  sum1xJoints,
+  sum2xJoints,
+} from "@/features/links/linksOverlay";
 import {
   RPS1_COLOR,
   RPS2_COLOR,
@@ -36,6 +42,12 @@ import {
 import {
   calcForwardSum, calcRps1, calcRps2, calcRak1, calcRHalf,
 } from "@/shared/math/sumRemainders";
+import { calcB1Star, calcHStar, calcMStar, calcRho, calcZetaLogDeriv, chiLogDeriv } from "@/shared/math/b1Star";
+import { calcAkSaddleTerms, chirpSumSpiral } from "@/shared/math/akSaddleTargets";
+import { bigSigmaWorldScale, computeBigSigmaGeometry, pointsMaxRadius, scalePoints } from "@/shared/math/bigSigmaSpiral";
+import { findNextRhoHalfIndex } from "@/shared/math/findRhoHalf";
+import { complex } from "@/shared/math/complex";
+import { calcRightAnglePoint } from "@/shared/math/rightAnglePoint";
 
 const EXTEND_LINK_VALUES: readonly number[] = [0, 5000, 50000, 500000];
 
@@ -274,6 +286,45 @@ export function ChampionsSlider(props: { onPick: (T: number) => void; currentT?:
 }
 
 /**
+ * Prev/next buttons that jump to the nearest height where ρ = 1/2 on
+ * σ = 1/2, i.e. the next extremum of Z. Same ◀ ▶ pair as the champions
+ * and zeros rows; the search itself is findNextRhoHalfIndex.
+ */
+export function RhoHalfStepper(props: {
+  currentT: number;
+  usePolyImag: boolean;
+  onPick: (T: number) => void;
+}) {
+  const arrowStyle = {
+    width: 16,
+    height: 16,
+    padding: 0,
+    lineHeight: "14px",
+    fontSize: 10,
+    border: "1px solid var(--border, #444)",
+    borderRadius: 3,
+    background: "transparent",
+    color: "var(--text, #ccc)",
+    cursor: "pointer",
+  };
+  const step = (direction: 1 | -1) => {
+    const T = findNextRhoHalfIndex(props.currentT, direction, props.usePolyImag);
+    if (T !== null) props.onPick(T);
+  };
+  return createElement(
+    "div",
+    { className: "zest-control" },
+    createElement(
+      "div",
+      { className: "zest-control-row", style: { display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4 } },
+      createElement("span", { className: "zest-label" }, "ρ = ½"),
+      createElement("button", { style: arrowStyle, title: "previous ρ = ½", onClick: () => { step(-1); } }, "◀"),
+      createElement("button", { style: arrowStyle, title: "next ρ = ½", onClick: () => { step(1); } }, "▶"),
+    ),
+  );
+}
+
+/**
  * Integer scroll bar (champions-slider style) for K = number of last spirals
  * whose middle link is extended. Range 0 … ⌊T⌋, step 1. Controlled by `value`.
  */
@@ -418,24 +469,28 @@ export function ZerosSlider(props: { onPick: (T: number) => void; currentT?: num
 }
 
 /**
- * Custom "Integer part of T" row: number input on top (accepts any value),
- * piecewise-linear slider below mapping [0,1] -> 0..20..100..500.
- * Typing T > 500 pins the slider at the right end.
+ * Custom "Integer part of T" row: number input on top, piecewise-linear slider
+ * below. Default far end is 1500; pass `maxInt` to clamp type/arrows and put
+ * the slider’s right end at that integer (Big Sigma uses 4000).
  */
-export function IntegerPartTRow(props: { intValue: number; onChange: (v: number) => void }) {
-  // slider position [0,1] -> T value. Accelerating ramp: halfway≈100, 0.75≈500,
-  // far end=1500. Arrows can still step past 1500 (slider just pins at the end).
+export function IntegerPartTRow(props: { intValue: number; onChange: (v: number) => void; maxInt?: number }) {
+  const sliderEnd = props.maxInt ?? 1500;
+  const clampInt = (n: number): number => {
+    const v = Math.max(0, Math.trunc(n));
+    if (props.maxInt === undefined) return v;
+    return Math.min(props.maxInt, v);
+  };
+  // Accelerating ramp: halfway≈100, 0.75≈500, far end=`sliderEnd`.
   const sliderToT = (s: number): number => {
     if (s <= 0.5) return 200 * s;
     if (s <= 0.75) return 100 + 1600 * (s - 0.5);
-    return 500 + 4000 * (s - 0.75);
+    return 500 + (sliderEnd - 500) * (s - 0.75) / 0.25;
   };
-  // T value -> slider position [0,1] (clamped to 1 for T > 1500)
   const TToSlider = (T: number): number => {
     if (T <= 0) return 0;
     if (T <= 100) return T / 200;
     if (T <= 500) return 0.5 + (T - 100) / 1600;
-    if (T <= 1500) return 0.75 + (T - 500) / 4000;
+    if (T <= sliderEnd) return 0.75 + (T - 500) / ((sliderEnd - 500) / 0.25);
     return 1;
   };
 
@@ -443,7 +498,7 @@ export function IntegerPartTRow(props: { intValue: number; onChange: (v: number)
   useEffect(() => { setText(String(props.intValue)); }, [props.intValue]);
   const commit = () => {
     const n = Number(text);
-    if (Number.isFinite(n)) props.onChange(Math.max(0, Math.trunc(n)));
+    if (Number.isFinite(n)) props.onChange(clampInt(n));
     else setText(String(props.intValue));
   };
 
@@ -453,7 +508,7 @@ export function IntegerPartTRow(props: { intValue: number; onChange: (v: number)
     border: "1px solid var(--border, #444)", borderRadius: 3,
     background: "transparent", color: "var(--text, #ccc)", cursor: "pointer",
   };
-  const step = (d: number): void => { props.onChange(Math.max(0, props.intValue + d)); };
+  const step = (d: number): void => { props.onChange(clampInt(props.intValue + d)); };
   return createElement(
     "div",
     { className: "zest-control" },
@@ -469,6 +524,7 @@ export function IntegerPartTRow(props: { intValue: number; onChange: (v: number)
         style: { marginLeft: "auto" },
         value: text,
         min: 0,
+        max: props.maxInt,
         step: 1,
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => setText(e.target.value),
         onBlur: commit,
@@ -482,7 +538,7 @@ export function IntegerPartTRow(props: { intValue: number; onChange: (v: number)
       max: 1,
       step: 0.001,
       onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newT = Math.round(sliderToT(Number(e.target.value)));
+        const newT = clampInt(Math.round(sliderToT(Number(e.target.value))));
         props.onChange(newT);
       },
     }),
@@ -566,6 +622,16 @@ function ringSprite(): THREE.CanvasTexture {
 }
 
 const TEXT_SPRITE_VIEWPORT = new THREE.Vector2();
+const PARENT_WORLD_SCALE = new THREE.Vector3();
+
+/** Parent world scale, so a screen-fixed mark stays the same CSS size when the chain is shrunk. */
+function parentUniformScale(obj: THREE.Object3D): number {
+  const parent = obj.parent;
+  if (parent === null) return 1;
+  parent.getWorldScale(PARENT_WORLD_SCALE);
+  const scale = Math.abs(PARENT_WORLD_SCALE.x);
+  return Number.isFinite(scale) && scale > 1e-30 ? scale : 1;
+}
 
 // Last world-units-per-CSS-pixel seen by any text sprite's onBeforeRender. Cached so a
 // freshly-created label can size itself correctly on its very first frame (camera zoom
@@ -577,16 +643,24 @@ let lastWorldPerPixel = 0;
 // of `pixelHeight` CSS px regardless of camera zoom, via an onBeforeRender that
 // rescales it from the orthographic camera's world-per-pixel each frame. Caller
 // positions it. Texture freed by disposeGroup. No-op draw in test mode.
-function textSprite(text: string, color: string, pixelHeight: number): THREE.Sprite {
+function textSprite(
+  text: string,
+  color: string,
+  pixelHeight: number,
+  face: "mono" | "italic" = "mono",
+): THREE.Sprite {
   const fontPx = 40;
+  const font = face === "italic"
+    ? `italic ${fontPx}px Georgia, "Times New Roman", serif`
+    : `bold ${fontPx}px monospace`;
   const canvas = document.createElement("canvas");
   const ctx = import.meta.env.MODE === "test" ? null : canvas.getContext("2d");
   let cw = 80; const ch = fontPx + 12;
   if (ctx !== null) {
-    ctx.font = `bold ${fontPx}px monospace`;
+    ctx.font = font;
     cw = Math.ceil(ctx.measureText(text).width) + 12;
     canvas.width = cw; canvas.height = ch;
-    ctx.font = `bold ${fontPx}px monospace`;
+    ctx.font = font;
     ctx.fillStyle = color;
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.fillText(text, cw / 2, ch / 2);
@@ -606,7 +680,7 @@ function textSprite(text: string, color: string, pixelHeight: number): THREE.Spr
     renderer.getSize(TEXT_SPRITE_VIEWPORT);
     const worldPerPixel = (camera.top - camera.bottom) / Math.max(1, TEXT_SPRITE_VIEWPORT.y);
     lastWorldPerPixel = worldPerPixel;
-    const h = pixelHeight * worldPerPixel;
+    const h = (pixelHeight * worldPerPixel) / parentUniformScale(sprite);
     sprite.scale.set(h * aspect, h, 1);
   };
   return sprite;
@@ -875,6 +949,36 @@ export function widthGapJoints2(T: number): number[] {
   return gapEdgeJointsFor(T, GAP_EDGE_FRACTIONS_2);
 }
 
+/**
+ * Reflect a 0-based polyline so its last joint lands exactly on `target`.
+ * Orientation-reversing: z ↦ (target / conj(last)) · conj(z).
+ */
+function mapPolylineLastTo(joints: Point2[], target: Point2): Point2[] {
+  const last = joints[joints.length - 1];
+  if (last === undefined) return joints;
+  const h2 = last.x * last.x + last.y * last.y;
+  if (h2 < 1e-24) return joints;
+  const mulRe = (target.x * last.x - target.y * last.y) / h2;
+  const mulIm = (target.x * last.y + target.y * last.x) / h2;
+  return joints.map((p) => ({
+    x: mulRe * p.x + mulIm * p.y,
+    y: mulIm * p.x - mulRe * p.y,
+  }));
+}
+
+/** Far end of origin through M2-star: |zeta - zeta'| times the unit vector of M2-star. */
+function m2RayEnd(
+  zeta: { re: number; im: number },
+  zetaPrime: { re: number; im: number },
+  m2: { re: number; im: number },
+): Point2 | null {
+  const m2Len = Math.hypot(m2.re, m2.im);
+  const chordLen = Math.hypot(zeta.re - zetaPrime.re, zeta.im - zetaPrime.im);
+  if (!Number.isFinite(m2Len) || m2Len < 1e-12 || !(chordLen > 0)) return null;
+  const scale = chordLen / m2Len;
+  return { x: m2.re * scale, y: m2.im * scale };
+}
+
 function buildLine(pts: Point2[], color: number, group: THREE.Group): THREE.Line | null {
   if (pts.length < 2) return null;
   const positions = new Float32Array(pts.length * 3);
@@ -899,8 +1003,8 @@ function disposeLine(line: THREE.Line, group: THREE.Group): void {
   if (!Array.isArray(mat)) mat.dispose();
 }
 
-/** On-screen half-size (CSS px) for ζ / bisector target reticles. */
-const TARGET_MARKER_PIXEL_RADIUS = 14;
+/** On-screen half-size (CSS px) for every Targets reticle (origin, ζ, bisector, M*). */
+const TARGET_MARKER_PIXEL_RADIUS = 14 / 5;
 
 /**
  * Keeps a unit-geometry group at a constant on-screen size (CSS px) under an
@@ -912,7 +1016,7 @@ function attachScreenSpaceScale(group: THREE.Group, pixelRadius: number): void {
     renderer.getSize(TEXT_SPRITE_VIEWPORT);
     const worldPerPixel = (camera.top - camera.bottom) / Math.max(1, TEXT_SPRITE_VIEWPORT.y);
     lastWorldPerPixel = worldPerPixel;
-    group.scale.setScalar(pixelRadius * worldPerPixel);
+    group.scale.setScalar((pixelRadius * worldPerPixel) / parentUniformScale(group));
   };
   if (lastWorldPerPixel > 0) {
     group.scale.setScalar(pixelRadius * lastWorldPerPixel);
@@ -993,6 +1097,68 @@ function createBisectorTargetMarker(color: number): THREE.Group {
   return group;
 }
 
+/**
+ * Screen-fixed open circle at a point. Same on-screen radius as the
+ * ζ and bisector reticles so every Targets marker reads at one size.
+ */
+function createOpenCircleMarker(color: number): THREE.Group {
+  const group = new THREE.Group();
+  const seg = 32;
+  const ringPos = new Float32Array((seg + 1) * 3);
+  for (let i = 0; i <= seg; i += 1) {
+    const a = (i / seg) * 2 * Math.PI;
+    ringPos[i * 3] = Math.cos(a);
+    ringPos[i * 3 + 1] = Math.sin(a);
+    ringPos[i * 3 + 2] = 0;
+  }
+  const ringGeom = new THREE.BufferGeometry();
+  ringGeom.setAttribute("position", new THREE.BufferAttribute(ringPos, 3));
+  group.add(new THREE.Line(ringGeom, new THREE.LineBasicMaterial({ color })));
+  attachScreenSpaceScale(group, TARGET_MARKER_PIXEL_RADIUS);
+  return group;
+}
+
+const MARKER_LABEL_PX = 14;
+
+function imagePixelSize(image: unknown): { width: number; height: number } | null {
+  if (typeof image !== "object" || image === null) return null;
+  if (!("width" in image) || !("height" in image)) return null;
+  const width = image.width;
+  const height = image.height;
+  if (typeof width !== "number" || typeof height !== "number") return null;
+  if (!(width > 0) || !(height > 0)) return null;
+  return { width, height };
+}
+
+/**
+ * Name drawn just to the right of an open-circle marker. The marker group is
+ * rescaled every frame to a fixed pixel radius; textSprite divides that parent
+ * scale back out, so the glyphs stay at MARKER_LABEL_PX.
+ */
+function addOpenCircleLabel(marker: THREE.Group, text: string, color: number): void {
+  const label = textSprite(text, akCssColor(color), MARKER_LABEL_PX, "italic");
+  const size = imagePixelSize(label.material.map?.image);
+  const spriteWidthPx = size === null ? MARKER_LABEL_PX * 2 : MARKER_LABEL_PX * (size.width / size.height);
+  const gapPx = TARGET_MARKER_PIXEL_RADIUS + 4;
+  label.center.set(-gapPx / spriteWidthPx, 0.5);
+  label.position.set(0, 0, 0.01);
+  marker.add(label);
+}
+
+function disposeOpenCircleMarker(marker: THREE.Group, parent: THREE.Group): void {
+  marker.traverse((obj) => {
+    if (obj instanceof THREE.Sprite) {
+      if (obj.material.map !== null) obj.material.map.dispose();
+      obj.material.dispose();
+    } else if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+      obj.geometry.dispose();
+      const mat = obj.material;
+      if (!Array.isArray(mat)) mat.dispose();
+    }
+  });
+  parent.remove(marker);
+}
+
 /** Bisector midpoint modes for the Targets option-toggle. */
 const BISECTOR_POINT_OPTIONS = [
   { label: "Off" },
@@ -1006,6 +1172,32 @@ const BISECTOR_R1PS_COLOR = 0xff073a;
 const BISECTOR_R1AK_COLOR = 0x44ff44;
 const BISECTOR_RHALF_COLOR = 0xffff44;
 
+// Velocity-split target: teal point (the paper's B₁* color), blue leg
+// origin → B₁*, yellow leg B₁* → ζ.
+const B1_STAR_POINT_COLOR = 0x0aa6a6;
+const B1_STAR_LEG1_COLOR = 0x4488ff;
+const B1_STAR_LEG2_COLOR = 0xffff44;
+const ZETA_PRIME_TO_ZETA_COLOR = 0xff7f0e;
+const RIGHT_ANGLE_COLOR = 0xcf1638;
+const M_STAR_COLOR = 0x7b2d8e;
+const RHO_POINT_COLOR = 0xe74c3c;
+const ONE_MINUS_RHO_POINT_COLOR = 0x3498db;
+const ZETA_LOG_DERIV_COLOR = 0x2ecc71;
+const CHI_LOG_DERIV_COLOR = 0x9b59b6;
+const H_STAR_COLOR = 0xff4dff;
+const AK_G0_COLOR = 0xf1c40f;
+const AK_Q0_COLOR = 0x1abc9c;
+const AK_Q1_COLOR = 0x5dade2;
+const AK_Q2_COLOR = 0xe67e22;
+const AK_Q3_COLOR = 0xbb6bd9;
+const AK_Q4_COLOR = 0x58d68d;
+const AK_SUM_COLOR = 0xff66cc;
+
+/** CSS color for a toolbox label, the same hex as the scene marker. */
+function akCssColor(hex: number): string {
+  return `#${hex.toString(16).padStart(6, "0")}`;
+}
+
 /**
  * Spiral layer: renders Forward (EMS), Inverse, Zak, Eta, and Z′ partial-sum polylines
  * plus their Reflect variants, and Forward σ=½ and Reverse overlays.
@@ -1018,6 +1210,11 @@ export class SpiralWorkspaceLayer {
   private line: THREE.Line | null = null;
   private pointsObject: THREE.Points | null = null;
   private zetaMarker: THREE.Group | null = null;
+  private originMarker: THREE.Group | null = null;
+  private rhoMarker: THREE.Group | null = null;
+  private oneMinusRhoMarker: THREE.Group | null = null;
+  private zetaLogDerivMarker: THREE.Group | null = null;
+  private chiLogDerivMarker: THREE.Group | null = null;
   private bisectorMarkers: THREE.Group | null = null;
   private colorLinksMeshes: THREE.Mesh[] = [];
   private currentGeometry: ZetaSpiralGeometry | null = null;
@@ -1039,10 +1236,12 @@ export class SpiralWorkspaceLayer {
   private sum2xLine: THREE.Line | null = null;
   private sum2xReflectLine: THREE.Line | null = null;
   private crossingSumObject: THREE.Group | null = null;
+  private allRemaindersObject: THREE.Group | null = null;
 
   // Eta and Z′ spirals
   private etaLine: THREE.Line | null = null;
   private zPrimeLine: THREE.Line | null = null;
+  private zPrimeReflectLine: THREE.Line | null = null;
   private chebyLine: THREE.Line | null = null;
   private chebyMirrorLine: THREE.Line | null = null;
 
@@ -1060,9 +1259,34 @@ export class SpiralWorkspaceLayer {
   private extendUntilCrossObject: THREE.Group | null = null;
   private extendCrossLabel = "";
   private drawMode: ZetaDrawMode = "all";
+  private showOrigin = false;
   private showZetaEndpoint = false;
   /** 0=Off, 1=R1ps, 2=R1ak, 3=R/2, 4=All */
   private showBisectorPoint = 0;
+  // Velocity-split point B₁* = ζ − ζ′/(χ′/χ) with its two legs
+  // origin → B₁* (blue) and B₁* → ζ (yellow).
+  private showB1Star = false;
+  private b1StarObject: THREE.Group | null = null;
+  private showZetaPrimeToZeta = false;
+  private zetaPrimeToZetaObject: THREE.Group | null = null;
+  private showRightAngle = false;
+  private rightAngleObject: THREE.Group | null = null;
+  private showMStar = false;
+  private showRho = false;
+  private showOneMinusRho = false;
+  private showZetaLogDeriv = false;
+  private showChiLogDeriv = false;
+  private showHStar = false;
+  private hStarObject: THREE.Group | null = null;
+  private showAkG0 = false;
+  private showAkQ0 = false;
+  private showAkQ1 = false;
+  private showAkQ2 = false;
+  private showAkQ3 = false;
+  private showAkQ4 = false;
+  private showAkSum = false;
+  private akTargetsObject: THREE.Group | null = null;
+  private mStarObject: THREE.Group | null = null;
   private showSpiralMidpoints = false;
   private spiralMidpointsObject: THREE.Group | null = null;
   private showJointReflectLines = false;
@@ -1169,10 +1393,13 @@ export class SpiralWorkspaceLayer {
   // plus a sequence counter so per-frame samplers record each rebuild once.
   private lastRebuildTimeMs = 0;
   private rebuildSeq = 0;
+  /** Uniform fit about the origin. 1 when σ > −1; Big Sigma’s fit when σ ≤ −1. */
+  private displayScale = 1;
 
   // Matrix toggles
   private spiralVisible = true;
   private spiralFirstHalf = false;   // Forward: spiral to ⌊T⌋ + R₁ps
+  private fOfSVisible = false;       // f(s): spiral to the bisector joint + white R₁ak
   private spiralReflect = false;
   private spiralHalfSigma = false;
   private spiralReverse = false;
@@ -1182,14 +1409,17 @@ export class SpiralWorkspaceLayer {
   private zakVisible = false;
   private zakReflect = false;
   private crossingSumVisible = false;
+  private allRemaindersVisible = false;
   private sumXVisible = false;
   private sumXReflect = false;
   private sum2xVisible = false;
   private sum2xReflect = false;
   private etaVisible = false;
   private zPrimeVisible = false;
+  private zPrimeReflect = false;
   private showChebyCurve = false;
   private firstHalfObject: THREE.Group | null = null;
+  private fOfSObject: THREE.Group | null = null;
 
   public constructor(parent: THREE.Group) {
     this.group = new THREE.Group();
@@ -1235,6 +1465,11 @@ export class SpiralWorkspaceLayer {
     this.rebuild();
   }
 
+  public setShowOrigin(value: boolean): void {
+    this.showOrigin = value;
+    this.rebuild();
+  }
+
   public setShowZetaEndpoint(value: boolean): void {
     this.showZetaEndpoint = value;
     this.rebuild();
@@ -1245,12 +1480,126 @@ export class SpiralWorkspaceLayer {
     this.rebuild();
   }
 
+  public setShowB1Star(value: boolean): void {
+    this.showB1Star = value;
+    this.rebuild();
+  }
+
+  public getShowB1Star(): boolean { return this.showB1Star; }
+
+  public setShowZetaPrimeToZeta(value: boolean): void {
+    this.showZetaPrimeToZeta = value;
+    this.rebuild();
+  }
+
+  public getShowZetaPrimeToZeta(): boolean { return this.showZetaPrimeToZeta; }
+
+  public setShowRightAngle(value: boolean): void {
+    this.showRightAngle = value;
+    this.rebuild();
+  }
+
+  public getShowRightAngle(): boolean { return this.showRightAngle; }
+
+  public setShowMStar(value: boolean): void {
+    this.showMStar = value;
+    this.rebuild();
+  }
+
+  public getShowMStar(): boolean { return this.showMStar; }
+
+  public setShowRho(value: boolean): void {
+    this.showRho = value;
+    this.rebuild();
+  }
+
+  public getShowRho(): boolean { return this.showRho; }
+
+  public setShowOneMinusRho(value: boolean): void {
+    this.showOneMinusRho = value;
+    this.rebuild();
+  }
+
+  public getShowOneMinusRho(): boolean { return this.showOneMinusRho; }
+
+  public setShowZetaLogDeriv(value: boolean): void {
+    this.showZetaLogDeriv = value;
+    this.rebuild();
+  }
+
+  public getShowZetaLogDeriv(): boolean { return this.showZetaLogDeriv; }
+
+  public setShowChiLogDeriv(value: boolean): void {
+    this.showChiLogDeriv = value;
+    this.rebuild();
+  }
+
+  public getShowChiLogDeriv(): boolean { return this.showChiLogDeriv; }
+
+  public setShowHStar(value: boolean): void {
+    this.showHStar = value;
+    this.rebuild();
+  }
+
+  public getShowHStar(): boolean { return this.showHStar; }
+
+  public setShowAkG0(value: boolean): void {
+    this.showAkG0 = value;
+    this.rebuild();
+  }
+
+  public getShowAkG0(): boolean { return this.showAkG0; }
+
+  public setShowAkQ0(value: boolean): void {
+    this.showAkQ0 = value;
+    this.rebuild();
+  }
+
+  public getShowAkQ0(): boolean { return this.showAkQ0; }
+
+  public setShowAkQ1(value: boolean): void {
+    this.showAkQ1 = value;
+    this.rebuild();
+  }
+
+  public getShowAkQ1(): boolean { return this.showAkQ1; }
+
+  public setShowAkQ2(value: boolean): void {
+    this.showAkQ2 = value;
+    this.rebuild();
+  }
+
+  public getShowAkQ2(): boolean { return this.showAkQ2; }
+
+  public setShowAkQ3(value: boolean): void {
+    this.showAkQ3 = value;
+    this.rebuild();
+  }
+
+  public getShowAkQ3(): boolean { return this.showAkQ3; }
+
+  public setShowAkQ4(value: boolean): void {
+    this.showAkQ4 = value;
+    this.rebuild();
+  }
+
+  public getShowAkQ4(): boolean { return this.showAkQ4; }
+
+  public setShowAkSum(value: boolean): void {
+    this.showAkSum = value;
+    this.rebuild();
+  }
+
+  public getShowAkSum(): boolean { return this.showAkSum; }
+
   public setSpiralVisible(visible: boolean): void {
     this.spiralVisible = visible;
     this.rebuild();
   }
 
   public setSpiralFirstHalf(value: boolean): void { this.spiralFirstHalf = value; this.rebuild(); }
+  public getFOfSVisible(): boolean { return this.fOfSVisible; }
+  public setFOfSVisible(value: boolean): void { this.fOfSVisible = value; this.rebuild(); }
   public setSpiralReflect(value: boolean): void { this.spiralReflect = value; this.rebuild(); }
   public setSpiralHalfSigma(value: boolean): void { this.spiralHalfSigma = value; this.rebuild(); }
   public setSpiralReverse(value: boolean): void { this.spiralReverse = value; this.rebuild(); }
@@ -1287,12 +1636,14 @@ export class SpiralWorkspaceLayer {
   public setZakVisible(value: boolean): void { this.zakVisible = value; this.rebuild(); }
   public setZakReflect(value: boolean): void { this.zakReflect = value; this.rebuild(); }
   public setCrossingSumVisible(value: boolean): void { this.crossingSumVisible = value; this.rebuild(); }
+  public setAllRemaindersVisible(value: boolean): void { this.allRemaindersVisible = value; this.rebuild(); }
   public setSumXVisible(value: boolean): void { this.sumXVisible = value; this.rebuild(); }
   public setSumXReflect(value: boolean): void { this.sumXReflect = value; this.rebuild(); }
   public setSum2xVisible(value: boolean): void { this.sum2xVisible = value; this.rebuild(); }
   public setSum2xReflect(value: boolean): void { this.sum2xReflect = value; this.rebuild(); }
   public setEtaVisible(value: boolean): void { this.etaVisible = value; this.rebuild(); }
   public setZPrimeVisible(value: boolean): void { this.zPrimeVisible = value; this.rebuild(); }
+  public setZPrimeReflect(value: boolean): void { this.zPrimeReflect = value; this.rebuild(); }
   public setShowChebyCurve(value: boolean): void { this.showChebyCurve = value; this.rebuild(); }
   public setShowSpiralMidpoints(value: boolean): void { this.showSpiralMidpoints = value; this.rebuild(); }
   public getShowSpiralMidpoints(): boolean { return this.showSpiralMidpoints; }
@@ -1404,6 +1755,7 @@ export class SpiralWorkspaceLayer {
   public getSpiralVisible(): boolean { return this.spiralVisible; }
   public getSpiralFirstHalf(): boolean { return this.spiralFirstHalf; }
   public getDrawMode(): ZetaDrawMode { return this.drawMode; }
+  public getShowOrigin(): boolean { return this.showOrigin; }
   public getShowZetaEndpoint(): boolean { return this.showZetaEndpoint; }
   public getShowBisectorPoint(): number { return this.showBisectorPoint; }
   public getColorLinks(): number { return this.colorLinks; }
@@ -1417,12 +1769,14 @@ export class SpiralWorkspaceLayer {
   public getZakVisible(): boolean { return this.zakVisible; }
   public getZakReflect(): boolean { return this.zakReflect; }
   public getCrossingSumVisible(): boolean { return this.crossingSumVisible; }
+  public getAllRemaindersVisible(): boolean { return this.allRemaindersVisible; }
   public getSumXVisible(): boolean { return this.sumXVisible; }
   public getSumXReflect(): boolean { return this.sumXReflect; }
   public getSum2xVisible(): boolean { return this.sum2xVisible; }
   public getSum2xReflect(): boolean { return this.sum2xReflect; }
   public getEtaVisible(): boolean { return this.etaVisible; }
   public getZPrimeVisible(): boolean { return this.zPrimeVisible; }
+  public getZPrimeReflect(): boolean { return this.zPrimeReflect; }
   public getShowChebyCurve(): boolean { return this.showChebyCurve; }
   public getImportedPoints(): Point2[] { return this.imported; }
   public getCurrentGeometry(): ZetaSpiralGeometry | null { return this.currentGeometry; }
@@ -1430,10 +1784,19 @@ export class SpiralWorkspaceLayer {
   public getLastRebuildTimeMs(): number { return this.lastRebuildTimeMs; }
   public getRebuildSeq(): number { return this.rebuildSeq; }
 
+  /** Scale applied to the spiral group. Matches Big Sigma when σ ≤ −1. */
+  public getDisplayScale(): number { return this.displayScale; }
+
   public dispose(): void {
     this.clearAllLines();
     this.clearPoints();
     this.clearZetaMarker();
+    this.clearOriginMarker();
+    this.clearRhoMarker();
+    this.clearOneMinusRhoMarker();
+    this.clearZetaLogDerivMarker();
+    this.clearChiLogDerivMarker();
+    this.clearAkTargetsObject();
     this.group.removeFromParent();
   }
 
@@ -1652,9 +2015,19 @@ export class SpiralWorkspaceLayer {
       {
         id: "targets",
         contributorId: "workspace:targets",
-        title: "Targets",
+        title: "Basic Targets",
         order: 16,
         controls: [
+          {
+            kind: "toggle",
+            id: "show-origin",
+            label: "Show origin",
+            value: this.showOrigin,
+            onChange: (value: boolean) => {
+              this.setShowOrigin(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
           {
             kind: "toggle",
             id: "show-zeta",
@@ -1679,10 +2052,193 @@ export class SpiralWorkspaceLayer {
         ],
       },
       {
+        id: "n-star-targets",
+        contributorId: "workspace:n-star-targets",
+        title: "N* Targets",
+        order: 17,
+        controls: [
+          {
+            kind: "toggle",
+            id: "show-b1-star",
+            label: "Show B₁* and legs",
+            value: this.showB1Star,
+            onChange: (value: boolean) => {
+              this.setShowB1Star(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-zeta-prime-to-zeta",
+            label: "Show ζ′ → ζ and origin through M₂*",
+            value: this.showZetaPrimeToZeta,
+            onChange: (value: boolean) => {
+              this.setShowZetaPrimeToZeta(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-right-angle",
+            label: "Right angle",
+            value: this.showRightAngle,
+            onChange: (value: boolean) => {
+              this.setShowRightAngle(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-m-star",
+            label: "Show M₁* → M₂* → ζ",
+            value: this.showMStar,
+            onChange: (value: boolean) => {
+              this.setShowMStar(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-rho",
+            label: "Show ρ",
+            value: this.showRho,
+            onChange: (value: boolean) => {
+              this.setShowRho(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-one-minus-rho",
+            label: "Show 1−ρ",
+            value: this.showOneMinusRho,
+            onChange: (value: boolean) => {
+              this.setShowOneMinusRho(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-zeta-log-deriv",
+            label: "Show ζ′/ζ",
+            value: this.showZetaLogDeriv,
+            onChange: (value: boolean) => {
+              this.setShowZetaLogDeriv(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-chi-log-deriv",
+            label: "Show χ′/χ",
+            value: this.showChiLogDeriv,
+            onChange: (value: boolean) => {
+              this.setShowChiLogDeriv(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-h-star",
+            label: "Show h*",
+            value: this.showHStar,
+            onChange: (value: boolean) => {
+              this.setShowHStar(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+        ],
+      },
+      {
+        id: "ak-targets",
+        contributorId: "workspace:ak-targets",
+        title: "AK Targets",
+        order: 18,
+        controls: [
+          {
+            kind: "toggle",
+            id: "show-ak-g0",
+            label: "G₀",
+            labelColor: akCssColor(AK_G0_COLOR),
+            value: this.showAkG0,
+            onChange: (value: boolean) => {
+              this.setShowAkG0(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-q0",
+            label: "Q₀",
+            labelColor: akCssColor(AK_Q0_COLOR),
+            value: this.showAkQ0,
+            onChange: (value: boolean) => {
+              this.setShowAkQ0(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-q1",
+            label: "Q₁",
+            labelColor: akCssColor(AK_Q1_COLOR),
+            value: this.showAkQ1,
+            onChange: (value: boolean) => {
+              this.setShowAkQ1(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-q2",
+            label: "Q₂",
+            labelColor: akCssColor(AK_Q2_COLOR),
+            value: this.showAkQ2,
+            onChange: (value: boolean) => {
+              this.setShowAkQ2(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-q3",
+            label: "Q₃",
+            labelColor: akCssColor(AK_Q3_COLOR),
+            value: this.showAkQ3,
+            onChange: (value: boolean) => {
+              this.setShowAkQ3(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-q4",
+            label: "Q₄",
+            labelColor: akCssColor(AK_Q4_COLOR),
+            value: this.showAkQ4,
+            onChange: (value: boolean) => {
+              this.setShowAkQ4(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+          {
+            kind: "toggle",
+            id: "show-ak-sum",
+            label: "G₀ + Q₀ + Q₁ + Q₂",
+            labelColor: akCssColor(AK_SUM_COLOR),
+            value: this.showAkSum,
+            onChange: (value: boolean) => {
+              this.setShowAkSum(value);
+              ctx.requestToolboxRefresh();
+            },
+          },
+        ],
+      },
+      {
         id: "euler-spirals",
         contributorId: "workspace:euler-spirals",
         title: "Exponential-sum spirals",
-        order: 17,
+        order: 19,
         defaultCollapsed: true,
         controls: [
           {
@@ -1721,7 +2277,7 @@ export class SpiralWorkspaceLayer {
         id: "origin-plots",
         contributorId: "workspace:origin-plots",
         title: "origin plots",
-        order: 18,
+        order: 20,
         defaultCollapsed: true,
         controls: [
           {
@@ -1770,7 +2326,7 @@ export class SpiralWorkspaceLayer {
         id: "yin-yang",
         contributorId: "workspace:yin-yang",
         title: "yin yang",
-        order: 19,
+        order: 21,
         defaultCollapsed: true,
         controls: [
           {
@@ -2162,6 +2718,43 @@ export class SpiralWorkspaceLayer {
     this.zetaMarker = null;
   }
 
+  private clearOriginMarker(): void {
+    if (this.originMarker === null) return;
+    this.originMarker.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.originMarker);
+    this.originMarker = null;
+  }
+
+  private clearRhoMarker(): void {
+    if (this.rhoMarker === null) return;
+    disposeOpenCircleMarker(this.rhoMarker, this.group);
+    this.rhoMarker = null;
+  }
+
+  private clearOneMinusRhoMarker(): void {
+    if (this.oneMinusRhoMarker === null) return;
+    disposeOpenCircleMarker(this.oneMinusRhoMarker, this.group);
+    this.oneMinusRhoMarker = null;
+  }
+
+  private clearZetaLogDerivMarker(): void {
+    if (this.zetaLogDerivMarker === null) return;
+    disposeOpenCircleMarker(this.zetaLogDerivMarker, this.group);
+    this.zetaLogDerivMarker = null;
+  }
+
+  private clearChiLogDerivMarker(): void {
+    if (this.chiLogDerivMarker === null) return;
+    disposeOpenCircleMarker(this.chiLogDerivMarker, this.group);
+    this.chiLogDerivMarker = null;
+  }
+
   /**
    * Extend every active spiral link-by-link from the start of its divergent
    * tail, and stop at the first step where the newest link of one active
@@ -2325,10 +2918,112 @@ export class SpiralWorkspaceLayer {
     this.firstHalfObject = null;
   }
 
+  private clearFOfSObject(): void {
+    if (this.fOfSObject === null) return;
+    this.fOfSObject.traverse((obj) => {
+      if (
+        obj instanceof THREE.Line ||
+        obj instanceof THREE.LineSegments ||
+        obj instanceof THREE.Mesh
+      ) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.fOfSObject);
+    this.fOfSObject = null;
+  }
+
+  private clearB1StarObject(): void {
+    if (this.b1StarObject === null) return;
+    this.b1StarObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.b1StarObject);
+    this.b1StarObject = null;
+  }
+
+  private clearZetaPrimeToZetaObject(): void {
+    if (this.zetaPrimeToZetaObject === null) return;
+    this.zetaPrimeToZetaObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.zetaPrimeToZetaObject);
+    this.zetaPrimeToZetaObject = null;
+  }
+
+  private clearRightAngleObject(): void {
+    if (this.rightAngleObject === null) return;
+    this.rightAngleObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.rightAngleObject);
+    this.rightAngleObject = null;
+  }
+
+  private clearAkTargetsObject(): void {
+    if (this.akTargetsObject === null) return;
+    this.akTargetsObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.akTargetsObject);
+    this.akTargetsObject = null;
+  }
+
+  private clearHStarObject(): void {
+    if (this.hStarObject === null) return;
+    this.hStarObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.hStarObject);
+    this.hStarObject = null;
+  }
+
+  private clearMStarObject(): void {
+    if (this.mStarObject === null) return;
+    this.mStarObject.traverse((obj) => {
+      if (obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+        obj.geometry.dispose();
+        const mat = obj.material;
+        if (!Array.isArray(mat)) mat.dispose();
+      }
+    });
+    this.group.remove(this.mStarObject);
+    this.mStarObject = null;
+  }
+
   private clearAllLines(): void {
     this.clearLine();
     this.clearBisectorLine();
     this.clearFirstHalfObject();
+    this.clearFOfSObject();
+    this.clearB1StarObject();
+    this.clearZetaPrimeToZetaObject();
+    this.clearRightAngleObject();
+    this.clearMStarObject();
+    this.clearHStarObject();
+    this.clearAkTargetsObject();
     if (this.reflectLine) { disposeLine(this.reflectLine, this.group); this.reflectLine = null; }
     if (this.halfSigmaLine) { disposeLine(this.halfSigmaLine, this.group); this.halfSigmaLine = null; }
     if (this.reverseLine) { disposeLine(this.reverseLine, this.group); this.reverseLine = null; }
@@ -2342,6 +3037,7 @@ export class SpiralWorkspaceLayer {
     if (this.sum2xReflectLine) { disposeLine(this.sum2xReflectLine, this.group); this.sum2xReflectLine = null; }
     if (this.etaLine) { disposeLine(this.etaLine, this.group); this.etaLine = null; }
     if (this.zPrimeLine) { disposeLine(this.zPrimeLine, this.group); this.zPrimeLine = null; }
+    if (this.zPrimeReflectLine) { disposeLine(this.zPrimeReflectLine, this.group); this.zPrimeReflectLine = null; }
     if (this.chebyLine) { disposeLine(this.chebyLine, this.group); this.chebyLine = null; }
     if (this.chebyMirrorLine) { disposeLine(this.chebyMirrorLine, this.group); this.chebyMirrorLine = null; }
     if (this.bisectorRateLine) { disposeLine(this.bisectorRateLine, this.group); this.bisectorRateLine = null; }
@@ -2460,6 +3156,7 @@ export class SpiralWorkspaceLayer {
     this.cornuFresnelObject = disposeGroup(this.cornuFresnelObject);
     this.selectedJointsObject = disposeGroup(this.selectedJointsObject);
     this.crossingSumObject = disposeGroup(this.crossingSumObject);
+    this.allRemaindersObject = disposeGroup(this.allRemaindersObject);
     this.gapJointsObject = disposeGroup(this.gapJointsObject);
     this.flankingJointsObject = disposeGroup(this.flankingJointsObject);
     this.indexDivJointsObject = disposeGroup(this.indexDivJointsObject);
@@ -2538,11 +3235,17 @@ export class SpiralWorkspaceLayer {
     this.clearAllLines();
     this.clearPoints();
     this.clearZetaMarker();
+    this.clearOriginMarker();
+    this.clearRhoMarker();
+    this.clearOneMinusRhoMarker();
+    this.clearZetaLogDerivMarker();
+    this.clearChiLogDerivMarker();
+    this.clearAkTargetsObject();
 
     const computeStart = performance.now();
 
     // --- Forward spiral (EMS) ---
-    const geometry = computeEmsSpiralGeometry({
+    let geometry = computeEmsSpiralGeometry({
       sigma: this.sigma,
       index: this.index,
       usePolyImag: this.usePolyImag,
@@ -2561,6 +3264,26 @@ export class SpiralWorkspaceLayer {
       geometry.zeta = zakGeom.zeta;
     }
     this.currentGeometry = geometry;
+    const zetaRadius = Math.hypot(geometry.zeta.x, geometry.zeta.y);
+    const chainRadius = Math.max(pointsMaxRadius(geometry.joints), Number.isFinite(zetaRadius) ? zetaRadius : 0);
+    this.displayScale = bigSigmaWorldScale(this.sigma, chainRadius);
+    // Bake the fit into the coordinates. A group scale cannot do it: the
+    // polyline is a float32 buffer, and at σ ≈ −20 the raw terms n^{−σ} already
+    // exceed float32 (~1e38). The shrink factor is then smaller than float32
+    // can hold, so the GPU sees non-finite vertices and drops the line.
+    // Big Sigma avoids that by drawing T^σ · n^{−s} while the values are still
+    // float64. Keep the unscaled copy in currentGeometry for the camera.
+    this.group.scale.setScalar(1);
+    if (this.displayScale !== 1) {
+      const fit = this.displayScale;
+      const mid = geometry.middlePoint;
+      geometry = {
+        ...geometry,
+        joints: geometry.joints.map((p) => ({ x: p.x * fit, y: p.y * fit })),
+        zeta: { x: geometry.zeta.x * fit, y: geometry.zeta.y * fit },
+        middlePoint: mid === null ? null : { x: mid.x * fit, y: mid.y * fit },
+      };
+    }
 
     if (this.extendUntilCross) {
       this.renderExtendUntilCross(geometry);
@@ -2624,32 +3347,36 @@ export class SpiralWorkspaceLayer {
       }
     }
 
-    // --- Σ_1x / Σ_2x / crossing-part sums of Σ₁+R_{1ps} ---
+    // --- Σ_1x / Σ_2x / crossing-part sums / all pair remainders ---
     const sumXFloor = Math.floor(this.index);
     const show1x = this.sumXVisible || this.sumXReflect;
     const show2x = this.sum2xVisible || this.sum2xReflect;
     const showCrossingSum = this.crossingSumVisible;
-    if (sumXFloor >= 0 && (show1x || show2x || showCrossingSum)) {
-      const fwd = forwardChain(this.sigma, this.index, this.usePolyImag, 100_000);
+    const showAllRemainders = this.allRemaindersVisible;
+    if (sumXFloor >= 0 && (show1x || show2x || showCrossingSum || showAllRemainders)) {
       const scale = crossingScale(this.index, this.usePolyImag);
-      const { b1, b2 } = psLegs(this.sigma, this.index);
+      const maxLinks = Math.min(250_000, Math.max(100_000, Math.ceil(scale) + 4));
+      const fwd = forwardChain(this.sigma, this.index, this.usePolyImag, maxLinks);
       const mid = { x: geometry.zeta.x / 2, y: geometry.zeta.y / 2 };
-      const inv = (show1x || showCrossingSum)
-        ? reflectedInverseChain(this.sigma, this.index, this.usePolyImag, geometry.zeta, 100_000)
+      const inv = (show1x || showCrossingSum || showAllRemainders)
+        ? reflectedInverseChain(this.sigma, this.index, this.usePolyImag, geometry.zeta, maxLinks)
         : null;
-      if (sumXFloor >= 1 && show1x && inv !== null) {
-        const joints = sum1xJoints(fwd, inv, sumXFloor, scale, b1);
+      const legs = (show1x || show2x || showCrossingSum)
+        ? psLegs(this.sigma, this.index)
+        : null;
+      if (sumXFloor >= 1 && show1x && inv !== null && legs !== null) {
+        const joints = sum1xJoints(fwd, inv, sumXFloor, scale, legs.b1);
         if (this.sumXVisible) this.sumXLine = buildLine(joints, 0xffd54a, this.group);
         if (this.sumXReflect) this.sumXReflectLine = buildLine(reflectJoints(joints, mid), 0xffe082, this.group);
       }
-      if (sumXFloor >= 1 && show2x) {
-        const inv0 = inverseChain(this.sigma, this.index, this.usePolyImag, 100_000);
-        const joints = sum2xJoints(inv0, fwd, sumXFloor, scale, b2);
+      if (sumXFloor >= 1 && show2x && legs !== null) {
+        const inv0 = inverseChain(this.sigma, this.index, this.usePolyImag, maxLinks);
+        const joints = sum2xJoints(inv0, fwd, sumXFloor, scale, legs.b2);
         if (this.sum2xVisible) this.sum2xLine = buildLine(joints, 0x69f0ae, this.group);
         if (this.sum2xReflect) this.sum2xReflectLine = buildLine(reflectJoints(joints, mid), 0xa5d6a7, this.group);
       }
-      if (showCrossingSum && inv !== null) {
-        const { v1, v2 } = crossingPartSums(fwd, inv, sumXFloor, scale, b1);
+      if (showCrossingSum && inv !== null && legs !== null) {
+        const { v1, v2 } = crossingPartSums(fwd, inv, sumXFloor, scale, legs.b1);
         const wrap = new THREE.Group();
         buildLine([{ x: 0, y: 0 }, v1], 0x2ec4a8, wrap);
         const tip = { x: v1.x + v2.x, y: v1.y + v2.y };
@@ -2665,6 +3392,28 @@ export class SpiralWorkspaceLayer {
         })));
         this.crossingSumObject = wrap;
         this.group.add(wrap);
+      }
+      if (showAllRemainders && inv !== null) {
+        const segments = crossingRemainderSegments(fwd, inv, sumXFloor, scale);
+        if (segments.length > 0) {
+          const positions = new Float32Array(segments.length * 6);
+          for (let i = 0; i < segments.length; i++) {
+            const seg = segments[i]!;
+            const o = i * 6;
+            positions[o] = seg.from.x;
+            positions[o + 1] = seg.from.y;
+            positions[o + 2] = 0.015;
+            positions[o + 3] = seg.to.x;
+            positions[o + 4] = seg.to.y;
+            positions[o + 5] = 0.015;
+          }
+          const geom = new THREE.BufferGeometry();
+          geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+          const wrap = new THREE.Group();
+          wrap.add(new THREE.LineSegments(geom, new THREE.LineBasicMaterial({ color: 0xff0000 })));
+          this.allRemaindersObject = wrap;
+          this.group.add(wrap);
+        }
       }
     }
 
@@ -2691,10 +3440,25 @@ export class SpiralWorkspaceLayer {
     }
 
     // --- Z′ spiral ---
-    if (this.zPrimeVisible) {
+    if (this.zPrimeVisible || this.zPrimeReflect) {
       const zpGeom = computeZPrimeSpiralGeometry(this.sigma, this.index, this.usePolyImag);
       const zpFiltered = filterJointsForDrawMode(zpGeom.joints, this.drawMode, zpGeom.middleIndex);
-      this.zPrimeLine = buildLine(zpFiltered, 0xa0a0a0, this.group);
+      if (this.zPrimeVisible) {
+        this.zPrimeLine = buildLine(zpFiltered, 0xa0a0a0, this.group);
+      }
+      if (this.zPrimeReflect) {
+        // Invert through the origin, then reflect so the head lands on the
+        // same point P = |ζ′| M₂*/|M₂*| as the orange line. Aim the full
+        // chain (not the draw-mode stub) so a new outer link cannot re-aim
+        // the whole spiral.
+        const t = indexToImag(this.index, this.usePolyImag);
+        const { zeta, zetaPrime, m2Star } = calcMStar(this.sigma, t);
+        const end = m2RayEnd(zeta, zetaPrime, m2Star);
+        const inverted = reflectJoints(zpGeom.joints, { x: 0, y: 0 });
+        const aimed = end !== null ? mapPolylineLastTo(inverted, end) : inverted;
+        const aimedDraw = filterJointsForDrawMode(aimed, this.drawMode, zpGeom.middleIndex);
+        this.zPrimeReflectLine = buildLine(aimedDraw, 0xc4b8a0, this.group);
+      }
     }
 
     // --- Chebyshev fit curve ---
@@ -4409,6 +5173,13 @@ export class SpiralWorkspaceLayer {
       }
     }
 
+    // Origin: open circle, same on-screen size as M₁* / M₂* / B₁*.
+    if (this.showOrigin) {
+      this.originMarker = createOpenCircleMarker(this.lightTheme ? 0x222222 : 0xffffff);
+      this.originMarker.position.set(0, 0, 0.01);
+      this.group.add(this.originMarker);
+    }
+
     // --- ζ(s) endpoint marker: circle + centered crosshair at ζ (screen-fixed) ---
     if (this.showZetaEndpoint) {
       const z = geometry.zeta;
@@ -4455,6 +5226,28 @@ export class SpiralWorkspaceLayer {
       this.firstHalfObject = wrap;
     }
 
+    // f(s) row: the Big Sigma picture. Σ₁ through ⌊T⌋ in T^σ units, then white
+    // R₁ak off that tip. Fit this figure on its own radius. The main spiral's
+    // displayScale is set by links far past ⌊T⌋, which at large negative σ
+    // shrinks Σ₁ to a dot, and the unscaled I₁ in R₁ak overflows.
+    if (this.fOfSVisible) {
+      const geom = computeBigSigmaGeometry(this.sigma, this.index, "floorT", null, "ak");
+      const scale = bigSigmaWorldScale(this.sigma, pointsMaxRadius([...geom.joints, geom.fApprox]));
+      const joints = scalePoints(geom.joints, scale);
+      const wrap = new THREE.Group();
+      buildLine(joints, 0x66d9ff, wrap);
+      buildLine(
+        [
+          { x: geom.sum1.x * scale, y: geom.sum1.y * scale },
+          { x: geom.fApprox.x * scale, y: geom.fApprox.y * scale },
+        ],
+        0xffffff,
+        wrap,
+      );
+      this.group.add(wrap);
+      this.fOfSObject = wrap;
+    }
+
     // --- Bisector midpoint targets: square + X centered on Σ₁+R_* ---
     // Mode: 1=R1ps, 2=R1ak, 3=R/2, 4=all. Screen-fixed size under zoom.
     if (this.showBisectorPoint > 0) {
@@ -4471,6 +5264,264 @@ export class SpiralWorkspaceLayer {
       if (mode === 3 || mode === 4) addAt(calcRHalf(this.sigma, this.index), BISECTOR_RHALF_COLOR);
       this.group.add(wrap);
       this.bisectorMarkers = wrap;
+    }
+
+    // --- B₁* velocity-split point with its two legs ---
+    // B₁* = ζ − ζ′/(χ′/χ), the velocity split extended off the critical line.
+    // Leg 1 runs origin → B₁* (blue), leg 2 runs B₁* → ζ (yellow); the two
+    // legs are equal in length exactly on the critical line.
+    if (this.showB1Star || this.showZetaPrimeToZeta) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      const { zeta, zetaPrime, b1Star } = calcB1Star(this.sigma, t);
+      const zp: Point2 = { x: zeta.re, y: zeta.im };
+      if (this.showB1Star) {
+        const wrap = new THREE.Group();
+        const b1p: Point2 = { x: b1Star.re, y: b1Star.im };
+        buildLine([{ x: 0, y: 0 }, b1p], B1_STAR_LEG1_COLOR, wrap);
+        buildLine([b1p, zp], B1_STAR_LEG2_COLOR, wrap);
+        const marker = createOpenCircleMarker(B1_STAR_POINT_COLOR);
+        marker.position.set(b1p.x, b1p.y, 0.015);
+        wrap.add(marker);
+        this.group.add(wrap);
+        this.b1StarObject = wrap;
+      }
+      if (this.showZetaPrimeToZeta) {
+        const wrap = new THREE.Group();
+        buildLine([{ x: zetaPrime.re, y: zetaPrime.im }, zp],
+          ZETA_PRIME_TO_ZETA_COLOR, wrap);
+        // Second line: origin through M₂*, length |ζ − ζ′|, same as the
+        // ζ′ → ζ chord, so both orange segments match.
+        const { m2Star } = calcMStar(this.sigma, t);
+        const end = m2RayEnd(zeta, zetaPrime, m2Star);
+        if (end !== null) {
+          buildLine([{ x: 0, y: 0 }, end], ZETA_PRIME_TO_ZETA_COLOR, wrap);
+        }
+        this.group.add(wrap);
+        this.zetaPrimeToZetaObject = wrap;
+      }
+    }
+
+    // Right-angle vertex of the ps-split triangle: T_right = B₁(1+cos ϑ₂)
+    // with B₁ = Σ₁+R₁. Legs origin → T_right and T_right → ζ; on σ = 1/2
+    // those two legs meet at a right angle (Thales, Unity RAV).
+    if (this.showRightAngle) {
+      const { point } = calcRightAnglePoint(this.sigma, this.index);
+      if (Number.isFinite(point.re) && Number.isFinite(point.im)) {
+        const wrap = new THREE.Group();
+        const rp: Point2 = { x: point.re, y: point.im };
+        const zp: Point2 = { x: geometry.zeta.x, y: geometry.zeta.y };
+        buildLine([{ x: 0, y: 0 }, rp], RIGHT_ANGLE_COLOR, wrap);
+        buildLine([rp, zp], RIGHT_ANGLE_COLOR, wrap);
+        const marker = createOpenCircleMarker(RIGHT_ANGLE_COLOR);
+        marker.position.set(rp.x, rp.y, 0.015);
+        wrap.add(marker);
+        this.group.add(wrap);
+        this.rightAngleObject = wrap;
+      }
+    }
+
+    // ρ = (ζ′/ζ)/(χ′/χ) and 1−ρ, plotted as Argand points. On σ = 1/2
+    // both sit on Re = 1/2 (mirrored in Im). Off the line, 1−ρ(s) = ρ(1−s).
+    if (this.showRho || this.showOneMinusRho) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      const rho = calcRho(this.sigma, t);
+      if (Number.isFinite(rho.re) && Number.isFinite(rho.im)) {
+        if (this.showRho) {
+          this.rhoMarker = createOpenCircleMarker(RHO_POINT_COLOR);
+          addOpenCircleLabel(this.rhoMarker, "ρ", RHO_POINT_COLOR);
+          this.rhoMarker.position.set(rho.re, rho.im, 0.015);
+          this.group.add(this.rhoMarker);
+        }
+        if (this.showOneMinusRho) {
+          this.oneMinusRhoMarker = createOpenCircleMarker(ONE_MINUS_RHO_POINT_COLOR);
+          addOpenCircleLabel(this.oneMinusRhoMarker, "1−ρ", ONE_MINUS_RHO_POINT_COLOR);
+          this.oneMinusRhoMarker.position.set(1 - rho.re, -rho.im, 0.015);
+          this.group.add(this.oneMinusRhoMarker);
+        }
+      }
+    }
+
+    // The two factors of ρ, each as its own Argand point.
+    if (this.showZetaLogDeriv || this.showChiLogDeriv) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      if (this.showZetaLogDeriv) {
+        const zlog = calcZetaLogDeriv(this.sigma, t);
+        if (Number.isFinite(zlog.re) && Number.isFinite(zlog.im)) {
+          this.zetaLogDerivMarker = createOpenCircleMarker(ZETA_LOG_DERIV_COLOR);
+          addOpenCircleLabel(this.zetaLogDerivMarker, "ζ′/ζ", ZETA_LOG_DERIV_COLOR);
+          this.zetaLogDerivMarker.position.set(zlog.re, zlog.im, 0.015);
+          this.group.add(this.zetaLogDerivMarker);
+        }
+      }
+      if (this.showChiLogDeriv) {
+        const w = chiLogDeriv(complex(this.sigma, t));
+        if (Number.isFinite(w.re) && Number.isFinite(w.im)) {
+          this.chiLogDerivMarker = createOpenCircleMarker(CHI_LOG_DERIV_COLOR);
+          addOpenCircleLabel(this.chiLogDerivMarker, "χ′/χ", CHI_LOG_DERIV_COLOR);
+          this.chiLogDerivMarker.position.set(w.re, w.im, 0.015);
+          this.group.add(this.chiLogDerivMarker);
+        }
+      }
+    }
+
+    // Offset of B₁* in the ϑ-frame. On σ = 1/2 this segment runs from ζ/2 to
+    // B₁* and its signed length is h* = −Z′/(2ϑ′).
+    if (this.showHStar) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      const { foot, tip } = calcHStar(this.sigma, t);
+      if (
+        Number.isFinite(foot.re) && Number.isFinite(foot.im)
+        && Number.isFinite(tip.re) && Number.isFinite(tip.im)
+      ) {
+        const wrap = new THREE.Group();
+        buildLine(
+          [{ x: foot.re, y: foot.im }, { x: tip.re, y: tip.im }],
+          H_STAR_COLOR,
+          wrap,
+        );
+        this.group.add(wrap);
+        this.hStarObject = wrap;
+      }
+    }
+
+    // AK saddle terms at the y of the strip containing this T.
+    // Each Q toggle draws the Fresnel chirp that converges to that Q.
+    // For σ ≤ −1 the terms are fitted about the origin into the same window as
+    // the forward spiral. Their own radius is used: they are not Dirichlet
+    // arrows, so the spiral's shrink factor would collapse them to the origin.
+    // The factor is baked into the coordinates before the float32 buffer.
+    if (this.showAkG0 || this.showAkQ0 || this.showAkQ1 || this.showAkQ2 || this.showAkQ3 || this.showAkQ4 || this.showAkSum) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      const terms = calcAkSaddleTerms(this.sigma, t);
+      const wrap = new THREE.Group();
+      const singles: { on: boolean; value: { re: number; im: number }; color: number; chirp: boolean }[] = [
+        { on: this.showAkG0, value: terms.g0, color: AK_G0_COLOR, chirp: false },
+        { on: this.showAkQ0, value: terms.q0, color: AK_Q0_COLOR, chirp: true },
+        { on: this.showAkQ1, value: terms.q1, color: AK_Q1_COLOR, chirp: true },
+        { on: this.showAkQ2, value: terms.q2, color: AK_Q2_COLOR, chirp: true },
+        { on: this.showAkQ3, value: terms.q3, color: AK_Q3_COLOR, chirp: true },
+        { on: this.showAkQ4, value: terms.q4, color: AK_Q4_COLOR, chirp: true },
+      ];
+      const sumPieces: { value: { re: number; im: number }; color: number; chirp: boolean }[] = [
+        { value: terms.g0, color: AK_G0_COLOR, chirp: false },
+        { value: terms.q0, color: AK_Q0_COLOR, chirp: true },
+        { value: terms.q1, color: AK_Q1_COLOR, chirp: true },
+        { value: terms.q2, color: AK_Q2_COLOR, chirp: true },
+      ];
+      let akRadius = 0;
+      const consider = (x: number, y: number): void => {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+        const d = Math.hypot(x, y);
+        if (d > akRadius) akRadius = d;
+      };
+      for (const item of singles) {
+        if (!item.on) continue;
+        if (item.chirp) {
+          for (const p of chirpSumSpiral(item.value)) consider(p.re, p.im);
+        } else {
+          consider(item.value.re, item.value.im);
+        }
+      }
+      if (this.showAkSum) {
+        let ox = 0;
+        let oy = 0;
+        for (const piece of sumPieces) {
+          const { re, im } = piece.value;
+          if (!Number.isFinite(re) || !Number.isFinite(im)) continue;
+          if (piece.chirp) {
+            for (const p of chirpSumSpiral(piece.value)) consider(ox + p.re, oy + p.im);
+          } else {
+            consider(ox, oy);
+            consider(ox + re, oy + im);
+          }
+          ox += re;
+          oy += im;
+        }
+        consider(terms.sum.re, terms.sum.im);
+      }
+      const akScale = bigSigmaWorldScale(this.sigma, akRadius);
+      const place = (
+        on: boolean,
+        value: { re: number; im: number },
+        color: number,
+        withChirp: boolean,
+      ): void => {
+        if (!on || !Number.isFinite(value.re) || !Number.isFinite(value.im)) return;
+        if (withChirp) {
+          const spiral = chirpSumSpiral(value).map((p) => ({ x: p.re * akScale, y: p.im * akScale }));
+          buildLine(spiral, color, wrap);
+        }
+        const marker = createOpenCircleMarker(color);
+        marker.position.set(value.re * akScale, value.im * akScale, 0.015);
+        wrap.add(marker);
+      };
+      place(this.showAkG0, terms.g0, AK_G0_COLOR, false);
+      place(this.showAkQ0, terms.q0, AK_Q0_COLOR, true);
+      place(this.showAkQ1, terms.q1, AK_Q1_COLOR, true);
+      place(this.showAkQ2, terms.q2, AK_Q2_COLOR, true);
+      place(this.showAkQ3, terms.q3, AK_Q3_COLOR, true);
+      place(this.showAkQ4, terms.q4, AK_Q4_COLOR, true);
+      // Chain the four summands head to tail so each piece starts where the last one ended.
+      if (this.showAkSum) {
+        let ox = 0;
+        let oy = 0;
+        for (const piece of sumPieces) {
+          const { re, im } = piece.value;
+          if (!Number.isFinite(re) || !Number.isFinite(im)) continue;
+          if (piece.chirp) {
+            const spiral = chirpSumSpiral(piece.value).map((p) => ({
+              x: (ox + p.re) * akScale,
+              y: (oy + p.im) * akScale,
+            }));
+            buildLine(spiral, piece.color, wrap);
+          } else {
+            buildLine(
+              [{ x: ox * akScale, y: oy * akScale }, { x: (ox + re) * akScale, y: (oy + im) * akScale }],
+              piece.color,
+              wrap,
+            );
+          }
+          ox += re;
+          oy += im;
+          const joint = createOpenCircleMarker(piece.color);
+          joint.position.set(ox * akScale, oy * akScale, 0.015);
+          wrap.add(joint);
+        }
+        if (Number.isFinite(terms.sum.re) && Number.isFinite(terms.sum.im)) {
+          const total = createOpenCircleMarker(AK_SUM_COLOR);
+          total.position.set(terms.sum.re * akScale, terms.sum.im * akScale, 0.016);
+          wrap.add(total);
+        }
+      }
+      if (wrap.children.length > 0) {
+        this.group.add(wrap);
+        this.akTargetsObject = wrap;
+      }
+    }
+
+    // Meeting-point polyline origin → M₁* → M₂* → ζ. M₁* = λ B₁* is
+    // where ζ′ → ζ crosses origin → B₁*; M₂* = B₁* + ν B₂* sits on
+    // B₁* → ζ, nearer the joint. Skip when λ is undefined (χ′/χ = 1).
+    if (this.showMStar) {
+      const t = indexToImag(this.index, this.usePolyImag);
+      const { zeta, m1Star, m2Star } = calcMStar(this.sigma, t);
+      if (
+        Number.isFinite(m1Star.re) && Number.isFinite(m1Star.im)
+        && Number.isFinite(m2Star.re) && Number.isFinite(m2Star.im)
+      ) {
+        const wrap = new THREE.Group();
+        const m1p: Point2 = { x: m1Star.re, y: m1Star.im };
+        const m2p: Point2 = { x: m2Star.re, y: m2Star.im };
+        const zp: Point2 = { x: zeta.re, y: zeta.im };
+        buildLine([{ x: 0, y: 0 }, m1p, m2p, zp], M_STAR_COLOR, wrap);
+        for (const p of [m1p, m2p]) {
+          const marker = createOpenCircleMarker(M_STAR_COLOR);
+          marker.position.set(p.x, p.y, 0.015);
+          wrap.add(marker);
+        }
+        this.group.add(wrap);
+        this.mStarObject = wrap;
+      }
     }
 
     // --- Imported scatter points ---

@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ζ champion #36 spiral — 3D Gaussian Splats</title>
+<style>html,body{margin:0;height:100%;background:#0a0a16;overflow:hidden}
+#info{position:absolute;top:10px;left:12px;color:#8fe;font:13px/1.5 monospace;z-index:10;text-shadow:0 0 4px #000}</style>
+</head><body>
+<div id="info">Riemann ζ champion #36 &nbsp;(t = 12645.135, |Z| = 18.01)<br>partial-sum spiral &middot; 4026 Gaussians &middot; colored by index<br>drag = orbit &middot; scroll = zoom &middot; right-drag = pan</div>
+<script type="module">
+import * as GaussianSplats3D from 'https://esm.sh/@mkkellogg/gaussian-splats-3d@0.4.7?deps=three@0.175.0';
+const viewer = new GaussianSplats3D.Viewer({
+  cameraUp:[0,1,0], initialCameraPosition:[3.2,1.6,6.0], initialCameraLookAt:[0,0,0],
+  sphericalHarmonicsDegree:0, sharedMemoryForWorkers:false, antialiased:true,
+});
+viewer.addSplatScene('/spiral_champ36.splat', {
+  format: GaussianSplats3D.SceneFormat.Splat, splatAlphaRemovalThreshold:1, showLoadingUI:true,
+}).then(()=>viewer.start()).catch(e=>{document.getElementById('info').innerHTML='load error: '+e;});
+</script></body></html>

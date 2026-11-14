@@ -24,9 +24,27 @@ export const visualizationDefinitions: VisualizationDefinition[] = [
     load: async () => import("@/features/links/linksRoute"),
   },
   {
+    id: "zeros-of-f",
+    title: "Zeros of f",
+    routePath: "/zeros-of-f",
+    load: async () => import("@/features/zeros-of-f/zerosOfFRoute"),
+  },
+  {
     id: "joint-angles",
     title: "Joint Angles",
     routePath: "/joint-angles",
     load: async () => import("@/features/joint-angles/jointAnglesRoute"),
+  },
+  {
+    id: "zeta-log-deriv",
+    title: "ζ′/ζ",
+    routePath: "/zeta-log-deriv",
+    load: async () => import("@/features/zeta-log-deriv/zetaLogDerivRoute"),
+  },
+  {
+    id: "quasicrystal",
+    title: "quasicrystal",
+    routePath: "/quasicrystal",
+    load: async () => import("@/features/quasicrystal/quasicrystalRoute"),
   },
 ];

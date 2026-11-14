@@ -15,10 +15,28 @@ export type RangeSliderProps = {
 type EditingField = "value" | "range" | null;
 
 type DragState = {
-  accDx: number;
-  startValue: number;
+  startX: number;
   hasMoved: boolean;
 };
+
+/**
+ * Maps a horizontal fraction of the slider track onto [min, max].
+ * Fraction 0 is the left end, fraction 1 is the right end, snapped to step.
+ */
+export function valueAtSliderFraction(
+  fraction: number,
+  min: number,
+  max: number,
+  step: number,
+): number {
+  const clamped = Math.min(1, Math.max(0, fraction));
+  const raw = min + clamped * (max - min);
+  if (!(step > 0) || !Number.isFinite(step)) {
+    return Math.min(max, Math.max(min, raw));
+  }
+  const snapped = min + Math.round((raw - min) / step) * step;
+  return Math.min(max, Math.max(min, snapped));
+}
 
 type StepDragState = {
   accDx: number;
@@ -44,13 +62,13 @@ function snapStep(raw: number): number {
 }
 
 /**
- * Inline scrub control with outer range bounds.
+ * Inline slider with a range row under the track.
  *
- * - Drag left/right on the value section to scrub; click to type directly.
+ * - Drag across the value section to travel from the low end of the range to the high end.
+ *   Click without moving to type a value.
  * - Drag left/right on the step section to adjust sensitivity (snaps to powers of 10, clamped 1e-8–1).
- * - Min/max bounds sit outside the box; click either to edit the range inline.
+ * - The range row shows the low end, the word Range, and the high end. Click either end to edit them.
  * - Tab cycles focus between min and max inputs in range-edit mode.
- * - Both drag sections lock the pointer so the cursor cannot wander off screen.
  */
 export function RangeSlider({
   label,
@@ -68,6 +86,7 @@ export function RangeSlider({
   const [rangeMinText, setRangeMinText] = useState("");
   const [rangeMaxText, setRangeMaxText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const valueSectionRef = useRef<HTMLDivElement>(null);
   const minRangeRef = useRef<HTMLInputElement>(null);
   const maxRangeRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<DragState | null>(null);
@@ -83,35 +102,39 @@ export function RangeSlider({
     }
   }, [editing]);
 
+  const valueFromClientX = useCallback(
+    (clientX: number): number => {
+      const section = valueSectionRef.current;
+      if (section === null) return value;
+      const rect = section.getBoundingClientRect();
+      if (!(rect.width > 0)) return value;
+      return valueAtSliderFraction((clientX - rect.left) / rect.width, min, max, step);
+    },
+    [max, min, step, value],
+  );
+
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       if (editing !== null) return;
       e.currentTarget.setPointerCapture(e.pointerId);
-      e.currentTarget.requestPointerLock?.();
-      dragRef.current = { accDx: 0, startValue: value, hasMoved: false };
+      dragRef.current = { startX: e.clientX, hasMoved: false };
     },
-    [editing, value],
+    [editing],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       const drag = dragRef.current;
       if (!drag) return;
-      drag.accDx += e.movementX;
-      if (!drag.hasMoved && Math.abs(drag.accDx) > 2) drag.hasMoved = true;
-      if (drag.hasMoved) {
-        // 1 pixel = 1 step unit of change.
-        const delta = drag.accDx * step;
-        onValueChange(Math.min(max, Math.max(min, drag.startValue + delta)));
-      }
+      if (!drag.hasMoved && Math.abs(e.clientX - drag.startX) > 2) drag.hasMoved = true;
+      if (drag.hasMoved) onValueChange(valueFromClientX(e.clientX));
     },
-    [max, min, step, onValueChange],
+    [onValueChange, valueFromClientX],
   );
 
   const handlePointerUp = useCallback(() => {
     const drag = dragRef.current;
     dragRef.current = null;
-    document.exitPointerLock?.();
     if (drag && !drag.hasMoved) {
       setInputText(value.toFixed(8));
       setEditing("value");
@@ -188,18 +211,11 @@ export function RangeSlider({
 
   return (
     <div className="rs-outer">
-      {/* Min bound — outside the box */}
-      <span
-        className={`rs-bound-outer${rangeEditable ? " rs-bound-outer--editable" : ""}`}
-        onClick={startRangeEdit}
-      >
-        {formatBound(min)}
-      </span>
-
       <div className="rs-root">
         {/* Section 1: value — range-edit mode replaces entire content */}
         <div className="rs-value-wrap">
         <div
+          ref={valueSectionRef}
           className={`rs-value-section${editing !== null ? " rs-value-section--editing" : ""}`}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -299,13 +315,26 @@ export function RangeSlider({
         </div>
       </div>
 
-      {/* Max bound — outside the box */}
-      <span
-        className={`rs-bound-outer${rangeEditable ? " rs-bound-outer--editable" : ""}`}
-        onClick={startRangeEdit}
-      >
-        {formatBound(max)}
-      </span>
+      <div className="rs-range-row">
+        <span
+          className={`rs-bound-outer${rangeEditable ? " rs-bound-outer--editable" : ""}`}
+          onClick={startRangeEdit}
+        >
+          {formatBound(min)}
+        </span>
+        <span
+          className={`rs-range-caption${rangeEditable ? " rs-range-caption--editable" : ""}`}
+          onClick={startRangeEdit}
+        >
+          Range (click to set)
+        </span>
+        <span
+          className={`rs-bound-outer${rangeEditable ? " rs-bound-outer--editable" : ""}`}
+          onClick={startRangeEdit}
+        >
+          {formatBound(max)}
+        </span>
+      </div>
 
     </div>
   );

@@ -41,29 +41,44 @@ export function computeEtaSpiralGeometry(sigma: number, index: number, usePolyIm
 /**
  * Zeta-prime spiral: ζ′(s) = −Σ ln(n)/n^s (Unity `UpdateSum1Prime`).
  * Same link structure as EMS but each term is weighted by −ln(n).
+ *
+ * The last link is grown by the fractional part of spiralMiddleIndex so the
+ * endpoint is continuous when that index crosses an integer (T ≈ 6.177
+ * for the first crossing above 6). Without that, floor() adds a whole new
+ * term at once and the aimed/reflected copy jumps.
  */
 export function computeZPrimeSpiralGeometry(sigma: number, index: number, usePolyImag: boolean): ZetaSpiralGeometry {
   const imaginary = indexToImag(index, usePolyImag);
   const middleIndex = Math.trunc(index);
-  const numLinks = linkCount(index);
+  const mid = spiralMiddleIndex(index, 0);
+  const nLastFull = Math.floor(mid) + 1;
+  const frac = mid - Math.floor(mid);
+  const numLinks = nLastFull + (frac > 0 ? 1 : 0) + 1;
 
   let x = 0, y = 0;
   const joints: Point2[] = [{ x: 0, y: 0 }];
   let middlePoint: Point2 | null = null;
 
-  for (let n = 1; n < numLinks; n++) {
+  const addTerm = (n: number, weight: number): void => {
     const angle = imaginary * Math.log(n);
-    const r = -Math.log(n) * Math.pow(n, -sigma);  // 0 at n=1 (ln 1 = 0)
+    const r = -Math.log(n) * Math.pow(n, -sigma) * weight;
     const dx = r * Math.cos(angle);
     const dy = -r * Math.sin(angle);
+    const prevX = x;
+    const prevY = y;
     x += dx;
     y += dy;
     joints.push({ x, y });
-
     if (n === middleIndex + 1) {
-      const prev = joints[joints.length - 2]!;
-      middlePoint = { x: prev.x + dx / 2, y: prev.y + dy / 2 };
+      middlePoint = { x: prevX + dx / 2, y: prevY + dy / 2 };
     }
+  };
+
+  for (let n = 1; n <= nLastFull; n++) {
+    addTerm(n, 1);
+  }
+  if (frac > 1e-15) {
+    addTerm(nLastFull + 1, frac);
   }
 
   return { joints, zeta: { x, y }, middleIndex, middlePoint, imaginary, numLinks };

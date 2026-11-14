@@ -1,0 +1,179 @@
+/* Dual-handle range slider on a shared track. Two `<input type="range">`
+ * elements are absolutely positioned on top of each other; their thumbs
+ * remain interactive (pointer-events: auto) while their tracks pass clicks
+ * through (pointer-events: none) so the underlying coloured fill stays
+ * visible and the closer handle grabs focus on a click anywhere along the
+ * bar. */
+.zest-frac-range {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  margin-top: 4px;
+}
+
+.zest-frac-range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 7px;
+  height: 4px;
+  background: #2a2f3c;
+  border-radius: 2px;
+}
+
+.zest-frac-range-fill {
+  position: absolute;
+  top: 7px;
+  height: 4px;
+  background: var(--accent, #66d9ff);
+  border-radius: 2px;
+}
+
+.zest-frac-range input[type="range"] {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 18px;
+  margin: 0;
+  pointer-events: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.zest-frac-range input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent, #66d9ff);
+  border: 2px solid #0c0f17;
+  cursor: pointer;
+}
+
+.zest-frac-range input[type="range"]::-moz-range-thumb {
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent, #66d9ff);
+  border: 2px solid #0c0f17;
+  cursor: pointer;
+}
+
+.zest-frac-range input[type="range"]::-webkit-slider-runnable-track {
+  background: transparent;
+}
+
+.zest-frac-range input[type="range"]::-moz-range-track {
+  background: transparent;
+}
+
+.zest-frac-range-readout {
+  font-family: var(--font-mono, ui-monospace, Menlo, monospace);
+  font-size: 10px;
+  color: var(--text-dim, #9aa4be);
+}
+
+.zest-frac-just-one-row {
+  align-items: center;
+  gap: 8px;
+}
+
+.zest-frac-just-one-row .zest-toggle-label {
+  margin: 0 0 0 auto;
+  flex: 0 1 auto;
+}
+
+.zest-frac-just-one-row .zest-toggle-label > .zest-label:empty {
+  display: none;
+}
+
+.zest-frac-just-one input[type="range"] {
+  pointer-events: auto;
+}
+
+.zest-frac-just-one-idle {
+  opacity: 0.4;
+}
+
+.zest-frac-just-one-digits-row {
+  align-items: center;
+}
+
+.zest-frac-digits-radios {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.zest-frac-digits-radio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text, #ddd);
+  cursor: pointer;
+}
+
+.zest-frac-digits-radio input {
+  margin: 0;
+  accent-color: var(--accent, #66d9ff);
+}
+
+.zest-frac-quarter-enable {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.zest-frac-quarter-enable input {
+  margin: 0;
+  accent-color: var(--accent, #66d9ff);
+}
+
+.zest-frac-quarter-radios {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.zest-frac-quarter-radio {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  font-size: 9px;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--text, #ddd);
+  cursor: pointer;
+}
+
+.zest-frac-quarter-radio input {
+  margin: 0;
+  accent-color: var(--accent, #66d9ff);
+}
+
+.zest-frac-quarter-pair-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.zest-frac-quarter-pair-row .zest-frac-quarter-radio {
+  flex: 0 0 auto;
+  flex-direction: row;
+  gap: 4px;
+  font-size: 11px;
+}

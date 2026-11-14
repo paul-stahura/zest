@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { ToolboxContext } from "@/shared/visualization/contracts";
 import { OptionToggle } from "@/shared/toolbox/OptionToggle";
 import { getPrimeImaginaryPart, nearestPrime } from "@/shared/math/lFunctionCalculator";
+import { indexToImag } from "@/shared/math/zetaEms";
 
 // ---------------------------------------------------------------------------
 // Interface the layer must satisfy (avoids circular import)
@@ -14,6 +15,12 @@ export interface LFunctionPanelLayer {
 
   getL1Enabled(): boolean; setL1Enabled(v: boolean): void;
   getL2Enabled(): boolean; setL2Enabled(v: boolean): void;
+  getFLEnabled(): boolean; setFLEnabled(v: boolean): void;
+  getTLEnabled(): boolean; setTLEnabled(v: boolean): void;
+  getTLWhich(): number; setTLWhich(v: number): void;
+  getTLSpiralMode(): number; setTLSpiralMode(v: number): void;
+  getTLReflect(): boolean; setTLReflect(v: boolean): void;
+  getTLBisector(): boolean; setTLBisector(v: boolean): void;
   getL1Prime(): number; setL1Prime(v: number): void;
   getL2Prime(): number; setL2Prime(v: number): void;
   getL1SpiralMode(): number; setL1SpiralMode(v: number): void;
@@ -22,6 +29,9 @@ export interface LFunctionPanelLayer {
   getL2Reflect(): boolean; setL2Reflect(v: boolean): void;
   getL1Bisector(): boolean; setL1Bisector(v: boolean): void;
   getL2Bisector(): boolean; setL2Bisector(v: boolean): void;
+  getFLSpiralMode(): number; setFLSpiralMode(v: number): void;
+  getFLReflect(): boolean; setFLReflect(v: boolean): void;
+  getFLBisector(): boolean; setFLBisector(v: boolean): void;
   getPhantomMode(): number; setPhantomMode(v: number): void;
   getUsePrimeImag(): boolean; setUsePrimeImag(v: boolean): void;
 }
@@ -32,6 +42,7 @@ export interface LFunctionPanelLayer {
 
 const PHANTOM_OPTIONS = [{ label: "joints" }, { label: "phantom" }, { label: "both" }];
 const SPIRAL_OPTIONS  = [{ label: "fwd" }, { label: "inv" }, { label: "both" }];
+const TL_WHICH_OPTIONS = [{ label: "L1" }, { label: "L2" }, { label: "both" }];
 
 // ---------------------------------------------------------------------------
 // Styles
@@ -59,7 +70,7 @@ const styles = {
     color: "rgba(255,255,255,0.75)",
     fontWeight: 600 as const,
     letterSpacing: "0.06em",
-    minWidth: "14px",
+    minWidth: "22px",
   },
   primeInput: {
     width: "36px",
@@ -97,7 +108,12 @@ const styles = {
 // Per-row color backgrounds (matching Unity's L1=red-tint, L2=purple-tint)
 // ---------------------------------------------------------------------------
 
-const ROW_BG = ["rgba(100,20,20,0.4)", "rgba(70,20,90,0.4)"] as const;
+const ROW_BG = [
+  "rgba(100,20,20,0.4)",
+  "rgba(70,20,90,0.4)",
+  "rgba(80,20,55,0.4)",
+  "rgba(90,60,10,0.4)",
+] as const;
 
 // ---------------------------------------------------------------------------
 // LRow — renders one L-function row (shared for L1 and L2)
@@ -197,6 +213,24 @@ function LRow({
 // Factory — creates a stable component bound to the layer
 // ---------------------------------------------------------------------------
 
+function FLHoverLabel() {
+  return (
+    <span className="lfn-fl-label" style={styles.label}>
+      f_L
+      <span className="lfn-fl-tip">Titchmarsh p. 282</span>
+    </span>
+  );
+}
+
+function TLHoverLabel() {
+  return (
+    <span className="lfn-fl-label" style={styles.label}>
+      L1 L2
+      <span className="lfn-fl-tip">Titchmarsh L₁, L₂ p. 282</span>
+    </span>
+  );
+}
+
 export function createLFunctionPanel(layer: LFunctionPanelLayer): ComponentType<{ ctx: ToolboxContext }> {
   return function LFunctionPanel({ ctx }) {
     const index = layer.getIndex();
@@ -260,6 +294,84 @@ export function createLFunctionPanel(layer: LFunctionPanelLayer): ComponentType<
           onReflectChange={v => { layer.setL2Reflect(v); refresh(); }}
           onBisectorChange={v => { layer.setL2Bisector(v); refresh(); }}
         />
+
+        {/* Titchmarsh L₁ / L₂ — period 5, complex ±i */}
+        <div style={{ ...styles.lRow, background: ROW_BG[2] }}>
+          <input
+            type="checkbox"
+            style={styles.checkbox}
+            checked={layer.getTLEnabled()}
+            onChange={e => { layer.setTLEnabled(e.target.checked); refresh(); }}
+          />
+          <TLHoverLabel />
+          <OptionToggle
+            compact
+            value={layer.getTLWhich()}
+            options={TL_WHICH_OPTIONS}
+            onChange={v => { layer.setTLWhich(v); refresh(); }}
+          />
+          <OptionToggle
+            compact
+            value={layer.getTLSpiralMode()}
+            options={SPIRAL_OPTIONS}
+            onChange={v => { layer.setTLSpiralMode(v); refresh(); }}
+          />
+          <label style={styles.checkLabel}>
+            <input
+              type="checkbox"
+              style={styles.checkbox}
+              checked={layer.getTLReflect()}
+              onChange={e => { layer.setTLReflect(e.target.checked); refresh(); }}
+            />
+            Refl
+          </label>
+          <label style={styles.checkLabel}>
+            <input
+              type="checkbox"
+              style={styles.checkbox}
+              checked={layer.getTLBisector()}
+              onChange={e => { layer.setTLBisector(e.target.checked); refresh(); }}
+            />
+            Bisect
+          </label>
+          <span style={styles.tValue}>t: {indexToImag(index, usePolyImag).toFixed(4)}</span>
+        </div>
+
+        {/* f_L row — Titchmarsh mod-5 series, no prime box */}
+        <div style={{ ...styles.lRow, background: ROW_BG[3] }}>
+          <input
+            type="checkbox"
+            style={styles.checkbox}
+            checked={layer.getFLEnabled()}
+            onChange={e => { layer.setFLEnabled(e.target.checked); refresh(); }}
+          />
+          <FLHoverLabel />
+          <OptionToggle
+            compact
+            value={layer.getFLSpiralMode()}
+            options={SPIRAL_OPTIONS}
+            onChange={v => { layer.setFLSpiralMode(v); refresh(); }}
+          />
+          <label style={styles.checkLabel}>
+            <input
+              type="checkbox"
+              style={styles.checkbox}
+              checked={layer.getFLReflect()}
+              onChange={e => { layer.setFLReflect(e.target.checked); refresh(); }}
+            />
+            Refl
+          </label>
+          <label style={styles.checkLabel}>
+            <input
+              type="checkbox"
+              style={styles.checkbox}
+              checked={layer.getFLBisector()}
+              onChange={e => { layer.setFLBisector(e.target.checked); refresh(); }}
+            />
+            Bisect
+          </label>
+          <span style={styles.tValue}>t: {indexToImag(index, usePolyImag).toFixed(4)}</span>
+        </div>
       </div>
     );
   };

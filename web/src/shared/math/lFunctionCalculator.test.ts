@@ -1,12 +1,25 @@
 import {
   calcNLinks,
-  isLFunctionIndexFeasible,
-  MAX_L_FUNCTION_LINKS,
+  calculateFLInverseVectors,
+  calculateFLTarget,
+  calculateFLVectors,
   calculateInverseVectors,
   calculateVectors,
   calculateZetaTarget,
   getPrimeImaginaryPart,
   reflectLFunctionVectors,
+  flipLFunctionVectorsOriginToTarget,
+  TITCHMARSH_FL_TAN_THETA,
+  TITCHMARSH_FL_THETA,
+  titchmarshFLCoeff,
+  titchmarshLCoeff,
+  calculateTitchmarshLTarget,
+  calculateTitchmarshLVectors,
+  calculateTitchmarshLInverseVectors,
+  calculateHurwitzCharacterInverseSumVectors,
+  calculateHurwitzCharacterTarget,
+  combineHurwitzCharacterBasis,
+  hurwitzCharacterBasis,
 } from "@/shared/math/lFunctionCalculator";
 import { complex } from "@/shared/math/complex";
 
@@ -103,14 +116,128 @@ describe("L1 inv/refl tails", () => {
   });
 });
 
-describe("isLFunctionIndexFeasible", () => {
-  it("allows small T", () => {
-    expect(isLFunctionIndexFeasible(50, 3)).toBe(true);
-    expect(calcNLinks(50, 3)).toBeLessThanOrEqual(MAX_L_FUNCTION_LINKS);
+describe("flipLFunctionVectorsOriginToTarget", () => {
+  it("starts at the origin and ends on the analytic target", () => {
+    const prime = 3;
+    const T = 6.276116;
+    const t = getPrimeImaginaryPart(prime, T, false, false);
+    const s = complex(0.5, t);
+    const target = calculateZetaTarget(prime, s);
+    const targetPt = { x: target.re, y: target.im };
+    const fwd = calculateVectors(calcNLinks(T, prime), prime, s);
+    const flipped = flipLFunctionVectorsOriginToTarget(fwd, targetPt);
+    const head = flipped[0];
+    const tail = flipped[flipped.length - 1];
+    expect(head).toBeDefined();
+    expect(tail).toBeDefined();
+    if (head === undefined || tail === undefined) return;
+    expect(Math.hypot(head.x, head.y)).toBeLessThan(0.05);
+    expect(Math.hypot(tail.x - targetPt.x, tail.y - targetPt.y)).toBeLessThan(1e-10);
+  });
+});
+
+describe("Titchmarsh f_L", () => {
+  it("stores tan θ from (10.25.1) and θ = arctan of that", () => {
+    expect(TITCHMARSH_FL_TAN_THETA).toBeCloseTo(0.284079043840412, 15);
+    expect(TITCHMARSH_FL_THETA).toBeCloseTo(Math.atan(TITCHMARSH_FL_TAN_THETA), 15);
+    expect(TITCHMARSH_FL_THETA).toBeCloseTo(0.276787179448523, 12);
   });
 
-  it("rejects medium T that would allocate tens of millions of links", () => {
-    expect(isLFunctionIndexFeasible(4000, 3)).toBe(false);
-    expect(calcNLinks(4000, 3)).toBeGreaterThan(MAX_L_FUNCTION_LINKS);
+  it("repeats four links then a phantom every five n", () => {
+    const tan = TITCHMARSH_FL_TAN_THETA;
+    expect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(titchmarshFLCoeff)).toEqual([
+      1, tan, -tan, -1, 0, 1, tan, -tan, -1, 0,
+    ]);
+  });
+
+  it("puts a phantom on every multiple of 5 and keeps the partial sum", () => {
+    const s = complex(2, 0);
+    const walked = calculateFLVectors(10, s);
+    expect(walked.phantomVectors).toHaveLength(2);
+    expect(walked.vectors).toHaveLength(9);
+    const head = walked.vectors.at(-1)!;
+    const tan = TITCHMARSH_FL_TAN_THETA;
+    const expected =
+      1 + tan / 4 - tan / 9 - 1 / 16 + 1 / 36 + tan / 49 - tan / 64 - 1 / 81;
+    expect(head.x).toBeCloseTo(expected, 12);
+    expect(head.y).toBeCloseTo(0, 12);
+  });
+
+  it("places the analytic cross near the spiral head", () => {
+    const s = complex(0.5, 14.134725);
+    const n = calcNLinks(3, 5);
+    const head = calculateFLVectors(n, s).vectors.at(-1)!;
+    const target = calculateFLTarget(s);
+    expect(Math.hypot(head.x - target.re, head.y - target.im)).toBeLessThan(0.08);
+    const inv = calculateFLInverseVectors(n, s, { x: target.re, y: target.im });
+    expect(inv.vectors[0]!.x).toBeCloseTo(target.re, 10);
+    expect(inv.vectors[0]!.y).toBeCloseTo(target.im, 10);
+  });
+});
+
+describe("Titchmarsh L1 L2", () => {
+  it("repeats 1, ±i, ∓i, −1, then a phantom every five n", () => {
+    const l1 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => titchmarshLCoeff(1, n));
+    const l2 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => titchmarshLCoeff(2, n));
+    expect(l1.map(c => [c.re, c.im])).toEqual([
+      [1, 0], [0, 1], [0, -1], [-1, 0], [0, 0],
+      [1, 0], [0, 1], [0, -1], [-1, 0], [0, 0],
+    ]);
+    expect(l2.map(c => [c.re, c.im])).toEqual([
+      [1, 0], [0, -1], [0, 1], [-1, 0], [0, 0],
+      [1, 0], [0, -1], [0, 1], [-1, 0], [0, 0],
+    ]);
+  });
+
+  it("puts a phantom on every multiple of 5 and walks the complex series", () => {
+    const s = complex(2, 0);
+    const walked = calculateTitchmarshLVectors(1, 10, s);
+    expect(walked.phantomVectors).toHaveLength(2);
+    expect(walked.vectors).toHaveLength(9);
+    const head = walked.vectors.at(-1)!;
+    const expectedRe = 1 - 1 / 16 + 1 / 36 - 1 / 81;
+    const expectedIm = 1 / 4 - 1 / 9 + 1 / 49 - 1 / 64;
+    expect(head.x).toBeCloseTo(expectedRe, 12);
+    expect(head.y).toBeCloseTo(expectedIm, 12);
+    const head2 = calculateTitchmarshLVectors(2, 10, s).vectors.at(-1)!;
+    expect(head2.x).toBeCloseTo(expectedRe, 12);
+    expect(head2.y).toBeCloseTo(-expectedIm, 12);
+  });
+
+  it("places the analytic cross near the spiral head", () => {
+    const s = complex(0.5, 14.134725);
+    const n = calcNLinks(3, 5);
+    const head = calculateTitchmarshLVectors(1, n, s).vectors.at(-1)!;
+    const target = calculateTitchmarshLTarget(1, s);
+    expect(Math.hypot(head.x - target.re, head.y - target.im)).toBeLessThan(0.08);
+    const inv = calculateTitchmarshLInverseVectors(1, n, s, { x: target.re, y: target.im });
+    expect(inv.vectors[0]!.x).toBeCloseTo(target.re, 10);
+    expect(inv.vectors[0]!.y).toBeCloseTo(target.im, 10);
+  });
+});
+
+describe("calculateHurwitzCharacterInverseSumVectors", () => {
+  it("pins the last joint to analytic H and keeps n-order χ, not reversed residues", () => {
+    const s = complex(2, 0);
+    const chi = [{ re: -1, im: 0 }, { re: 1, im: 0 }];
+    const walked = calculateHurwitzCharacterInverseSumVectors(chi, 2, s);
+    const h = calculateHurwitzCharacterTarget(chi, s);
+    const last = walked.vectors.at(-1)!;
+    expect(last.x).toBeCloseTo(h.re, 10);
+    expect(last.y).toBeCloseTo(h.im, 10);
+    // Unscaled joints: n=1 → (1,0), n=2 → (−1,0). Scale H/(−1) = −H.
+    expect(walked.vectors[1]!.x).toBeCloseTo(-h.re, 10);
+    expect(walked.vectors[1]!.y).toBeCloseTo(-h.im, 10);
+  });
+});
+
+describe("hurwitzCharacterBasis", () => {
+  it("recombines to the same L as calculateHurwitzCharacterTarget", () => {
+    const s = complex(0.5, 76.44254084972411);
+    const coeffs = [{ re: 0, im: -1 }, { re: 1, im: 0 }];
+    const direct = calculateHurwitzCharacterTarget(coeffs, s);
+    const combined = combineHurwitzCharacterBasis(coeffs, hurwitzCharacterBasis(s, 2));
+    expect(combined.re).toBeCloseTo(direct.re, 12);
+    expect(combined.im).toBeCloseTo(direct.im, 12);
   });
 });

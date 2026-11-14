@@ -1,0 +1,14 @@
+{
+  "akSigmaLtNeg50": 1999,
+  "akSigmaGtNeg50": 871374,
+  "t3975To4000_sigmaLt0": 125497,
+  "t3975To4000_sigma0To1": 1525398,
+  "t3950To3975_sigmaLt0": 124719,
+  "t3950To3975_sigma0To1": 1514602,
+  "t3925To3950_sigmaLt0": 124009,
+  "t3925To3950_sigma0To1": 1503744,
+  "t3900To3925_sigmaLt0": 123096,
+  "t3900To3925_sigma0To1": 1492994,
+  "t398To3900_sigmaNeg50ToNeg10": 501251,
+  "t398To3900_sigmaNeg20To0": 1170554
+}

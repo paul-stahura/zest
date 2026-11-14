@@ -1,0 +1,61 @@
+/* eslint-disable no-loss-of-precision -- Kuznetsov 8-term coefficients carry digits beyond JS double precision; literals are direct copies of the published reference values used in the Python source (formulas_v3speed.py). */
+
+/**
+ * ω₀ — leading constant in the Kuznetsov 8-term I₁ asymptotic series.
+ * Stored as `[real, imag]`.
+ */
+export const OMEGA0: readonly [number, number] = [
+  0.1926019633029103199063,
+  0.02472986965795651842299,
+];
+
+/** Real parts of ω₁[0..7]. */
+export const OMEGA1_RE: readonly number[] = [
+  0.1582954327321094104502,
+  0.07826728293587305110862,
+  0.01940595049247490540621,
+  0.0016911847719027555036966,
+  -0.0002994777986686168319731,
+  -0.00009837202592542590210980,
+  -0.000009346989286415688998740,
+  -0.0000002451577304299235983015,
+];
+
+/** Imag parts of ω₁[0..7]. */
+export const OMEGA1_IM: readonly number[] = [
+  0.04149113569204600502105,
+  0.05215518667623989653254,
+  0.02977286598777633378610,
+  0.008938933548999206800196,
+  0.001567541981830224487301,
+  0.0001502108057352792742070,
+  0.000005793852209955845432028,
+  0.000000006134784898751456953524,
+];
+
+/** Real parts of λ[0..7]. */
+export const LAMBDA_RE: readonly number[] = [
+  0.152845417613666702426,
+  0.302346225128945757427,
+  0.451119584531782942888,
+  0.604563710297226464637,
+  0.765965706759629396959,
+  0.938371150977889047740,
+  1.128148837845288402558,
+  1.353030558654668162533,
+];
+
+/** Imag parts of λ[0..7]. */
+export const LAMBDA_IM: readonly number[] = [
+  -0.119440685603870510384,
+  -0.243989695504400621268,
+  -0.378479770209444563858,
+  -0.523486888629095259770,
+  -0.678405572413543444272,
+  -0.845332361280975174880,
+  -1.030737947568157685685,
+  -1.252503278108132307164,
+];
+
+/** Number of Kuznetsov correction terms. */
+export const KUZNETSOV_TERM_COUNT = OMEGA1_RE.length;

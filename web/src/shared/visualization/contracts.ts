@@ -55,7 +55,7 @@ export type ToolboxSection = {
 };
 
 export type ToolboxControl =
-  | { kind: "toggle"; id: string; label: string; value: boolean; onChange(v: boolean): void }
+  | { kind: "toggle"; id: string; label: string; labelColor?: string; value: boolean; onChange(v: boolean): void }
   | { kind: "number"; id: string; label: string; value: number; min?: number; max?: number; step?: number; onChange(v: number): void }
   | { kind: "range-slider"; id: string; label: string; value: number; defaultValue?: number; min: number; max: number; step: number; onChange(v: number): void; onStepChange?(step: number): void; onRangeChange?(min: number, max: number): void }
   | { kind: "select"; id: string; label: string; value: string; options: { label: string; value: string }[]; onChange(v: string): void }

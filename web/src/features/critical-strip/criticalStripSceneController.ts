@@ -60,6 +60,8 @@ export class CriticalStripSceneController implements SceneController {
   private lastScrollTime = 0;
 
   private blinkOn = true;
+  /** Set by anything that changes the picture; frame() draws only when set. */
+  private dirty = true;
 
   // Hover state — tracks which cache entry the pointer is nearest to
   private hoveredSetId: string | null = null;
@@ -105,7 +107,13 @@ export class CriticalStripSceneController implements SceneController {
 
   public frame(time: number): void {
     if (this.ctx === null || this.disposed) return;
-    this.blinkOn = Math.floor(time / BLINK_HALF_PERIOD_MS) % 2 === 0;
+    const blinkOn = Math.floor(time / BLINK_HALF_PERIOD_MS) % 2 === 0;
+    if (blinkOn !== this.blinkOn) {
+      this.blinkOn = blinkOn;
+      this.dirty = true;
+    }
+    if (!this.dirty) return;
+    this.dirty = false;
     this.render();
   }
 
@@ -124,12 +132,16 @@ export class CriticalStripSceneController implements SceneController {
   }
 
   public setCurrentPosition(index: number, sigma: number): void {
+    if (index === this.currentIndex && sigma === this.currentSigma) return;
     this.currentIndex = index;
     this.currentSigma = sigma;
+    this.dirty = true;
   }
 
   public setBandsVisible(visible: boolean): void {
+    if (visible === this.bandsVisible) return;
     this.bandsVisible = visible;
+    this.dirty = true;
   }
 
   public setSigmaRange(range: number): void {
@@ -446,6 +458,7 @@ export class CriticalStripSceneController implements SceneController {
   // ── Visible cache ──────────────────────────────────────────────────────────
 
   private rebuildVisibleCaches(): void {
+    this.dirty = true;
     this.visibleCache.clear();
     // Clear stale hover state — the point may no longer be visible
     this.hoveredSetId = null;
@@ -632,6 +645,7 @@ export class CriticalStripSceneController implements SceneController {
     this.hoveredCacheIdx = foundCacheIdx;
     this.hoveredReal = foundReal;
     this.hoveredIndex = foundIndex;
+    this.dirty = true;
 
     if (this.canvas !== null) {
       this.canvas.style.cursor = foundSetId !== null ? "pointer" : "crosshair";
@@ -642,6 +656,7 @@ export class CriticalStripSceneController implements SceneController {
     if (this.hoveredSetId === null) return;
     this.hoveredSetId = null;
     this.hoveredCacheIdx = -1;
+    this.dirty = true;
     if (this.canvas !== null) this.canvas.style.cursor = "crosshair";
   }
 
@@ -655,6 +670,7 @@ export class CriticalStripSceneController implements SceneController {
       hi += floor - lo;
       lo = floor;
     }
+    if (lo === this.transform.getMinValue() && hi === this.transform.getMaxValue()) return;
     this.transform.setRange(lo, hi);
     this.rebuildVisibleCaches();
   }
@@ -663,6 +679,8 @@ export class CriticalStripSceneController implements SceneController {
     const startMin = this.transform.getMinValue();
     const startMax = this.transform.getMaxValue();
     const startTime = performance.now();
+    // Lock mode re-centers every 50 ms; a stale tween would keep running.
+    cancelAnimationFrame(this.animFrameHandle);
 
     const step = (): void => {
       const t = Math.min(1, (performance.now() - startTime) / durationMs);

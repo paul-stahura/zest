@@ -10,7 +10,12 @@ export function RenderToolboxControl({ control }: RenderToolboxControlProps) {
   if (control.kind === "toggle") {
     return (
       <label className="zest-toggle-label">
-        <span className="zest-label">{control.label}</span>
+        <span
+          className="zest-label"
+          style={control.labelColor === undefined ? undefined : { color: control.labelColor }}
+        >
+          {control.label}
+        </span>
         <span className="zest-toggle-track">
           <input
             type="checkbox"

@@ -20,6 +20,7 @@ like internal tooling. Public publishing follows the repository rules below.
 
 - `chriscow/zest` is the private development repository where we iterate.
 - “Push it live” means publish the static web app to `paul-stahura/zest` on `main`; GitHub Pages serves https://paul-stahura.github.io/zest/.
+- For Paul's latest work, inspect `chriscow/zest` branch `pauls-experiments`; do not assume private `main` contains it. Confirm the source revision before publishing.
 - Start from the latest public `main` and reconcile compatible app changes while preserving Paul's latest work, Pages routing, and build configuration.
 - Strip Cloud/cluster code, controls, dependencies, infrastructure, and secrets from the public release. Port reviewed static-app changes; do not merge private repository history into the public repository.
 - Publishing private `main` does not update GitHub Pages. Cluster deployment is a separate task requiring an explicit cluster request.

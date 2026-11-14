@@ -281,6 +281,11 @@ export class RemainderWorkspaceLayer implements RemainderMatrixLayer {
     this.matrixPanel = createRemainderMatrixPanel(this);
   }
 
+  /** Same origin fit as the spiral, so remainder curves stay on the scaled chain. */
+  public setDisplayScale(scale: number): void {
+    this.group.scale.setScalar(scale);
+  }
+
   public initialize(): void {
     this.rebuild();
   }
@@ -301,13 +306,6 @@ export class RemainderWorkspaceLayer implements RemainderMatrixLayer {
 
   public setIndex(index: number): void {
     this.index = index;
-    // Idle remainder toggles: skip rebuild so animation does not pay O(T) sums
-    // for an empty remainder layer every frame.
-    if (!this.isRowActive(this.states.rak)
-      && !this.isRowActive(this.states.rps)
-      && !this.isRowActive(this.states.rHalf)) {
-      return;
-    }
     this.rebuild();
   }
 
@@ -375,7 +373,7 @@ export class RemainderWorkspaceLayer implements RemainderMatrixLayer {
         id: "remainder-layer",
         contributorId: "workspace:remainder",
         title: "Remainders",
-        order: 15,
+        order: 16,
         defaultCollapsed: true,
         CustomPanel: this.matrixPanel,
         controls: [

@@ -18,9 +18,12 @@ export interface SpiralMatrixLayer {
   getZakVisible(): boolean; setZakVisible(v: boolean): void;
   getZakReflect(): boolean; setZakReflect(v: boolean): void;
   getCrossingSumVisible(): boolean; setCrossingSumVisible(v: boolean): void;
+  getAllRemaindersVisible(): boolean; setAllRemaindersVisible(v: boolean): void;
   getEtaVisible(): boolean; setEtaVisible(v: boolean): void;
   getZPrimeVisible(): boolean; setZPrimeVisible(v: boolean): void;
+  getZPrimeReflect(): boolean; setZPrimeReflect(v: boolean): void;
   getOrderedChainVisible(): boolean; setOrderedChainVisible(v: boolean): void;
+  getFOfSVisible(): boolean; setFOfSVisible(v: boolean): void;
 }
 
 const COL_HEADERS = ["Spiral", "1st half", "Reflect", "σ=½", "Reverse", "order"];
@@ -57,6 +60,10 @@ const ROWS: RowDef[] = [
     cell(l => l.getSpiralReverse(),   (l, v) => l.setSpiralReverse(v)),
     cell(l => l.getOrderedChainVisible(), (l, v) => l.setOrderedChainVisible(v)),
   ),
+  row("f(s)", "#3a3a42",
+    cell(l => l.getFOfSVisible(), (l, v) => l.setFOfSVisible(v)),
+    null, null, null, null, null,
+  ),
   row("Inverse", "#3d2a5a",
     cell(l => l.getInverseVisible(),  (l, v) => l.setInverseVisible(v)),
     cell(l => l.getInverseFirstHalf(), (l, v) => l.setInverseFirstHalf(v)),
@@ -85,13 +92,19 @@ const ROWS: RowDef[] = [
     cell(l => l.getCrossingSumVisible(), (l, v) => l.setCrossingSumVisible(v)),
     null, null, null, null, null,
   ),
+  row("all remainders", "#4a1f24",
+    cell(l => l.getAllRemaindersVisible(), (l, v) => l.setAllRemaindersVisible(v)),
+    null, null, null, null, null,
+  ),
   row("Eta", "#4a4a1a",
     cell(l => l.getEtaVisible(), (l, v) => l.setEtaVisible(v)),
     null, null, null, null, null,
   ),
   row("Z Prime", "#323232",
     cell(l => l.getZPrimeVisible(), (l, v) => l.setZPrimeVisible(v)),
-    null, null, null, null, null,
+    null,
+    cell(l => l.getZPrimeReflect(), (l, v) => l.setZPrimeReflect(v)),
+    null, null, null,
   ),
 ];
 

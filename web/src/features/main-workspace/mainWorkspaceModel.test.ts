@@ -57,11 +57,13 @@ describe("MainWorkspaceModel session restore", () => {
         sigma: 0.25,
         index: 15,
         drawMode: "bisectorLink",
+        allRemaindersVisible: true,
       });
       const state = model.getSerializableState();
       expect(state.sigma).toBe(0.25);
       expect(state.index).toBe(15);
       expect(state.drawMode).toBe("bisectorLink");
+      expect(state.allRemaindersVisible).toBe(true);
     } finally {
       model.dispose();
     }

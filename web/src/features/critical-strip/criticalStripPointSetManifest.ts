@@ -48,4 +48,5 @@ export const CRITICAL_STRIP_MANIFEST: ManifestEntry[] = [
   { id: "91-rak-equal-legs",     filename: "91 Rak Equal Legs.csv",                         label: "Rak Equal Legs" },
   { id: "92-sums-equal-legs",    filename: "92 Sums Equal Legs.csv",                        label: "Sums Equal Legs" },
   { id: "93-rps-to-rak",         filename: "93 RpsToRak Equal Legs.csv",                    label: "RpsToRak Equal Legs" },
+  { id: "96-fl-zeros",           filename: "96 zeros of f_L(s).csv",                        label: "zeros of f_L(s)" },
 ];

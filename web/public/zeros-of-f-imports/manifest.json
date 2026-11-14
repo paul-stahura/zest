@@ -1,0 +1,3912 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-05T19:38:39.424Z",
+  "entries": [
+    {
+      "scanId": "import-1bd1616d",
+      "filename": "scan_R1-background.csv",
+      "createdAt": 1778009913826,
+      "bin": "import-1bd1616d.bin",
+      "bytes": 156242428,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -357.9,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.4524179606750067,
+          "max": 2999.9875394668525
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 11824,
+        "pointsRecorded": 6503696,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-7b92619f",
+      "filename": "scan_detailed3-with-depth.csv",
+      "createdAt": 1777406642007,
+      "bin": "import-7b92619f.bin",
+      "bytes": 18535913,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411434394,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 14633,
+        "pointsRecorded": 764403,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8a5eaa45",
+      "filename": "scan_default3-post-proc.csv",
+      "createdAt": 1777165432608,
+      "bin": "import-8a5eaa45.bin",
+      "bytes": 1672996,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411434394,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 12584,
+        "pointsRecorded": 94337,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-1fba2825",
+      "filename": "scan_default3.csv",
+      "createdAt": 1777162594749,
+      "bin": "import-1fba2825.bin",
+      "bytes": 12420689,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411434394,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 14633,
+        "pointsRecorded": 764403,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e2b35b8d",
+      "filename": "scan_T800_s-75to-25_L5000_R1ak.csv",
+      "createdAt": 1777152032141,
+      "bin": "import-e2b35b8d.bin",
+      "bytes": 2513005,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -75,
+          "max": -25,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 400.0313863,
+          "max": 799.9699971
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4997,
+        "pointsRecorded": 153002,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-99a96a2c",
+      "filename": "scan_detailed3.csv",
+      "createdAt": 1777135007283,
+      "bin": "import-99a96a2c.bin",
+      "bytes": 12420689,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411434394,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 14633,
+        "pointsRecorded": 764403,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-674558a0",
+      "filename": "scan_T113_s-52to0_L3120_R1ak.csv",
+      "createdAt": 1777134803636,
+      "bin": "import-674558a0.bin",
+      "bytes": 94495,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -52,
+          "max": -0.3167681949,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411434394,
+          "max": 112.6295148
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2191,
+        "pointsRecorded": 4125,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ebd6fe6b",
+      "filename": "scan_detailed2.csv",
+      "createdAt": 1777132415217,
+      "bin": "import-ebd6fe6b.bin",
+      "bytes": 12326206,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.453181507,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 12442,
+        "pointsRecorded": 760278,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-7884feb9",
+      "filename": "scan_T3000_s-74.2to0_L3710_R1ak.csv",
+      "createdAt": 1777132318792,
+      "bin": "import-7884feb9.bin",
+      "bytes": 928512,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -74.2,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.453181507,
+          "max": 2999.96099
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3652,
+        "pointsRecorded": 55064,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9ddadbfe",
+      "filename": "scan_T100_s-50to0_L1500_R1ak.csv",
+      "createdAt": 1777076986904,
+      "bin": "import-9ddadbfe.bin",
+      "bytes": 38299,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -48.36557705,
+          "max": -0.2334889927,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.411534815,
+          "max": 99.6250698
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 955,
+        "pointsRecorded": 1617,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-da02ec94",
+      "filename": "scan_T500_s-50to-20_L900_R1ak.csv",
+      "createdAt": 1777076147745,
+      "bin": "import-da02ec94.bin",
+      "bytes": 78809,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -50,
+          "max": -20,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 28.570021,
+          "max": 499.3550847
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 881,
+        "pointsRecorded": 4209,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-573a209b",
+      "filename": "scan_detailed.csv",
+      "createdAt": 1777043028296,
+      "bin": "import-573a209b.bin",
+      "bytes": 11397706,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": -74.2049247,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 191.5266722,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 8790,
+        "pointsRecorded": 705214,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b2f50a28",
+      "filename": "scan_T3000_s-148.3to-50_L4915_R1ak.csv",
+      "createdAt": 1777040755341,
+      "bin": "import-b2f50a28.bin",
+      "bytes": 3081745,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -148.3,
+          "max": -74.2049247,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 191.5266722,
+          "max": 2999.9751
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3705,
+        "pointsRecorded": 189598,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b668872f",
+      "filename": "scan_T5000_s-600to-200_L12000_R1ak.csv",
+      "createdAt": 1776984106023,
+      "bin": "import-b668872f.bin",
+      "bytes": 95478223,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -591.5992999,
+          "max": -218.3015251,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1008.497235,
+          "max": 4999.562076
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 11199,
+        "pointsRecorded": 5958289,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d75d76a3",
+      "filename": "default_scan_backup.csv",
+      "createdAt": 1776984101807,
+      "bin": "import-d75d76a3.bin",
+      "bytes": 1082116,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -130,
+          "max": -0.1516919487,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 599.6798167
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 5400,
+        "pointsRecorded": 63244,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ba248ccc",
+      "filename": "default_scan.csv",
+      "createdAt": 1776984101610,
+      "bin": "import-ba248ccc.bin",
+      "bytes": 3681314,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -419.87997,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 59246,
+        "pointsRecorded": 181944,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-54cbddda",
+      "filename": "scan_T3000_s-250to-100_L7500_R1ak.csv",
+      "createdAt": 1776948746066,
+      "bin": "import-54cbddda.bin",
+      "bytes": 8315973,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": -100,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 554.4978102,
+          "max": 2999.987583
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 5085,
+        "pointsRecorded": 515616,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-cc94ea45",
+      "filename": "scan_T2050_s-300to-290_L100_R1ak.csv",
+      "createdAt": 1776731020546,
+      "bin": "import-cc94ea45.bin",
+      "bytes": 58864,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -290,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.524382,
+          "max": 2049.529746
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 100,
+        "pointsRecorded": 3597,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d13a64ad",
+      "filename": "scan_T2050_s-300to-290_L1200_R1ak.csv",
+      "createdAt": 1776730867243,
+      "bin": "import-d13a64ad.bin",
+      "bytes": 419308,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -290,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.52436,
+          "max": 2049.529743
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1200,
+        "pointsRecorded": 25231,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a4a479b5",
+      "filename": "scan_T2050_s-300to-290_L1200_R1ak2.csv",
+      "createdAt": 1776729389325,
+      "bin": "import-a4a479b5.bin",
+      "bytes": 1719906,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -290,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1905.524567,
+          "max": 2049.529739
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 750,
+        "pointsRecorded": 106884,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-5a26426d",
+      "filename": "scan_T2000_s-300to-200_L3000_R1ak.csv",
+      "createdAt": 1776725937112,
+      "bin": "import-5a26426d.bin",
+      "bytes": 577525,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1611.497498,
+          "max": 1999.528068
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 285,
+        "pointsRecorded": 35863,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-2a9344ce",
+      "filename": "scan_T4000_s-500to-100_L32000_R1ak2.csv",
+      "createdAt": 1776684351264,
+      "bin": "import-2a9344ce.bin",
+      "bytes": 17534187,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -500,
+          "max": -100,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3393.501009,
+          "max": 3999.512784
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2715,
+        "pointsRecorded": 1093680,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9d750d8c",
+      "filename": "scan_T2050_s-300to-295_L300_R1ak.csv",
+      "createdAt": 1776654080261,
+      "bin": "import-9d750d8c.bin",
+      "bytes": 483912,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -295,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1950.483113,
+          "max": 2049.529732
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 300,
+        "pointsRecorded": 30000,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9d613919",
+      "filename": "scan_T2050_s-300to-295_L150_R1ak.csv",
+      "createdAt": 1776652979828,
+      "bin": "import-9d613919.bin",
+      "bytes": 241962,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -295,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1950.483115,
+          "max": 2049.529734
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 150,
+        "pointsRecorded": 15000,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-bd3b1074",
+      "filename": "scan_T2050_s-299to-295_L240_R1ak.csv",
+      "createdAt": 1776652746314,
+      "bin": "import-bd3b1074.bin",
+      "bytes": 387132,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -299,
+          "max": -295,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1950.526245,
+          "max": 2049.529732
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 240,
+        "pointsRecorded": 24000,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ef0dc72c",
+      "filename": "scan_T2200_s-300to-275_L1500_R1ak.csv",
+      "createdAt": 1776636071201,
+      "bin": "import-ef0dc72c.bin",
+      "bytes": 7876910,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -275,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1533.493908,
+          "max": 2199.551098
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 810,
+        "pointsRecorded": 491648,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-dccd9709",
+      "filename": "scan_T1700_s-275to-75_L4000_R1ak.csv",
+      "createdAt": 1776527784884,
+      "bin": "import-dccd9709.bin",
+      "bytes": 55299772,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -275,
+          "max": -75,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 157.5142188,
+          "max": 1699.948301
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 3452985,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-5c7bac99",
+      "filename": "scan_T600_s-110to-70_L800_R1ak_2.csv",
+      "createdAt": 1776487456905,
+      "bin": "import-5c7bac99.bin",
+      "bytes": 3371644,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -110,
+          "max": -70,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 300.4469101,
+          "max": 599.4540113
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 800,
+        "pointsRecorded": 210077,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-fbca5af0",
+      "filename": "scan_T600_s-110to-70_L800_R1ak.csv",
+      "createdAt": 1776487430771,
+      "bin": "import-fbca5af0.bin",
+      "bytes": 3371644,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -110,
+          "max": -70,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 300.4469101,
+          "max": 599.4540113
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 800,
+        "pointsRecorded": 210077,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-94f8bf57",
+      "filename": "scan_T3000_s-300to-20_L8400_R1ak.csv",
+      "createdAt": 1776481375296,
+      "bin": "import-94f8bf57.bin",
+      "bytes": 48965430,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -20,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1122.504603,
+          "max": 2999.468564
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1890,
+        "pointsRecorded": 3058803,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8648b317",
+      "filename": "scan_new_1.csv",
+      "createdAt": 1776472999929,
+      "bin": "import-8648b317.bin",
+      "bytes": 1959342,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -20,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1627.49815,
+          "max": 2999.468548
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 90,
+        "pointsRecorded": 122385,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ea566f3e",
+      "filename": "scan_big_detail_inlay3.csv",
+      "createdAt": 1776369598548,
+      "bin": "import-ea566f3e.bin",
+      "bytes": 157630940,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -600,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1008.497235,
+          "max": 4999.562076
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 20720,
+        "pointsRecorded": 6556732,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-f9cc24f9",
+      "filename": "scan_T3000_s-345to-320_L4000_R1ak.csv",
+      "createdAt": 1776369557581,
+      "bin": "import-f9cc24f9.bin",
+      "bytes": 3652198,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -345,
+          "max": -320,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2900.477508,
+          "max": 2999.708792
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3970,
+        "pointsRecorded": 150024,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-061f3815",
+      "filename": "scan_big_detail_inlay2.csv",
+      "createdAt": 1776367073215,
+      "bin": "import-061f3815.bin",
+      "bytes": 153987347,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -600,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1008.497235,
+          "max": 4999.562076
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 17411,
+        "pointsRecorded": 6406708,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-39eb21c0",
+      "filename": "scan_T3200_s-355to-320_L4000_R1ak.csv",
+      "createdAt": 1776367017996,
+      "bin": "import-39eb21c0.bin",
+      "bytes": 5281764,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -355,
+          "max": -320,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3100.471597,
+          "max": 3199.682636
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2784,
+        "pointsRecorded": 218565,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-c6f6ce0d",
+      "filename": "scan_big_detail_inlay.csv",
+      "createdAt": 1776362874702,
+      "bin": "import-c6f6ce0d.bin",
+      "bytes": 148713031,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -600,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1008.497235,
+          "max": 4999.562076
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 15199,
+        "pointsRecorded": 6188143,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-fe310f37",
+      "filename": "scan_T3300_s-355to-335_L4000_R1ak.csv",
+      "createdAt": 1776362649443,
+      "bin": "import-fe310f37.bin",
+      "bytes": 5568508,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -355,
+          "max": -335,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3200.474374,
+          "max": 3299.683264
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 229854,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-5c7b8142",
+      "filename": "scan_T3300_s-370to-320_L4000_R1ak.csv",
+      "createdAt": 1776200803263,
+      "bin": "import-5c7b8142.bin",
+      "bytes": 6116976,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -370,
+          "max": -320,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3200.47437,
+          "max": 3299.683258
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3948,
+        "pointsRecorded": 252735,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e860a5a4",
+      "filename": "scan_the_big_one_R1ak.csv",
+      "createdAt": 1776179235275,
+      "bin": "import-e860a5a4.bin",
+      "bytes": 143144535,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -600,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1008.497235,
+          "max": 4999.562076
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 11199,
+        "pointsRecorded": 5958289,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-98ab13b8",
+      "filename": "scan_clear_14_R1ak.csv",
+      "createdAt": 1776118461076,
+      "bin": "import-98ab13b8.bin",
+      "bytes": 73201795,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.881781683,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 35803,
+        "pointsRecorded": 3030681,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-bfd3e464",
+      "filename": "scan_T4500_s-353to-250_L4000_R1ak.csv",
+      "createdAt": 1776118421467,
+      "bin": "import-bfd3e464.bin",
+      "bytes": 9909228,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -353,
+          "max": -250,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3000.468578,
+          "max": 4499.444052
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1440,
+        "pointsRecorded": 412104,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-98962c3f",
+      "filename": "scan_clear_13_R1ak.csv",
+      "createdAt": 1776102221059,
+      "bin": "import-98962c3f.bin",
+      "bytes": 63293164,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.881781683,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 34408,
+        "pointsRecorded": 2618577,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-5e6fea41",
+      "filename": "scan_T200_s-20to0_L3000_R1ak.csv",
+      "createdAt": 1776102181958,
+      "bin": "import-5e6fea41.bin",
+      "bytes": 530297,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -20,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.881781683,
+          "max": 199.9599241
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2993,
+        "pointsRecorded": 20474,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-70cc0956",
+      "filename": "scan_clear_12_R1ak.csv",
+      "createdAt": 1776100637205,
+      "bin": "import-70cc0956.bin",
+      "bytes": 62783796,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 33024,
+        "pointsRecorded": 2598103,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-3d85febe",
+      "filename": "scan_T500_s-20to0_L3000_R1ak.csv",
+      "createdAt": 1776100587181,
+      "bin": "import-3d85febe.bin",
+      "bytes": 97469,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -20,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 200.4991148,
+          "max": 499.8428702
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1613,
+        "pointsRecorded": 3187,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-364788b5",
+      "filename": "scan_clear_11_R1ak.csv",
+      "createdAt": 1776095963113,
+      "bin": "import-364788b5.bin",
+      "bytes": 62686339,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 31411,
+        "pointsRecorded": 2594916,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-77435e55",
+      "filename": "scan_T2100_s-265to-250_L3000_R1ak.csv",
+      "createdAt": 1776095895175,
+      "bin": "import-77435e55.bin",
+      "bytes": 2695044,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -265,
+          "max": -250,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.559154,
+          "max": 2099.672457
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3000,
+        "pointsRecorded": 110668,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ecfbe1fc",
+      "filename": "scan_clear_10_R1ak.csv",
+      "createdAt": 1776061938798,
+      "bin": "import-ecfbe1fc.bin",
+      "bytes": 59996377,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 28801,
+        "pointsRecorded": 2484248,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b6b64658",
+      "filename": "scan_T2150_s-275to-255_L3000_R1ak.csv",
+      "createdAt": 1776061899016,
+      "bin": "import-b6b64658.bin",
+      "bytes": 1082855,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -275,
+          "max": -255,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2100.565357,
+          "max": 2149.673074
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2543,
+        "pointsRecorded": 43741,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-065ec030",
+      "filename": "scan_clear_9_R1ak.csv",
+      "createdAt": 1776060935581,
+      "bin": "import-065ec030.bin",
+      "bytes": 58916381,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 26477,
+        "pointsRecorded": 2440507,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-57868e6a",
+      "filename": "scan_T2200_s-295to-260_L3000_R1ak.csv",
+      "createdAt": 1776060885308,
+      "bin": "import-57868e6a.bin",
+      "bytes": 1889045,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -295,
+          "max": -260,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2150.477325,
+          "max": 2199.704396
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2381,
+        "pointsRecorded": 77420,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-3dd812c9",
+      "filename": "scan_clear_8_R1ak.csv",
+      "createdAt": 1776059900453,
+      "bin": "import-3dd812c9.bin",
+      "bytes": 57027348,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 24096,
+        "pointsRecorded": 2363087,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-c20a145d",
+      "filename": "scan_T2500_s-290to-270_L4000_2_R1ak.csv",
+      "createdAt": 1776059857668,
+      "bin": "import-c20a145d.bin",
+      "bytes": 8659708,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -290,
+          "max": -270,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2300.469632,
+          "max": 2499.631079
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 358654,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-f2fc3822",
+      "filename": "scan_T2500_s-290to-270_L4000_R1ak.csv",
+      "createdAt": 1776056037934,
+      "bin": "import-f2fc3822.bin",
+      "bytes": 1786540,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -290,
+          "max": -270,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2300.469621,
+          "max": 2499.631075
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 72272,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-236d1216",
+      "filename": "scan_clear_7_R1ak.csv",
+      "createdAt": 1776054439175,
+      "bin": "import-236d1216.bin",
+      "bytes": 48375764,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 20720,
+        "pointsRecorded": 2004433,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-4ba6ef26",
+      "filename": "scan_T2300_s-300to-230_L4000_R1ak.csv",
+      "createdAt": 1776054327949,
+      "bin": "import-4ba6ef26.bin",
+      "bytes": 1481568,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -230,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.480974,
+          "max": 2299.570921
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3948,
+        "pointsRecorded": 59593,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8ea56dff",
+      "filename": "scan_clear_6_R1ak.csv",
+      "createdAt": 1776015200790,
+      "bin": "import-8ea56dff.bin",
+      "bytes": 46896327,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 16935,
+        "pointsRecorded": 1944840,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ab73e58b",
+      "filename": "scan_T2260_s-347to-334_L4000_R1ak.csv",
+      "createdAt": 1776015143759,
+      "bin": "import-ab73e58b.bin",
+      "bytes": 32190244,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -347,
+          "max": -334,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2160.46456,
+          "max": 2259.83362
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 1339093,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-65ad6c9e",
+      "filename": "scan_T1479_s-264to-262_L4000_R1ak.csv",
+      "createdAt": 1776012139262,
+      "bin": "import-65ad6c9e.bin",
+      "bytes": 1456492,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -264,
+          "max": -262,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1475.459248,
+          "max": 1478.831184
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 58520,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-3bdb6dbc",
+      "filename": "scan_clear_5_R1ak.csv",
+      "createdAt": 1775975977756,
+      "bin": "import-3bdb6dbc.bin",
+      "bytes": 14706251,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 12947,
+        "pointsRecorded": 605747,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-12fd914f",
+      "filename": "scan_T4500_s-400to-350_L3000_R1ak.csv",
+      "createdAt": 1775975923848,
+      "bin": "import-12fd914f.bin",
+      "bytes": 4507676,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -400,
+          "max": -350,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3000.480379,
+          "max": 4499.46345
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2816,
+        "pointsRecorded": 186294,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-bfa49275",
+      "filename": "scan_clear_4_R1ak.csv",
+      "createdAt": 1775964317907,
+      "bin": "import-bfa49275.bin",
+      "bytes": 20915004,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 12144,
+        "pointsRecorded": 864880,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a6af40c2",
+      "filename": "scan_clear_3_R1ak.csv",
+      "createdAt": 1775954191545,
+      "bin": "import-a6af40c2.bin",
+      "bytes": 10198587,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 10131,
+        "pointsRecorded": 419453,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-7755984b",
+      "filename": "scan_T4500_s-500to-400_L4000_R1ak.csv",
+      "createdAt": 1775954059037,
+      "bin": "import-7755984b.bin",
+      "bytes": 946378,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -500,
+          "max": -400,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3000.49205,
+          "max": 4499.521472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1822,
+        "pointsRecorded": 38445,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-c202eaeb",
+      "filename": "scan_clear_2_R1ak.csv",
+      "createdAt": 1775947563254,
+      "bin": "import-c202eaeb.bin",
+      "bytes": 9252611,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 2999.619591
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 8339,
+        "pointsRecorded": 381008,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8f8fac4a",
+      "filename": "scan_T38_s-22.5to-21_L2013_R1ak.csv",
+      "createdAt": 1775945455006,
+      "bin": "import-8f8fac4a.bin",
+      "bytes": 10716429,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -22.5,
+          "max": -21,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 30.0459049,
+          "max": 37.99999974
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2013,
+        "pointsRecorded": 445427,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-c7ebfe5b",
+      "filename": "scan_T600_s-50to0_L4000_R1ak.csv",
+      "createdAt": 1775935959228,
+      "bin": "import-c7ebfe5b.bin",
+      "bytes": 388144,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -50,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 25.56708712,
+          "max": 599.9178431
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2428,
+        "pointsRecorded": 14857,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9363ccd8",
+      "filename": "scan_clear_R1ak.csv",
+      "createdAt": 1775930462006,
+      "bin": "import-9363ccd8.bin",
+      "bytes": 8866871,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 2999.619591
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 6095,
+        "pointsRecorded": 366151,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-df2c03b4",
+      "filename": "scan_T1900_s-325to0_L4000_R1ak.csv",
+      "createdAt": 1775929949306,
+      "bin": "import-df2c03b4.bin",
+      "bytes": 6751484,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.502777947,
+          "max": 1899.643314
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3800,
+        "pointsRecorded": 279253,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-5455cda5",
+      "filename": "scan_T2999.62_s-440to-100_L4000_R1ak.csv",
+      "createdAt": 1775921077460,
+      "bin": "import-5455cda5.bin",
+      "bytes": 2115594,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -440,
+          "max": -100,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.451261,
+          "max": 2999.619591
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2310,
+        "pointsRecorded": 86898,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d11fa2ef",
+      "filename": "scan_T1400_s-250to-200_L4000_R1ak.csv",
+      "createdAt": 1775888465514,
+      "bin": "import-d11fa2ef.bin",
+      "bytes": 20553377,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -250,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 907.4913997,
+          "max": 1399.697866
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3473,
+        "pointsRecorded": 854509,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-1a2de385",
+      "filename": "scan_big_R1ak.csv",
+      "createdAt": 1775868393736,
+      "bin": "import-1a2de385.bin",
+      "bytes": 6809808,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -419.87997,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 62244,
+        "pointsRecorded": 250026,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-da27d810",
+      "filename": "scan_T2500_s-300to-200_L3000_R1ak.csv",
+      "createdAt": 1775868109230,
+      "bin": "import-da27d810.bin",
+      "bytes": 1673124,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 890.507846,
+          "max": 2499.652679
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3000,
+        "pointsRecorded": 68088,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-cdddd218",
+      "filename": "scan_T2000_s-300to0_L3000_R1ak.csv",
+      "createdAt": 1775841205450,
+      "bin": "import-cdddd218.bin",
+      "bytes": 158143,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -300,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 42.4930131,
+          "max": 1999.645138
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2071,
+        "pointsRecorded": 5467,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a54a06cc",
+      "filename": "scan_T500_s-500to-50_L2000_R1.csv",
+      "createdAt": 1775836929303,
+      "bin": "import-a54a06cc.bin",
+      "bytes": 246138,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -500,
+          "max": -50,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 7.051521739,
+          "max": 499.5001652
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1374,
+        "pointsRecorded": 9511,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-399a9e75",
+      "filename": "scan_T1500_s-450to0_big4_R1.csv",
+      "createdAt": 1775835533888,
+      "bin": "import-399a9e75.bin",
+      "bytes": 17445353,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -450,
+          "max": -18.22955739,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.465574985,
+          "max": 1498.504265
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 11513,
+        "pointsRecorded": 720653,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-fd7e2f35",
+      "filename": "scan_T1000_s-280to-225_L3003_R1.csv",
+      "createdAt": 1775835476859,
+      "bin": "import-fd7e2f35.bin",
+      "bytes": 3321819,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -280,
+          "max": -225,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 18.04325804,
+          "max": 968.4979634
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3003,
+        "pointsRecorded": 136782,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-468ed296",
+      "filename": "scan_T1500_s-450to0_big3_R1.csv",
+      "createdAt": 1775803782232,
+      "bin": "import-468ed296.bin",
+      "bytes": 14125119,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -450,
+          "max": -18.22955739,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.465574985,
+          "max": 1498.504265
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 8511,
+        "pointsRecorded": 583936,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d69fcbad",
+      "filename": "scan_T350_s-225to-175_L4000_R1.csv",
+      "createdAt": 1775803682028,
+      "bin": "import-d69fcbad.bin",
+      "bytes": 3322948,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -225,
+          "max": -175,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 14.03035566,
+          "max": 349.9999856
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4000,
+        "pointsRecorded": 136289,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-1a861047",
+      "filename": "scan_T1500_s-450to0_big2_R1.csv",
+      "createdAt": 1775802384814,
+      "bin": "import-1a861047.bin",
+      "bytes": 10802183,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -450,
+          "max": -18.22955739,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.465574985,
+          "max": 1498.504265
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4511,
+        "pointsRecorded": 447647,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e79a430e",
+      "filename": "scan_T400_s-300to-200_L6000_R1.csv",
+      "createdAt": 1775802226679,
+      "bin": "import-e79a430e.bin",
+      "bytes": 3263051,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -300,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 18.04652154,
+          "max": 399.9999998
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1187,
+        "pointsRecorded": 135317,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-f7b3ba11",
+      "filename": "scan_T1500_s-450to0_L4000_R1.csv",
+      "createdAt": 1775783438193,
+      "bin": "import-f7b3ba11.bin",
+      "bytes": 7541677,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -450,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.465574985,
+          "max": 1498.504265
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3325,
+        "pointsRecorded": 312435,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d68758a0",
+      "filename": "scan_T1500_s-450to0_big1_R1.csv",
+      "createdAt": 1775748465796,
+      "bin": "import-d68758a0.bin",
+      "bytes": 7541677,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -450,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.465574985,
+          "max": 1498.504265
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3325,
+        "pointsRecorded": 312435,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-59ff38c9",
+      "filename": "scan_T500_s-80to0_L4000_R1ak.csv",
+      "createdAt": 1775719842406,
+      "bin": "import-59ff38c9.bin",
+      "bytes": 9115575,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -80,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.40900082,
+          "max": 498.4079968
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3999,
+        "pointsRecorded": 377649,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-17403a20",
+      "filename": "scan_T1500_s-296to-250_L10000_R1.csv",
+      "createdAt": 1775715000707,
+      "bin": "import-17403a20.bin",
+      "bytes": 27246815,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -296,
+          "max": -250,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 21.49277236,
+          "max": 1494.00425
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3335,
+        "pointsRecorded": 1133477,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-7d88d929",
+      "filename": "scan_T1500_s-296to-150_L10000_R1.csv",
+      "createdAt": 1775708835703,
+      "bin": "import-7d88d929.bin",
+      "bytes": 13136284,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -296,
+          "max": -150,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 20.38874839,
+          "max": 1499.495074
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 256,
+        "pointsRecorded": 547206,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-1e00181e",
+      "filename": "scan_T1000_s-150to0_L10000_R1.csv",
+      "createdAt": 1775705440477,
+      "bin": "import-1e00181e.bin",
+      "bytes": 51770482,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -150,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.400456685,
+          "max": 999.9693786
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 9766,
+        "pointsRecorded": 2151813,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9197bb5e",
+      "filename": "scan_T1000_s-1000to-300_L4000_R1.csv",
+      "createdAt": 1775683541226,
+      "bin": "import-9197bb5e.bin",
+      "bytes": 5136866,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -1000,
+          "max": -300,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 59246,
+        "pointsRecorded": 181944,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8e7955c3",
+      "filename": "scan_combo_R1_3.csv",
+      "createdAt": 1775680752439,
+      "bin": "import-8e7955c3.bin",
+      "bytes": 96207136,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -50,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418206642,
+          "max": 1992.500053
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 29428,
+        "pointsRecorded": 3992690,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-7edbf8a8",
+      "filename": "scan_T1000_s-1000to-800_L7000_R1.csv",
+      "createdAt": 1775680512076,
+      "bin": "import-7edbf8a8.bin",
+      "bytes": 79889188,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -1000,
+          "max": -800,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 62.49824866,
+          "max": 999.5000932
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 7000,
+        "pointsRecorded": 3324924,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8bb83164",
+      "filename": "scan_combo_R1_2.csv",
+      "createdAt": 1775662966070,
+      "bin": "import-8bb83164.bin",
+      "bytes": 16317973,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -50,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418206642,
+          "max": 1992.500053
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 22429,
+        "pointsRecorded": 667766,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-dec303ae",
+      "filename": "scan_T2000_s-800to-500_L6000_R1.csv",
+      "createdAt": 1775662501539,
+      "bin": "import-dec303ae.bin",
+      "bytes": 5281548,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -800,
+          "max": -500,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 45.49744992,
+          "max": 1992.500053
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 6000,
+        "pointsRecorded": 216814,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-df3e02f9",
+      "filename": "scan_combo_R1.csv",
+      "createdAt": 1775627596438,
+      "bin": "import-df3e02f9.bin",
+      "bytes": 11036450,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -50,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418206642,
+          "max": 1196.495132
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 16430,
+        "pointsRecorded": 450952,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e82310b6",
+      "filename": "scan_T600_s-5to1_L6000_R1.csv",
+      "createdAt": 1775626250316,
+      "bin": "import-e82310b6.bin",
+      "bytes": 278918,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -5,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 6.9199529,
+          "max": 599.6868159
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1058,
+        "pointsRecorded": 11048,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-cc6be9b8",
+      "filename": "scan_T600_s-50to1_L6000_R1.csv",
+      "createdAt": 1775624886367,
+      "bin": "import-cc6be9b8.bin",
+      "bytes": 664820,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -50,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418206642,
+          "max": 598.8686997
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4424,
+        "pointsRecorded": 25304,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-07d7c265",
+      "filename": "scan_T600_s-193to-1_L6000_R1.csv",
+      "createdAt": 1775620150254,
+      "bin": "import-07d7c265.bin",
+      "bytes": 3997474,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -193,
+          "max": -1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 5.243870065,
+          "max": 599.9963755
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 4318,
+        "pointsRecorded": 164222,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-2d7b90af",
+      "filename": "scan_T1200_s-500to-100_L10000_R1.csv",
+      "createdAt": 1775617020806,
+      "bin": "import-2d7b90af.bin",
+      "bytes": 6374180,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -500,
+          "max": -100,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 17.0000007,
+          "max": 1196.495132
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 7688,
+        "pointsRecorded": 261426,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-733de91f",
+      "filename": "scan_T600_s-400to0_L10000_R1.csv",
+      "createdAt": 1775578191342,
+      "bin": "import-733de91f.bin",
+      "bytes": 7986339,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -400,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 400.5001586,
+          "max": 599.5001883
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 6243,
+        "pointsRecorded": 329382,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-63c2ae58",
+      "filename": "scan_T400_s-400to-200_L10000_R1.csv",
+      "createdAt": 1775550125415,
+      "bin": "import-63c2ae58.bin",
+      "bytes": 592011,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -400,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 200.4998659,
+          "max": 399.500205
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 123,
+        "pointsRecorded": 24600,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a27962c4",
+      "filename": "scan_T1200_s-240to-220_L4000_R1ak.csv",
+      "createdAt": 1775548293811,
+      "bin": "import-a27962c4.bin",
+      "bytes": 5136866,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -240,
+          "max": -220,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 59246,
+        "pointsRecorded": 181944,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-345b8e0d",
+      "filename": "scan_T1200_s-240to-220_L10000_R1ak.csv",
+      "createdAt": 1775547001112,
+      "bin": "import-345b8e0d.bin",
+      "bytes": 5136866,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -240,
+          "max": -220,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 59246,
+        "pointsRecorded": 181944,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e9ea6d9b",
+      "filename": "scan_T9000_s-850to0_L10000_R1ak.csv",
+      "createdAt": 1775546210919,
+      "bin": "import-e9ea6d9b.bin",
+      "bytes": 5136866,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -850,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 59246,
+        "pointsRecorded": 181944,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b9fe3b47",
+      "filename": "scan_T400_s-70to-40_L10000_R1ak.csv",
+      "createdAt": 1775533959826,
+      "bin": "import-b9fe3b47.bin",
+      "bytes": 1040455,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -70,
+          "max": -40,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 150.4662874,
+          "max": 399.9936901
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 9151,
+        "pointsRecorded": 38395,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-590115b0",
+      "filename": "scan_T1000_s-500to0_L8000_R1.csv",
+      "createdAt": 1775512481095,
+      "bin": "import-590115b0.bin",
+      "bytes": 26445771,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -500,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.421767746,
+          "max": 1000
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 7467,
+        "pointsRecorded": 1097862,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-e7abcb56",
+      "filename": "scan_T1000-500_s-400to0_L10000_R1.csv",
+      "createdAt": 1775497707791,
+      "bin": "import-e7abcb56.bin",
+      "bytes": 138499321,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -400,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418746236,
+          "max": 1000
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 9553,
+        "pointsRecorded": 5765630,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-bfc15678",
+      "filename": "scan_T1000_s-400to-200_L6000_R1.csv",
+      "createdAt": 1775496023222,
+      "bin": "import-bfc15678.bin",
+      "bytes": 126707292,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -400,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 15.48540612,
+          "max": 1000
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 6000,
+        "pointsRecorded": 5276220,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a572189d",
+      "filename": "scan_T500_s-200to0_L4000_R1.csv",
+      "createdAt": 1775489166285,
+      "bin": "import-a572189d.bin",
+      "bytes": 11792054,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -200,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.418746236,
+          "max": 499.5121961
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3554,
+        "pointsRecorded": 489410,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-42f9891f",
+      "filename": "scan_T3000_s-200to0_L4000_R1ak.csv",
+      "createdAt": 1775486865837,
+      "bin": "import-42f9891f.bin",
+      "bytes": 254062,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -200,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 4.471591586,
+          "max": 2997.337472
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2746,
+        "pointsRecorded": 9098,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b749436f",
+      "filename": "scan_T400_s-100to0_L4000_R1.csv",
+      "createdAt": 1775449441476,
+      "bin": "import-b749436f.bin",
+      "bytes": 1973699,
+      "request": {
+        "variant": "R1",
+        "sigmaRange": {
+          "min": -100,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.4187443,
+          "max": 390.8940026
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3275,
+        "pointsRecorded": 80463,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-2d75eedf",
+      "filename": "scan_T500_s-1to1_L4000.csv",
+      "createdAt": 1775444938984,
+      "bin": "import-2d75eedf.bin",
+      "bytes": 745605,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -1,
+          "max": 1,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1.783274861,
+          "max": 499.9634368
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3381,
+        "pointsRecorded": 29235,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-24a5ae4d",
+      "filename": "scan_T500_s-20to-0_L1000.csv",
+      "createdAt": 1774891408699,
+      "bin": "import-24a5ae4d.bin",
+      "bytes": 1875871,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -20,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.881748517,
+          "max": 499.9925286
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1999,
+        "pointsRecorded": 77078,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-21cc96c6",
+      "filename": "scan_T500_s-20to-5_L1000.csv",
+      "createdAt": 1774751666750,
+      "bin": "import-21cc96c6.bin",
+      "bytes": 1254244,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -20,
+          "max": -5,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 4.471618534,
+          "max": 499.9925286
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1000,
+        "pointsRecorded": 51718,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-a1584c15",
+      "filename": "scan_T500_s-5to0_L1000.csv",
+      "createdAt": 1774749365966,
+      "bin": "import-a1584c15.bin",
+      "bytes": 622492,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -5,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.881748517,
+          "max": 499.9670381
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1000,
+        "pointsRecorded": 25395,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-4b10b501",
+      "filename": "scan_T3000_s-420to-300_L4000.csv",
+      "createdAt": 1774738089258,
+      "bin": "import-4b10b501.bin",
+      "bytes": 4501838,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -420,
+          "max": -300,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1900.495051,
+          "max": 2999.619596
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3890,
+        "pointsRecorded": 185469,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-b957da2d",
+      "filename": "scan_T1900_s-325to-200_L4000.csv",
+      "createdAt": 1774716410206,
+      "bin": "import-b957da2d.bin",
+      "bytes": 1338783,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -325,
+          "max": -200,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 1500.476169,
+          "max": 1899.619683
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 3183,
+        "pointsRecorded": 54058,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-28c455df",
+      "filename": "scan_T1500_s-285to-230_L4000.csv",
+      "createdAt": 1774539470852,
+      "bin": "import-28c455df.bin",
+      "bytes": 16882472,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -285,
+          "max": -230,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.45317397,
+          "max": 1499.971186
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 21668,
+        "pointsRecorded": 691699,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-8772abcf",
+      "filename": "scan_T1500_s-50to0_L4000.csv",
+      "createdAt": 1774506717740,
+      "bin": "import-8772abcf.bin",
+      "bytes": 116049,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -50,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 600.2965501,
+          "max": 1499.971186
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2121,
+        "pointsRecorded": 3686,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-01fb971c",
+      "filename": "scan_T1500_s-100to-50_L3000.csv",
+      "createdAt": 1774495368185,
+      "bin": "import-01fb971c.bin",
+      "bytes": 473432,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -100,
+          "max": -50,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 600.0269067,
+          "max": 1499.968621
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2900,
+        "pointsRecorded": 18155,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-ce5e2f42",
+      "filename": "scan_T1500_s-130to0_L6000.csv",
+      "createdAt": 1774486489198,
+      "bin": "import-ce5e2f42.bin",
+      "bytes": 743343,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -130,
+          "max": 0,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 600.4540311,
+          "max": 1499.38127
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1431,
+        "pointsRecorded": 30197,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-c250de41",
+      "filename": "scan_T1499.7_s-187to-130_L6000.csv",
+      "createdAt": 1774478036523,
+      "bin": "import-c250de41.bin",
+      "bytes": 8371812,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -187,
+          "max": -130,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 444.5093233,
+          "max": 1499.443278
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 6000,
+        "pointsRecorded": 345575,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-240aef6b",
+      "filename": "scan_T1500_s-230to-100_L6000.csv",
+      "createdAt": 1774460608555,
+      "bin": "import-240aef6b.bin",
+      "bytes": 3942870,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -230,
+          "max": -100,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 797.5004373,
+          "max": 1499.698152
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 1986,
+        "pointsRecorded": 163210,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-9c27eafd",
+      "filename": "scan_T400_s-5to-2_L3000.csv",
+      "createdAt": 1774452651014,
+      "bin": "import-9c27eafd.bin",
+      "bytes": 128536,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -5,
+          "max": -2,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 2.453165911,
+          "max": 399.5276966
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 2212,
+        "pointsRecorded": 4157,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-d3d3726f",
+      "filename": "scan_T400_s-4to-3_L1000.csv",
+      "createdAt": 1774449890515,
+      "bin": "import-d3d3726f.bin",
+      "bytes": 20245,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -4,
+          "max": -3,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3.447105603,
+          "max": 386.8458856
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 469,
+        "pointsRecorded": 589,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-36e4be5b",
+      "filename": "scan_T400_s-60to-40_L400.csv",
+      "createdAt": 1774394645871,
+      "bin": "import-36e4be5b.bin",
+      "bytes": 451180,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -60,
+          "max": -40,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 73.52480367,
+          "max": 397.3817513
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 400,
+        "pointsRecorded": 18582,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-f7668549",
+      "filename": "scan_T600_s-150to-10_L200_indext.csv",
+      "createdAt": 1774392533006,
+      "bin": "import-f7668549.bin",
+      "bytes": 303703,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -150,
+          "max": -10,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 3025.965692,
+          "max": 1005890.939
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 151,
+        "pointsRecorded": 12572,
+        "durationMs": 0
+      }
+    },
+    {
+      "scanId": "import-0494c62f",
+      "filename": "scan_T600_s-150to-10_L200_rawT.csv",
+      "createdAt": 1774392532996,
+      "bin": "import-0494c62f.bin",
+      "bytes": 303703,
+      "request": {
+        "variant": "R1ak",
+        "sigmaRange": {
+          "min": -150,
+          "max": -10,
+          "linesPerSigma": 0
+        },
+        "tRange": {
+          "min": 21.4472263,
+          "max": 399.6157314
+        },
+        "samplesPerT": 0,
+        "bellShape": 0,
+        "lowestCount": 0,
+        "densityMult": 0,
+        "recordThresh": 0,
+        "seed": 0,
+        "workers": 0
+      },
+      "summary": {
+        "linesScanned": 151,
+        "pointsRecorded": 12572,
+        "durationMs": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+#@ name: zeros of f_L(s)
+#@ color: #e6b84d
+#@ pointsize: 6
+#@ skipcriticalline: false
+#@ samplinginterval: 1
+#@ connectlines: false
+#@ hline: true
+# real,index  (index T = imagToIndex(t); source σ,t pairs of zeros of f_L(s); |f| column omitted)
+0.808517182456637386,3.204486064594077
+0.650830080609737082,3.772388115668358
+0.869530579640643073,5.692339675802661
+0.819549592098810835,6.652099109539516
+0.768223123615721532,6.764414915685941
+0.815873677845720813,7.600796534386000

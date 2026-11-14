@@ -1,9 +1,38 @@
 import * as THREE from "three";
 
 import { clamp } from "@/shared/math/clamp";
+import { RenderSignature } from "@/shared/rendering/renderSignature";
 import type { SceneController } from "@/shared/visualization/contracts";
 
 type ListenerCleanup = () => void;
+
+/**
+ * Idle canvases still redraw this often, so a change the signature cannot
+ * see (or a GPU context restore) shows up within half a second.
+ */
+const SAFETY_REDRAW_MS = 500;
+/** A rAF gap this long means the tab was hidden; redraw on return. */
+const RESUME_GAP_MS = 250;
+
+/** Which axes a modifier-free wheel gesture zooms. Shift still forces σ (X);
+ *  Alt still forces T (Y). */
+export type WheelZoomMode = "both" | "y" | "x";
+
+/**
+ * Decide which camera axes a wheel event should zoom.
+ *
+ * @returns `xOnly` / `yOnly` before the Strip-mode X lock is applied.
+ */
+export function resolveWheelZoomAxes(
+  mode: WheelZoomMode,
+  shiftKey: boolean,
+  altKey: boolean,
+): { xOnly: boolean; yOnly: boolean } {
+  return {
+    xOnly: shiftKey || (mode === "x" && !altKey),
+    yOnly: altKey || (mode === "y" && !shiftKey),
+  };
+}
 
 /**
  * Orthographic 2D scene controller with pan/zoom, resize/DPR handling, and a dedicated feature group.
@@ -18,9 +47,10 @@ export class OrthographicPanZoomSceneController implements SceneController {
   private lastRenderTimeMs = 0;
   private lastSizeCss: { width: number; height: number } = { width: 1, height: 1 };
   private baseHalfHeight = 5;
-  /** Per-axis zoom factors. Plain wheel scales both; modifier-keyed wheels each. */
+  /** Per-axis zoom factors. Plain wheel follows {@link wheelZoomMode}. */
   private zoomX = 1;
   private zoomY = 1;
+  private wheelZoomMode: WheelZoomMode = "both";
   /** When set to "x", wheel zoom and drag pan ignore the X axis entirely.
    *  Used by Strip mode (σ axis fixed at [-1, 2]). */
   private axisLock: "x" | null = null;
@@ -40,9 +70,29 @@ export class OrthographicPanZoomSceneController implements SceneController {
   private aspectLockTargetZoomY: (() => number) | null = null;
   private panX = 0;
   private panY = 0;
+  /** `"orbit"` turns unmodified drag into yaw/pitch; Shift-drag still pans. */
+  private dragMode: "pan" | "orbit" = "pan";
+  private orbitDragListener: ((dx: number, dy: number) => void) | null = null;
+  private orbitDragEndListener: (() => void) | null = null;
+  /**
+   * When set, a pan drag reports a world step (positive = right and up)
+   * instead of moving the camera. Orbit drags do not call it.
+   */
+  private contentDragListener: ((worldDx: number, worldDy: number) => void) | null = null;
   private inputCleanup: ListenerCleanup | null = null;
   private frameListeners: Array<(time: number, deltaMs: number) => void> = [];
   private lastFrameTime: number | null = null;
+  private readonly signature = new RenderSignature();
+  private renderRequested = true;
+  private lastDrawTime = Number.NEGATIVE_INFINITY;
+  private drawCount = 0;
+  /** When this returns false, pointer-drag does not pan (Big Sigma Shift-scrub). */
+  private allowPan: (event: PointerEvent) => boolean = () => true;
+  /** When this returns false, wheel/trackpad does not zoom or re-anchor pan. */
+  private allowWheel: (event: WheelEvent) => boolean = () => true;
+  /** Fired on every canvas pointer move and when the pointer leaves. */
+  private pointerHoverListener: ((event: PointerEvent, overCanvas: boolean) => void) | null = null;
+  private readonly cssProject = new THREE.Vector3();
 
   public readonly featureRoot: THREE.Group;
 
@@ -56,6 +106,48 @@ export class OrthographicPanZoomSceneController implements SceneController {
 
     this.featureRoot = new THREE.Group();
     this.scene.add(this.featureRoot);
+  }
+
+  /**
+   * Gate pointer-drag panning. Shift-scrub on Big Sigma uses this so the
+   * spiral stays put while σ and T follow the hovered zero.
+   */
+  public setAllowPan(fn: (event: PointerEvent) => boolean): void {
+    this.allowPan = fn;
+  }
+
+  /**
+   * Gate wheel / two-finger trackpad zoom. Big Sigma Shift-scrub uses this so
+   * Shift+scroll does not change the spiral camera.
+   */
+  public setAllowWheel(fn: (event: WheelEvent) => boolean): void {
+    this.allowWheel = fn;
+  }
+
+  /**
+   * Pointer move over the canvas, including while a pan or orbit drag is
+   * in progress. `overCanvas` is false on leave so a hover can clear.
+   */
+  public setPointerHoverListener(
+    fn: ((event: PointerEvent, overCanvas: boolean) => void) | null,
+  ): void {
+    this.pointerHoverListener = fn;
+  }
+
+  /**
+   * World point to CSS pixels for the current orthographic camera.
+   * Used when an orbit has mixed Z into X/Y and the flat fit map no
+   * longer matches the screen.
+   */
+  public projectWorldToCss(worldX: number, worldY: number, worldZ: number): { x: number; y: number } {
+    this.camera.updateMatrixWorld();
+    this.cssProject.set(worldX, worldY, worldZ);
+    this.cssProject.project(this.camera);
+    const { width, height } = this.lastSizeCss;
+    return {
+      x: (this.cssProject.x * 0.5 + 0.5) * width,
+      y: (-this.cssProject.y * 0.5 + 0.5) * height,
+    };
   }
 
   /**
@@ -83,11 +175,13 @@ export class OrthographicPanZoomSceneController implements SceneController {
 
     const onWheel = (event: WheelEvent): void => {
       event.preventDefault();
+      if (!this.allowWheel(event)) return;
       const rawFactor = Math.exp(-event.deltaY * 0.0015);
-      // Modifier-keyed per-axis zoom: Shift → σ (X) only; Alt → T (Y) only.
-      // Plain wheel still zooms both for backwards-compatible UX.
-      const xOnly = event.shiftKey;
-      const yOnly = event.altKey;
+      const { xOnly, yOnly } = resolveWheelZoomAxes(
+        this.wheelZoomMode,
+        event.shiftKey,
+        event.altKey,
+      );
       const xLocked = this.axisLock === "x";
       const zoomXAxis = !xLocked && (xOnly || (!xOnly && !yOnly));
       const zoomYAxis = yOnly || (!xOnly && !yOnly) || xLocked;
@@ -161,6 +255,7 @@ export class OrthographicPanZoomSceneController implements SceneController {
     let lastY = 0;
 
     const onPointerDown = (event: PointerEvent): void => {
+      if (!this.allowPan(event)) return;
       dragging = true;
       lastX = event.clientX;
       lastY = event.clientY;
@@ -168,7 +263,8 @@ export class OrthographicPanZoomSceneController implements SceneController {
     };
 
     const onPointerMove = (event: PointerEvent): void => {
-      if (!dragging) {
+      if (!dragging || !this.allowPan(event)) {
+        this.pointerHoverListener?.(event, true);
         return;
       }
       const dx = event.clientX - lastX;
@@ -180,30 +276,53 @@ export class OrthographicPanZoomSceneController implements SceneController {
       const worldPerPixelX = (this.camera.right - this.camera.left) / Math.max(1, width);
       const worldPerPixelY = (this.camera.top - this.camera.bottom) / Math.max(1, height);
 
+      if (this.dragMode === "orbit" && !event.shiftKey) {
+        this.orbitDragListener?.(dx, dy);
+        this.pointerHoverListener?.(event, true);
+        return;
+      }
+
+      if (this.contentDragListener !== null) {
+        this.contentDragListener(dx * worldPerPixelX, -dy * worldPerPixelY);
+        this.pointerHoverListener?.(event, true);
+        return;
+      }
+
       if (this.axisLock !== "x") this.panX -= dx * worldPerPixelX;
       this.panY += dy * worldPerPixelY;
       this.updateProjection();
+      this.pointerHoverListener?.(event, true);
     };
 
     const endDrag = (event: PointerEvent): void => {
+      const wasDragging = dragging;
       dragging = false;
       try {
         canvas.releasePointerCapture(event.pointerId);
       } catch {
         // Pointer may already be released; ignore.
       }
+      if (wasDragging && this.dragMode === "orbit") {
+        this.orbitDragEndListener?.();
+      }
+    };
+
+    const onPointerLeave = (event: PointerEvent): void => {
+      this.pointerHoverListener?.(event, false);
     };
 
     canvas.addEventListener("pointerdown", onPointerDown);
     canvas.addEventListener("pointermove", onPointerMove);
     canvas.addEventListener("pointerup", endDrag);
     canvas.addEventListener("pointercancel", endDrag);
+    canvas.addEventListener("pointerleave", onPointerLeave);
 
     cleanups.push(() => {
       canvas.removeEventListener("pointerdown", onPointerDown);
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", endDrag);
       canvas.removeEventListener("pointercancel", endDrag);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
     });
 
     this.inputCleanup = (): void => {
@@ -229,6 +348,7 @@ export class OrthographicPanZoomSceneController implements SceneController {
     this.renderer.setPixelRatio(clampedDpr);
     this.renderer.setSize(safeWidth, safeHeight, false);
     this.updateProjection();
+    this.renderRequested = true;
   }
 
   /** Returns the current orthographic camera bounds in world coordinates. */
@@ -275,6 +395,64 @@ export class OrthographicPanZoomSceneController implements SceneController {
    *  ignore the X axis entirely (Strip mode). */
   public setAxisLock(lock: "x" | null): void {
     this.axisLock = lock;
+  }
+
+  /** Current σ-axis lock. */
+  public getAxisLock(): "x" | null {
+    return this.axisLock;
+  }
+
+  /**
+   * Plain-wheel zoom axes. `"both"` is the historical default; `"y"` is
+   * T-only so a tall harvest can be inspected without also collapsing σ.
+   */
+  public setWheelZoomMode(mode: WheelZoomMode): void {
+    this.wheelZoomMode = mode;
+  }
+
+  /**
+   * 2D pan vs 3D orbit. Orbit uses {@link setOrbitDragListener}; Shift-drag
+   * still pans so the harvest can be recentered without leaving 3D.
+   */
+  public setDragMode(mode: "pan" | "orbit"): void {
+    this.dragMode = mode;
+  }
+
+  /** Pixel deltas from an unmodified 3D drag (positive X = yaw right). */
+  public setOrbitDragListener(cb: ((dx: number, dy: number) => void) | null): void {
+    this.orbitDragListener = cb;
+  }
+
+  /** Persist hook after an orbit drag ends. */
+  public setOrbitDragEndListener(cb: (() => void) | null): void {
+    this.orbitDragEndListener = cb;
+  }
+
+  /**
+   * Replace camera pan with a content translation. `null` restores pan.
+   * The callback receives the world step a pan would have used, with
+   * positive Y up so the caller can add it to data coordinates.
+   */
+  public setContentDragListener(
+    cb: ((worldDx: number, worldDy: number) => void) | null,
+  ): void {
+    this.contentDragListener = cb;
+  }
+
+  /** Widen the far plane so a rotated 3D cloud is not clipped. */
+  public setCameraFar(far: number): void {
+    this.camera.far = Math.max(this.camera.near + 1, far);
+    this.camera.updateProjectionMatrix();
+  }
+
+  /** Current plain-wheel zoom mode. */
+  public getWheelZoomMode(): WheelZoomMode {
+    return this.wheelZoomMode;
+  }
+
+  /** Current zoom-out floor (both axes). */
+  public getZoomOutFloor(): number {
+    return this.zoomOutFloor;
   }
 
   /** Set the zoom-out floor (minimum allowed zoom factor). 1.0 = pinned to
@@ -345,6 +523,28 @@ export class OrthographicPanZoomSceneController implements SceneController {
     this.updateProjection();
   }
 
+  /** Programmatically set both X and Y zoom factors. */
+  public setZoom(zoomX: number, zoomY: number): void {
+    this.zoomX = Math.max(1e-6, zoomX);
+    this.zoomY = Math.max(1e-6, zoomY);
+    this.updateProjection();
+  }
+
+  /** Current drag mode ("pan" or "orbit"). */
+  public getDragMode(): "pan" | "orbit" {
+    return this.dragMode;
+  }
+
+  /** Current per-axis zoom-in ceilings. */
+  public getZoomInCeiling(): { x: number; y: number } {
+    return { x: this.zoomInCeilingX, y: this.zoomInCeilingY };
+  }
+
+  /** Current orthographic far plane distance. */
+  public getCameraFar(): number {
+    return this.camera.far;
+  }
+
   /** Engage an aspect lock — every wheel zoom calls `fn()` after applying the
    *  cursor-anchored zoom, then sets zoomY to the returned value and re-anchors
    *  so the cursor pixel still maps to its original world point. Pass `null`
@@ -393,14 +593,68 @@ export class OrthographicPanZoomSceneController implements SceneController {
     if (this.renderer === null) {
       return;
     }
-    const deltaMs = this.lastFrameTime !== null ? Math.min(time - this.lastFrameTime, 100) : 16.667;
+    const gapMs = this.lastFrameTime !== null ? time - this.lastFrameTime : 0;
+    const deltaMs = this.lastFrameTime !== null ? Math.min(gapMs, 100) : 16.667;
     this.lastFrameTime = time;
+    if (gapMs > RESUME_GAP_MS) this.renderRequested = true;
     for (const cb of this.frameListeners) {
       cb(time, deltaMs);
     }
+    const sceneChanged = this.sceneChangedSinceLastCheck();
+    const stale = time - this.lastDrawTime >= SAFETY_REDRAW_MS;
+    if (!sceneChanged && !this.renderRequested && !stale) return;
     const renderStart = performance.now();
-    this.renderer.render(this.scene, this.camera);
+    this.drawFrame(this.renderer, this.scene, this.camera);
     this.lastRenderTimeMs = performance.now() - renderStart;
+    this.renderRequested = false;
+    this.lastDrawTime = time;
+    this.drawCount += 1;
+    // onBeforeRender hooks (screen-fixed labels) may rescale objects during
+    // the draw; absorb those edits so they do not trigger another frame.
+    this.sceneChangedSinceLastCheck();
+  }
+
+  /** Draw on the next animation frame even if the scene looks unchanged. */
+  public requestRender(): void {
+    this.renderRequested = true;
+  }
+
+  /** Frames actually drawn. Idle frames that skip the draw do not count. */
+  public getDrawCount(): number {
+    return this.drawCount;
+  }
+
+  /**
+   * Capture the camera and scene and compare with the previous capture.
+   * True when anything that affects the picture has changed.
+   */
+  public sceneChangedSinceLastCheck(): boolean {
+    const signature = this.signature;
+    signature.begin();
+    signature.addCamera(this.camera);
+    signature.addObject(this.scene);
+    this.addToSignature(signature);
+    return signature.end();
+  }
+
+  /**
+   * Subclasses that draw more than the main scene (a second scene, a
+   * backdrop camera, flags that change the pass order) add that state here.
+   */
+  protected addToSignature(_signature: RenderSignature): void {
+    // Base controller draws only `scene` with `camera`.
+  }
+
+  /**
+   * Single color pass. Subclasses can draw a camera-locked backdrop first,
+   * then the pan/zoom scene without clearing color.
+   */
+  protected drawFrame(
+    renderer: THREE.WebGLRenderer,
+    scene: THREE.Scene,
+    camera: THREE.Camera,
+  ): void {
+    renderer.render(scene, camera);
   }
 
   /**
@@ -430,6 +684,14 @@ export class OrthographicPanZoomSceneController implements SceneController {
 
     this.disposeObject3D(this.featureRoot);
     this.scene.clear();
+  }
+
+  /**
+   * Canvas CSS pixels (origin top-left) to world XY. Used for hover/click
+   * picking so pixel radius stays stable when σ and T are scaled differently.
+   */
+  public worldFromCss(cssX: number, cssY: number): { x: number; y: number } {
+    return { x: this.cssToWorldX(cssX), y: this.cssToWorldY(cssY) };
   }
 
   /** Convert a CSS-pixel X coord (relative to canvas) to world X. */

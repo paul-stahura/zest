@@ -14,11 +14,29 @@ import {
   parseMainWorkspaceSerializedState,
   validMainWorkspaceSerializedState,
 } from "@/features/main-workspace/validation/validMainWorkspaceSerializedState";
-import { SpiralWorkspaceLayer, IndexTRow, IntegerPartTRow, ChampionsSlider, ZerosSlider } from "@/features/main-workspace/spiralWorkspaceLayer";
+import { SpiralWorkspaceLayer, IndexTRow, IntegerPartTRow, ChampionsSlider, ZerosSlider, RhoHalfStepper } from "@/features/main-workspace/spiralWorkspaceLayer";
 import { createElement, useState, useEffect } from "react";
 import { indexToImag, imagToIndex } from "@/shared/math/zetaEms";
+import { riemannSiegelTheta } from "@/shared/math/riemannSiegelTheta";
 import { rak } from "@/shared/math/zakCalculator";
 import { calcInverseSum } from "@/shared/math/sumRemainders";
+
+const CAMERA_FRAMES = [
+  "origin",
+  "bisector",
+  "sum1-half-r",
+  "r-half-rs",
+  "zeta",
+  "zeta-mid",
+  "last-link",
+  "theta-rotate",
+] as const;
+
+type CameraFrame = (typeof CAMERA_FRAMES)[number];
+
+function isCameraFrame(value: string): value is CameraFrame {
+  return (CAMERA_FRAMES as readonly string[]).includes(value);
+}
 
 
 /**
@@ -157,6 +175,10 @@ function AbsZetaRow(props: { getAbs: () => number }) {
 
 import { RemainderWorkspaceLayer } from "@/features/main-workspace/remainderWorkspaceLayer";
 import { LFunctionWorkspaceLayer } from "@/features/main-workspace/lFunctionWorkspaceLayer";
+import { HurwitzMachineWorkspaceLayer } from "@/features/main-workspace/hurwitzMachineWorkspaceLayer";
+import { HurwitzMidPerpWorkspaceLayer } from "@/features/main-workspace/hurwitzMidPerpWorkspaceLayer";
+import { HurwitzFormulaWorkspaceLayer } from "@/features/main-workspace/hurwitzFormulaWorkspaceLayer";
+import { defaultHurwitzCoeffs } from "@/shared/math/lFunctionCalculator";
 
 /**
  * Coordinates the main workspace scene graph, imported datasets, and toolbox contributions.
@@ -166,6 +188,9 @@ export class MainWorkspaceModel implements VisualizationModel {
   private readonly spiral: SpiralWorkspaceLayer;
   private readonly remainder: RemainderWorkspaceLayer;
   private readonly lFunction: LFunctionWorkspaceLayer;
+  private readonly hurwitzMachine: HurwitzMachineWorkspaceLayer;
+  private readonly hurwitzMidPerp: HurwitzMidPerpWorkspaceLayer;
+  private readonly hurwitzFormula: HurwitzFormulaWorkspaceLayer;
   private selection: SelectionState = { activePoint: null };
   private animSpeed = 0;
   private animSpeedMode: "coarse" | "fine" | "fast" = "coarse";
@@ -173,7 +198,7 @@ export class MainWorkspaceModel implements VisualizationModel {
   // Camera coordinate frame: "origin" leaves the camera in world space (user
   // pans/zooms freely); the others track a moving point/orientation each frame.
   // Extensible — new frames can be added to the dropdown + computeFrameSpec.
-  private cameraFrame: "origin" | "bisector" | "sum1-half-r" | "r-half-rs" | "zeta-mid" | "last-link" = "origin";
+  private cameraFrame: CameraFrame = "origin";
   // User drag offset while a tracking frame is active (view-space units), and
   // the pan we set last frame — any difference at the next frame is the
   // user's drag, which we fold into the offset instead of stomping it.
@@ -192,6 +217,7 @@ export class MainWorkspaceModel implements VisualizationModel {
   private perfCalcSamples: { t: number; ms: number }[] = [];
   private perfDrawSamples: { t: number; ms: number }[] = [];
   private lastSeenRebuildSeq = 0;
+  private lastSeenDrawCount = 0;
 
   private get animSpeedRange(): number {
     return this.animSpeedMode === "fine" ? 0.1 : this.animSpeedMode === "fast" ? 8 : 3;
@@ -202,6 +228,16 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.spiral = new SpiralWorkspaceLayer(this.controller.getFeatureRoot());
     this.remainder = new RemainderWorkspaceLayer(this.controller.getFeatureRoot());
     this.lFunction = new LFunctionWorkspaceLayer(this.controller.getFeatureRoot());
+    this.hurwitzMachine = new HurwitzMachineWorkspaceLayer(this.controller.getFeatureRoot());
+    this.hurwitzMidPerp = new HurwitzMidPerpWorkspaceLayer(this.controller.getFeatureRoot());
+    this.hurwitzFormula = new HurwitzFormulaWorkspaceLayer(this.controller.getFeatureRoot());
+  }
+
+  private syncCharLayers(index: number, sigma: number, usePolyImag: boolean): void {
+    this.lFunction.update(index, sigma, usePolyImag);
+    this.hurwitzMachine.update(index, sigma, usePolyImag);
+    this.hurwitzMidPerp.update(index, sigma, usePolyImag);
+    this.hurwitzFormula.update(index, sigma, usePolyImag);
   }
 
   /**
@@ -212,8 +248,11 @@ export class MainWorkspaceModel implements VisualizationModel {
     // Remainder defaults used to disagree with the spiral (index 10 vs 6.18);
     // sync so first remainder draw uses the same T/σ as the spiral.
     this.remainder.syncParams(this.spiral.getSigma(), this.spiral.getIndex());
-    this.lFunction.update(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
+    this.syncCharLayers(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
     this.lFunction.initialize();
+    this.hurwitzMachine.initialize();
+    this.hurwitzMidPerp.initialize();
+    this.hurwitzFormula.initialize();
     this.unsubscribeFrame = this.controller.addFrameListener((_time, deltaMs) => {
       // --- calc/draw timing samples (pruned to a 2s rolling window) ---
       {
@@ -224,21 +263,16 @@ export class MainWorkspaceModel implements VisualizationModel {
           this.perfCalcSamples.push({ t: now, ms: this.spiral.getLastRebuildTimeMs() });
         }
         // frame() runs listeners before render, so this is the previous
-        // frame's draw cost — fine for a rolling window.
-        this.perfDrawSamples.push({ t: now, ms: this.controller.getLastRenderTimeMs() });
+        // frame's draw cost — fine for a rolling window. Idle frames skip
+        // the draw and add no sample, so fps reads actual draws per second.
+        const drawCount = this.controller.getDrawCount();
+        if (drawCount !== this.lastSeenDrawCount) {
+          this.lastSeenDrawCount = drawCount;
+          this.perfDrawSamples.push({ t: now, ms: this.controller.getLastRenderTimeMs() });
+        }
         const cutoff = now - 2000;
         while (this.perfCalcSamples.length > 0 && this.perfCalcSamples[0]!.t < cutoff) this.perfCalcSamples.shift();
         while (this.perfDrawSamples.length > 0 && this.perfDrawSamples[0]!.t < cutoff) this.perfDrawSamples.shift();
-      }
-
-      // Keep the emphasised Rps ribbon a constant on-screen thickness through zoom by
-      // feeding it the current world-units-per-pixel (averaged over both axes).
-      {
-        const b = this.controller.getCameraBounds();
-        const size = this.controller.getCanvasSize();
-        const wppX = (b.right - b.left) / Math.max(1, size.width);
-        const wppY = (b.top - b.bottom) / Math.max(1, size.height);
-        this.remainder.setWorldPerPixel((wppX + wppY) / 2);
       }
 
       const deadzone = 0.0001;
@@ -251,11 +285,30 @@ export class MainWorkspaceModel implements VisualizationModel {
         const newIndex = Math.max(0, index + speedPerFrame * Math.sign(this.animSpeed) * (deltaMs / 16.667));
         this.spiral.setIndex(newIndex);
         this.remainder.setIndex(newIndex);
-        this.lFunction.update(newIndex, this.spiral.getSigma(), this.spiral.getUsePolyImag());
+        this.syncCharLayers(newIndex, this.spiral.getSigma(), this.spiral.getUsePolyImag());
 
         // Track performance metrics
         const computeTime = this.spiral.getLastComputeTimeMs();
         this.performanceMetrics.times.push(computeTime);
+      }
+
+      // Fit every layer with the spiral, then keep pixel-sized marks constant on screen.
+      {
+        const b = this.controller.getCameraBounds();
+        const size = this.controller.getCanvasSize();
+        const wppX = (b.right - b.left) / Math.max(1, size.width);
+        const wppY = (b.top - b.bottom) / Math.max(1, size.height);
+        const rawScale = this.spiral.getDisplayScale();
+        const fit = rawScale > 0 && Number.isFinite(rawScale) ? rawScale : 1;
+        this.remainder.setDisplayScale(fit);
+        this.lFunction.setDisplayScale(fit);
+        this.hurwitzMachine.setDisplayScale(fit);
+        this.hurwitzMidPerp.setDisplayScale(fit);
+        this.hurwitzFormula.setDisplayScale(fit);
+        const wpp = ((wppX + wppY) / 2) / fit;
+        this.remainder.setWorldPerPixel(wpp);
+        this.hurwitzMidPerp.setWorldPerPixel(wpp);
+        this.hurwitzFormula.setWorldPerPixel(wpp);
       }
 
       const frame = this.computeFrameSpec();
@@ -271,9 +324,12 @@ export class MainWorkspaceModel implements VisualizationModel {
         // The view basis maps world directions to view axes: x̂=(ux,uy)→+x,
         // ŷ=(vx,vy)→+y. The view linear map is M=[[ux,uy],[vx,vy]], so
         // pan = M·center and (rotation, flipY) decompose M.
+        const displayScale = this.spiral.getDisplayScale();
+        const cx = frame.cx * displayScale;
+        const cy = frame.cy * displayScale;
         const { ux, uy, vx, vy } = frame;
-        const panX = ux * frame.cx + uy * frame.cy + this.followOffsetX;
-        const panY = vx * frame.cx + vy * frame.cy + this.followOffsetY;
+        const panX = ux * cx + uy * cy + this.followOffsetX;
+        const panY = vx * cx + vy * cy + this.followOffsetY;
         this.controller.setPan(panX, panY);
         this.lastFollowPan = { x: panX, y: panY };
         const flip = (ux * vy - uy * vx) < 0;   // det < 0 ⇒ reflection
@@ -301,6 +357,9 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.spiral.dispose();
     this.remainder.dispose();
     this.lFunction.dispose();
+    this.hurwitzMachine.dispose();
+    this.hurwitzMidPerp.dispose();
+    this.hurwitzFormula.dispose();
     this.controller.dispose();
   }
 
@@ -314,12 +373,23 @@ export class MainWorkspaceModel implements VisualizationModel {
    *   • r-half-rs   — center = B1rs = sum1 + R1rs with R1rs = R/2 the exact rs
    *                   half-split (R = ζ − Σ1 − Σ2, Siegel's exact remainder);
    *                   Rrs = R laid horizontal.
+   *   • zeta        — center = ζ, same origin→ζ orientation as zeta-mid.
    *   • zeta-mid    — center = ζ/2, origin→ζ line horizontal; orientation
    *                   carried frame-to-frame by continuity so the view never
    *                   suddenly flips (crossing a zero or the bisector moving
    *                   across the axis no longer rotates/mirrors the scene).
+   *   • theta-rotate — multiply the whole plane by e^{iϑ(t)}, t = I(T). The
+   *                   origin stays fixed. On σ = 1/2 this lays ζ on the real axis.
    */
   private computeFrameSpec(): { cx: number; cy: number; ux: number; uy: number; vx: number; vy: number } | null {
+    if (this.cameraFrame === "theta-rotate") {
+      const t = indexToImag(this.spiral.getIndex(), this.spiral.getUsePolyImag());
+      const theta = riemannSiegelTheta(t);
+      const c = Math.cos(theta);
+      const s = Math.sin(theta);
+      return { cx: 0, cy: 0, ux: c, uy: -s, vx: s, vy: c };
+    }
+
     const geometry = this.spiral.getCurrentGeometry();
     if (geometry === null) return null;
 
@@ -359,9 +429,9 @@ export class MainWorkspaceModel implements VisualizationModel {
       return rotBasis(sum1.x + rx / 2, sum1.y + ry / 2, Math.atan2(ry, rx));
     }
 
-    if (this.cameraFrame === "zeta-mid") {
-      const cx = geometry.zeta.x / 2;
-      const cy = geometry.zeta.y / 2;
+    if (this.cameraFrame === "zeta-mid" || this.cameraFrame === "zeta") {
+      const cx = this.cameraFrame === "zeta" ? geometry.zeta.x : geometry.zeta.x / 2;
+      const cy = this.cameraFrame === "zeta" ? geometry.zeta.y : geometry.zeta.y / 2;
       const a = Math.atan2(geometry.zeta.y, geometry.zeta.x);
       // The origin→ζ line is horizontal for x̂ = ±(cos a, sin a); ŷ = ±perp.
       // Four candidate orthonormal bases keep the line horizontal:
@@ -483,11 +553,29 @@ export class MainWorkspaceModel implements VisualizationModel {
       usePolyImag: this.spiral.getUsePolyImag(),
       extendSpiralCount: this.spiral.getExtendSpiralCount(),
       drawMode: this.spiral.getDrawMode(),
+      showOrigin: this.spiral.getShowOrigin(),
       showZetaEndpoint: this.spiral.getShowZetaEndpoint(),
       showBisectorPoint: this.spiral.getShowBisectorPoint(),
+      showB1Star: this.spiral.getShowB1Star(),
+      showZetaPrimeToZeta: this.spiral.getShowZetaPrimeToZeta(),
+      showRightAngle: this.spiral.getShowRightAngle(),
+      showMStar: this.spiral.getShowMStar(),
+      showRho: this.spiral.getShowRho(),
+      showOneMinusRho: this.spiral.getShowOneMinusRho(),
+      showZetaLogDeriv: this.spiral.getShowZetaLogDeriv(),
+      showChiLogDeriv: this.spiral.getShowChiLogDeriv(),
+      showHStar: this.spiral.getShowHStar(),
+      showAkG0: this.spiral.getShowAkG0(),
+      showAkQ0: this.spiral.getShowAkQ0(),
+      showAkQ1: this.spiral.getShowAkQ1(),
+      showAkQ2: this.spiral.getShowAkQ2(),
+      showAkQ3: this.spiral.getShowAkQ3(),
+      showAkQ4: this.spiral.getShowAkQ4(),
+      showAkSum: this.spiral.getShowAkSum(),
       colorLinks: this.spiral.getColorLinks(),
       spiralVisible: this.spiral.getSpiralVisible(),
       spiralFirstHalf: this.spiral.getSpiralFirstHalf(),
+      fOfSVisible: this.spiral.getFOfSVisible(),
       spiralReflect: this.spiral.getSpiralReflect(),
       spiralHalfSigma: this.spiral.getSpiralHalfSigma(),
       spiralReverse: this.spiral.getSpiralReverse(),
@@ -501,11 +589,16 @@ export class MainWorkspaceModel implements VisualizationModel {
       zakVisible: this.spiral.getZakVisible(),
       zakReflect: this.spiral.getZakReflect(),
       crossingSumVisible: this.spiral.getCrossingSumVisible(),
+      allRemaindersVisible: this.spiral.getAllRemaindersVisible(),
       etaVisible: this.spiral.getEtaVisible(),
       zPrimeVisible: this.spiral.getZPrimeVisible(),
+      zPrimeReflect: this.spiral.getZPrimeReflect(),
       importedPoints: this.snapshotImportedPoints(),
       ...this.remainderSerializableState(),
       ...this.lFunctionSerializableState(),
+      ...this.hurwitzMachineSerializableState(),
+      ...this.hurwitzMidPerpSerializableState(),
+      ...this.hurwitzFormulaSerializableState(),
     };
   }
 
@@ -592,7 +685,7 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.spiral.setSigma(sigma);
     this.remainder.setIndex(index);
     this.remainder.setSigma(sigma);
-    this.lFunction.update(index, sigma, this.spiral.getUsePolyImag());
+    this.syncCharLayers(index, sigma, this.spiral.getUsePolyImag());
     this.toolboxRefresh?.();
   }
 
@@ -662,7 +755,7 @@ export class MainWorkspaceModel implements VisualizationModel {
             const v = Math.max(0, Math.min(10000 - 1e-9, T));
             this.spiral.setIndex(v);
             this.remainder.setIndex(this.spiral.getIndex());
-            this.lFunction.update(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
+            this.syncCharLayers(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
             ctx.requestToolboxRefresh();
           },
         }),
@@ -687,7 +780,24 @@ export class MainWorkspaceModel implements VisualizationModel {
             const v = Math.max(0, Math.min(10000 - 1e-9, T));
             this.spiral.setIndex(v);
             this.remainder.setIndex(this.spiral.getIndex());
-            this.lFunction.update(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
+            this.syncCharLayers(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
+            ctx.requestToolboxRefresh();
+          },
+        }),
+      },
+      {
+        kind: "custom",
+        id: "rho-half-stepper",
+        render: () => createElement(RhoHalfStepper, {
+          currentT: this.spiral.getIndex(),
+          usePolyImag: this.spiral.getUsePolyImag(),
+          onPick: (T: number) => {
+            const v = Math.max(0, Math.min(10000 - 1e-9, T));
+            this.spiral.setSigma(0.5);
+            this.remainder.setSigma(0.5);
+            this.spiral.setIndex(v);
+            this.remainder.setIndex(this.spiral.getIndex());
+            this.syncCharLayers(this.spiral.getIndex(), 0.5, this.spiral.getUsePolyImag());
             ctx.requestToolboxRefresh();
           },
         }),
@@ -702,11 +812,13 @@ export class MainWorkspaceModel implements VisualizationModel {
           { label: "bisector", value: "bisector" },
           { label: "sum1 + R/2", value: "sum1-half-r" },
           { label: "R/2", value: "r-half-rs" },
+          { label: "zeta", value: "zeta" },
           { label: "zeta/2", value: "zeta-mid" },
           { label: "last link", value: "last-link" },
+          { label: "multiplication by e^{iϑ(t)}", value: "theta-rotate" },
         ],
         onChange: (value: string) => {
-          if (value === "origin" || value === "bisector" || value === "sum1-half-r" || value === "r-half-rs" || value === "zeta-mid" || value === "last-link") {
+          if (isCameraFrame(value)) {
             this.cameraFrame = value;
             // Reset drag offset and the continuity basis when switching frames
             // so each frame starts from its natural center/orientation.
@@ -728,7 +840,7 @@ export class MainWorkspaceModel implements VisualizationModel {
           return { ...ctrl, onChange: (v: number) => {
             orig(v);
             this.remainder.setSigma(v);
-            this.lFunction.update(this.spiral.getIndex(), v, this.spiral.getUsePolyImag());
+            this.syncCharLayers(this.spiral.getIndex(), v, this.spiral.getUsePolyImag());
           } };
         }
         if (ctrl.kind === "number" && ctrl.id === "index-frac") {
@@ -736,7 +848,7 @@ export class MainWorkspaceModel implements VisualizationModel {
           return { ...ctrl, onChange: (v: number) => {
             orig(v);
             this.remainder.setIndex(this.spiral.getIndex());
-            this.lFunction.update(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
+            this.syncCharLayers(this.spiral.getIndex(), this.spiral.getSigma(), this.spiral.getUsePolyImag());
           } };
         }
         if (ctrl.kind === "custom" && ctrl.id === "index-int") {
@@ -748,7 +860,7 @@ export class MainWorkspaceModel implements VisualizationModel {
               const newIndex = clampedInt + frac;
               this.spiral.setIndex(newIndex);
               this.remainder.setIndex(newIndex);
-              this.lFunction.update(newIndex, this.spiral.getSigma(), this.spiral.getUsePolyImag());
+              this.syncCharLayers(newIndex, this.spiral.getSigma(), this.spiral.getUsePolyImag());
               ctx.requestToolboxRefresh();
             },
           }) };
@@ -761,7 +873,7 @@ export class MainWorkspaceModel implements VisualizationModel {
               const clamped = Math.max(0, Math.min(10000 - 1e-9, v));
               this.spiral.setIndex(clamped);
               this.remainder.setIndex(clamped);
-              this.lFunction.update(clamped, this.spiral.getSigma(), this.spiral.getUsePolyImag());
+              this.syncCharLayers(clamped, this.spiral.getSigma(), this.spiral.getUsePolyImag());
               ctx.requestToolboxRefresh();
             },
             onTFromtChange: (tIn: number) => {
@@ -769,7 +881,7 @@ export class MainWorkspaceModel implements VisualizationModel {
               const clamped = Math.max(0, Math.min(10000 - 1e-9, newT));
               this.spiral.setIndex(clamped);
               this.remainder.setIndex(clamped);
-              this.lFunction.update(clamped, this.spiral.getSigma(), this.spiral.getUsePolyImag());
+              this.syncCharLayers(clamped, this.spiral.getSigma(), this.spiral.getUsePolyImag());
               ctx.requestToolboxRefresh();
             },
           }) };
@@ -778,7 +890,7 @@ export class MainWorkspaceModel implements VisualizationModel {
           const orig = ctrl.onChange;
           return { ...ctrl, onChange: (v: boolean) => {
             orig(v);
-            this.lFunction.update(this.spiral.getIndex(), this.spiral.getSigma(), v);
+            this.syncCharLayers(this.spiral.getIndex(), this.spiral.getSigma(), v);
           } };
         }
         return ctrl;
@@ -797,6 +909,9 @@ export class MainWorkspaceModel implements VisualizationModel {
     return aggregateToolboxSections([
       ...sectionsWithAnim,
       ...this.lFunction.getToolSections(ctx),
+      ...this.hurwitzMachine.getToolSections(ctx),
+      ...this.hurwitzMidPerp.getToolSections(ctx),
+      ...this.hurwitzFormula.getToolSections(ctx),
       ...this.remainder.getToolSections(ctx),
     ]);
   }
@@ -804,12 +919,81 @@ export class MainWorkspaceModel implements VisualizationModel {
   private lFunctionSerializableState(): Partial<MainWorkspaceSerializableState> {
     const snap = this.lFunction.getStateSnapshot();
     return {
-      lfL1Enabled: snap.l1Enabled, lfL2Enabled: snap.l2Enabled,
+      lfL1Enabled: snap.l1Enabled, lfL2Enabled: snap.l2Enabled, lfFLEnabled: snap.flEnabled,
+      lfTLEnabled: snap.tlEnabled,
       lfL1Prime: snap.l1Prime, lfL2Prime: snap.l2Prime,
-      lfL1SpiralMode: snap.l1SpiralMode, lfL2SpiralMode: snap.l2SpiralMode,
-      lfL1Reflect: snap.l1Reflect, lfL2Reflect: snap.l2Reflect,
-      lfL1Bisector: snap.l1Bisector, lfL2Bisector: snap.l2Bisector,
+      lfL1SpiralMode: snap.l1SpiralMode, lfL2SpiralMode: snap.l2SpiralMode, lfFLSpiralMode: snap.flSpiralMode,
+      lfTLWhich: snap.tlWhich, lfTLSpiralMode: snap.tlSpiralMode,
+      lfL1Reflect: snap.l1Reflect, lfL2Reflect: snap.l2Reflect, lfFLReflect: snap.flReflect,
+      lfTLReflect: snap.tlReflect,
+      lfL1Bisector: snap.l1Bisector, lfL2Bisector: snap.l2Bisector, lfFLBisector: snap.flBisector,
+      lfTLBisector: snap.tlBisector,
       lfPhantomMode: snap.phantomMode, lfUsePrimeImag: snap.usePrimeImag,
+    };
+  }
+
+  private hurwitzMachineSerializableState(): Partial<MainWorkspaceSerializableState> {
+    const snap = this.hurwitzMachine.getStateSnapshot();
+    return {
+      hmEnabled: snap.enabled,
+      hmCoeffs: snap.coeffs,
+      hmSpiralMode: snap.spiralMode,
+      hmPhantomMode: snap.phantomMode,
+      hmReflect: snap.reflect,
+      hmBisector: snap.bisector,
+      hmPerp: snap.perp,
+    };
+  }
+
+  private hurwitzMidPerpSerializableState(): Partial<MainWorkspaceSerializableState> {
+    const snap = this.hurwitzMidPerp.getStateSnapshot();
+    return {
+      hpRows: snap.rows,
+      hpCircle: snap.circle,
+      hpShowSpiral: snap.showSpiral,
+      hpShowReverse: snap.showReverse,
+      hpShowOH: snap.showOH,
+      hpShowPerp: snap.showPerp,
+      hpShowBLink: snap.showBLink,
+      hpShowBPoint: snap.showBPoint,
+      hpShowQ2Circle: snap.showQ2Circle,
+      hpShowQ3Circle: snap.showQ3Circle,
+      hpShowQ4Circle: snap.showQ4Circle,
+      hpShowQ5Circle: snap.showQ5Circle,
+      hpShowQ6Circle: snap.showQ6Circle,
+      hpShowH: snap.showH,
+      hpShowB1Star: snap.showB1Star,
+      hpQ2OmegaOn: snap.q2OmegaOn,
+      hpQ2OmegaDeg: snap.q2OmegaDeg,
+      hpQ2OmegaLock: snap.q2OmegaLock,
+      hpOmegaOn: snap.omegaOn,
+      hpOmegaDeg: snap.omegaDeg,
+      hpQ3OmegaLock: snap.q3OmegaLock,
+      hpQ4OmegaOn: snap.q4OmegaOn,
+      hpQ4OmegaDeg: snap.q4OmegaDeg,
+      hpQ4OmegaLock: snap.q4OmegaLock,
+      hpQ5OmegaOn: snap.q5OmegaOn,
+      hpQ5OmegaDeg: snap.q5OmegaDeg,
+      hpQ5OmegaLock: snap.q5OmegaLock,
+      hpQ6OmegaOn: snap.q6OmegaOn,
+      hpQ6OmegaDeg: snap.q6OmegaDeg,
+      hpQ6OmegaLock: snap.q6OmegaLock,
+    };
+  }
+
+  private hurwitzFormulaSerializableState(): Partial<MainWorkspaceSerializableState> {
+    const snap = this.hurwitzFormula.getStateSnapshot();
+    return {
+      hfQMax: snap.qMax,
+      hfSingle: snap.single,
+      hfShowSpiral: snap.showSpiral,
+      hfShowReverse: snap.showReverse,
+      hfShowBLink: snap.showBLink,
+      hfShowBPoint: snap.showBPoint,
+      hfShowOZ: snap.showOZ,
+      hfShowPerp: snap.showPerp,
+      hfShowCircle: snap.showCircle,
+      hfShowOH: snap.showOH,
     };
   }
 
@@ -843,11 +1027,29 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.spiral.setUsePolyImag(state.usePolyImag);
     this.spiral.setExtendSpiralCount(state.extendSpiralCount);
     this.spiral.setDrawMode(state.drawMode);
+    this.spiral.setShowOrigin(state.showOrigin ?? false);
     this.spiral.setShowZetaEndpoint(state.showZetaEndpoint);
     this.spiral.setShowBisectorPoint(state.showBisectorPoint);
+    this.spiral.setShowB1Star(state.showB1Star ?? false);
+    this.spiral.setShowZetaPrimeToZeta(state.showZetaPrimeToZeta ?? false);
+    this.spiral.setShowRightAngle(state.showRightAngle ?? false);
+    this.spiral.setShowMStar(state.showMStar ?? false);
+    this.spiral.setShowRho(state.showRho ?? false);
+    this.spiral.setShowOneMinusRho(state.showOneMinusRho ?? false);
+    this.spiral.setShowZetaLogDeriv(state.showZetaLogDeriv ?? false);
+    this.spiral.setShowChiLogDeriv(state.showChiLogDeriv ?? false);
+    this.spiral.setShowHStar(state.showHStar ?? false);
+    this.spiral.setShowAkG0(state.showAkG0 ?? false);
+    this.spiral.setShowAkQ0(state.showAkQ0 ?? false);
+    this.spiral.setShowAkQ1(state.showAkQ1 ?? false);
+    this.spiral.setShowAkQ2(state.showAkQ2 ?? false);
+    this.spiral.setShowAkQ3(state.showAkQ3 ?? false);
+    this.spiral.setShowAkQ4(state.showAkQ4 ?? false);
+    this.spiral.setShowAkSum(state.showAkSum ?? false);
     this.spiral.setColorLinks(state.colorLinks);
     this.spiral.setSpiralVisible(state.spiralVisible);
     this.spiral.setSpiralFirstHalf(state.spiralFirstHalf ?? false);
+    this.spiral.setFOfSVisible(state.fOfSVisible ?? false);
     this.spiral.setSpiralReflect(state.spiralReflect);
     this.spiral.setSpiralHalfSigma(state.spiralHalfSigma);
     this.spiral.setSpiralReverse(state.spiralReverse);
@@ -863,6 +1065,7 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.spiral.setCrossingSumVisible(state.crossingSumVisible ?? false);
     this.spiral.setEtaVisible(state.etaVisible);
     this.spiral.setZPrimeVisible(state.zPrimeVisible);
+    this.spiral.setZPrimeReflect(state.zPrimeReflect ?? false);
     const points = state.importedPoints ?? [];
     this.spiral.setImportedPoints(points);
     this.selection = { activePoint: points[0] ?? null };
@@ -870,16 +1073,81 @@ export class MainWorkspaceModel implements VisualizationModel {
     this.lFunction.batchRestore({
       l1Enabled:    state.lfL1Enabled    ?? false,
       l2Enabled:    state.lfL2Enabled    ?? false,
+      flEnabled:    state.lfFLEnabled    ?? false,
+      tlEnabled:    state.lfTLEnabled    ?? false,
       l1Prime:      state.lfL1Prime      ?? 3,
       l2Prime:      state.lfL2Prime      ?? 5,
       l1SpiralMode: state.lfL1SpiralMode ?? 0,
       l2SpiralMode: state.lfL2SpiralMode ?? 0,
+      flSpiralMode: state.lfFLSpiralMode ?? 0,
+      tlWhich:      state.lfTLWhich      ?? 2,
+      tlSpiralMode: state.lfTLSpiralMode ?? 0,
       l1Reflect:    state.lfL1Reflect    ?? false,
       l2Reflect:    state.lfL2Reflect    ?? false,
+      flReflect:    state.lfFLReflect    ?? false,
+      tlReflect:    state.lfTLReflect    ?? false,
       l1Bisector:   state.lfL1Bisector   ?? false,
       l2Bisector:   state.lfL2Bisector   ?? false,
+      flBisector:   state.lfFLBisector   ?? false,
+      tlBisector:   state.lfTLBisector   ?? false,
       phantomMode:  state.lfPhantomMode  ?? 2,
       usePrimeImag: state.lfUsePrimeImag ?? true,
+    });
+
+    this.hurwitzMachine.batchRestore({
+      enabled: state.hmEnabled ?? false,
+      coeffs: state.hmCoeffs ?? defaultHurwitzCoeffs(5),
+      spiralMode: state.hmSpiralMode ?? 0,
+      phantomMode: state.hmPhantomMode ?? 2,
+      reflect: state.hmReflect ?? false,
+      bisector: state.hmBisector ?? false,
+      perp: state.hmPerp ?? false,
+    });
+
+    this.hurwitzMidPerp.batchRestore({
+      circle: state.hpCircle ?? false,
+      showSpiral: state.hpShowSpiral ?? false,
+      showReverse: state.hpShowReverse ?? false,
+      showOH: state.hpShowOH ?? false,
+      showPerp: state.hpShowPerp ?? false,
+      showBLink: state.hpShowBLink ?? true,
+      showBPoint: state.hpShowBPoint ?? true,
+      showQ2Circle: state.hpShowQ2Circle ?? false,
+      showQ3Circle: state.hpShowQ3Circle ?? false,
+      showQ4Circle: state.hpShowQ4Circle ?? false,
+      showQ5Circle: state.hpShowQ5Circle ?? false,
+      showQ6Circle: state.hpShowQ6Circle ?? false,
+      showH: state.hpShowH ?? false,
+      showB1Star: state.hpShowB1Star ?? false,
+      q2OmegaOn: state.hpQ2OmegaOn ?? false,
+      q2OmegaDeg: state.hpQ2OmegaDeg ?? 0,
+      q2OmegaLock: state.hpQ2OmegaLock ?? false,
+      omegaOn: state.hpOmegaOn ?? false,
+      omegaDeg: state.hpOmegaDeg ?? 0,
+      q3OmegaLock: state.hpQ3OmegaLock ?? false,
+      q4OmegaOn: state.hpQ4OmegaOn ?? false,
+      q4OmegaDeg: state.hpQ4OmegaDeg ?? 0,
+      q4OmegaLock: state.hpQ4OmegaLock ?? false,
+      q5OmegaOn: state.hpQ5OmegaOn ?? false,
+      q5OmegaDeg: state.hpQ5OmegaDeg ?? 0,
+      q5OmegaLock: state.hpQ5OmegaLock ?? false,
+      q6OmegaOn: state.hpQ6OmegaOn ?? false,
+      q6OmegaDeg: state.hpQ6OmegaDeg ?? 0,
+      q6OmegaLock: state.hpQ6OmegaLock ?? false,
+      rows: state.hpRows ?? [],
+    });
+
+    this.hurwitzFormula.batchRestore({
+      qMax: state.hfQMax ?? 2,
+      single: state.hfSingle ?? true,
+      showSpiral: state.hfShowSpiral ?? false,
+      showReverse: state.hfShowReverse ?? false,
+      showBLink: state.hfShowBLink ?? false,
+      showBPoint: state.hfShowBPoint ?? false,
+      showOZ: state.hfShowOZ ?? false,
+      showPerp: state.hfShowPerp ?? false,
+      showCircle: state.hfShowCircle ?? false,
+      showOH: state.hfShowOH ?? false,
     });
 
     this.remainder.batchRestore(
