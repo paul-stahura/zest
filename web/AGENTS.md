@@ -13,9 +13,17 @@ he drives the mathematical investigation, is not a traditional software
 engineer, and works as a vibe coder. Protect his workflow.
 
 Paul runs the web app the same way Chris does: local Vite via `npm run dev`.
-Do not assume there is a broader public-user deployment path unless Chris says
-so. Changes to local dev startup can directly disrupt Paul even when they look
-like internal tooling.
+Changes to local dev startup can directly disrupt Paul even when they look
+like internal tooling. Public publishing follows the repository rules below.
+
+## Repositories and publishing
+
+- `chriscow/zest` is the private development repository where we iterate.
+- “Push it live” means publish the static web app to `paul-stahura/zest` on `main`; GitHub Pages serves https://paul-stahura.github.io/zest/.
+- Start from the latest public `main` and reconcile compatible app changes while preserving Paul's latest work, Pages routing, and build configuration.
+- Strip Cloud/cluster code, controls, dependencies, infrastructure, and secrets from the public release. Port reviewed static-app changes; do not merge private repository history into the public repository.
+- Publishing private `main` does not update GitHub Pages. Cluster deployment is a separate task requiring an explicit cluster request.
+- Before reporting “live,” verify the Pages workflow succeeded, the public app renders, and `/zest/version.json` matches the published revision.
 
 ## Architecture: layers vs workspaces
 
