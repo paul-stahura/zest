@@ -364,6 +364,13 @@ export function getPrimeImaginaryPart(
   return iOfT(prime, index);
 }
 
+/** Beyond this link budget, L-function partial sums block the main thread for seconds. */
+export const MAX_L_FUNCTION_LINKS = 50_000;
+
 export function calcNLinks(index: number, prime: number): number {
   return Math.max(0, Math.floor(2 * index * (index + 1) * prime));
+}
+
+export function isLFunctionIndexFeasible(index: number, prime: number): boolean {
+  return calcNLinks(index, prime) <= MAX_L_FUNCTION_LINKS;
 }

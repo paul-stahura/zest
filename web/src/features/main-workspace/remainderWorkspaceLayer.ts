@@ -301,6 +301,13 @@ export class RemainderWorkspaceLayer implements RemainderMatrixLayer {
 
   public setIndex(index: number): void {
     this.index = index;
+    // Idle remainder toggles: skip rebuild so animation does not pay O(T) sums
+    // for an empty remainder layer every frame.
+    if (!this.isRowActive(this.states.rak)
+      && !this.isRowActive(this.states.rps)
+      && !this.isRowActive(this.states.rHalf)) {
+      return;
+    }
     this.rebuild();
   }
 

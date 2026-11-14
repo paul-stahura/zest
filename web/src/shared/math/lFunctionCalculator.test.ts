@@ -1,5 +1,7 @@
 import {
   calcNLinks,
+  isLFunctionIndexFeasible,
+  MAX_L_FUNCTION_LINKS,
   calculateInverseVectors,
   calculateVectors,
   calculateZetaTarget,
@@ -98,5 +100,17 @@ describe("L1 inv/refl tails", () => {
       samples[1]!.targetPt.y - samples[0]!.targetPt.y,
     );
     expect(dTarget).toBeLessThan(0.05);
+  });
+});
+
+describe("isLFunctionIndexFeasible", () => {
+  it("allows small T", () => {
+    expect(isLFunctionIndexFeasible(50, 3)).toBe(true);
+    expect(calcNLinks(50, 3)).toBeLessThanOrEqual(MAX_L_FUNCTION_LINKS);
+  });
+
+  it("rejects medium T that would allocate tens of millions of links", () => {
+    expect(isLFunctionIndexFeasible(4000, 3)).toBe(false);
+    expect(calcNLinks(4000, 3)).toBeGreaterThan(MAX_L_FUNCTION_LINKS);
   });
 });

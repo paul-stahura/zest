@@ -32,6 +32,9 @@ jobs:
         run: npm ci
       - name: Build site
         run: npm run build
+      - name: Record published revision
+        run: |
+          node --input-type=module -e 'import { writeFileSync } from "node:fs"; writeFileSync("dist/version.json", JSON.stringify({ gitSha: process.env.GITHUB_SHA, builtAt: new Date().toISOString() }) + "\n");'
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
       - name: Upload site artifact

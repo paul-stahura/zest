@@ -8,6 +8,7 @@ import {
   calculateVectors,
   calculateZetaTarget,
   getPrimeImaginaryPart,
+  isLFunctionIndexFeasible,
   reflectLFunctionVectors,
 } from "@/shared/math/lFunctionCalculator";
 import { complex } from "@/shared/math/complex";
@@ -264,6 +265,7 @@ export class LFunctionWorkspaceLayer implements LFunctionPanelLayer {
   ): void {
     const t      = getPrimeImaginaryPart(prime, this.index, this.usePrimeImag, this.usePolyImag);
     const s      = complex(this.sigma, t);
+    if (!isLFunctionIndexFeasible(this.index, prime)) return;
     const nLinks = calcNLinks(this.index, prime);
     if (nLinks < 1) return;
 

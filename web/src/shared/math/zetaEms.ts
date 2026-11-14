@@ -79,12 +79,12 @@ export function imagToIndex(t: number, usePolyImag: boolean): number {
     // Solve 2π(T² + T + 1/6) = t  ⇒  T = (-1 + √(2t/π + 1/3)) / 2
     return (-1 + Math.sqrt(2 * t / Math.PI + 1 / 3)) / 2;
   }
-  // Newton on f(T) = (2T+1)π / (ln(T+1) - ln(T)) - t
+  // Newton on f(T) = (2T+1)π / log1p(1/T) - t
   let T = Math.max(1.0, Math.sqrt(Math.max(t, 1.0) / TWO_PI));   // leading-order seed
   for (let i = 0; i < 60; i += 1) {
-    const d = Math.log(T + 1) - Math.log(T);
+    const d = Math.log1p(1 / T);
     const f = (2 * T + 1) * Math.PI / d - t;
-    const dprime = 1 / (T + 1) - 1 / T;
+    const dprime = -1 / (T * (T + 1));
     const fprime = (2 * Math.PI * d - (2 * T + 1) * Math.PI * dprime) / (d * d);
     if (fprime === 0) break;
     const step = f / fprime;
